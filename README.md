@@ -1,3 +1,46 @@
+# Hummingbird
+
+![](https://github.com/ksaur/hb-dryrun/workflows/Python%20application/badge.svg?branch=master)
+
+
+## Introduction
+*sklearn-pytorch* converts [scikit-learn](https://scikit-learn.org/stable/) models to [PyTorch](https://pytorch.org/). Once in the PyTorch format, you can further convert to [ONNX](https://github.com/onnx/onnx) or [TorchScript](https://pytorch.org/docs/stable/jit.html) for high performance native scoring.
+
+## Installation
+
+This was tested on Python 3.7.   (Newer versions such as 3.8 do not yet work with torch==1.3.1).
+
+Note that the xgboost package requires `cmake` on your system.
+**TODO other xbg install complications?**
+
+```
+python setup.py develop
+```
+Or you can install from the source with the latest changes.
+**#TODO update URL**
+```
+pip install git+https://github.com/ksaur/hb-dryrun.git
+```
+
+## TODO
+* explain commit hooks
+* explain which pep8 we use
+* write commiter guide
+* write more documentation, especially explaining overall design
+
+
+## License
+**#TODO what license do we want?**
+[MIT License](LICENSE)
+
+## Troubleshooting:
+
+* On installing xgboost:  (Ex:  `./xgboost/build-python.sh: line 21: cmake: command not found`)
+  * install cmake (Ex: `brew install cmake` or `apt install cmake`)
+
+* `OSError: dlopen(lib_lightgbm.so, 6): Library not loaded: ...libomp.dylib`
+ * TODO:
+
 
 # Contributing
 
