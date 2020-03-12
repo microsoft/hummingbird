@@ -38,5 +38,5 @@ jobs:
         flake8 . --count  --max-complexity=15 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pip install pytest
+        pip install -r requirements.txt && pip install -e . && pip install pytest
         pytest
