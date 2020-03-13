@@ -5,14 +5,11 @@
 # --------------------------------------------------------------------------
 
 from sklearn import pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import FunctionTransformer
 
 from ._supported_operators import _get_sklearn_operator_name
 from .common._container import SklearnModelContainerNode
 from .common._topology import Topology
 from .common.data_types import TensorType
-from .common.utils import get_column_indices
 
 
 def _fetch_input_slice(scope, inputs, column_indices):
@@ -209,81 +206,11 @@ def _prepare_columns_idx(column_indices):
                 len(column_indices)) if column_indices[i]]
 
 
-def _parse_sklearn_column_transformer(scope, model, inputs):
-    """
-    :param scope: Scope object
-    :param model: A *scikit-learn* *ColumnTransformer* object
-    :param inputs: A list of Variable objects
-    :return: A list of output variables produced by column transformer
-    """
-    # Output variable name of each transform. It's a list of string.
-    transformed_result_names = []
-    input_indices = []
-    # Encode each transform as our IR object
-    for name, _, column_indices in model.transformers:
-        column_indices = _prepare_columns_idx(column_indices)
-        names = get_column_indices(column_indices, inputs, multiple=True)
-        for _, inp_ind in names.items():
-            input_indices.extend(inp_ind)
-        transform_inputs = []
-        for pytorch_var, pytorch_is in names.items():
-            tr_inputs = _fetch_input_slice(
-                scope, [inputs[pytorch_var]], pytorch_is)
-            transform_inputs.extend(tr_inputs)
-        if len(transform_inputs) > 1:
-            # Many PyTorch operators expect one input vector,
-            # the default behaviour is to merge columns.
-            ty = transform_inputs[0].type.__class__([None, None])
-
-            conc_op = scope.declare_operator('SklearnConcat')
-            conc_op.inputs = transform_inputs
-            conc_names = scope.declare_variable('merged_columns', ty)
-            conc_op.outputs.append(conc_names)
-            transform_inputs = [conc_names]
-        model_obj = model.named_transformers_[name]
-        if isinstance(model_obj, str):
-            if model_obj == "passthrough":
-                model_obj = FunctionTransformer()
-            else:
-                raise RuntimeError("Unknown operator alias "
-                                   "'{0}'. These are specified in "
-                                   "_supported_operators.py."
-                                   "".format(model_obj))
-
-        var_out = parse_sklearn(scope, model_obj, transform_inputs)[0]
-        transformed_result_names.append(var_out)
-
-    if model.remainder == "passthrough":
-        input_indices = set(input_indices)
-        left_over = [i for i in range(len(inputs)) if i not in input_indices]
-        if len(left_over) > 0:
-            for i in sorted(left_over):
-                pytorch_var, pytorch_is = get_column_indices(
-                    [i], inputs, multiple=False)
-                tr_inputs = _fetch_input_slice(
-                    scope, [inputs[pytorch_var]], pytorch_is)
-                transformed_result_names.extend(tr_inputs)
-
-    # Create a Concat PyTorch node
-    if len(transformed_result_names) > 1:
-        concat_operator = scope.declare_operator('SklearnConcat')
-        concat_operator.inputs = transformed_result_names
-
-        # Declare output name of scikit-learn ColumnTransformer
-        transformed_column_name = scope.declare_variable(
-            'transformed_column', None)
-        concat_operator.outputs.append(transformed_column_name)
-        return concat_operator.outputs
-    else:
-        return transformed_result_names
-
-
 def build_sklearn_parsers_map():
     # Adding parsers for edge cases
     map_parser = {
-        pipeline.Pipeline: _parse_sklearn_pipeline,
-        pipeline.FeatureUnion: _parse_sklearn_feature_union,
-        ColumnTransformer: _parse_sklearn_column_transformer
+        pipeline.Pipeline: _parse_sklearn_pipeline
+        # more will go here as added
     }
     return map_parser
 
