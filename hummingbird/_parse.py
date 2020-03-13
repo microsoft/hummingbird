@@ -9,31 +9,6 @@ from sklearn import pipeline
 from ._supported_operators import _get_sklearn_operator_name
 from .common._container import SklearnModelContainerNode
 from .common._topology import Topology
-from .common.data_types import TensorType
-
-
-def _fetch_input_slice(scope, inputs, column_indices):
-    if not isinstance(inputs, list):
-        raise TypeError("Parameter inputs must be a list.")
-    if len(inputs) == 0:
-        raise RuntimeError("Operator ArrayFeatureExtractor requires at "
-                           "least one inputs.")
-    if len(inputs) != 1:
-        raise RuntimeError("Operator ArrayFeatureExtractor does not support "
-                           "multiple input tensors.")
-    if (isinstance(inputs[0].type, TensorType) and
-            inputs[0].type.shape[1] == len(column_indices)):
-        # No need to extract.
-        return inputs
-    array_feature_extractor_operator = scope.declare_operator(
-        'SklearnArrayFeatureExtractor')
-    array_feature_extractor_operator.inputs = inputs
-    array_feature_extractor_operator.column_indices = column_indices
-
-    output_variable_name = scope.declare_variable(
-        'extracted_feature_columns', None)
-    array_feature_extractor_operator.outputs.append(output_variable_name)
-    return array_feature_extractor_operator.outputs
 
 
 def parse_sklearn_model(model, initial_types=None):
@@ -153,59 +128,6 @@ def _parse_sklearn_pipeline(scope, model, inputs):
     return inputs
 
 
-def _parse_sklearn_feature_union(scope, model, inputs):
-    """
-    :param scope: Scope object
-    :param model: A scikit-learn FeatureUnion object
-    :param inputs: A list of Variable objects
-    :return: A list of output variables produced by feature union
-    """
-    # Output variable name of each transform. It's a list of string.
-    transformed_result_names = []
-    # Encode each transform as our IR object
-    for name, transform in model.transformer_list:
-        transformed_result_names.append(
-            _parse_sklearn_simple_model(
-                scope, transform, inputs)[0])
-        if model.transformer_weights is not None and name in model.transformer_weights:
-            transform_result = [transformed_result_names.pop()]
-            # Create a Multiply PyTorch node
-            multiply_operator = scope.declare_operator('SklearnMultiply')
-            multiply_operator.inputs = transform_result
-            multiply_operator.operand = model.transformer_weights[name]
-            multiply_output = scope.declare_variable(
-                'multiply_output', None)
-            multiply_operator.outputs.append(multiply_output)
-            transformed_result_names.append(multiply_operator.outputs[0])
-
-    # Create a Concat PyTorch node
-    concat_operator = scope.declare_operator('SklearnConcat')
-    concat_operator.inputs = transformed_result_names
-
-    # Declare output name of scikit-learn FeatureUnion
-    union_name = scope.declare_variable('union', None)
-    concat_operator.outputs.append(union_name)
-
-    return concat_operator.outputs
-
-
-def _prepare_columns_idx(column_indices):
-    if isinstance(column_indices, slice):
-        return list(range(
-            column_indices.start
-            if column_indices.start is not None else 0,
-            column_indices.stop, column_indices.step
-            if column_indices.step is not None else 1))
-    elif isinstance(column_indices, (int, str)):
-        return [column_indices]
-    elif isinstance(column_indices, list):
-        if len(column_indices) == 0:
-            return column_indices
-        elif isinstance(column_indices[0], bool):
-            return [i for i in range(
-                len(column_indices)) if column_indices[i]]
-
-
 def build_sklearn_parsers_map():
     # Adding parsers for edge cases
     map_parser = {
@@ -213,19 +135,6 @@ def build_sklearn_parsers_map():
         # more will go here as added
     }
     return map_parser
-
-
-def update_registered_parser(model, parser_fct):
-    """
-    Registers or updates a parser for a new model.
-    A parser returns the expected output of a model.
-
-    :param model: model class
-    :param parser_fct: parser, signature is the same as
-        :func:`parse_sklearn <hummingbird._parse.parse_sklearn>`
-    """
-
-    sklearn_parsers_map[model] = parser_fct
 
 
 # registered parsers

@@ -5,7 +5,7 @@ from hummingbird.common.data_types import TensorType
 
 from . import _registration
 from ._container import Skl2PyTorchModel
-from .exceptions import MissingConverter, MissingShapeCalculator
+from .exceptions import MissingConverter
 
 type_fct = type
 
@@ -179,8 +179,7 @@ class Topology:
         # beginning of a graph evaluation) of the graph. Specifying all
         # root variables in this list and leaving it empty are
         # equivalent. This attribute directly affects
-        # _initialize_graph_status_for_traversing function and
-        # indirectly affects _infer_all_shapes and _prune functions.
+        # _initialize_graph_status_for_traversing function
         self.root_names = list()
 
     @staticmethod
@@ -242,18 +241,6 @@ class Topology:
             self.variable_name_mapping[raw_name] = [pytorch]
         return variable
 
-    def delete_variable(self, pytorch_name):
-        """
-        Removes the variable whose *pytorch_name* is the input *pytorch_name*.
-        """
-        if (pytorch_name not in self.pytorch_variable_names or
-                pytorch_name not in self.variables):
-            raise RuntimeError('The variable to remove was not found.')
-        self.pytorch_variable_names.discard(pytorch_name)
-        raw_name = self.variables[pytorch_name].raw_name
-        self.variable_name_mapping[raw_name].remove(pytorch_name)
-        del self.variables[pytorch_name]
-
     def get_unique_variable_name(self, seed):
         """
         Creates a unique variable ID based on the given seed.
@@ -265,17 +252,6 @@ class Topology:
             seed, self.pytorch_variable_names)
         return name
 
-    def delete_operator(self, pytorch_name):
-        """
-        Removes the operator whose pytorch_name is the input *pytorch_name*.
-        """
-        if (pytorch_name not in self.pytorch_operator_names or
-                pytorch_name not in self.operators):
-            raise RuntimeError('The operator to remove was not found.')
-
-        self.pytorch_operator_names.discard(pytorch_name)
-        del self.operators[pytorch_name]
-
     def declare_operator(self, type, raw_model=None):
         """
         This function is used to declare new local operator.
@@ -284,22 +260,6 @@ class Topology:
         operator = Operator(pytorch_name, type, raw_model)
         self.operators[pytorch_name] = operator
         return operator
-
-    def get_op_producing_variable(self, variable):
-        """
-        This function is used to find the operator which produces the given variable
-        """
-        for operator in self.operators.values():
-            if any([variable.pytorch_name == x.pytorch_name for x in operator.outputs]):
-                return operator
-        return None
-
-    def get_ops_consuming_variable(self, variable):
-        """
-        This function is used to find the operators which consumes the given variable
-        """
-        return [op for op in self.operators.values() if
-                any(variable.pytorch_name == var.pytorch_name for var in op.inputs)]
 
     def get_unique_operator_name(self, seed):
         """
@@ -386,39 +346,6 @@ class Topology:
                 # If the variable is an input of one operator,
                 # it must not be a leaf
                 variable.is_leaf = False
-
-    def infer_all_shapes(self):
-        """
-        Infer all variables' shapes in the computational graph.
-        """
-        self._initialize_graph_status_for_traversing()
-
-        # Deliver user-specified types to root variables
-        for raw_name, initial_type in self.initial_types:
-            # Check all variables declared using raw_name in
-            # the whole graph
-
-            # Assign initial_type to all variables declared using
-            # raw_name
-            for pytorch_name in self.variable_name_mapping[raw_name]:
-                variable = self.variables[pytorch_name]
-                if variable.is_root:
-                    # Assign type to the root; existing type
-                    # produced by parser may be overwritten
-                    variable.type = initial_type
-
-        # Traverse the graph from roots to leaves
-        for operator in self.topological_operator_iterator():
-
-            try:
-                _registration.get_shape_calculator(operator.type)(operator)
-            except ValueError:
-                raise MissingShapeCalculator(
-                    "Unable to find shape calculator for alias '{}' type "
-                    "'{}'. You may raise an issue at "
-                    "https://cisl.visualstudio.com/Hummingbird/issues."
-                    "".format(operator.type,
-                              type(getattr(operator, 'raw_model', None))))
 
 
 def convert_topology(topology, device=None, extra_config={}):
