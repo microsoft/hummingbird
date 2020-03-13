@@ -40,3 +40,8 @@ jobs:
       run: |
         pip install -r requirements.txt && pip install -e . && pip install pytest
         pytest
+    - name: Coverage
+      run: |
+        pip install -r requirements.txt && pip install -e . && pip install coverage
+        SCORE=$(coverage report -m | tail -n 1 | awk '{print $NF}' | rev | cut -c2- | rev)
+        if [ $SCORE -ge 70 ]; then echo "COVERAGE OK"; else echo "WARNING: Coverage is $SCORE but should be at least 70"; fi
