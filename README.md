@@ -1,6 +1,6 @@
 # Hummingbird
 
-![](https://github.com/ksaur/hb-dryrun/workflows/Python%20application/badge.svg?branch=master)
+![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
 
 
 ## Introduction
