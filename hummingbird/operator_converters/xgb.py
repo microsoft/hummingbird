@@ -266,7 +266,7 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
         net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in
                           tree_infos]
         return BatchGBDTRegressor(
-            net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+            net_parameters, n_features, [0], alpha=operator.raw_operator.base_score, device=device)
     elif operator.raw_operator.max_depth <= 10:
         net_parameters = [get_tree_parameters_for_beam(
             tree_info) for tree_info in tree_infos]

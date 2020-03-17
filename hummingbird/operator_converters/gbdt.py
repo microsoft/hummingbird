@@ -11,6 +11,7 @@ from ._tree_commons import get_parameters_for_batch, get_parameters_for_beam
 from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble
 from ..common._registration import register_converter
 
+# GBDT -  Gradient Boosting Decision Tree
 
 class BatchGBDTClassifier(BatchedTreeEnsemble):
 
@@ -62,7 +63,8 @@ class BatchGBDTClassifier(BatchedTreeEnsemble):
 class BatchGBDTRegressor(BatchedTreeEnsemble):
 
     def __init__(self, net_parameters, n_features, classes, learning_rate=None, alpha=None, device=None):
-        super(BeamGBDTRegressor, self).__init__(net_parameters, n_features, 1)
+
+        super(BatchGBDTRegressor, self).__init__(net_parameters, n_features, 1)
 
         self.n_classes = 1
         self.n_gbdt_classes = 1
