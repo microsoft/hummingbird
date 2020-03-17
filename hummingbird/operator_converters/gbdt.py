@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
+# GBDT -  Gradient Boosting Decision Tree
 import warnings
 
 import torch
@@ -11,7 +12,6 @@ from ._tree_commons import get_parameters_for_batch, get_parameters_for_beam
 from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble
 from ..common._registration import register_converter
 
-# GBDT -  Gradient Boosting Decision Tree
 
 class BatchGBDTClassifier(BatchedTreeEnsemble):
 
