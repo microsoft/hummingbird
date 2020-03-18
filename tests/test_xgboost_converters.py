@@ -13,7 +13,7 @@ from hummingbird.common.data_types import Float32TensorType
 class TestXGBoostConverter(unittest.TestCase):
 
     def _run_xgb_classifier_converter(self, num_classes, extra_config={}):
-        for max_depth in [3, 7, 11]:
+        for max_depth in [1, 3, 8, 10, 12, None]:
             model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
@@ -56,12 +56,13 @@ class TestXGBoostConverter(unittest.TestCase):
             model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
-            y = np.random.randint(3, size=100)
+            y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
             pytorch_model = convert_sklearn(
                 model,
-                [("input", Float32TensorType([1, 200]))]
+                [("input", Float32TensorType([1, 200]))],
+                extra_config=extra_config
             )
             self.assertTrue(pytorch_model is not None)
             self.assertTrue(np.allclose(model.predict(X), pytorch_model(
