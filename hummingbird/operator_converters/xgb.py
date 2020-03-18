@@ -238,17 +238,17 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
             return BeamGBDTClassifier(
                 net_parameters, n_features, classes, device=device)
     else:  # manually set tree implementation
-        if extra_config['tree_implementation'] == 'batch':
+        if 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'batch':
             net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in
                               tree_infos]
             return BatchGBDTClassifier(
                 net_parameters, n_features, classes, device=device)
-        elif extra_config['tree_implementation'] == 'beam':
+        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam':
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in
                               tree_infos]
             return BeamGBDTClassifier(
                 net_parameters, n_features, classes, device=device)
-        elif extra_config['tree_implementation'] == 'beam++':
+        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam++':
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in
                               tree_infos]
             return BeamGBDTClassifier(
@@ -262,21 +262,35 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
     n_features = operator.inputs[0].type.shape[1]
     tree_infos = operator.raw_operator.get_booster().get_dump()
 
-    if operator.raw_operator.max_depth <= 3:
-        net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in
-                          tree_infos]
-        return BatchGBDTRegressor(
-            net_parameters, n_features, [0], alpha=operator.raw_operator.base_score, device=device)
-    elif operator.raw_operator.max_depth <= 10:
-        net_parameters = [get_tree_parameters_for_beam(
-            tree_info) for tree_info in tree_infos]
-        return BeamPPGBDTRegressor(
-            net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
-    else:
-        net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in
-                          tree_infos]
-        return BeamGBDTRegressor(
-            net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+    if "tree_implementation" not in extra_config:  # use heurstics to get the tree implementation
+        if operator.raw_operator.max_depth <= 3:
+            net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
+            return BatchGBDTRegressor(
+                net_parameters, n_features, [0], alpha=operator.raw_operator.base_score, device=device)
+        elif operator.raw_operator.max_depth <= 10:
+            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
+            return BeamPPGBDTRegressor(
+                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+        else:
+            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
+            return BeamGBDTRegressor(
+                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+    else:  # manually set tree implementation
+        if 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'batch':
+            net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
+            return BatchGBDTRegressor(
+                net_parameters, n_features, [0], alpha=operator.raw_operator.base_score, device=device)
+        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam':
+            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
+            return BeamPPGBDTRegressor(
+                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam++':
+            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
+            return BeamGBDTRegressor(
+                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+        else:
+            raise Exception("Tree implementation {} not found".format(
+                extra_config['tree_implementation']))
 
 
 register_converter('SklearnXGBClassifier', convert_sklearn_xgb_classifier)

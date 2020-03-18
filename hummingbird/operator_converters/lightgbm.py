@@ -191,15 +191,15 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
                               tree_infos]
             return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
     else:  # manually set tree implementation
-        if extra_config['tree_implementation'] == 'batch':
+        if 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'batch':
             net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in
                               tree_infos]
             return BatchGBDTClassifier(net_parameters, n_features, classes, device=device)
-        elif extra_config['tree_implementation'] == 'beam':
+        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam':
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in
                               tree_infos]
             return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
-        elif extra_config['tree_implementation'] == 'beam++':
+        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam++':
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in
                               tree_infos]
             return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
