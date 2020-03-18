@@ -13,7 +13,7 @@ from hummingbird.common.data_types import Float32TensorType
 class TestLGBMConverter(unittest.TestCase):
 
     def _run_lgbm_classifier_converter(self, num_classes, extra_config={}):
-        for max_depth in [3, 7, 11]:
+        for max_depth in [1, 3, 8, 10, 12, None]:
             model = lgb.LGBMClassifier(n_estimators=10, max_depth=max_depth)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
@@ -51,14 +51,13 @@ class TestLGBMConverter(unittest.TestCase):
         self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "beam++"})
 
     def _run_lgbm_regressor_converter(self, num_classes, extra_config={}):
-        for max_depth in [3, 7, 11]:
+        for max_depth in [1, 3, 8, 10, 12, None]:
             model = lgb.LGBMRegressor(n_estimators=10, max_depth=max_depth)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-
             pytorch_model = convert_sklearn(
                 model,
                 [("input", Float32TensorType([1, 200]))],
