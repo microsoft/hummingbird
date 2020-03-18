@@ -10,6 +10,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, Extr
 
 from hummingbird import convert_sklearn
 from hummingbird.common.data_types import Float32TensorType
+from hummingbird.common.exceptions import WrongExtraConfig
 from sklearn.tree import DecisionTreeClassifier
 
 
@@ -53,6 +54,12 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
     def test_random_forest_beampp_classifier_converter(self):
         self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "beam++"})
 
+    # failure case
+    def test_random_forest_fail_classifier_converter(self):
+        self.assertRaises(
+            WrongExtraConfig,
+            self._run_random_forest_classifier_converter, 3, extra_config={"tree_implementation": "nonsense"})
+
     def _run_random_forest_regressor_converter(self, num_classes, extra_config={}):
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = RandomForestRegressor(n_estimators=10, max_depth=max_depth)
@@ -89,6 +96,13 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
     # beam++ regressor
     def test_random_forest_beampp_regressor_converter(self):
         self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "beam++"})
+
+    # failure case
+    # TODO implement
+    # def test_random_forest_fail_regressor_converter(self):
+    #    self.assertRaises(
+    #        WrongExtraConfig,
+    #        self._run_random_forest_regressor_converter, 3, extra_config={"tree_implementation": "nonsense"})
 
     # TODO consolidate
     def test_decision_tree_classifier_converter(self):

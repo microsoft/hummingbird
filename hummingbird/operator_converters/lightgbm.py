@@ -10,6 +10,7 @@ from hummingbird.operator_converters.gbdt import BeamPPGBDTRegressor, BeamGBDTCl
 
 from ._tree_commons import Node, find_depth
 from ..common._registration import register_converter
+from ..common.exceptions import WrongExtraConfig
 
 
 def _tree_traversal(node, ls, rs, fs, ts, vs, count):
@@ -203,8 +204,7 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
             return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
         else:
-            raise Exception("Tree implementation {} not found".format(
-                extra_config['tree_implementation']))
+            raise WrongExtraConfig("Tree implementation {} not found".format(extra_config))
 
 
 def convert_sklearn_lgbm_regressor(operator, device, extra_config):
@@ -233,8 +233,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
             return BeamGBDTRegressor(net_parameters, n_features, device=device)
         else:
-            raise Exception("Tree implementation {} not found".format(
-                extra_config['tree_implementation']))
+            raise WrongExtraConfig("Tree implementation {} not found".format(extra_config))
 
 
 register_converter('SklearnLGBMClassifier', convert_sklearn_lgbm_classifier)
