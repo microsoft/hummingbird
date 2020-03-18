@@ -212,10 +212,10 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     tree_infos = operator.raw_operator.booster_.dump_model()['tree_info']
 
     if "tree_implementation" not in extra_config:  # use heurstics to get the tree implementation
-        max_depth = operator.raw_operator.max_depth
+        max_depth = operator.raw_operator.max_depth  # TODO FIXME this should be a call to max_depth and NOT fall through!
         if max_depth is not None and max_depth <= 3:
             net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
-            return BatchGBDTRegressor(net_parameters, n_features, [0], device=device)
+            return BatchGBDTRegressor(net_parameters, n_features, device=device)
         elif max_depth is not None and max_depth <= 10:
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
             return BeamPPGBDTRegressor(net_parameters, n_features, device=device)
@@ -225,7 +225,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     else:  # manually set tree implementation
         if 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'batch':
             net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
-            return BatchGBDTRegressor(net_parameters, n_features, [0], device=device)
+            return BatchGBDTRegressor(net_parameters, n_features, device=device)
         elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam':
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
             return BeamPPGBDTRegressor(net_parameters, n_features, device=device)

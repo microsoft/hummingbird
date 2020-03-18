@@ -27,8 +27,8 @@ class TestXGBoostConverter(unittest.TestCase):
                 extra_config=extra_config
             )
             self.assertTrue(pytorch_model is not None)
-            self.assertTrue(np.allclose(model.predict_proba(
-                X), pytorch_model(torch.from_numpy(X))[1].data.numpy()))
+            np.testing.assert_allclose(model.predict_proba(
+                X), pytorch_model(torch.from_numpy(X))[1].data.numpy(), rtol=1e-06, atol=1e-06)
 
     # binary classifier
     def test_xgb_binary_classifier_converter(self):
@@ -65,8 +65,8 @@ class TestXGBoostConverter(unittest.TestCase):
                 extra_config=extra_config
             )
             self.assertTrue(pytorch_model is not None)
-            self.assertTrue(np.allclose(model.predict(X), pytorch_model(
-                torch.from_numpy(X)).view(-1).numpy()))
+            np.testing.assert_allclose(model.predict(X), pytorch_model(
+                torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06)
 
     # binary regressor
     def test_xgb_binary_regressor_converter(self):

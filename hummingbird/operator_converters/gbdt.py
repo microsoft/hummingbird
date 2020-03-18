@@ -62,11 +62,10 @@ class BatchGBDTClassifier(BatchedTreeEnsemble):
 
 class BatchGBDTRegressor(BatchedTreeEnsemble):
 
-    def __init__(self, net_parameters, n_features, classes, learning_rate=None, alpha=None, device=None):
+    def __init__(self, net_parameters, n_features, classes=[0], learning_rate=None, alpha=None, device=None):
 
         super(BatchGBDTRegressor, self).__init__(net_parameters, n_features, 1)
 
-        self.n_classes = 1
         self.n_gbdt_classes = 1
         self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
 
