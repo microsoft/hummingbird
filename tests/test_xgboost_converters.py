@@ -2,6 +2,7 @@
 Tests sklearn TruncatedSVD converter
 """
 import unittest
+import warnings
 
 import numpy as np
 import torch
@@ -14,7 +15,8 @@ from hummingbird.common.exceptions import WrongExtraConfig
 class TestXGBoostConverter(unittest.TestCase):
 
     def _run_xgb_classifier_converter(self, num_classes, extra_config={}):
-        for max_depth in [1, 3, 8, 10, 12, None]:
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
@@ -56,9 +58,9 @@ class TestXGBoostConverter(unittest.TestCase):
         self.assertRaises(
             WrongExtraConfig, self._run_xgb_classifier_converter, 3, extra_config={"tree_implementation": "nonsense"})
 
-    # TODO THIS ONE FAILS
     def _run_xgb_regressor_converter(self, num_classes, extra_config={}):
-        for max_depth in [1, 3, 8, 10, 12, None]:
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)

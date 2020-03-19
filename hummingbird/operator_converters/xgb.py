@@ -265,31 +265,32 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
 
     if "tree_implementation" not in extra_config:  # use heurstics to get the tree implementation
         max_depth = operator.raw_operator.max_depth
+        # TODO: in xgboost 1.0.2 (not yet supported), we will need to handle the None case for max_depth
         if max_depth is not None and max_depth <= 3:
             net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
             return BatchGBDTRegressor(
-                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+                net_parameters, n_features, alpha=[operator.raw_operator.base_score], device=device)
         elif max_depth is not None and max_depth <= 10:
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
             return BeamPPGBDTRegressor(
-                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+                net_parameters, n_features, alpha=[operator.raw_operator.base_score], device=device)
         else:
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
             return BeamGBDTRegressor(
-                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+                net_parameters, n_features, alpha=[operator.raw_operator.base_score], device=device)
     else:  # manually set tree implementation
         if 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'batch':
             net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
             return BatchGBDTRegressor(
-                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+                net_parameters, n_features, alpha=[operator.raw_operator.base_score], device=device)
         elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam':
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
             return BeamPPGBDTRegressor(
-                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+                net_parameters, n_features, alpha=[operator.raw_operator.base_score], device=device)
         elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam++':
             net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
             return BeamGBDTRegressor(
-                net_parameters, n_features, alpha=operator.raw_operator.base_score, device=device)
+                net_parameters, n_features, alpha=[operator.raw_operator.base_score], device=device)
         else:
             raise WrongExtraConfig("Tree implementation {} not found".format(extra_config))
 
