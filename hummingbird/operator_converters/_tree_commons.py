@@ -7,6 +7,7 @@
 import copy
 import torch
 import numpy as np
+from enum import Enum
 
 
 class Node:
@@ -30,6 +31,32 @@ def find_depth(node, current_depth):
     elif node.right != -1 and node.left != -1:
         return max(find_depth(node.left, current_depth + 1),
                    find_depth(node.right, current_depth + 1))
+
+
+class TreeImpl(Enum):
+    batch = 1
+    beam = 2
+    beampp = 3
+
+
+# TODO move this to gbdt_gree_commons.py? (create new file)
+def get_gbdt_by_config_or_depth(extra_config, max_depth):
+    if 'tree_implementation' not in extra_config:
+        if max_depth is not None and max_depth <= 3:
+            return TreeImpl.batch
+        elif max_depth is not None and max_depth <= 10:
+            return TreeImpl.beam
+        else:
+            return TreeImpl.beampp
+
+    if extra_config['tree_implementation'] == 'batch':
+        return TreeImpl.batch
+    elif extra_config['tree_implementation'] == 'beam':
+        return TreeImpl.beam
+    elif extra_config['tree_implementation'] == 'beam++':
+        return TreeImpl.beampp
+    else:
+        raise ValueError("Tree implementation {} not found".format(extra_config))
 
 
 def get_parameters_for_beam(tree):

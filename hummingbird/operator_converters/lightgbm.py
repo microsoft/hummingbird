@@ -8,9 +8,8 @@ import numpy as np
 from hummingbird.operator_converters.gbdt import BatchGBDTClassifier, BatchGBDTRegressor, BeamPPGBDTClassifier
 from hummingbird.operator_converters.gbdt import BeamPPGBDTRegressor, BeamGBDTClassifier, BeamGBDTRegressor
 
-from ._tree_commons import Node, find_depth
+from ._tree_commons import Node, find_depth, get_gbdt_by_config_or_depth, TreeImpl
 from ..common._registration import register_converter
-from ..common.exceptions import WrongExtraConfig
 
 
 def _tree_traversal(node, ls, rs, fs, ts, vs, count):
@@ -177,63 +176,35 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
     if n_classes == 2:
         n_classes -= 1
     classes = [i for i in range(n_classes)]
+    max_depth = operator.raw_operator.max_depth  # TODO FIXME this should be a call to max_depth and NOT fall through!
+    tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth)
 
-    if "tree_implementation" not in extra_config:  # use heurstics to get the tree implementation
-        max_depth = operator.raw_operator.max_depth
+    if tree_type == TreeImpl.batch:
+        net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
+        return BatchGBDTClassifier(net_parameters, n_features, classes, device=device)
 
-        if max_depth is not None and max_depth <= 3:
-            net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in
-                              tree_infos]
-            return BatchGBDTClassifier(net_parameters, n_features, classes, device=device)
-        elif max_depth is not None and max_depth <= 10:
-            net_parameters = [get_tree_parameters_for_beam(
-                tree_info) for tree_info in tree_infos]
-            return BeamPPGBDTClassifier(net_parameters, n_features, classes, device=device)
-        else:
-            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in
-                              tree_infos]
-            return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
-    else:  # manually set tree implementation
-        if 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'batch':
-            net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
-            return BatchGBDTClassifier(net_parameters, n_features, classes, device=device)
-        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam':
-            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
-            return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
-        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam++':
-            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
-            return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
-        else:
-            raise WrongExtraConfig("Tree implementation {} not found".format(extra_config))
+    net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
+    if tree_type == TreeImpl.beam:
+        return BeamPPGBDTClassifier(net_parameters, n_features, classes, device=device)
+    else:  # Remaining possible case: tree_type == TreeImpl.beampp
+        return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
 
 
 def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     n_features = operator.raw_operator._n_features
     tree_infos = operator.raw_operator.booster_.dump_model()['tree_info']
+    max_depth = operator.raw_operator.max_depth  # TODO FIXME this should be a call to max_depth and NOT fall through!
+    tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth)
 
-    if "tree_implementation" not in extra_config:  # use heurstics to get the tree implementation
-        max_depth = operator.raw_operator.max_depth  # TODO FIXME this should be a call to max_depth and NOT fall through!
-        if max_depth is not None and max_depth <= 3:
-            net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
-            return BatchGBDTRegressor(net_parameters, n_features, device=device)
-        elif max_depth is not None and max_depth <= 10:
-            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
-            return BeamPPGBDTRegressor(net_parameters, n_features, device=device)
-        else:
-            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
-            return BeamGBDTRegressor(net_parameters, n_features, device=device)
-    else:  # manually set tree implementation
-        if 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'batch':
-            net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
-            return BatchGBDTRegressor(net_parameters, n_features, device=device)
-        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam':
-            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
-            return BeamPPGBDTRegressor(net_parameters, n_features, device=device)
-        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam++':
-            net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
-            return BeamGBDTRegressor(net_parameters, n_features, device=device)
-        else:
-            raise WrongExtraConfig("Tree implementation {} not found".format(extra_config))
+    if tree_type == TreeImpl.batch:
+        net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
+        return BatchGBDTRegressor(net_parameters, n_features, device=device)
+
+    net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
+    if tree_type == TreeImpl.beam:
+        return BeamPPGBDTRegressor(net_parameters, n_features, device=device)
+    else:  # Remaining possible case: tree_type == TreeImpl.beampp
+        return BeamGBDTRegressor(net_parameters, n_features, device=device)
 
 
 register_converter('SklearnLGBMClassifier', convert_sklearn_lgbm_classifier)

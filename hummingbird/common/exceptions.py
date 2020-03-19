@@ -20,12 +20,3 @@ class MissingConverter(RuntimeError):
 
     def __init__(self, msg):
         super().__init__(msg + _missing_converter)
-
-
-class WrongExtraConfig(RuntimeError):
-    """
-    Raised when user supplied unexpected extra_config
-    """
-
-    def __init__(self, msg):
-        super().__init__(msg + _missing_converter)

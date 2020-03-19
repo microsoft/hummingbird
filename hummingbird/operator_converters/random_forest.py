@@ -11,7 +11,6 @@ import torch
 from ._tree_commons import get_parameters_for_batch, get_parameters_for_beam, find_depth, Node
 from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble
 from ..common._registration import register_converter
-from ..common.exceptions import WrongExtraConfig
 
 
 class BatchRandomForestClassifier(BatchedTreeEnsemble):
@@ -216,7 +215,7 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
             return BeamPPRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
                                                 operator.raw_operator.classes_.tolist(), device)
         else:
-            raise WrongExtraConfig("Tree implementation {} not found".format(extra_config))
+            raise ValueError("Tree implementation {} not found".format(extra_config))
 
 
 def convert_sklearn_random_forest_regressor(operator, device, extra_config):

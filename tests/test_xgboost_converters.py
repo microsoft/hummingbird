@@ -9,7 +9,6 @@ import torch
 import xgboost as xgb
 from hummingbird import convert_sklearn
 from hummingbird.common.data_types import Float32TensorType
-from hummingbird.common.exceptions import WrongExtraConfig
 
 
 class TestXGBoostConverter(unittest.TestCase):
@@ -53,11 +52,6 @@ class TestXGBoostConverter(unittest.TestCase):
     def test_xgb_beampp_classifier_converter(self):
         self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "beam++"})
 
-    # failure case
-    def test_xgb_fail_classifier_converter(self):
-        self.assertRaises(
-            WrongExtraConfig, self._run_xgb_classifier_converter, 3, extra_config={"tree_implementation": "nonsense"})
-
     def _run_xgb_regressor_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12]:
@@ -95,11 +89,6 @@ class TestXGBoostConverter(unittest.TestCase):
     # beam++ regressor
     def test_xgb_beampp_regressor_converter(self):
         self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "beam++"})
-
-    # failure case
-    def test_xgb_fail_regressor_converter(self):
-        self.assertRaises(
-            WrongExtraConfig, self._run_xgb_regressor_converter, 3, extra_config={"tree_implementation": "nonsense"})
 
 
 if __name__ == "__main__":
