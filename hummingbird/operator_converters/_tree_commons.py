@@ -40,11 +40,13 @@ class TreeImpl(Enum):
 
 
 # TODO move this to gbdt_gree_commons.py? (create new file)
-def get_gbdt_by_config_or_depth(extra_config, max_depth):
+# TODO: consider reanming this to get_tree_implementation_by_config_or_depth if I
+#     can generalize this to the RF tree as well
+def get_gbdt_by_config_or_depth(extra_config, max_depth, low=3, high=10):
     if 'tree_implementation' not in extra_config:
-        if max_depth is not None and max_depth <= 3:
+        if max_depth is not None and max_depth <= low:
             return TreeImpl.batch
-        elif max_depth is not None and max_depth <= 10:
+        elif max_depth is not None and max_depth <= high:
             return TreeImpl.beam
         else:
             return TreeImpl.beampp

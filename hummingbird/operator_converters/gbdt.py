@@ -8,7 +8,7 @@ import warnings
 
 import torch
 import numpy as np
-from ._tree_commons import get_parameters_for_batch, get_parameters_for_beam
+from ._tree_commons import get_parameters_for_batch, get_parameters_for_beam, get_gbdt_by_config_or_depth, TreeImpl
 from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble
 from ..common._registration import register_converter
 
@@ -20,8 +20,7 @@ class BatchGBDTClassifier(BatchedTreeEnsemble):
             net_parameters, n_features, 1)
         self.perform_class_select = False
         if min(classes) != 0 or max(classes) != len(classes) - 1:
-            self.classes = torch.nn.Parameter(
-                torch.IntTensor(classes), requires_grad=False)
+            self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
             self.perform_class_select = True
 
         self.n_classes = 1
@@ -241,11 +240,14 @@ class BeamPPGBDTRegressor(BeamPPTreeEnsemble):
 
 def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     sklearn_rf_classifier = operator.raw_operator
+    n_features = sklearn_rf_classifier.n_features_
+    learning_rate = operator.raw_operator.learning_rate
 
-    if not all(isinstance(c, int) for c in operator.raw_operator.classes_.tolist()):
+    # analyze classes
+    classes_list = operator.raw_operator.classes_.tolist()
+    if not all(isinstance(c, int) for c in classes_list):
         raise RuntimeError(
             'GBDT Classifier translation only supports integer class labels')
-
     n_classes = len(operator.raw_operator.classes_)
     if n_classes == 2:
         n_classes -= 1
@@ -253,7 +255,6 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
                                          for j in range(n_classes) for i in
                                          range(len(sklearn_rf_classifier.estimators_))]
 
-    learning_rate = operator.raw_operator.learning_rate
     if operator.raw_operator.init == 'zero':
         alpha = [[0.0]]
     elif operator.raw_operator.init is None:
@@ -261,36 +262,30 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
             alpha = [[np.log(
                 operator.raw_operator.init_.class_prior_[1] / (1 - operator.raw_operator.init_.class_prior_[1]))]]
         else:
-            alpha = [[np.log(
-                operator.raw_operator.init_.class_prior_[i])
-                for i in range(n_classes)]]
+            alpha = [[np.log(operator.raw_operator.init_.class_prior_[i]) for i in range(n_classes)]]
     else:
-        raise RuntimeError(
-            'Custom initializers for GBDT are not yet supported in hummingbird')
+        raise RuntimeError('Custom initializers for GBDT are not yet supported in hummingbird')
+
+    max_depth = sklearn_rf_classifier.max_depth
+    tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth, low=4)
 
     # TODO: automatically find the max tree depth by traversing the trees without relying on user input.
-    if sklearn_rf_classifier.max_depth is not None and sklearn_rf_classifier.max_depth <= 10:
-        if sklearn_rf_classifier.max_depth <= 4:
-            net_parameters = [get_parameters_for_batch(
-                e) for e in sklearn_rf_classifier.estimators_]
-            return BatchGBDTClassifier(net_parameters, sklearn_rf_classifier.n_features_,
-                                       operator.raw_operator.classes_.tolist(), learning_rate, alpha, device)
-        else:
-            net_parameters = [get_parameters_for_beam(
-                e) for e in sklearn_rf_classifier.estimators_]
-            return BeamPPGBDTClassifier(net_parameters, sklearn_rf_classifier.n_features_,
-                                        operator.raw_operator.classes_.tolist(), learning_rate, alpha, device)
-    else:
+    if tree_type == TreeImpl.batch:
+        net_parameters = [get_parameters_for_batch(e) for e in sklearn_rf_classifier.estimators_]
+        return BatchGBDTClassifier(net_parameters, n_features, classes_list, learning_rate, alpha, device)
+
+    net_parameters = [get_parameters_for_beam(e) for e in sklearn_rf_classifier.estimators_]
+    if tree_type == TreeImpl.beampp:
+        return BeamPPGBDTClassifier(net_parameters, n_features, classes_list, learning_rate, alpha, device)
+    else:  # Remaining possible case: tree_type == TreeImpl.beam
         if sklearn_rf_classifier.max_depth is None:
             warnings.warn("GBDT model does not have a defined max_depth value. Consider setting one as it "
                           "will help the translator to pick a better translation method")
         elif sklearn_rf_classifier.max_depth > 10:
             warnings.warn("GBDT model max_depth value is {0}. Consider setting a smaller value as it improves"
                           " translated tree scoring performance.".format(sklearn_rf_classifier.max_depth))
-        net_parameters = [get_parameters_for_beam(
-            e) for e in sklearn_rf_classifier.estimators_]
-        return BeamGBDTClassifier(net_parameters, sklearn_rf_classifier.n_features_,
-                                  operator.raw_operator.classes_.tolist(), learning_rate, alpha, device)
+        return BeamGBDTClassifier(net_parameters, n_features,
+                                  classes_list, learning_rate, alpha, device)
 
 
 register_converter('SklearnGradientBoostingClassifier',
