@@ -8,7 +8,7 @@ import numpy as np
 from hummingbird.operator_converters.gbdt import BatchGBDTClassifier, BatchGBDTRegressor, BeamPPGBDTClassifier
 from hummingbird.operator_converters.gbdt import BeamPPGBDTRegressor, BeamGBDTClassifier, BeamGBDTRegressor
 
-from ._tree_commons import Node, find_depth, get_gbdt_by_config_or_depth, TreeImpl
+from ._tree_commons import get_gbdt_by_config_or_depth, TreeImpl, get_parameters_for_beam_generic
 from ..common._registration import register_converter
 
 
@@ -88,6 +88,7 @@ def get_tree_parameters_for_batch(tree_info, n_features):
                 else:
                     raise Exception(
                         "Warning: Inconsistent tree translation encountered")
+
             if values.shape[-1] > 1:
                 class_proba.append((values[i] / np.sum(values[i])).flatten())
             else:
@@ -111,11 +112,11 @@ def get_tree_parameters_for_batch(tree_info, n_features):
     # OR neurons from the preceding layer in order to get final classes.
     weights.append(np.transpose(np.array(class_proba).astype("float32")))
     biases.append(None)
+
     return weights, biases
 
 
-# TODO: redundant code with tree_commons
-def get_tree_parameters_for_beam(tree_info):
+def _get_tree_parameters_for_beam(tree_info):
     lefts = []
     rights = []
     features = []
@@ -124,46 +125,7 @@ def get_tree_parameters_for_beam(tree_info):
     _tree_traversal(tree_info['tree_structure'], lefts,
                     rights, features, thresholds, values, 0)
 
-    ids = [i for i in range(len(lefts))]
-    nodes = list(zip(ids, lefts, rights, features, thresholds, values))
-
-    nodes_map = {0: Node(0)}
-    current_node = 0
-
-    for i, node in enumerate(nodes):
-        id, left, right, feature, thresh, value = node
-
-        if left != -1:
-            l_node = Node(left)
-            nodes_map[left] = l_node
-        else:
-            lefts[i] = id
-            l_node = -1
-            feature = -1
-
-        if right != -1:
-            r_node = Node(right)
-            nodes_map[right] = r_node
-        else:
-            rights[i] = id
-            r_node = -1
-            feature = -1
-
-        nodes_map[current_node].left = l_node
-        nodes_map[current_node].right = r_node
-        nodes_map[current_node].feature = feature
-        nodes_map[current_node].threshold = thresh
-        nodes_map[current_node].value = value
-
-        current_node += 1
-
-    depth = find_depth(nodes_map[0], -1)
-    lefts = np.array(lefts)
-    rights = np.array(rights)
-    features = np.array(features)
-    thresholds = np.array(thresholds)
-    values = np.array(values)
-    return [depth, nodes_map, ids, lefts, rights, features, thresholds, values]
+    return get_parameters_for_beam_generic(lefts, rights, features, thresholds, values, as_numpy=True)
 
 
 def convert_sklearn_lgbm_classifier(operator, device, extra_config):
@@ -183,7 +145,7 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
         net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
         return BatchGBDTClassifier(net_parameters, n_features, classes, device=device)
 
-    net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
+    net_parameters = [_get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
     if tree_type == TreeImpl.beam:
         return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
     else:  # Remaining possible case: tree_type == TreeImpl.beampp
@@ -200,7 +162,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
         net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
         return BatchGBDTRegressor(net_parameters, n_features, device=device)
 
-    net_parameters = [get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
+    net_parameters = [_get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
     if tree_type == TreeImpl.beam:
         return BeamGBDTRegressor(net_parameters, n_features, device=device)
     else:  # Remaining possible case: tree_type == TreeImpl.beampp

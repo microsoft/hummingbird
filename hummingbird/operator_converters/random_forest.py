@@ -8,7 +8,7 @@ import copy
 
 import torch
 
-from ._tree_commons import get_parameters_for_batch, get_parameters_for_beam, find_depth, Node
+from ._tree_commons import get_parameters_for_batch, get_parameters_for_beam_sklearn_estimators, find_depth, Node
 from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble
 from ..common._registration import register_converter
 
@@ -189,12 +189,12 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
                 return BatchRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
                                                    operator.raw_operator.classes_.tolist(), device)
             else:
-                net_parameters = [get_parameters_for_beam(
+                net_parameters = [get_parameters_for_beam_sklearn_estimators(
                     e) for e in sklearn_rf_classifier.estimators_]
                 return BeamPPRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
                                                     operator.raw_operator.classes_.tolist(), device)
         else:
-            net_parameters = [get_parameters_for_beam(
+            net_parameters = [get_parameters_for_beam_sklearn_estimators(
                 e) for e in sklearn_rf_classifier.estimators_]
             return BeamRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
                                               operator.raw_operator.classes_.tolist(), device)
@@ -205,12 +205,12 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
             return BatchRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
                                                operator.raw_operator.classes_.tolist(), device)
         elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam':
-            net_parameters = [get_parameters_for_beam(
+            net_parameters = [get_parameters_for_beam_sklearn_estimators(
                 e) for e in sklearn_rf_classifier.estimators_]
             return BeamRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
                                               operator.raw_operator.classes_.tolist(), device)
         elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam++':
-            net_parameters = [get_parameters_for_beam(
+            net_parameters = [get_parameters_for_beam_sklearn_estimators(
                 e) for e in sklearn_rf_classifier.estimators_]
             return BeamPPRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
                                                 operator.raw_operator.classes_.tolist(), device)
@@ -230,7 +230,7 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
                 e) for e in sklearn_rf_regressor.estimators_]
             return BatchRandomForestRegressor(net_parameters, sklearn_rf_regressor.n_features_, device)
         else:
-            net_parameters = [get_parameters_for_beam(
+            net_parameters = [get_parameters_for_beam_sklearn_estimators(
                 e) for e in sklearn_rf_regressor.estimators_]
             return BeamPPRandomForestRegressor(net_parameters, sklearn_rf_regressor.n_features_, device)
     else:
@@ -240,7 +240,7 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
         elif sklearn_rf_regressor.max_depth > 10:
             warnings.warn("RandomForest model max_depth value is {0}. Consider setting a smaller value as it improves"
                           " translated tree scoring performance.".format(sklearn_rf_regressor.max_depth))
-        net_parameters = [get_parameters_for_beam(
+        net_parameters = [get_parameters_for_beam_sklearn_estimators(
             e) for e in sklearn_rf_regressor.estimators_]
         return BeamRandomForestRegressor(net_parameters, sklearn_rf_regressor.n_features_, device)
 
