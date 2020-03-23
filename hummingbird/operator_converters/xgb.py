@@ -169,7 +169,7 @@ def _get_tree_parameters_for_beam(tree_info):
         thresholds = [0, 0, 0]
         values = [np.array([0.0]), values[0], values[0]]
 
-    return get_parameters_for_beam_generic(lefts, rights, features, thresholds, values, as_numpy=True)
+    return get_parameters_for_beam_generic(lefts, rights, features, thresholds, values)
 
 
 def convert_sklearn_xgb_classifier(operator, device, extra_config):

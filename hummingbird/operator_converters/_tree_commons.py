@@ -61,7 +61,7 @@ def get_gbdt_by_config_or_depth(extra_config, max_depth, low=3, high=10):
         raise ValueError("Tree implementation {} not found".format(extra_config))
 
 
-def get_parameters_for_beam_generic(lefts, rights, features, thresholds, values, as_numpy=False):
+def get_parameters_for_beam_generic(lefts, rights, features, thresholds, values):
     """This is used by all trees."""
     ids = [i for i in range(len(lefts))]
     nodes = list(zip(ids, lefts, rights, features, thresholds, values))
@@ -96,12 +96,13 @@ def get_parameters_for_beam_generic(lefts, rights, features, thresholds, values,
         current_node += 1
 
     depth = find_depth(nodes_map[0], -1)
-    if as_numpy:
-        lefts = np.array(lefts)
-        rights = np.array(rights)
-        features = np.array(features)
-        thresholds = np.array(thresholds)
-        values = np.array(values)
+
+    # convert all to numpy
+    lefts = np.array(lefts)
+    rights = np.array(rights)
+    features = np.array(features)
+    thresholds = np.array(thresholds)
+    values = np.array(values)
 
     return [depth, nodes_map, ids, lefts, rights, features, thresholds, values]
 

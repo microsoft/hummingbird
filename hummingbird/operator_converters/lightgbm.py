@@ -125,7 +125,7 @@ def _get_tree_parameters_for_beam(tree_info):
     _tree_traversal(tree_info['tree_structure'], lefts,
                     rights, features, thresholds, values, 0)
 
-    return get_parameters_for_beam_generic(lefts, rights, features, thresholds, values, as_numpy=True)
+    return get_parameters_for_beam_generic(lefts, rights, features, thresholds, values)
 
 
 def convert_sklearn_lgbm_classifier(operator, device, extra_config):
