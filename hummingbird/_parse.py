@@ -30,7 +30,7 @@ def parse_sklearn_model(model, initial_types=None):
     # Declare a computational graph. It will become a representation of
     # the input scikit-learn model after parsing.
 
-    topology = Topology(raw_model_container, initial_types=initial_types)
+    topology = Topology(raw_model_container, initial_types)
 
     # Declare an object to provide variables' and operators' naming mechanism.
     # In contrast to CoreML, one global scope

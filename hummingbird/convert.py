@@ -12,7 +12,7 @@ from ._parse import parse_sklearn_model
 from . import operator_converters  # noqa
 
 
-def convert_sklearn(model, initial_types=None, device=None,
+def convert_sklearn(model, initial_types, device=None,
                     optimize_graph=True, extra_config={}):
     """
     This function produces an equivalent PyTorch model of the given scikit-learn model.
@@ -53,13 +53,6 @@ def convert_sklearn(model, initial_types=None, device=None,
         (defined by parameter *initial_types*), only integers are supported.
 
     """  # noqa
-
-    if initial_types is None:
-        if hasattr(model, 'infer_initial_types'):
-            initial_types = model.infer_initial_types()
-        else:
-            raise ValueError(
-                'Initial types are required. See usage of convert(...) in hummingbird.convert for details')
 
     # Parse scikit-learn model as our internal data structure
     # (i.e., Topology)

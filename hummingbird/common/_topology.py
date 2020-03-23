@@ -133,25 +133,25 @@ class Topology:
     must be called to convert the topological graph into PyTorch model.
     """  # noqa
 
-    def __init__(self, model, default_batch_size=1, initial_types=None, variable_name_set=None, operator_name_set=None):
+    def __init__(self, model, initial_types, default_batch_size=1, variable_name_set=None, operator_name_set=None):
         """
         Initializes a *Topology* object, which is an intermediate
         representation of a computational graph.
         :param model: RawModelContainer object or one of its derived
                       classes. It contains the original model.
-        :param default_batch_size: batch_size prepend to scalar and
-                                   array types. It's usually 1 or None.
         :param initial_types: A list providing some types for some
                               root variables. Each element is a tuple
                                of a variable name and a type defined
                                in *data_types.py*.
+        :param default_batch_size: batch_size prepend to scalar and
+                                   array types. It's usually 1 or None.
         """
         # self.scopes = []
         self.raw_model = model
         # self.scope_names = set()
         self.variable_name_set = set()
         self.operator_name_set = set()
-        self.initial_types = initial_types if initial_types else list()
+        self.initial_types = initial_types
         self.default_batch_size = default_batch_size
 
         self.pytorch_variable_names = (
