@@ -90,6 +90,26 @@ class TestXGBoostConverter(unittest.TestCase):
     def test_xgb_beampp_regressor_converter(self):
         self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "beam++"})
 
+    # small tree
+    def test_run_xgb_classifier_converter(self):
+        warnings.filterwarnings("ignore")
+        for extra_config_param in ["beam", "batch"]:
+            model = xgb.XGBClassifier(n_estimators=1, max_depth=1)
+            X = np.random.rand(1, 1)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(2, size=1)
+
+            model.fit(X, y)
+
+            pytorch_model = convert_sklearn(
+                model,
+                [("input", FloatTensorType([1, 1]))],
+                extra_config={"tree_implementation": extra_config_param}
+            )
+            self.assertTrue(pytorch_model is not None)
+            np.testing.assert_allclose(model.predict_proba(
+                X), pytorch_model(torch.from_numpy(X))[1].data.numpy(), rtol=1e-06, atol=1e-06)
+
 
 if __name__ == "__main__":
     unittest.main()

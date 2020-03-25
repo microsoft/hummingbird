@@ -107,7 +107,8 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
         model.fit(X, y)
         pytorch_model = convert_sklearn(
             model,
-            [("input", FloatTensorType([1, 20]))]
+            [("input", FloatTensorType([1, 20]))],
+            device="cpu"
         )
         self.assertTrue(pytorch_model is not None)
         self.assertTrue(np.allclose(model.predict_proba(
@@ -124,11 +125,28 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             model = ExtraTreesClassifier(n_estimators=10, max_depth=max_depth)
             self._run_test_other_trees_classifier(model)
 
+    # small tree
+    def test_random_forest_single_node_tree_converter(self):
+        warnings.filterwarnings("ignore")
+        X = np.random.rand(1, 1)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(1, size=1)
+        model = RandomForestClassifier(n_estimators=1).fit(X, y)
+        pytorch_model = convert_sklearn(
+            model,
+            [("input", FloatTensorType([1, 1]))],
+            extra_config={"tree_implementation": "batch"}
+            )
+        self.assertTrue(pytorch_model is not None)
+        np.testing.assert_allclose(model.predict(X), pytorch_model(
+            torch.from_numpy(X))[0].numpy().flatten(), rtol=1e-06, atol=1e-06)
+
     # Failure Cases
     def test_sklearn_random_forest_classifier_raises_wrong_type(self):
         warnings.filterwarnings("ignore")
-        X = np.zeros((10, 10))
-        y = np.ones((10,))  # y must be int, not float, should error
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error
         model = RandomForestClassifier(n_estimators=10).fit(X, y)
         self.assertRaises(RuntimeError, convert_sklearn, model, [])
 

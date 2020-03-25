@@ -119,8 +119,7 @@ def get_tree_parameters_for_batch(tree_info, n_features):
                 elif path[j + 1] in rights:
                     vec[p - num_leaves_before_p] = -1
                 else:
-                    raise Exception(
-                        "Warning: Inconsistent tree translation encountered")
+                    raise Exception("Warning: Inconsistent tree translation encountered")
 
             if values.shape[-1] > 1:
                 class_proba.append((values[i] / np.sum(values[i])).flatten())

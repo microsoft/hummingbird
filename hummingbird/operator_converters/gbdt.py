@@ -246,8 +246,7 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     # analyze classes
     classes_list = operator.raw_operator.classes_.tolist()
     if not all(isinstance(c, int) for c in classes_list):
-        raise RuntimeError(
-            'GBDT Classifier translation only supports integer class labels')
+        raise RuntimeError('GBDT Classifier translation only supports integer class labels')
     n_classes = len(operator.raw_operator.classes_)
     if n_classes == 2:
         n_classes -= 1
