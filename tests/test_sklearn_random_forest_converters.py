@@ -11,6 +11,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, Extr
 from hummingbird import convert_sklearn
 from hummingbird.common.data_types import Float32TensorType
 from sklearn.tree import DecisionTreeClassifier
+from hummingbird.common.exceptions import MissingConverter
 
 
 class TestSklearnRandomForestConverter(unittest.TestCase):
@@ -97,47 +98,46 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
     def test_random_forest_beampp_regressor_converter(self):
         self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "beam++"})
 
-    # TODO consolidate
+    # Used for DecisionTreeClassifier and ExtraTreesClassifier
+    def _run_test_other_trees_classifier(self, model):
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(3, size=100)
+
+        model.fit(X, y)
+        pytorch_model = convert_sklearn(
+            model,
+            [("input", Float32TensorType([1, 20]))]
+        )
+        self.assertTrue(pytorch_model is not None)
+        self.assertTrue(np.allclose(model.predict_proba(
+            X), pytorch_model(torch.from_numpy(X))[1].data.numpy()))
+
     def test_decision_tree_classifier_converter(self):
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = DecisionTreeClassifier(max_depth=max_depth)
-            X = np.random.rand(100, 200)
-            X = np.array(X, dtype=np.float32)
-            y = np.random.randint(3, size=100)
+            self._run_test_other_trees_classifier(model)
 
-            model.fit(X, y)
-            pytorch_model = convert_sklearn(
-                model,
-                [("input", Float32TensorType([1, 20]))]
-            )
-            self.assertTrue(pytorch_model is not None)
-            self.assertTrue(np.allclose(model.predict_proba(
-                X), pytorch_model(torch.from_numpy(X))[1].data.numpy()))
-
-    # TODO consolidate
     def test_extra_trees_classifier_converter(self):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = ExtraTreesClassifier(n_estimators=10, max_depth=max_depth)
-            X = np.random.rand(100, 200)
-            X = np.array(X, dtype=np.float32)
-            y = np.random.randint(3, size=100)
+            self._run_test_other_trees_classifier(model)
 
-            model.fit(X, y)
-            pytorch_model = convert_sklearn(
-                model,
-                [("input", Float32TensorType([1, 20]))]
-            )
-            self.assertTrue(pytorch_model is not None)
-            self.assertTrue(np.allclose(model.predict_proba(
-                X), pytorch_model(torch.from_numpy(X))[1].data.numpy()))
-
+    # Failure Cases
     def test_sklearn_random_forest_classifier_raises_wrong_type(self):
         warnings.filterwarnings("ignore")
         X = np.zeros((10, 10))
         y = np.ones((10,))  # y must be int, not float, should error
         model = RandomForestClassifier(n_estimators=10).fit(X, y)
         self.assertRaises(RuntimeError, convert_sklearn, model, [])
+
+    def test_sklearn_random_forest_classifier_raises_wrong_extra_config(self):
+        warnings.filterwarnings("ignore")
+        X = np.array(np.random.rand(100, 200), dtype=np.float32)
+        y = np.random.randint(3, size=100)
+        model = RandomForestClassifier(n_estimators=10).fit(X, y)
+        self.assertRaises(MissingConverter, convert_sklearn, model, [], extra_config={"tree_implementation": "nonsense"})
 
 
 if __name__ == "__main__":

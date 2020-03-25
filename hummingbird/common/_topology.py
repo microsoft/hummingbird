@@ -366,11 +366,8 @@ def convert_topology(topology, device=None, extra_config={}):
                 operator, device, extra_config)
         except ValueError:
             raise MissingConverter(
-                "Unable to find converter for alias '{}' type "
-                "'{}'. You may raise an issue at "
-                "https://cisl.visualstudio.com/Hummingbird/issues."
-                "".format(operator.type,
-                          type(getattr(operator, 'raw_model', None))))
+                "Unable to find converter for {} type {} with extra config: {}".format(
+                    operator.type, type(getattr(operator, 'raw_model', None)), extra_config))
 
     pytorch_model = Skl2PyTorchModel(topology.raw_model.input_names, topology.raw_model.output_names, operator_map,
                                      topology, device, extra_config)
