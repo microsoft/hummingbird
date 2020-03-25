@@ -437,8 +437,7 @@ class BeamPPTreeEnsemble(torch.nn.Module):
             node_by_levels, node_id, current_level, max_level)
         return node_id
 
-    def _get_weights_and_biases(
-            self, nodes_map, tree_depth, weight_0, weight_1, bias_0):
+    def _get_weights_and_biases(self, nodes_map, tree_depth, weight_0, weight_1, bias_0):
 
         def depth_f_traversal(node, current_depth, node_id, leaf_start_id):
             weight_0[node_id] = node.feature
