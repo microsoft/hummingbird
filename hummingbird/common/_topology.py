@@ -1,7 +1,7 @@
 import re
 
 import numpy as np
-from hummingbird.common.data_types import TensorType
+from onnxconverter_common.data_types import TensorType
 
 from . import _registration
 from ._container import Skl2PyTorchModel
@@ -24,7 +24,7 @@ class Variable:
                          field *pytorch_name* below).
         :param pytorch_name: A string indicating the variable's name in
                           the converted model
-        :param type: A type object defined in .common.data_types.py;
+        :param type: A type object defined in onnxconverter_common.data_types;
                      e.g., FloatTensorType
         """
 

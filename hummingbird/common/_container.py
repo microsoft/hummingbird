@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 import torch
-from hummingbird.common.data_types import TensorListType
+from onnxconverter_common.data_types import TensorType
 
 
 class RawModelContainerNode(object):
@@ -109,7 +109,7 @@ class Skl2PyTorchModel(torch.nn.Module):
             variable_map = {}
             for i, input_name in enumerate(self.input_names):
                 if self.device is not None and not isinstance(
-                        self.topology.variables[input_name].type, TensorListType):
+                        self.topology.variables[input_name].type, TensorType):
                     pytorch_inputs[i] = pytorch_inputs[i].to(self.device)
                 variable_map[input_name] = pytorch_inputs[i]
 

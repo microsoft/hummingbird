@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import lightgbm as lgb
 from hummingbird import convert_sklearn
-from hummingbird.common.data_types import Float32TensorType
+from onnxconverter_common.data_types import FloatTensorType
 
 
 class TestLGBMConverter(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestLGBMConverter(unittest.TestCase):
 
             pytorch_model = convert_sklearn(
                 model,
-                [("input", Float32TensorType([1, 200]))],
+                [("input", FloatTensorType([1, 200]))],
                 extra_config=extra_config
             )
             self.assertTrue(pytorch_model is not None)
@@ -60,7 +60,7 @@ class TestLGBMConverter(unittest.TestCase):
             model.fit(X, y)
             pytorch_model = convert_sklearn(
                 model,
-                [("input", Float32TensorType([1, 200]))],
+                [("input", FloatTensorType([1, 200]))],
                 extra_config=extra_config
             )
             self.assertTrue(pytorch_model is not None)

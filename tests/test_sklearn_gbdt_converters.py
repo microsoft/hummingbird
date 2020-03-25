@@ -9,7 +9,7 @@ import torch
 from sklearn.ensemble import GradientBoostingClassifier
 
 from hummingbird import convert_sklearn
-from hummingbird.common.data_types import Float32TensorType
+from onnxconverter_common.data_types import FloatTensorType
 
 
 class TestSklearnGradientBoostingClassifier(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
             model.fit(X, y)
             pytorch_model = convert_sklearn(
                 model,
-                [("input", Float32TensorType([1, 20]))],
+                [("input", FloatTensorType([1, 20]))],
                 extra_config=extra_config
             )
             self.assertTrue(pytorch_model is not None)
@@ -68,7 +68,7 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
             model.fit(X, y)
             pytorch_model = convert_sklearn(
                 model,
-                [("input", Float32TensorType([1, 20]))]
+                [("input", FloatTensorType([1, 20]))]
             )
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(model.predict_proba(

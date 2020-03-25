@@ -9,7 +9,7 @@ import torch
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, ExtraTreesClassifier
 
 from hummingbird import convert_sklearn
-from hummingbird.common.data_types import Float32TensorType
+from onnxconverter_common.data_types import FloatTensorType
 from sklearn.tree import DecisionTreeClassifier
 from hummingbird.common.exceptions import MissingConverter
 
@@ -27,7 +27,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             model.fit(X, y)
             pytorch_model = convert_sklearn(
                 model,
-                [("input", Float32TensorType([1, 20]))],
+                [("input", FloatTensorType([1, 20]))],
                 extra_config=extra_config
             )
             self.assertTrue(pytorch_model is not None)
@@ -71,7 +71,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             model.fit(X, y)
             pytorch_model = convert_sklearn(
                 model,
-                [("input", Float32TensorType([1, 20]))],
+                [("input", FloatTensorType([1, 20]))],
                 extra_config=extra_config
             )
             self.assertTrue(pytorch_model is not None)
@@ -107,7 +107,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
         model.fit(X, y)
         pytorch_model = convert_sklearn(
             model,
-            [("input", Float32TensorType([1, 20]))]
+            [("input", FloatTensorType([1, 20]))]
         )
         self.assertTrue(pytorch_model is not None)
         self.assertTrue(np.allclose(model.predict_proba(
