@@ -178,45 +178,23 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
         raise RuntimeError(
             'Random Forest Classifier translation only supports integer class labels')
 
-    if "tree_implementation" not in extra_config:  # use heurstics to get the tree implementation
-        max_depth = sklearn_rf_classifier.max_depth
-        if max_depth is None:
-            max_depth = max_depth = find_max_depth(operator)
+    max_depth = sklearn_rf_classifier.max_depth
+    if max_depth is None:
+        max_depth = max_depth = find_max_depth(operator)
+    tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth, low=4)
 
-        if max_depth <= 10:
-            if max_depth <= 4:
-                net_parameters = [get_parameters_for_batch(
-                    e) for e in sklearn_rf_classifier.estimators_]
-                return BatchRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
-                                                   operator.raw_operator.classes_.tolist(), device)
-            else:
-                net_parameters = [get_parameters_for_beam_sklearn_estimators(
-                    e) for e in sklearn_rf_classifier.estimators_]
-                return BeamPPRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
-                                                    operator.raw_operator.classes_.tolist(), device)
-        else:
-            net_parameters = [get_parameters_for_beam_sklearn_estimators(
-                e) for e in sklearn_rf_classifier.estimators_]
-            return BeamRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
-                                              operator.raw_operator.classes_.tolist(), device)
-    else:  # manually set tree implementation
-        if 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'batch':
-            net_parameters = [get_parameters_for_batch(
-                e) for e in sklearn_rf_classifier.estimators_]
-            return BatchRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
-                                               operator.raw_operator.classes_.tolist(), device)
-        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam':
-            net_parameters = [get_parameters_for_beam_sklearn_estimators(
-                e) for e in sklearn_rf_classifier.estimators_]
-            return BeamRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
-                                              operator.raw_operator.classes_.tolist(), device)
-        elif 'tree_implementation' in extra_config and extra_config['tree_implementation'] == 'beam++':
-            net_parameters = [get_parameters_for_beam_sklearn_estimators(
-                e) for e in sklearn_rf_classifier.estimators_]
-            return BeamPPRandomForestClassifier(net_parameters, sklearn_rf_classifier.n_features_,
-                                                operator.raw_operator.classes_.tolist(), device)
-        else:
-            raise ValueError("Tree implementation {} not found".format(extra_config))
+    if tree_type == TreeImpl.batch:
+        net_parameters = [get_parameters_for_batch(e) for e in sklearn_rf_classifier.estimators_]
+        return BatchRandomForestClassifier(
+            net_parameters, sklearn_rf_classifier.n_features_, operator.raw_operator.classes_.tolist(), device)
+
+    net_parameters = [get_parameters_for_beam_sklearn_estimators(e) for e in sklearn_rf_classifier.estimators_]
+    if tree_type == TreeImpl.beam:
+        return BeamRandomForestClassifier(
+            net_parameters, sklearn_rf_classifier.n_features_, operator.raw_operator.classes_.tolist(), device)
+    else:  # Remaining possible case: tree_type == TreeImpl.beampp
+        return BeamPPRandomForestClassifier(
+            net_parameters, sklearn_rf_classifier.n_features_, operator.raw_operator.classes_.tolist(), device)
 
 
 def convert_sklearn_random_forest_regressor(operator, device, extra_config):

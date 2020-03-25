@@ -39,9 +39,8 @@ class TreeImpl(Enum):
     beampp = 3
 
 
-# TODO move this to gbdt_gree_commons.py? (create new file)
-# TODO: consider reanming this to get_tree_implementation_by_config_or_depth if I
-#     can generalize this to the RF tree as well
+# @low and @high are optimization parameters
+# TODO: document and explain these choices
 def get_gbdt_by_config_or_depth(extra_config, max_depth, low=3, high=10):
     if 'tree_implementation' not in extra_config:
         if max_depth is not None and max_depth <= low:
