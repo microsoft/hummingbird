@@ -132,6 +132,13 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             self.assertTrue(np.allclose(model.predict_proba(
                 X), pytorch_model(torch.from_numpy(X))[1].data.numpy()))
 
+    def test_sklearn_random_forest_classifier_raises_wrong_type(self):
+        warnings.filterwarnings("ignore")
+        X = np.zeros((10, 10))
+        y = np.ones((10,))  # y must be int, not float, should error
+        model = RandomForestClassifier(n_estimators=10).fit(X, y)
+        self.assertRaises(RuntimeError, convert_sklearn, model, [])
+
 
 if __name__ == "__main__":
     unittest.main()
