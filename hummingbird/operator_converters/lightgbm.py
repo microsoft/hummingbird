@@ -55,9 +55,11 @@ def get_tree_parameters_for_batch(tree_info, n_features):
             hidden_weights.append(
                 [1 if i == feature else 0 for i in range(n_features)])
             hidden_biases.append(thresh)
+
     weights.append(np.array(hidden_weights).astype("float32"))
     biases.append(np.array(hidden_biases).astype("float32"))
     n_splits = len(hidden_weights)
+    #  TODO SPLIT HERE=========
 
     # second hidden layer has ANDs for each leaf of the decision tree.
     # depth first enumeration of the tree in order to determine the AND by the path.
@@ -70,10 +72,10 @@ def get_tree_parameters_for_batch(tree_info, n_features):
     class_proba = []
     nodes = list(zip(lefts, rights, features, thresholds, values))
 
-    while True:
+    while True and len(path) > 0:
         i = path[-1]
         visited[i] = True
-        left, right, feature, thresh, value = nodes[i]
+        left, right, feature, threshold, value = nodes[i]
         if left == -1 and right == -1:
             vec = [0 for _ in range(n_splits)]
             # keep track of positive weights for calculating bias.
@@ -86,8 +88,8 @@ def get_tree_parameters_for_batch(tree_info, n_features):
                 elif path[j + 1] in rights:
                     vec[p - num_leaves_before_p] = -1
                 else:
-                    raise Exception(
-                        "Warning: Inconsistent tree translation encountered")
+                    raise RuntimeError(
+                        "Inconsistent state encountered while tree translation.")
 
             if values.shape[-1] > 1:
                 class_proba.append((values[i] / np.sum(values[i])).flatten())
@@ -104,8 +106,7 @@ def get_tree_parameters_for_batch(tree_info, n_features):
             path.append(right)
         else:
             path.pop()
-            if len(path) == 0:
-                break
+
     weights.append(np.array(hidden_weights).astype("float32"))
     biases.append(np.array(hidden_biases).astype("float32"))
 

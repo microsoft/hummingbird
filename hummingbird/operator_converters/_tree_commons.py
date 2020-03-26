@@ -127,6 +127,62 @@ def get_parameters_for_beam_sklearn_estimators(tree):
     return get_parameters_for_beam_generic(lefts, rights, features, thresholds, values)
 
 
+def get_parameters_for_batch_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits):
+    """This is used by all trees."""
+
+    hidden_weights = []
+    hidden_biases = []
+
+    path = [0]
+    n_nodes = len(lefts)
+    visited = [False for _ in range(n_nodes)]
+
+    class_proba = []
+    nodes = list(zip(lefts, rights, features, thresholds, values))
+
+    while True and len(path) > 0:
+        i = path[-1]
+        visited[i] = True
+        left, right, feature, threshold, value = nodes[i]
+        if left == -1 and right == -1:
+            vec = [0 for _ in range(n_splits)]
+            # keep track of positive weights for calculating bias.
+            num_positive = 0
+            for j, p in enumerate(path[:-1]):
+                num_leaves_before_p = list(lefts[:p]).count(-1)
+                if path[j + 1] in lefts:
+                    vec[p - num_leaves_before_p] = 1
+                    num_positive += 1
+                elif path[j + 1] in rights:
+                    vec[p - num_leaves_before_p] = -1
+                else:
+                    raise RuntimeError("Inconsistent state encountered while tree translation.")
+
+            if values.shape[-1] > 1:
+                class_proba.append((values[i] / np.sum(values[i])).flatten())
+            else:
+                # we have only a single value. e.g., GBDT
+                class_proba.append(values[i].flatten())
+
+            hidden_weights.append(vec)
+            hidden_biases.append(num_positive)
+            path.pop()
+        elif not visited[left]:
+            path.append(left)
+        elif not visited[right]:
+            path.append(right)
+        else:
+            path.pop()
+
+    weights.append(np.array(hidden_weights).astype("float32"))
+    biases.append(np.array(hidden_biases).astype("float32"))
+
+    weights.append(np.transpose(np.array(class_proba).astype("float32")))
+    biases.append(None)
+
+    return weights, biases
+
+
 def get_parameters_for_batch(tree):
     lefts = tree.tree_.children_left
     rights = tree.tree_.children_right
@@ -134,7 +190,6 @@ def get_parameters_for_batch(tree):
     thresholds = tree.tree_.threshold
     values = tree.tree_.value
     n_features = tree.tree_.n_features
-    n_nodes = len(lefts)
 
     weights = []
     biases = []
@@ -160,58 +215,7 @@ def get_parameters_for_batch(tree):
     weights.append(np.array(hidden_weights).astype("float32"))
     biases.append(np.array(hidden_biases).astype("float32"))
     n_splits = len(hidden_weights)
-
-    hidden_weights = []
-    hidden_biases = []
-
-    path = [0]
-    visited = [False for _ in range(n_nodes)]
-
-    class_proba = []
-    nodes = list(zip(lefts, rights, features, thresholds, values))
-
-    while True and len(path) > 0:
-        i = path[-1]
-        visited[i] = True
-        left, right, feature, threshold, value = nodes[i]
-        if left == -1 and right == -1:
-            vec = [0 for _ in range(n_splits)]
-            # keep track of positive weights for calculating bias.
-            num_positive = 0
-            for j, p in enumerate(path[:-1]):
-                num_leaves_before_p = list(lefts[:p]).count(-1)
-                if path[j + 1] in lefts:
-                    vec[p - num_leaves_before_p] = 1
-                    num_positive += 1
-                elif path[j + 1] in rights:
-                    vec[p - num_leaves_before_p] = -1
-                else:
-                    raise RuntimeError(
-                        "Inconsistent state encountered while tree translation.")
-
-            if values.shape[-1] > 1:
-                class_proba.append((values[i] / np.sum(values[i])).flatten())
-            else:
-                # we have only a single value. e.g., GBDT
-                class_proba.append(values[i].flatten())
-
-            hidden_weights.append(vec)
-            hidden_biases.append(num_positive)
-            path.pop()
-        elif not visited[left]:
-            path.append(left)
-        elif not visited[right]:
-            path.append(right)
-        else:
-            path.pop()
-
-    weights.append(np.array(hidden_weights).astype("float32"))
-    biases.append(np.array(hidden_biases).astype("float32"))
-
-    weights.append(np.transpose(np.array(class_proba).astype("float32")))
-    biases.append(None)
-
-    return weights, biases
+    return get_parameters_for_batch_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits)
 
 
 class BatchedTreeEnsemble(torch.nn.Module):
