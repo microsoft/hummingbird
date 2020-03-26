@@ -8,7 +8,8 @@ import numpy as np
 from hummingbird.operator_converters.gbdt import BatchGBDTClassifier, BatchGBDTRegressor, BeamPPGBDTClassifier
 from hummingbird.operator_converters.gbdt import BeamPPGBDTRegressor, BeamGBDTClassifier, BeamGBDTRegressor
 
-from ._tree_commons import get_gbdt_by_config_or_depth, TreeImpl, get_parameters_for_beam_generic
+from ._tree_commons import get_gbdt_by_config_or_depth, TreeImpl
+from ._tree_commons import get_parameters_for_beam_generic, get_parameters_for_batch_generic
 from ..common._registration import register_converter
 
 
@@ -54,8 +55,7 @@ def _tree_traversal(tree_info, ls, rs, fs, ts, vs):
             count += 1
 
 
-# TODO: redundant code with tree_commons
-def get_tree_parameters_for_batch(tree_info, n_features):
+def _get_tree_parameters_for_batch(tree_info, n_features):
     lefts = []
     rights = []
     features = []
@@ -73,7 +73,6 @@ def get_tree_parameters_for_batch(tree_info, n_features):
         thresholds = [0, 0, 0]
         values = [np.array([0.0]), values[0], values[0]]
 
-    n_nodes = len(lefts)
     weights = []
     biases = []
 
@@ -92,62 +91,8 @@ def get_tree_parameters_for_batch(tree_info, n_features):
     n_splits = len(hidden_weights)
 
     # second hidden layer has ANDs for each leaf of the decision tree.
-    # depth first enumeration of the tree in order to determine the AND by the
-    # path.
-    hidden_weights = []
-    hidden_biases = []
-
-    path = [0]
-    visited = [False for _ in range(n_nodes)]
-    # save classes for later ORing
-    class_proba = []
-    nodes = list(zip(lefts, rights, features, thresholds, values))
-
-    while True:
-        i = path[-1]
-        visited[i] = True
-        left, right, feature, thresh, value = nodes[i]
-        if left == -1 and right == -1:
-            vec = [0 for _ in range(n_splits)]
-            # keep track of positive weights for calculating bias.
-            num_positive = 0
-            for j, p in enumerate(path[:-1]):
-                num_leaves_before_p = list(lefts[:p]).count(-1)
-                if path[j + 1] in lefts:
-                    vec[p - num_leaves_before_p] = 1
-                    num_positive += 1
-                elif path[j + 1] in rights:
-                    vec[p - num_leaves_before_p] = -1
-                else:
-                    raise Exception("Warning: Inconsistent tree translation encountered")
-
-            if values.shape[-1] > 1:
-                class_proba.append((values[i] / np.sum(values[i])).flatten())
-            else:
-                # we have only a single value. e.g., GBDT
-                class_proba.append(values[i].flatten())
-
-            hidden_weights.append(vec)
-            hidden_biases.append(num_positive)
-            path.pop()
-        elif not visited[left]:
-            path.append(left)
-        elif not visited[right]:
-            path.append(right)
-        else:
-            path.pop()
-            if len(path) == 0:
-                break
-    weights.append(np.array(hidden_weights).astype("float32"))
-    biases.append(np.array(hidden_biases).astype("float32"))
-
-    # OR neurons from the preceding layer in order to get final classes.
-    weights.append(np.transpose(np.array(class_proba).astype("float32")))
-    biases.append(None)
-
-    return weights, biases
-
-# TODO: redundant code with tree_commons
+    # depth first enumeration of the tree in order to determine the AND by the path.
+    return get_parameters_for_batch_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits)
 
 
 def _get_tree_parameters_for_beam(tree_info):
@@ -185,7 +130,7 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
     tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth)
 
     if tree_type == TreeImpl.batch:
-        net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
+        net_parameters = [_get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
         return BatchGBDTClassifier(net_parameters, n_features, classes, device=device)
 
     net_parameters = [_get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
@@ -205,7 +150,7 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
     tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth)
 
     if tree_type == TreeImpl.batch:
-        net_parameters = [get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
+        net_parameters = [_get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
         return BatchGBDTRegressor(net_parameters, n_features, alpha=alpha, device=device)
 
     net_parameters = [_get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]

@@ -177,6 +177,7 @@ def get_parameters_for_batch_generic(lefts, rights, features, thresholds, values
     weights.append(np.array(hidden_weights).astype("float32"))
     biases.append(np.array(hidden_biases).astype("float32"))
 
+    # OR neurons from the preceding layer in order to get final classes.
     weights.append(np.transpose(np.array(class_proba).astype("float32")))
     biases.append(None)
 
@@ -184,6 +185,10 @@ def get_parameters_for_batch_generic(lefts, rights, features, thresholds, values
 
 
 def get_parameters_for_batch(tree):
+    """This function is used by sklearn-based trees.
+
+    Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+    """
     lefts = tree.tree_.children_left
     rights = tree.tree_.children_right
     features = tree.tree_.feature
