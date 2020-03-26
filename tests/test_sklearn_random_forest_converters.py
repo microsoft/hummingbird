@@ -128,18 +128,19 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
     # small tree
     def test_random_forest_single_node_tree_converter(self):
         warnings.filterwarnings("ignore")
-        X = np.random.rand(1, 1)
-        X = np.array(X, dtype=np.float32)
-        y = np.random.randint(1, size=1)
-        model = RandomForestClassifier(n_estimators=1).fit(X, y)
-        pytorch_model = convert_sklearn(
-            model,
-            [("input", FloatTensorType([1, 1]))],
-            extra_config={"tree_implementation": "batch"}
-            )
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict(X), pytorch_model(
-            torch.from_numpy(X))[0].numpy().flatten(), rtol=1e-06, atol=1e-06)
+        for extra_config_param in ["beam", "beam++", "batch"]:
+            X = np.random.rand(1, 1)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(1, size=1)
+            model = RandomForestClassifier(n_estimators=1).fit(X, y)
+            pytorch_model = convert_sklearn(
+                model,
+                [("input", FloatTensorType([1, 1]))],
+                extra_config={"tree_implementation": extra_config_param}
+                )
+            self.assertTrue(pytorch_model is not None)
+            np.testing.assert_allclose(model.predict(X), pytorch_model(
+                torch.from_numpy(X))[0].numpy().flatten(), rtol=1e-06, atol=1e-06)
 
     # Failure Cases
     def test_sklearn_random_forest_classifier_raises_wrong_type(self):

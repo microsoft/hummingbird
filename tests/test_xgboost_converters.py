@@ -93,7 +93,7 @@ class TestXGBoostConverter(unittest.TestCase):
     # small tree
     def test_run_xgb_classifier_converter(self):
         warnings.filterwarnings("ignore")
-        for extra_config_param in ["beam", "batch"]:
+        for extra_config_param in ["beam", "beam++", "batch"]:
             model = xgb.XGBClassifier(n_estimators=1, max_depth=1)
             X = np.random.rand(1, 1)
             X = np.array(X, dtype=np.float32)
