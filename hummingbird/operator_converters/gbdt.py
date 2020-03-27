@@ -8,7 +8,8 @@ import warnings
 
 import torch
 import numpy as np
-from ._tree_commons import get_parameters_for_batch, get_parameters_for_beam_sklearn_estimators, get_gbdt_by_config_or_depth
+from ._tree_commons import get_parameters_for_gemm, \
+    get_parameters_for_tree_trav_sklearn_estimators, get_gbdt_by_config_or_depth
 from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble, TreeImpl
 from ..common._registration import register_converter
 
@@ -269,14 +270,14 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth, low=4)
 
     # TODO: automatically find the max tree depth by traversing the trees without relying on user input.
-    if tree_type == TreeImpl.batch:
-        net_parameters = [get_parameters_for_batch(e) for e in sklearn_rf_classifier.estimators_]
+    if tree_type == TreeImpl.gemm:
+        net_parameters = [get_parameters_for_gemm(e) for e in sklearn_rf_classifier.estimators_]
         return BatchGBDTClassifier(net_parameters, n_features, classes_list, learning_rate, alpha, device)
 
-    net_parameters = [get_parameters_for_beam_sklearn_estimators(e) for e in sklearn_rf_classifier.estimators_]
-    if tree_type == TreeImpl.beampp:
+    net_parameters = [get_parameters_for_tree_trav_sklearn_estimators(e) for e in sklearn_rf_classifier.estimators_]
+    if tree_type == TreeImpl.perf_tree_trav:
         return BeamPPGBDTClassifier(net_parameters, n_features, classes_list, learning_rate, alpha, device)
-    else:  # Remaining possible case: tree_type == TreeImpl.beam
+    else:  # Remaining possible case: tree_type == TreeImpl.tree_trav
         if sklearn_rf_classifier.max_depth is None:
             warnings.warn("GBDT model does not have a defined max_depth value. Consider setting one as it "
                           "will help the translator to pick a better translation method")

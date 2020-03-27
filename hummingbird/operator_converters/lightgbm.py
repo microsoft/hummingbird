@@ -9,7 +9,7 @@ from hummingbird.operator_converters.gbdt import BatchGBDTClassifier, BatchGBDTR
 from hummingbird.operator_converters.gbdt import BeamPPGBDTRegressor, BeamGBDTClassifier, BeamGBDTRegressor
 
 from ._tree_commons import get_gbdt_by_config_or_depth, TreeImpl
-from ._tree_commons import get_parameters_for_beam_generic, get_parameters_for_batch_generic
+from ._tree_commons import get_parameters_for_tree_trav_generic, get_parameters_for_gemm_generic
 from ..common._registration import register_converter
 
 
@@ -34,7 +34,7 @@ def _tree_traversal(node, ls, rs, fs, ts, vs, count):
         return count
 
 
-def _get_tree_parameters_for_batch(tree_info, n_features):
+def _get_tree_parameters_for_gemm(tree_info, n_features):
     lefts = []
     rights = []
     features = []
@@ -61,10 +61,10 @@ def _get_tree_parameters_for_batch(tree_info, n_features):
 
     # second hidden layer has ANDs for each leaf of the decision tree.
     # depth first enumeration of the tree in order to determine the AND by the path.
-    return get_parameters_for_batch_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits)
+    return get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits)
 
 
-def _get_tree_parameters_for_beam(tree_info):
+def _get_tree_parameters_for_tree_trav(tree_info):
     lefts = []
     rights = []
     features = []
@@ -73,7 +73,7 @@ def _get_tree_parameters_for_beam(tree_info):
     _tree_traversal(tree_info['tree_structure'], lefts,
                     rights, features, thresholds, values, 0)
 
-    return get_parameters_for_beam_generic(lefts, rights, features, thresholds, values)
+    return get_parameters_for_tree_trav_generic(lefts, rights, features, thresholds, values)
 
 
 def convert_sklearn_lgbm_classifier(operator, device, extra_config):
@@ -89,14 +89,14 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
     max_depth = operator.raw_operator.max_depth  # TODO FIXME this should be a call to max_depth and NOT fall through!
     tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth)
 
-    if tree_type == TreeImpl.batch:
-        net_parameters = [_get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
+    if tree_type == TreeImpl.gemm:
+        net_parameters = [_get_tree_parameters_for_gemm(tree_info, n_features) for tree_info in tree_infos]
         return BatchGBDTClassifier(net_parameters, n_features, classes, device=device)
 
-    net_parameters = [_get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
-    if tree_type == TreeImpl.beam:
+    net_parameters = [_get_tree_parameters_for_tree_trav(tree_info) for tree_info in tree_infos]
+    if tree_type == TreeImpl.tree_trav:
         return BeamGBDTClassifier(net_parameters, n_features, classes, device=device)
-    else:  # Remaining possible case: tree_type == TreeImpl.beampp
+    else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
         return BeamPPGBDTClassifier(net_parameters, n_features, classes, device=device)
 
 
@@ -106,14 +106,14 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     max_depth = operator.raw_operator.max_depth  # TODO FIXME this should be a call to max_depth and NOT fall through!
     tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth)
 
-    if tree_type == TreeImpl.batch:
-        net_parameters = [_get_tree_parameters_for_batch(tree_info, n_features) for tree_info in tree_infos]
+    if tree_type == TreeImpl.gemm:
+        net_parameters = [_get_tree_parameters_for_gemm(tree_info, n_features) for tree_info in tree_infos]
         return BatchGBDTRegressor(net_parameters, n_features, device=device)
 
-    net_parameters = [_get_tree_parameters_for_beam(tree_info) for tree_info in tree_infos]
-    if tree_type == TreeImpl.beam:
+    net_parameters = [_get_tree_parameters_for_tree_trav(tree_info) for tree_info in tree_infos]
+    if tree_type == TreeImpl.tree_trav:
         return BeamGBDTRegressor(net_parameters, n_features, device=device)
-    else:  # Remaining possible case: tree_type == TreeImpl.beampp
+    else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
         return BeamPPGBDTRegressor(net_parameters, n_features, device=device)
 
 

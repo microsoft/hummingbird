@@ -42,23 +42,23 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
     def test_random_forest_classifier_multi_converter(self):
         self._run_random_forest_classifier_converter(3)
 
-    # batch classifier
-    def test_random_forest_batch_classifier_converter(self):
-        self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "batch"})
+    # gemm classifier
+    def test_random_forest_gemm_classifier_converter(self):
+        self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # beam classifier
-    def test_random_forest_beam_classifier_converter(self):
-        self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "beam"})
+    # tree_trav classifier
+    def test_random_forest_tree_trav_classifier_converter(self):
+        self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # beam++ classifier
-    def test_random_forest_beampp_classifier_converter(self):
-        self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "beam++"})
+    # perf_tree_trav classifier
+    def test_random_forest_perf_tree_trav_classifier_converter(self):
+        self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # shifted classes
     def test_random_forest_classifier_shifted_labels_converter(self):
-        self._run_random_forest_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "batch"})
-        self._run_random_forest_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "beam"})
-        self._run_random_forest_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "beam++"})
+        self._run_random_forest_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "gemm"})
+        self._run_random_forest_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "tree_trav"})
+        self._run_random_forest_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "perf_tree_trav"})
 
     def _run_random_forest_regressor_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
@@ -86,17 +86,17 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
     def test_random_forest_regressor_multi_converter(self):
         self._run_random_forest_regressor_converter(3)
 
-    # batch regressor
-    def test_random_forest_batch_regressor_converter(self):
-        self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "batch"})
+    # gemm regressor
+    def test_random_forest_gemm_regressor_converter(self):
+        self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # beam regressor
-    def test_random_forest_beam_regressor_converter(self):
-        self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "beam"})
+    # tree_trav regressor
+    def test_random_forest_tree_trav_regressor_converter(self):
+        self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # beam++ regressor
-    def test_random_forest_beampp_regressor_converter(self):
-        self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "beam++"})
+    # perf_tree_trav regressor
+    def test_random_forest_perf_tree_trav_regressor_converter(self):
+        self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # Used for DecisionTreeClassifier and ExtraTreesClassifier
     def _run_test_other_trees_classifier(self, model):
@@ -128,10 +128,10 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
     # small tree
     def test_random_forest_single_node_tree_converter(self):
         warnings.filterwarnings("ignore")
-        # TODO: There is a bug in beam++ for RF with node size 1
+        # TODO: There is a bug in perf_tree_trav for RF with node size 1
         #       somewhere related to tree_commons.py:481
-        # for extra_config_param in ["beam", "beam++", "batch"]:
-        for extra_config_param in ["beam", "batch"]:
+        # for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
+        for extra_config_param in ["tree_trav", "gemm"]:
             X = np.random.rand(1, 1)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(1, size=1)

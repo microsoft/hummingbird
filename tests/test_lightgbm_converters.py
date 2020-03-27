@@ -38,17 +38,17 @@ class TestLGBMConverter(unittest.TestCase):
     def test_lgbm_multi_classifier_converter(self):
         self._run_lgbm_classifier_converter(3)
 
-    # batch
-    def test_lgbm_batch_classifier_converter(self):
-        self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "batch"})
+    # gemm
+    def test_lgbm_gemm_classifier_converter(self):
+        self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # beam
-    def test_lgbm_beam_classifier_converter(self):
-        self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "beam"})
+    # tree_trav
+    def test_lgbm_tree_trav_classifier_converter(self):
+        self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # beam++
-    def test_lgbm_beampp_classifier_converter(self):
-        self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "beam++"})
+    # perf_tree_trav
+    def test_lgbm_perf_tree_trav_classifier_converter(self):
+        self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     def _run_lgbm_regressor_converter(self, num_classes, extra_config={}):
         for max_depth in [1, 3, 8, 10, 12, None]:
@@ -75,17 +75,17 @@ class TestLGBMConverter(unittest.TestCase):
     def test_lgbm_multi_regressor_converter(self):
         self._run_lgbm_regressor_converter(3)
 
-    # batch
-    def test_lgbm_batch_regressor_converter(self):
-        self._run_lgbm_regressor_converter(3, extra_config={"tree_implementation": "batch"})
+    # gemm
+    def test_lgbm_gemm_regressor_converter(self):
+        self._run_lgbm_regressor_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # beam
-    def test_lgbm_beam_regressor_converter(self):
-        self._run_lgbm_regressor_converter(3, extra_config={"tree_implementation": "beam"})
+    # tree_trav
+    def test_lgbm_tree_trav_regressor_converter(self):
+        self._run_lgbm_regressor_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # beam++
-    def test_lgbm_beampp_regressor_converter(self):
-        self._run_lgbm_regressor_converter(3, extra_config={"tree_implementation": "beam++"})
+    # perf_tree_trav
+    def test_lgbm_perf_tree_trav_regressor_converter(self):
+        self._run_lgbm_regressor_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
 
 if __name__ == "__main__":

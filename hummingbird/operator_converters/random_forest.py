@@ -8,7 +8,7 @@ import copy
 
 import torch
 
-from ._tree_commons import get_parameters_for_batch, get_parameters_for_beam_sklearn_estimators, find_depth, Node
+from ._tree_commons import get_parameters_for_gemm, get_parameters_for_tree_trav_sklearn_estimators, find_depth, Node
 from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble
 from ._tree_commons import TreeImpl, get_gbdt_by_config_or_depth
 from ..common._registration import register_converter
@@ -183,16 +183,16 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
         max_depth = max_depth = find_max_depth(operator)
     tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth, low=4)
 
-    if tree_type == TreeImpl.batch:
-        net_parameters = [get_parameters_for_batch(e) for e in sklearn_rf_classifier.estimators_]
+    if tree_type == TreeImpl.gemm:
+        net_parameters = [get_parameters_for_gemm(e) for e in sklearn_rf_classifier.estimators_]
         return BatchRandomForestClassifier(
             net_parameters, sklearn_rf_classifier.n_features_, operator.raw_operator.classes_.tolist(), device)
 
-    net_parameters = [get_parameters_for_beam_sklearn_estimators(e) for e in sklearn_rf_classifier.estimators_]
-    if tree_type == TreeImpl.beam:
+    net_parameters = [get_parameters_for_tree_trav_sklearn_estimators(e) for e in sklearn_rf_classifier.estimators_]
+    if tree_type == TreeImpl.tree_trav:
         return BeamRandomForestClassifier(
             net_parameters, sklearn_rf_classifier.n_features_, operator.raw_operator.classes_.tolist(), device)
-    else:  # Remaining possible case: tree_type == TreeImpl.beampp
+    else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
         return BeamPPRandomForestClassifier(
             net_parameters, sklearn_rf_classifier.n_features_, operator.raw_operator.classes_.tolist(), device)
 
@@ -203,14 +203,14 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     # TODO max_depth should be a call to max_depth() without relying on user input.
     tree_type = get_gbdt_by_config_or_depth(extra_config, sklearn_rf_regressor.max_depth, low=4)
 
-    if tree_type == TreeImpl.batch:
-        net_parameters = [get_parameters_for_batch(e) for e in sklearn_rf_regressor.estimators_]
+    if tree_type == TreeImpl.gemm:
+        net_parameters = [get_parameters_for_gemm(e) for e in sklearn_rf_regressor.estimators_]
         return BatchRandomForestRegressor(net_parameters, sklearn_rf_regressor.n_features_, device)
 
-    net_parameters = [get_parameters_for_beam_sklearn_estimators(e) for e in sklearn_rf_regressor.estimators_]
-    if tree_type == TreeImpl.beampp:
+    net_parameters = [get_parameters_for_tree_trav_sklearn_estimators(e) for e in sklearn_rf_regressor.estimators_]
+    if tree_type == TreeImpl.perf_tree_trav:
         return BeamPPRandomForestRegressor(net_parameters, sklearn_rf_regressor.n_features_, device)
-    else:  # Remaining possible case: tree_type == TreeImpl.beam
+    else:  # Remaining possible case: tree_type == TreeImpl.tree_trav
         if sklearn_rf_regressor.max_depth is None:  # TODO: remove these comments when we call max_depth()
             warnings.warn("RandomForest model does not have a defined max_depth value. Consider setting one as it "
                           "will help the translator to pick a better translation method")

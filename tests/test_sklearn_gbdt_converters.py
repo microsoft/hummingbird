@@ -39,23 +39,23 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
     def test_GBDT_classifier_multi_converter(self):
         self._run_GB_trees_classifier_converter(3)
 
-    # batch classifier
-    def test_GBDT_batch_classifier_converter(self):
-        self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "batch"})
+    # gemm classifier
+    def test_GBDT_gemm_classifier_converter(self):
+        self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # beam classifier
-    def test_GBDT_beam_classifier_converter(self):
-        self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "beam"})
+    # tree_trav classifier
+    def test_GBDT_tree_trav_classifier_converter(self):
+        self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # beam++ classifier
-    def test_GBDT_beampp_classifier_converter(self):
-        self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "beam++"})
+    # perf_tree_trav classifier
+    def test_GBDT_perf_tree_trav_classifier_converter(self):
+        self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # shifted classes
     def test_GBDT_shifted_labels_converter(self):
-        self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "batch"})
-        self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "beam"})
-        self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "beam++"})
+        self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "gemm"})
+        self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "tree_trav"})
+        self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "perf_tree_trav"})
 
     def test_zero_init_GB_trees_classifier_converter(self):
         warnings.filterwarnings("ignore")

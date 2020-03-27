@@ -40,17 +40,17 @@ class TestXGBoostConverter(unittest.TestCase):
     def test_xgb_multi_classifier_converter(self):
         self._run_xgb_classifier_converter(3)
 
-    # batch classifier
-    def test_xgb_batch_classifier_converter(self):
-        self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "batch"})
+    # gemm classifier
+    def test_xgb_gemm_classifier_converter(self):
+        self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # beam classifier
-    def test_xgb_beam_classifier_converter(self):
-        self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "beam"})
+    # tree_trav classifier
+    def test_xgb_tree_trav_classifier_converter(self):
+        self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # beam++ classifier
-    def test_xgb_beampp_classifier_converter(self):
-        self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "beam++"})
+    # perf_tree_trav classifier
+    def test_xgb_perf_tree_trav_classifier_converter(self):
+        self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     def _run_xgb_regressor_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
@@ -78,22 +78,22 @@ class TestXGBoostConverter(unittest.TestCase):
     def test_xgb_multi_regressor_converter(self):
         self._run_xgb_regressor_converter(3)
 
-    # batch regressor
-    def test_xgb_batch_regressor_converter(self):
-        self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "batch"})
+    # gemm regressor
+    def test_xgb_gemm_regressor_converter(self):
+        self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # beam regressor
-    def test_xgb_beam_regressor_converter(self):
-        self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "beam"})
+    # tree_trav regressor
+    def test_xgb_tree_trav_regressor_converter(self):
+        self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # beam++ regressor
-    def test_xgb_beampp_regressor_converter(self):
-        self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "beam++"})
+    # perf_tree_trav regressor
+    def test_xgb_perf_tree_trav_regressor_converter(self):
+        self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # small tree
     def test_run_xgb_classifier_converter(self):
         warnings.filterwarnings("ignore")
-        for extra_config_param in ["beam", "beam++", "batch"]:
+        for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
             model = xgb.XGBClassifier(n_estimators=1, max_depth=1)
             X = np.random.rand(1, 1)
             X = np.array(X, dtype=np.float32)

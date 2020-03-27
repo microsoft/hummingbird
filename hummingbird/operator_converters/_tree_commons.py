@@ -34,9 +34,9 @@ def find_depth(node, current_depth):
 
 
 class TreeImpl(Enum):
-    batch = 1
-    beam = 2
-    beampp = 3
+    gemm = 1
+    tree_trav = 2
+    perf_tree_trav = 3
 
 
 # @low and @high are optimization parameters
@@ -44,23 +44,23 @@ class TreeImpl(Enum):
 def get_gbdt_by_config_or_depth(extra_config, max_depth, low=3, high=10):
     if 'tree_implementation' not in extra_config:
         if max_depth is not None and max_depth <= low:
-            return TreeImpl.batch
+            return TreeImpl.gemm
         elif max_depth is not None and max_depth <= high:
-            return TreeImpl.beam
+            return TreeImpl.tree_trav
         else:
-            return TreeImpl.beampp
+            return TreeImpl.perf_tree_trav
 
-    if extra_config['tree_implementation'] == 'batch':
-        return TreeImpl.batch
-    elif extra_config['tree_implementation'] == 'beam':
-        return TreeImpl.beam
-    elif extra_config['tree_implementation'] == 'beam++':
-        return TreeImpl.beampp
+    if extra_config['tree_implementation'] == 'gemm':
+        return TreeImpl.gemm
+    elif extra_config['tree_implementation'] == 'tree_trav':
+        return TreeImpl.tree_trav
+    elif extra_config['tree_implementation'] == 'perf_tree_trav':
+        return TreeImpl.perf_tree_trav
     else:
         raise ValueError("Tree implementation {} not found".format(extra_config))
 
 
-def get_parameters_for_beam_generic(lefts, rights, features, thresholds, values):
+def get_parameters_for_tree_trav_generic(lefts, rights, features, thresholds, values):
     """This is used by all trees."""
     ids = [i for i in range(len(lefts))]
     nodes = list(zip(ids, lefts, rights, features, thresholds, values))
@@ -106,7 +106,7 @@ def get_parameters_for_beam_generic(lefts, rights, features, thresholds, values)
     return [depth, nodes_map, ids, lefts, rights, features, thresholds, values]
 
 
-def get_parameters_for_beam_sklearn_estimators(tree):
+def get_parameters_for_tree_trav_sklearn_estimators(tree):
     """This function is used by sklearn-based trees.
 
     Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
@@ -124,10 +124,10 @@ def get_parameters_for_beam_sklearn_estimators(tree):
     if values.shape[1] > 1:
         values /= np.sum(values, axis=1, keepdims=True)
 
-    return get_parameters_for_beam_generic(lefts, rights, features, thresholds, values)
+    return get_parameters_for_tree_trav_generic(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_batch_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits):
+def get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits):
     """This is used by all trees."""
 
     hidden_weights = []
@@ -184,7 +184,7 @@ def get_parameters_for_batch_generic(lefts, rights, features, thresholds, values
     return weights, biases
 
 
-def get_parameters_for_batch(tree):
+def get_parameters_for_gemm(tree):
     """This function is used by sklearn-based trees.
 
     Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
@@ -220,7 +220,7 @@ def get_parameters_for_batch(tree):
     weights.append(np.array(hidden_weights).astype("float32"))
     biases.append(np.array(hidden_biases).astype("float32"))
     n_splits = len(hidden_weights)
-    return get_parameters_for_batch_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits)
+    return get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits)
 
 
 class BatchedTreeEnsemble(torch.nn.Module):
