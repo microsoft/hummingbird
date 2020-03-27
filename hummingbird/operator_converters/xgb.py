@@ -19,18 +19,16 @@ def _tree_traversal(tree_info, ls, rs, fs, ts, vs):
         if "leaf" in tree_info[count]:
             fs.append(0)
             ts.append(0)
-            vs.append([float(tree_info[count].split('=')[1])])
+            vs.append([float(tree_info[count].split("=")[1])])
             ls.append(-1)
             rs.append(-1)
             count += 1
         else:
-            fs.append(int(tree_info[count].split(':')[
-                      1].split('<')[0].replace('[f', '')))
-            ts.append(float(tree_info[count].split(':')[
-                      1].split('<')[1].replace(']', '')))
+            fs.append(int(tree_info[count].split(":")[1].split("<")[0].replace("[f", "")))
+            ts.append(float(tree_info[count].split(":")[1].split("<")[1].replace("]", "")))
             vs.append([-1])
             count += 1
-            l_wrong_id = tree_info[count].split(',')[0].replace('yes=', '')
+            l_wrong_id = tree_info[count].split(",")[0].replace("yes=", "")
             l_correct_id = 0
             temp = 0
             while not tree_info[temp].startswith(str(l_wrong_id + ":")):
@@ -41,7 +39,7 @@ def _tree_traversal(tree_info, ls, rs, fs, ts, vs):
                 l_correct_id += 1
             ls.append(l_correct_id)
 
-            r_wrong_id = tree_info[count].split(',')[1].replace('no=', '')
+            r_wrong_id = tree_info[count].split(",")[1].replace("no=", "")
             r_correct_id = 0
             temp = 0
             while not tree_info[temp].startswith(str(r_wrong_id + ":")):
@@ -61,8 +59,9 @@ def _get_tree_parameters_for_gemm(tree_info, n_features):
     features = []
     thresholds = []
     values = []
-    _tree_traversal(tree_info.replace('[f', '').replace('[', '').replace(
-        ']', '').split(), lefts, rights, features, thresholds, values)
+    _tree_traversal(
+        tree_info.replace("[f", "").replace("[", "").replace("]", "").split(), lefts, rights, features, thresholds, values
+    )
 
     if len(lefts) == 1:
         # XGB model creating tree with just a single leaf node. We transform it
@@ -83,8 +82,7 @@ def _get_tree_parameters_for_gemm(tree_info, n_features):
     hidden_biases = []
     for left, feature, thresh in zip(lefts, features, thresholds):
         if left != -1:
-            hidden_weights.append(
-                [1 if i == feature else 0 for i in range(n_features)])
+            hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
             hidden_biases.append(thresh)
     weights.append(np.array(hidden_weights).astype("float32"))
     biases.append(np.array(hidden_biases).astype("float32"))
@@ -101,8 +99,9 @@ def _get_tree_parameters_for_tree_trav(tree_info):
     features = []
     thresholds = []
     values = []
-    _tree_traversal(tree_info.replace('[f', '').replace('[', '').replace(
-        ']', '').split(), lefts, rights, features, thresholds, values)
+    _tree_traversal(
+        tree_info.replace("[f", "").replace("[", "").replace("]", "").split(), lefts, rights, features, thresholds, values
+    )
 
     if len(lefts) == 1:
         # XGB model creating tree with just a single leaf node. We transform it
@@ -121,8 +120,7 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
     tree_infos = operator.raw_operator.get_booster().get_dump()
 
     n_classes = operator.raw_operator.n_classes_
-    tree_infos = [tree_infos[i * n_classes + j]
-                  for j in range(n_classes) for i in range(len(tree_infos) // n_classes)]
+    tree_infos = [tree_infos[i * n_classes + j] for j in range(n_classes) for i in range(len(tree_infos) // n_classes)]
     if n_classes == 2:
         n_classes -= 1
     classes = [i for i in range(n_classes)]
@@ -160,5 +158,5 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
         return BeamPPGBDTRegressor(net_parameters, n_features, alpha=alpha, device=device)
 
 
-register_converter('SklearnXGBClassifier', convert_sklearn_xgb_classifier)
-register_converter('SklearnXGBRegressor', convert_sklearn_xgb_regressor)
+register_converter("SklearnXGBClassifier", convert_sklearn_xgb_classifier)
+register_converter("SklearnXGBRegressor", convert_sklearn_xgb_regressor)

@@ -34,14 +34,12 @@ def register_converter(operator_name, conversion_function, overwrite=False):
                       to enable overwriting.
     """
     if not overwrite and operator_name in _converter_pool:
-        raise ValueError('We do not overwrite registered converter '
-                         'by default')
+        raise ValueError("We do not overwrite registered converter " "by default")
     _converter_pool[operator_name] = conversion_function
 
 
 def get_converter(operator_name):
     if operator_name not in _converter_pool:
-        msg = 'Unsupported conversion for operator %s (%d registered)' % (
-            operator_name, len(_converter_pool))
+        msg = "Unsupported conversion for operator %s (%d registered)" % (operator_name, len(_converter_pool))
         raise ValueError(msg)
     return _converter_pool[operator_name]

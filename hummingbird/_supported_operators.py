@@ -19,21 +19,22 @@ from lightgbm import LGBMClassifier, LGBMRegressor
 # scikit-learn models share a single name, it means their are
 # equivalent in terms of conversion.
 def build_sklearn_operator_name_map():
-    res = {k: "Sklearn" + k.__name__ for k in [
-
-        # Classifiers: Trees
-        DecisionTreeClassifier,
-        RandomForestClassifier,
-        RandomForestRegressor,
-        GradientBoostingClassifier,
-        ExtraTreesClassifier,
-        XGBClassifier,
-        XGBRegressor,
-        LGBMClassifier,
-        LGBMRegressor,
-
-
-    ] if k is not None}
+    res = {
+        k: "Sklearn" + k.__name__
+        for k in [
+            # Classifiers: Trees
+            DecisionTreeClassifier,
+            RandomForestClassifier,
+            RandomForestRegressor,
+            GradientBoostingClassifier,
+            ExtraTreesClassifier,
+            XGBClassifier,
+            XGBRegressor,
+            LGBMClassifier,
+            LGBMRegressor,
+        ]
+        if k is not None
+    }
 
     return res
 

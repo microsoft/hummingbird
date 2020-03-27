@@ -12,8 +12,7 @@ from ._parse import parse_sklearn_model
 from . import operator_converters  # noqa
 
 
-def convert_sklearn(model, initial_types, device=None,
-                    optimize_graph=True, extra_config={}):
+def convert_sklearn(model, initial_types, device=None, optimize_graph=True, extra_config={}):
     """
     This function produces an equivalent PyTorch model of the given scikit-learn model.
     The supported converters is returned by function

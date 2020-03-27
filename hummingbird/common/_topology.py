@@ -45,14 +45,12 @@ class Variable:
                 try:
                     shape = list(shape)
                 except TypeError:
-                    raise TypeError("shape must be a tuple or a list not "
-                                    "{}.".format(type_fct(shape)))
+                    raise TypeError("shape must be a tuple or a list not " "{}.".format(type_fct(shape)))
             for dim in shape:
                 if dim is None:
                     continue
                 if not isinstance(dim, (int, np.int32, np.int64)):
-                    raise TypeError("shape must contains integers not "
-                                    "'{}'.".format(dim))
+                    raise TypeError("shape must contains integers not " "'{}'.".format(dim))
 
     @property
     def full_name(self):
@@ -62,11 +60,10 @@ class Variable:
         return self.pytorch_name
 
     def __repr__(self):
-        return ("Variable(raw_name='{0}', pytorch_name='{1}', type={2})".format(
-            self.raw_name, self.pytorch_name, self.type))
+        return "Variable(raw_name='{0}', pytorch_name='{1}', type={2})".format(self.raw_name, self.pytorch_name, self.type)
 
 
-class Operator():
+class Operator:
     """
     Defines an operator available in PyTorch.
     """
@@ -81,8 +78,7 @@ class Operator():
         """
 
         if isinstance(raw_operator, str):
-            raise RuntimeError("Parameter raw_operator must be an object not "
-                               "a string '{0}'.".format(raw_operator))
+            raise RuntimeError("Parameter raw_operator must be an object not " "a string '{0}'.".format(raw_operator))
         # operator name in the converted model
         self.pytorch_name = pytorch_name
         self.type = type
@@ -154,10 +150,8 @@ class Topology:
         self.initial_types = initial_types
         self.default_batch_size = default_batch_size
 
-        self.pytorch_variable_names = (
-            variable_name_set if variable_name_set is not None else set())
-        self.pytorch_operator_names = (
-            operator_name_set if operator_name_set is not None else set())
+        self.pytorch_variable_names = variable_name_set if variable_name_set is not None else set()
+        self.pytorch_operator_names = operator_name_set if operator_name_set is not None else set()
 
         # An one-to-many map from raw variable name to PyTorch variable
         # names. It looks like
@@ -191,16 +185,16 @@ class Topology:
                                produced
         :return: a string similar to the seed
         """
-        if seed == '':
-            raise ValueError('Name seed must be a non-empty string.')
+        if seed == "":
+            raise ValueError("Name seed must be a non-empty string.")
 
         # Make the seed meet C-style naming convention
         # Only alphabets and numbers are allowed
-        seed = re.sub('[^0-9a-zA-Z]', '_', seed)
+        seed = re.sub("[^0-9a-zA-Z]", "_", seed)
 
         # The first symbol cannot be a number
-        if re.match('^[0-9]', seed):
-            seed = '_' + seed
+        if re.match("^[0-9]", seed):
+            seed = "_" + seed
 
         # If seed has never been seen, we return it as it is. Otherwise,
         # we will append an number to make it unique.
@@ -246,10 +240,8 @@ class Topology:
         Creates a unique variable ID based on the given seed.
         """
         if not isinstance(seed, str):
-            raise TypeError("Parameter seed must be a string not {}."
-                            "".format(type(seed)))
-        name = Topology._generate_unique_name(
-            seed, self.pytorch_variable_names)
+            raise TypeError("Parameter seed must be a string not {}." "".format(type(seed)))
+        name = Topology._generate_unique_name(seed, self.pytorch_variable_names)
         return name
 
     def declare_operator(self, type, raw_model=None):
@@ -288,16 +280,14 @@ class Topology:
         while not all(operator.is_evaluated for operator in self.operators.values()):
             is_evaluation_happened = False
             for operator in self.unordered_operator_iterator():
-                if (all(variable.is_fed for variable in operator.inputs)
-                        and not operator.is_evaluated):
+                if all(variable.is_fed for variable in operator.inputs) and not operator.is_evaluated:
                     # Check if over-writing problem occurs (i.e., multiple
                     # operators produce results on one variable).
                     for variable in operator.outputs:
                         # Throw an error if this variable has been treated as
                         # an output somewhere
                         if variable.is_fed:
-                            raise RuntimeError(
-                                'One variable can only be assigned once.')
+                            raise RuntimeError("One variable can only be assigned once.")
                         # Mark this variable as filled
                         variable.is_fed = True
                     # Make this operator as handled
@@ -322,8 +312,7 @@ class Topology:
         for variable in self.unordered_variable_iterator():
             # If root_names is set, we only set those variable to be
             # fed. Otherwise, all roots would be fed.
-            variable.is_fed = (False if self.root_names and variable.pytorch_name
-                               not in self.root_names else True)
+            variable.is_fed = False if self.root_names and variable.pytorch_name not in self.root_names else True
             variable.is_root = True
             variable.is_leaf = True
 
@@ -362,13 +351,15 @@ def convert_topology(topology, device=None, extra_config={}):
     for operator in topology.topological_operator_iterator():
         try:
             converter = _registration.get_converter(operator.type)
-            operator_map[operator.full_name] = converter(
-                operator, device, extra_config)
+            operator_map[operator.full_name] = converter(operator, device, extra_config)
         except ValueError:
             raise MissingConverter(
                 "Unable to find converter for {} type {} with extra config: {}".format(
-                    operator.type, type(getattr(operator, 'raw_model', None)), extra_config))
+                    operator.type, type(getattr(operator, "raw_model", None)), extra_config
+                )
+            )
 
-    pytorch_model = Skl2PyTorchModel(topology.raw_model.input_names, topology.raw_model.output_names, operator_map,
-                                     topology, device, extra_config)
+    pytorch_model = Skl2PyTorchModel(
+        topology.raw_model.input_names, topology.raw_model.output_names, operator_map, topology, device, extra_config
+    )
     return pytorch_model

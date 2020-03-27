@@ -76,14 +76,13 @@ def _parse_sklearn_simple_model(topology, model, inputs):
 
     # alias can be None
     if isinstance(model, str):
-        raise RuntimeError("Parameter model must be an object not a "
-                           "string '{0}'.".format(model))
+        raise RuntimeError("Parameter model must be an object not a " "string '{0}'.".format(model))
     alias = _get_sklearn_operator_name(type(model))
     this_operator = topology.declare_operator(alias, model)
     this_operator.inputs = inputs
 
     # We assume that all scikit-learn operator produce a single output.
-    variable = topology.declare_variable('variable', None)
+    variable = topology.declare_variable("variable", None)
     this_operator.outputs.append(variable)
 
     return this_operator.outputs

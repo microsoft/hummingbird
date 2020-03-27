@@ -12,8 +12,4 @@ from . import xgb
 from . import lightgbm
 
 
-__all__ = [
-    random_forest,
-    xgb,
-    lightgbm
-]
+__all__ = [random_forest, xgb, lightgbm]

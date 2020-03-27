@@ -1,5 +1,5 @@
 [run]
 branch = True
 source = hummingbird
-omit = 
+omit =
   *tests*

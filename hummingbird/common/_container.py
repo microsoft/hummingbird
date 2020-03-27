@@ -82,15 +82,7 @@ class SklearnModelContainerNode(RawModelContainerNode):
 
 
 class Skl2PyTorchModel(torch.nn.Module):
-
-    def __init__(
-            self,
-            input_names,
-            output_names,
-            operator_map,
-            topology,
-            device,
-            extra_config):
+    def __init__(self, input_names, output_names, operator_map, topology, device, extra_config):
         super(Skl2PyTorchModel, self).__init__()
         self.input_names = input_names
         self.output_names = output_names
@@ -100,23 +92,20 @@ class Skl2PyTorchModel(torch.nn.Module):
         self.extra_config = extra_config
 
     def is_jittable(self, *pytorch_inputs):
-        return 'SklearnSVC' not in self.operator_map.keys(
-        ) and 'SklearnNuSVC' not in self.operator_map.keys()
+        return "SklearnSVC" not in self.operator_map.keys() and "SklearnNuSVC" not in self.operator_map.keys()
 
     def forward(self, *pytorch_inputs):
         with torch.no_grad():
             pytorch_inputs = [*pytorch_inputs]
             variable_map = {}
             for i, input_name in enumerate(self.input_names):
-                if self.device is not None and not isinstance(
-                        self.topology.variables[input_name].type, TensorType):
+                if self.device is not None and not isinstance(self.topology.variables[input_name].type, TensorType):
                     pytorch_inputs[i] = pytorch_inputs[i].to(self.device)
                 variable_map[input_name] = pytorch_inputs[i]
 
             for operator in self.topology.topological_operator_iterator():
                 pytorch_op = self.operator_map[operator.full_name]
-                pytorch_outputs = pytorch_op(
-                    *(variable_map[input.pytorch_name] for input in operator.inputs))
+                pytorch_outputs = pytorch_op(*(variable_map[input.pytorch_name] for input in operator.inputs))
 
                 if len(operator.outputs) == 1:
                     variable_map[operator.outputs[0].pytorch_name] = pytorch_outputs
@@ -127,5 +116,4 @@ class Skl2PyTorchModel(torch.nn.Module):
             if len(self.output_names) == 1:
                 return variable_map[self.output_names[0]]
             else:
-                return list(variable_map[output_name]
-                            for output_name in self.output_names)
+                return list(variable_map[output_name] for output_name in self.output_names)

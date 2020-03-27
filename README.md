@@ -28,6 +28,12 @@ pip install git+https://github.com/ksaur/hb-dryrun.git
 * write commiter guide
 * write more documentation, especially explaining overall design
 
+## Developing
+
+This project uses [pre-commit](https://pre-commit.com/) hooks. (Run  `pip install pre-commit` if you don't already have this.)
+
+To begin, run `pre-commit install` to install pre-commit into your git hooks.
+
 
 ## License
 **#TODO what license do we want?**
