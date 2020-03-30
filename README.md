@@ -48,6 +48,19 @@ Trim Trailing Whitespace.................................................Passed
 Don't commit to branch...................................................Passed
 ```
 
+If you have installed your pre-commit hooks successfull, you should see something like this if you
+try to commit something non-conformant:
+```
+# git commit -m "testing"
+black....................................................................Failed
+- hook id: black
+- files were modified by this hook
+
+reformatted hummingbird/convert.py
+All done!
+1 file reformatted.
+```
+
 ## License
 **#TODO what license do we want?**
 [MIT License](LICENSE)
