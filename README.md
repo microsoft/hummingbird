@@ -34,6 +34,19 @@ This project uses [pre-commit](https://pre-commit.com/) hooks. (Run  `pip instal
 
 To begin, run `pre-commit install` to install pre-commit into your git hooks.
 
+And before you commit, you can run it like this `pre-commit run --all-files` and should see output such as:
+
+```
+black....................................................................Passed
+Flake8...................................................................Passed
+Check for added large files..............................................Passed
+Check python ast.........................................................Passed
+Check for byte-order marker..............................................Passed
+Check for merge conflicts................................................Passed
+Detect Private Key.......................................................Passed
+Trim Trailing Whitespace.................................................Passed
+Don't commit to branch...................................................Passed
+```
 
 ## License
 **#TODO what license do we want?**
