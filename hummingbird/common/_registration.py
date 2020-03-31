@@ -35,6 +35,7 @@ def register_converter(operator_name, conversion_function, overwrite=False):
     """
     if not overwrite and operator_name in _converter_pool:
         raise ValueError("We do not overwrite registered converter " "by default")
+
     _converter_pool[operator_name] = conversion_function
 
 

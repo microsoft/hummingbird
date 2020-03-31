@@ -1,7 +1,7 @@
 # Hummingbird
 
 ![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
-
+![](https://github.com/microsoft/hummingbird/coverage.svg?branch=develop)
 
 ## Introduction
 *sklearn-pytorch* converts [scikit-learn](https://scikit-learn.org/stable/) models to [PyTorch](https://pytorch.org/). Once in the PyTorch format, you can further convert to [ONNX](https://github.com/onnx/onnx) or [TorchScript](https://pytorch.org/docs/stable/jit.html) for high performance native scoring.
