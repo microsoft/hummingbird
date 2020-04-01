@@ -15,7 +15,3 @@ repos:
     - id: detect-private-key
     - id: trailing-whitespace
     - id: no-commit-to-branch
-  - repo: https://github.com/ksaur/pre-commit-hooks
-    rev: v2.9.0
-    hooks:
-    - id: badge-cov
