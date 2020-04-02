@@ -1,5 +1,5 @@
 """
-Tests scikit-GradientBoostingClassifier converter.
+Tests Sklearn GradientBoostingClassifier converters.
 """
 import unittest
 import warnings
@@ -28,22 +28,35 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
                 model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].data.numpy(), rtol=1e-06, atol=1e-06
             )
 
+    # binary classifier
     def test_GBDT_classifier_binary_converter(self):
         self._run_GB_trees_classifier_converter(2)
+
+     # gemm classifier
+    def test_GBDT_gemm_classifier_converter(self):
+        self._run_GB_trees_classifier_converter(2, extra_config={"tree_implementation": "gemm"})
+
+    # tree_trav classifier
+    def test_GBDT_tree_trav_classifier_converter(self):
+        self._run_GB_trees_classifier_converter(2, extra_config={"tree_implementation": "tree_trav"})
+
+    # perf_tree_trav classifier
+    def test_GBDT_perf_tree_trav_classifier_converter(self):
+        self._run_GB_trees_classifier_converter(2, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # multi classifier
     def test_GBDT_classifier_multi_converter(self):
         self._run_GB_trees_classifier_converter(3)
 
-    # gemm classifier
+    # gemm multi classifier
     def test_GBDT_gemm_classifier_converter(self):
         self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # tree_trav classifier
+    # tree_trav multi classifier
     def test_GBDT_tree_trav_classifier_converter(self):
         self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # perf_tree_trav classifier
+    # perf_tree_trav multi classifier
     def test_GBDT_perf_tree_trav_classifier_converter(self):
         self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 

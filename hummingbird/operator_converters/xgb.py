@@ -144,7 +144,9 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
 
     # TODO: in xgboost 1.0.2 (not yet supported), we will need to handle the None case for max_depth
     max_depth = operator.raw_operator.max_depth
-    alpha = [operator.raw_operator.base_score]  # TODO in xgboost 1.0.2, remove brackets
+    alpha = operator.raw_operator.base_score
+    if type(alpha) is float:
+        alpha = [alpha]
     tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth)
 
     if tree_type == TreeImpl.gemm:

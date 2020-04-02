@@ -1,5 +1,5 @@
 """
-Tests scikit-RandomForestClassifier converter.
+Tests Sklearn RandomForest\DecisionTree\ExtraTrees converters.
 """
 import unittest
 import warnings
@@ -27,26 +27,38 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             pytorch_model = convert_sklearn(model, [("input", FloatTensorType([1, 20]))], extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
-                model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].data.numpy(), rtol=1e-06, atol=1e-06
+                model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
             )
 
     # binary classifier
     def test_random_forest_classifier_binary_converter(self):
         self._run_random_forest_classifier_converter(2)
 
+    # gemm classifier
+    def test_random_forest_gemm_classifier_converter(self):
+        self._run_random_forest_classifier_converter(2, extra_config={"tree_implementation": "gemm"})
+
+    # tree_trav classifier
+    def test_random_forest_tree_trav_classifier_converter(self):
+        self._run_random_forest_classifier_converter(2, extra_config={"tree_implementation": "tree_trav"})
+
+    # perf_tree_trav classifier
+    def test_random_forest_perf_tree_trav_classifier_converter(self):
+        self._run_random_forest_classifier_converter(2, extra_config={"tree_implementation": "perf_tree_trav"})
+
     # multi classifier
     def test_random_forest_classifier_multi_converter(self):
         self._run_random_forest_classifier_converter(3)
 
-    # gemm classifier
+    # gemm multi classifier
     def test_random_forest_gemm_classifier_converter(self):
         self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # tree_trav classifier
+    # tree_trav multi classifier
     def test_random_forest_tree_trav_classifier_converter(self):
         self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # perf_tree_trav classifier
+    # perf_tree_trav multi classifier
     def test_random_forest_perf_tree_trav_classifier_converter(self):
         self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
@@ -71,25 +83,21 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
                 model.predict(X), pytorch_model(torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06
             )
 
-    # binary regressor
-    def test_random_forest_regressor_binary_converter(self):
-        self._run_random_forest_regressor_converter(2)
-
-    # multi regressor
-    def test_random_forest_regressor_multi_converter(self):
-        self._run_random_forest_regressor_converter(3)
+    # regressor
+    def test_random_forest_regressor_converter(self):
+        self._run_random_forest_regressor_converter(1000)
 
     # gemm regressor
     def test_random_forest_gemm_regressor_converter(self):
-        self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "gemm"})
+        self._run_random_forest_regressor_converter(1000, extra_config={"tree_implementation": "gemm"})
 
     # tree_trav regressor
     def test_random_forest_tree_trav_regressor_converter(self):
-        self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "tree_trav"})
+        self._run_random_forest_regressor_converter(1000, extra_config={"tree_implementation": "tree_trav"})
 
     # perf_tree_trav regressor
     def test_random_forest_perf_tree_trav_regressor_converter(self):
-        self._run_random_forest_regressor_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
+        self._run_random_forest_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # Used for DecisionTreeClassifier and ExtraTreesClassifier
     def _run_test_other_trees_classifier(self, model):
@@ -99,8 +107,10 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
 
         model.fit(X, y)
         pytorch_model = convert_sklearn(model, [("input", FloatTensorType([1, 20]))], device="cpu")
-        self.assertTrue(pytorch_model is not None)
-        self.assertTrue(np.allclose(model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].data.numpy()))
+        self.assertTrue(pytorch_model is not None)    
+        np.testing.assert_allclose(
+            model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
+        )
 
     def test_decision_tree_classifier_converter(self):
         for max_depth in [1, 3, 8, 10, 12, None]:
@@ -114,7 +124,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             self._run_test_other_trees_classifier(model)
 
     # small tree
-    def test_random_forest_single_node_tree_converter(self):
+    def test_random_forest_classifier_single_node_tree_converter(self):
         warnings.filterwarnings("ignore")
         # TODO: There is a bug in perf_tree_trav for RF with node size 1
         #       somewhere related to tree_commons.py:481
@@ -129,7 +139,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             )
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
-                model.predict(X), pytorch_model(torch.from_numpy(X))[0].numpy().flatten(), rtol=1e-06, atol=1e-06
+                model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
             )
 
     # Failure Cases
