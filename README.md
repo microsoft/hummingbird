@@ -3,29 +3,26 @@
 ![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
 
 ## Introduction
-*sklearn-pytorch* converts [scikit-learn](https://scikit-learn.org/stable/) models to [PyTorch](https://pytorch.org/). Once in the PyTorch format, you can further convert to [ONNX](https://github.com/onnx/onnx) or [TorchScript](https://pytorch.org/docs/stable/jit.html) for high performance native scoring.
+*hummingbird* converts [scikit-learn](https://scikit-learn.org/stable/) models to [PyTorch](https://pytorch.org/). Once in the PyTorch format, <!--you can further convert to [ONNX](https://github.com/onnx/onnx) or [TorchScript](https://pytorch.org/docs/stable/jit.html), and --> you can run the models on GPU for high performance native scoring. For full details, see [our paper](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf). 
+
+Currently we support [these](https://github.com/microsoft/hummingbird/blob/develop/hummingbird/_supported_operators.py#L26) tree-based classifiers and regressors.
 
 ## Installation
 
-This was tested on Python 3.7.   (Newer versions such as 3.8 do not yet work with torch==1.3.1).
-
-Note that the xgboost package requires `cmake` on your system.
-**TODO other xbg install complications?**
-
+This was tested on Python 3.7.
 ```
-python setup.py develop
-```
-Or you can install from the source with the latest changes.
-**#TODO update URL**
-```
-pip install git+https://github.com/ksaur/hb-dryrun.git
+python setup.py install
 ```
 
-## TODO
-* explain commit hooks
-* explain which pep8 we use
-* write commiter guide
-* write more documentation, especially explaining overall design
+## Examples
+
+See the [notebooks](notebooks) section for examples.  In general, the syntax is very similar to [skl2onnx](https://github.com/onnx/sklearn-onnx), as hummingbird started as a fork of that project.
+```
+from hummingbird import convert_sklearn
+
+model = pickle.load(open("my-skl-model.pkl", "rb"))
+pytorch_model = convert_sklearn(model,[("input", FloatTensorType([200000, 28]))])
+```
 
 ## Developing
 
@@ -38,16 +35,11 @@ And before you commit, you can run it like this `pre-commit run --all-files` and
 ```
 black....................................................................Passed
 Flake8...................................................................Passed
-Check for added large files..............................................Passed
-Check python ast.........................................................Passed
-Check for byte-order marker..............................................Passed
-Check for merge conflicts................................................Passed
-Detect Private Key.......................................................Passed
-Trim Trailing Whitespace.................................................Passed
+...
 Don't commit to branch...................................................Passed
 ```
 
-If you have installed your pre-commit hooks successfull, you should see something like this if you
+If you have installed your pre-commit hooks successfully, you should see something like this if you
 try to commit something non-conformant:
 ```
 # git commit -m "testing"
@@ -61,16 +53,8 @@ All done!
 ```
 
 ## License
-**#TODO what license do we want?**
-[MIT License](LICENSE)
 
-## Troubleshooting:
-
-* On installing xgboost:  (Ex:  `./xgboost/build-python.sh: line 21: cmake: command not found`)
-  * install cmake (Ex: `brew install cmake` or `apt install cmake`)
-
-* `OSError: dlopen(lib_lightgbm.so, 6): Library not loaded: ...libomp.dylib`
- * TODO:
+[MIT License](https://github.com/microsoft/hummingbird/blob/master/LICENSE)
 
 
 # Contributing
