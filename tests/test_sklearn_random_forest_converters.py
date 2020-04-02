@@ -1,5 +1,5 @@
 """
-Tests Sklearn RandomForest DecisionTree ExtraTrees converters.
+Tests Sklearn RandomForest, DecisionTree, ExtraTrees converters.
 """
 import unittest
 import warnings
