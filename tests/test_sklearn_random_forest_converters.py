@@ -107,7 +107,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
 
         model.fit(X, y)
         pytorch_model = convert_sklearn(model, [("input", FloatTensorType([1, 20]))], device="cpu")
-        self.assertTrue(pytorch_model is not None)    
+        self.assertTrue(pytorch_model is not None)
         np.testing.assert_allclose(
             model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
         )

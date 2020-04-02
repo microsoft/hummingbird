@@ -32,7 +32,7 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
     def test_GBDT_classifier_binary_converter(self):
         self._run_GB_trees_classifier_converter(2)
 
-     # gemm classifier
+    # gemm classifier
     def test_GBDT_gemm_classifier_converter(self):
         self._run_GB_trees_classifier_converter(2, extra_config={"tree_implementation": "gemm"})
 
