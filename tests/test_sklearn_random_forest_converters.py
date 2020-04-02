@@ -1,5 +1,5 @@
 """
-Tests Sklearn RandomForest\DecisionTree\ExtraTrees converters.
+Tests Sklearn RandomForest DecisionTree ExtraTrees converters.
 """
 import unittest
 import warnings
@@ -47,19 +47,19 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
         self._run_random_forest_classifier_converter(2, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # multi classifier
-    def test_random_forest_classifier_multi_converter(self):
+    def test_random_forest_multi_classifier_converter(self):
         self._run_random_forest_classifier_converter(3)
 
     # gemm multi classifier
-    def test_random_forest_gemm_classifier_converter(self):
+    def test_random_forest_gemm_multi_classifier_converter(self):
         self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
     # tree_trav multi classifier
-    def test_random_forest_tree_trav_classifier_converter(self):
+    def test_random_forest_tree_trav_multi_classifier_converter(self):
         self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
     # perf_tree_trav multi classifier
-    def test_random_forest_perf_tree_trav_classifier_converter(self):
+    def test_random_forest_perf_tree_trav_multi_classifier_converter(self):
         self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # shifted classes

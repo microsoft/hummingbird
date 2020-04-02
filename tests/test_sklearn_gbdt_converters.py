@@ -45,19 +45,19 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
         self._run_GB_trees_classifier_converter(2, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # multi classifier
-    def test_GBDT_classifier_multi_converter(self):
+    def test_GBDT_multi_classifier_converter(self):
         self._run_GB_trees_classifier_converter(3)
 
     # gemm multi classifier
-    def test_GBDT_gemm_classifier_converter(self):
+    def test_GBDT_gemm_multi_classifier_converter(self):
         self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
     # tree_trav multi classifier
-    def test_GBDT_tree_trav_classifier_converter(self):
+    def test_GBDT_tree_trav_multi_classifier_converter(self):
         self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
     # perf_tree_trav multi classifier
-    def test_GBDT_perf_tree_trav_classifier_converter(self):
+    def test_GBDT_perf_tree_trav_multi_classifier_converter(self):
         self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # shifted classes

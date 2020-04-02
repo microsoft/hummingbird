@@ -1,5 +1,5 @@
 """
-Tests Skleran LightGBM converters.
+Tests LightGBM converters.
 """
 import unittest
 import warnings
@@ -49,15 +49,15 @@ class TestLGBMConverter(unittest.TestCase):
         self._run_lgbm_classifier_converter(3)
 
     # gemm multi classifier
-    def test_lgbm_gemm_classifier_converter(self):
+    def test_lgbm_gemm_multi_classifier_converter(self):
         self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
     # tree_trav multi classifier
-    def test_lgbm_tree_trav_classifier_converter(self):
+    def test_lgbm_tree_trav_multi_classifier_converter(self):
         self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
     # perf_tree_trav multi classifier
-    def test_lgbm_perf_tree_trav_classifier_converter(self):
+    def test_lgbm_perf_tree_trav_multi_classifier_converter(self):
         self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     def _run_lgbm_regressor_converter(self, num_classes, extra_config={}):
