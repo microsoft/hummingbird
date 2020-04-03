@@ -30,7 +30,7 @@ setup(
     description="Convert scikit-learn models to PyTorch",
     license="MIT License",
     author="Microsoft Corporation",
-    author_email="hummingbird-dev@service.microsoft.com",
+    author_email="hummingbird-dev@microsoft.com",
     url="https://github.com/microsoft/hummingbird",
     packages=packages,
     include_package_data=True,
