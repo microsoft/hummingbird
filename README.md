@@ -3,9 +3,10 @@
 ![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
 
 ## Introduction
-*hummingbird* converts [scikit-learn](https://scikit-learn.org/stable/) models to [PyTorch](https://pytorch.org/). Once in the PyTorch format, <!--you can further convert to [ONNX](https://github.com/onnx/onnx) or [TorchScript](https://pytorch.org/docs/stable/jit.html), and --> you can run the models on GPU for high performance native scoring. For full details, see [our paper](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf).
+*hummingbird* converts trained traditional machine learning models to [PyTorch](https://pytorch.org/). Once in the PyTorch format, <!--you can further convert to [ONNX](https://github.com/onnx/onnx) or [TorchScript](https://pytorch.org/docs/stable/jit.html), and --> you can run the models on GPU for high performance native scoring. For full details, see [our paper](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf).
 
-Currently we support [these](https://github.com/microsoft/hummingbird/blob/develop/hummingbird/_supported_operators.py#L26) tree-based classifiers and regressors.  These models include [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) models, in addition to scikit-learn models.
+Currently we support [these](https://github.com/microsoft/hummingbird/blob/develop/hummingbird/_supported_operators.py#L26) tree-based classifiers and regressors.  These models include
+[scikit-learn](https://scikit-learn.org/stable/) models such as  Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors.
 
 ## Installation
 
@@ -44,7 +45,16 @@ hum_gpu = pytorch_model(X_torch.to('cuda'))
 ```
 
 # Contributing
+
 Please see the section on [Contributing](CONTRIBUTING.md).
+
+Also, see our [roadmap](wiki/Roadmap-for-Upcoming-Features-and-Support) of planned features. If you have a feature that you want us to add or that you are interested in working on, please open an issue or [contact us](hummingbird-dev@microsoft.com) to help us plan out the future roadmap.
+
+# Authors
+
+* Supun Nakandala
+* Matteo Interlandi
+* Karla Saur
 
 # License
 [MIT License](LICENSE)

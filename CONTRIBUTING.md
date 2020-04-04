@@ -15,7 +15,7 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 ## Developing
 The simplest setup is:
 ```
-pip install develop
+pip install -e .
 ```
 
 #### Pre-commit
