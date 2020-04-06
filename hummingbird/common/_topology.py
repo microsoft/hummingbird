@@ -4,7 +4,7 @@ import numpy as np
 from onnxconverter_common.data_types import TensorType
 
 from . import _registration
-from ._container import Skl2PyTorchModel
+from ._container import HBPyTorchModel
 from .exceptions import MissingConverter
 
 type_fct = type
@@ -129,26 +129,16 @@ class Topology:
     must be called to convert the topological graph into PyTorch model.
     """  # noqa
 
-    def __init__(self, model, initial_types, default_batch_size=1, variable_name_set=None, operator_name_set=None):
+    def __init__(self, model, variable_name_set=None, operator_name_set=None):
         """
         Initializes a *Topology* object, which is an intermediate
         representation of a computational graph.
         :param model: RawModelContainer object or one of its derived
                       classes. It contains the original model.
-        :param initial_types: A list providing some types for some
-                              root variables. Each element is a tuple
-                               of a variable name and a type defined
-                               in *data_types.py*.
-        :param default_batch_size: batch_size prepend to scalar and
-                                   array types. It's usually 1 or None.
         """
-        # self.scopes = []
         self.raw_model = model
-        # self.scope_names = set()
         self.variable_name_set = set()
         self.operator_name_set = set()
-        self.initial_types = initial_types
-        self.default_batch_size = default_batch_size
 
         self.pytorch_variable_names = variable_name_set if variable_name_set is not None else set()
         self.pytorch_operator_names = operator_name_set if operator_name_set is not None else set()
@@ -359,7 +349,7 @@ def convert_topology(topology, device=None, extra_config={}):
                 )
             )
 
-    pytorch_model = Skl2PyTorchModel(
+    pytorch_model = HBPyTorchModel(
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, topology, device, extra_config
     )
     return pytorch_model

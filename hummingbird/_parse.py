@@ -11,15 +11,13 @@ from .common._container import SklearnModelContainerNode
 from .common._topology import Topology
 
 
-def parse_sklearn_model(model, initial_types=None):
+def parse_sklearn_model(model):
     """
     Puts *scikit-learn* object into an abstract container so that
     our framework can work seamlessly on models created
     with different machine learning tools.
 
     :param model: A scikit-learn model
-    :param initial_types: a python list. Each element is a tuple of a
-        variable name and a type defined in data_types.py
 
     :return: :class:`Topology <hummingbird.common._topology.Topology>`
 
@@ -30,7 +28,7 @@ def parse_sklearn_model(model, initial_types=None):
     # Declare a computational graph. It will become a representation of
     # the input scikit-learn model after parsing.
 
-    topology = Topology(raw_model_container, initial_types)
+    topology = Topology(raw_model_container)
 
     # Declare an object to provide variables' and operators' naming mechanism.
     # In contrast to CoreML, one global scope
@@ -38,11 +36,11 @@ def parse_sklearn_model(model, initial_types=None):
     # scope = topology.declare_scope('__root__')
 
     # Declare input variables. They should be the inputs of the scikit-learn
-    # model you want to convert into PyTorch.
+    # model you want to convert into PyTorch. Sklearn always gets as input a single
+    # dataframe, therefore by default we start with a single `input` variable
 
     inputs = []
-    for var_name, initial_type in initial_types:
-        inputs.append(topology.declare_variable(var_name, initial_type))
+    inputs.append(topology.declare_variable("input"))
 
     # The object raw_model_container is a part of the topology
     # we're going to return. We use it to store the inputs of

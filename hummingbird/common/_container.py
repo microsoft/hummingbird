@@ -81,18 +81,15 @@ class SklearnModelContainerNode(RawModelContainerNode):
             self._outputs.append(variable)
 
 
-class Skl2PyTorchModel(torch.nn.Module):
+class HBPyTorchModel(torch.nn.Module):
     def __init__(self, input_names, output_names, operator_map, topology, device, extra_config):
-        super(Skl2PyTorchModel, self).__init__()
+        super(HBPyTorchModel, self).__init__()
         self.input_names = input_names
         self.output_names = output_names
         self.operator_map = torch.nn.ModuleDict(operator_map)
         self.topology = topology
         self.device = device
         self.extra_config = extra_config
-
-    def is_jittable(self, *pytorch_inputs):
-        return "SklearnSVC" not in self.operator_map.keys() and "SklearnNuSVC" not in self.operator_map.keys()
 
     def forward(self, *pytorch_inputs):
         with torch.no_grad():

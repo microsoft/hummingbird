@@ -9,7 +9,6 @@ import torch
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, ExtraTreesClassifier
 
 from hummingbird import convert_sklearn
-from onnxconverter_common.data_types import FloatTensorType
 from sklearn.tree import DecisionTreeClassifier
 from hummingbird.common.exceptions import MissingConverter
 
@@ -24,7 +23,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100) + labels_shift
 
             model.fit(X, y)
-            pytorch_model = convert_sklearn(model, [("input", FloatTensorType([1, 20]))], extra_config=extra_config)
+            pytorch_model = convert_sklearn(model, extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
                 model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
@@ -77,7 +76,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            pytorch_model = convert_sklearn(model, [("input", FloatTensorType([1, 20]))], extra_config=extra_config)
+            pytorch_model = convert_sklearn(model, extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
                 model.predict(X), pytorch_model(torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06
@@ -106,7 +105,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
         y = np.random.randint(3, size=100)
 
         model.fit(X, y)
-        pytorch_model = convert_sklearn(model, [("input", FloatTensorType([1, 20]))], device="cpu")
+        pytorch_model = convert_sklearn(model, device="cpu")
         self.assertTrue(pytorch_model is not None)
         np.testing.assert_allclose(
             model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
@@ -134,9 +133,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(1, size=1)
             model = RandomForestClassifier(n_estimators=1).fit(X, y)
-            pytorch_model = convert_sklearn(
-                model, [("input", FloatTensorType([1, 1]))], extra_config={"tree_implementation": extra_config_param}
-            )
+            pytorch_model = convert_sklearn(model, extra_config={"tree_implementation": extra_config_param})
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
                 model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
@@ -149,14 +146,14 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error
         model = RandomForestClassifier(n_estimators=10).fit(X, y)
-        self.assertRaises(RuntimeError, convert_sklearn, model, [])
+        self.assertRaises(RuntimeError, convert_sklearn, model)
 
     def test_sklearn_random_forest_classifier_raises_wrong_extra_config(self):
         warnings.filterwarnings("ignore")
         X = np.array(np.random.rand(100, 200), dtype=np.float32)
         y = np.random.randint(3, size=100)
         model = RandomForestClassifier(n_estimators=10).fit(X, y)
-        self.assertRaises(MissingConverter, convert_sklearn, model, [], extra_config={"tree_implementation": "nonsense"})
+        self.assertRaises(MissingConverter, convert_sklearn, model, extra_config={"tree_implementation": "nonsense"})
 
 
 if __name__ == "__main__":
