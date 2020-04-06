@@ -1,13 +1,30 @@
 # Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+## Welcome
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+If you are here, it means you are interested in helping us out. A hearty welcome and thank you! There are many ways you can contribute to Hummingbird:
 
+* Offer PR's to fix bugs or implement new features;
+* Give us feedback and bug reports regarding the software or the documentation;
+* Improve our examples, and documentation.
+This project welcomes contributions and suggestions.  
+
+## Getting Started
+
+Please join the community on Gitter *gitter badge*. Also please make sure to take a look at the project [roadmap](wiki/Roadmap-for-Upcoming-Features-and-Support).
+
+
+### Pull requests
+If you are new to GitHub [here](https://help.github.com/categories/collaborating-with-issues-and-pull-requests/) is a detailed help source on getting involved with development on GitHub.
+
+As a first time contributor, you will be invited to sign the Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
+the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com. You will only need to do this once across all repos using our CLA.
+
+Your pull request needs to reference a filed issue. Please fill in the template that is populated for the pull request. Only pull requests addressing small typos can have no issues associated with them.
+
+All commits in a pull request will be [squashed](https://github.blog/2016-04-01-squash-your-commits/) to a single commit with the original creator as author.
+
+### Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
@@ -15,11 +32,14 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 ## Developing
 The simplest setup is:
 ```
+mkdir hummingbird
+cd hummingbird
+git clone https://github.com/microsoft/hummingbird.git .
 pip install -e .
 ```
 
 #### Pre-commit
-This project uses [pre-commit](https://pre-commit.com/) hooks. Run  `pip install pre-commit` if you don't already have this. To begin, run `pre-commit install` to install pre-commit into your git hooks.
+This project uses [pre-commit](https://pre-commit.com/) hooks. Run  `pip install pre-commit` if you don't already have this in your machine. Afterward, run `pre-commit install` to install pre-commit into your git hooks.
 
 And before you commit, you can run it like this `pre-commit run --all-files` and should see output such as:
 
@@ -58,7 +78,3 @@ We strive to keep our test coverage about 70%.  To run all unit tests:
 ```
 coverage run -m pytest tests
 ```
-
-## Submitting issues
-
-If you discover a bug, please open an issue or submit a pull request!
