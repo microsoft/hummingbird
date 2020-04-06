@@ -12,12 +12,14 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-
 ## Developing
+The simplest setup is:
+```
+pip install -e .
+```
 
-This project uses [pre-commit](https://pre-commit.com/) hooks. (Run  `pip install pre-commit` if you don't already have this.)
-
-To begin, run `pre-commit install` to install pre-commit into your git hooks.
+#### Pre-commit
+This project uses [pre-commit](https://pre-commit.com/) hooks. Run  `pip install pre-commit` if you don't already have this. To begin, run `pre-commit install` to install pre-commit into your git hooks.
 
 And before you commit, you can run it like this `pre-commit run --all-files` and should see output such as:
 
@@ -40,7 +42,7 @@ All done!
 1 file reformatted.
 ```
 
-### Formatting
+#### Formatting
 We generally use all pep8 checks, with the exception of line length 127.
 
 To do a quick check-up before commit, try:
@@ -48,11 +50,15 @@ To do a quick check-up before commit, try:
 flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
 ```
 
-### Coverage
+#### Coverage
 
-For coverage, we use [coverage.py](https://coverage.readthedocs.io/en/coverage-5.0.4/) in our Github Actions. (`pip install coverage`)
+For coverage, we use [coverage.py](https://coverage.readthedocs.io/en/coverage-5.0.4/) in our Github Actions.  Run  `pip install coverage` if you don't already have this, and any code you commit should generally not significantly impact coverage.
 
 We strive to keep our test coverage about 70%.  To run all unit tests:
 ```
 coverage run -m pytest tests
 ```
+
+## Submitting issues
+
+If you discover a bug, please open an issue or submit a pull request!
