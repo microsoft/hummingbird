@@ -62,7 +62,7 @@ Also, see our [roadmap](wiki/Roadmap-for-Upcoming-Features-and-Support) of plann
 
 Join our community! *gitter badge here*
 
- For more formal enquiries, you can [contact us](hummingbird-dev@microsoft.com).
+ For more formal enquiries, you can [contact us](mailto:hummingbird-dev@microsoft.com).
 
 # Authors
 
