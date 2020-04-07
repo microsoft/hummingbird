@@ -16,3 +16,5 @@ __domain__ = "microsoft.gsl"
 __model_version__ = 0
 
 from .convert import convert_sklearn  # noqa: F401
+from .convert import convert_lightgbm  # noqa: F401
+from .convert import convert_xgboost  # noqa: F401

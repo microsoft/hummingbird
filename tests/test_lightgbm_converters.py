@@ -7,8 +7,7 @@ import warnings
 import numpy as np
 import torch
 import lightgbm as lgb
-from hummingbird import convert_sklearn
-from onnxconverter_common.data_types import FloatTensorType
+from hummingbird import convert_lightgbm
 
 
 class TestLGBMConverter(unittest.TestCase):
@@ -22,7 +21,7 @@ class TestLGBMConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            pytorch_model = convert_sklearn(model, [("input", FloatTensorType([1, 200]))], extra_config=extra_config)
+            pytorch_model = convert_lightgbm(model, extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
                 model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].data.numpy(), rtol=1e-06, atol=1e-06
@@ -69,7 +68,7 @@ class TestLGBMConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            pytorch_model = convert_sklearn(model, [("input", FloatTensorType([1, 200]))], extra_config=extra_config)
+            pytorch_model = convert_lightgbm(model, extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
                 model.predict(X), pytorch_model(torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06
