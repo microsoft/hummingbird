@@ -13,18 +13,6 @@ from ._tree_commons import get_parameters_for_tree_trav_generic, get_parameters_
 from ..common._registration import register_converter
 
 
-def _get_n_features(operator, extra_config):
-    if "n_features" in extra_config:
-        return extra_config["n_features"]
-    elif "_features_count" not in dir(operator.raw_operator):
-        raise RuntimeError(
-            'XGBoost converter is not able to infer the number of input features.\
-             Please pass "n_features:N" as extra configuration to the converter.'
-        )
-    else:
-        return operator.raw_operator._features_count
-
-
 def _tree_traversal(tree_info, ls, rs, fs, ts, vs):
     count = 0
     while count < len(tree_info):
@@ -128,7 +116,13 @@ def _get_tree_parameters_for_tree_trav(tree_info):
 
 
 def convert_sklearn_xgb_classifier(operator, device, extra_config):
-    n_features = _get_n_features(operator, extra_config)
+    if "n_features" in extra_config:
+        n_features = extra_config["n_features"]
+    else:
+        raise RuntimeError(
+            'XGBoost converter is not able to infer the number of input features.\
+             Please pass "n_features:N" as extra configuration to the converter or fill a bug report.'
+        )
     tree_infos = operator.raw_operator.get_booster().get_dump()
 
     n_classes = operator.raw_operator.n_classes_
@@ -151,7 +145,13 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
 
 
 def convert_sklearn_xgb_regressor(operator, device, extra_config):
-    n_features = _get_n_features(operator, extra_config)
+    if "n_features" in extra_config:
+        n_features = extra_config["n_features"]
+    else:
+        raise RuntimeError(
+            'XGBoost converter is not able to infer the number of input features.\
+             Please pass "n_features:N" as extra configuration to the converter or fill a bug report.'
+        )
     tree_infos = operator.raw_operator.get_booster().get_dump()
 
     # TODO: in xgboost 1.0.2 (not yet supported), we will need to handle the None case for max_depth
