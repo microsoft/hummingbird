@@ -6,7 +6,6 @@
 
 from copy import deepcopy
 import numpy as np
-import pandas
 from .common._topology import convert_topology
 from ._parse import parse_sklearn_model
 
@@ -84,11 +83,10 @@ def convert_xgboost(model, test_input, device=None, extra_config={}):
     elif test_input is not None:
         if type(test_input) is np.ndarray and len(test_input.shape) == 2:
             extra_config["n_features"] = test_input.shape[1]
-        elif type(test_input) is pandas.DataFrame:
-            extra_config["n_features"] = len(test_input.columns)
         else:
             raise RuntimeError(
                 "XGBoost converter is not able to infer the number of input features.\
+                    Apparently test_input is not an ndarray. \
                     Please fill an issue on https://github.com/microsoft/hummingbird/"
             )
     else:
