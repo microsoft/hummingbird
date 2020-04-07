@@ -5,7 +5,6 @@ import unittest
 import warnings
 
 import numpy as np
-import pandas as pd
 import torch
 import xgboost as xgb
 from hummingbird import convert_xgboost
