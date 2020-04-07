@@ -108,23 +108,6 @@ class TestXGBoostConverter(unittest.TestCase):
                 model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
             )
 
-    def test_run_xgb_regression_converter_pandas(self):
-        warnings.filterwarnings("ignore")
-        for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
-            model = xgb.XGBRegressor(n_estimators=10, max_depth=6)
-            X = np.random.rand(1000, 20)
-            X = np.array(X, dtype=np.float32)
-            y = np.random.randint(1000, size=1000)
-
-            model.fit(X, y)
-
-            df = pd.DataFrame(X)
-            pytorch_model = convert_xgboost(model, df, extra_config={"tree_implementation": extra_config_param})
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(
-                model.predict(X), pytorch_model(torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06
-            )
-
 
 if __name__ == "__main__":
     unittest.main()
