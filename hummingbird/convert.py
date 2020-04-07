@@ -89,11 +89,11 @@ def convert_xgboost(model, test_input, device=None, extra_config={}):
         else:
             raise RuntimeError(
                 "XGBoost converter is not able to infer the number of input features.\
-            Please fill an issue on https://github.com/microsoft/hummingbird/"
+                    Please fill an issue on https://github.com/microsoft/hummingbird/"
             )
     else:
         raise RuntimeError(
             "XGBoost converter is not able to infer the number of input features.\
-            Please pass some test_input to the converter."
+                Please pass some test_input to the converter."
         )
     return convert_sklearn(model, test_input, device, extra_config)
