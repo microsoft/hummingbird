@@ -5,9 +5,10 @@ import unittest
 import warnings
 
 import numpy as np
+import pandas as pd
 import torch
 import xgboost as xgb
-from hummingbird import convert_sklearn
+from hummingbird import convert_xgboost
 
 
 class TestXGBoostConverter(unittest.TestCase):
@@ -21,7 +22,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            pytorch_model = convert_sklearn(model, extra_config=extra_config)
+            pytorch_model = convert_xgboost(model, [], extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
                 model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
@@ -68,8 +69,7 @@ class TestXGBoostConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            extra_config["n_features"] = 200
-            pytorch_model = convert_sklearn(model, extra_config=extra_config)
+            pytorch_model = convert_xgboost(model, X[0:1], extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
                 model.predict(X), pytorch_model(torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06
@@ -81,15 +81,15 @@ class TestXGBoostConverter(unittest.TestCase):
 
     # gemm regressor
     def test_xgb_gemm_regressor_converter(self):
-        self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "gemm"})
+        self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "gemm"})
 
     # tree_trav regressor
     def test_xgb_tree_trav_regressor_converter(self):
-        self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "tree_trav"})
+        self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "tree_trav"})
 
     # perf_tree_trav regressor
     def test_xgb_perf_tree_trav_regressor_converter(self):
-        self._run_xgb_regressor_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
+        self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # small tree
     def test_run_xgb_classifier_converter(self):
@@ -102,10 +102,27 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            pytorch_model = convert_sklearn(model, extra_config={"tree_implementation": extra_config_param})
+            pytorch_model = convert_xgboost(model, [], extra_config={"tree_implementation": extra_config_param})
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
-                model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].data.numpy(), rtol=1e-06, atol=1e-06
+                model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
+            )
+
+    def test_run_xgb_regression_converter_pandas(self):
+        warnings.filterwarnings("ignore")
+        for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
+            model = xgb.XGBRegressor(n_estimators=10, max_depth=6)
+            X = np.random.rand(1000, 20)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(1000, size=1000)
+
+            model.fit(X, y)
+
+            df = pd.DataFrame(X)
+            pytorch_model = convert_xgboost(model, df, extra_config={"tree_implementation": extra_config_param})
+            self.assertTrue(pytorch_model is not None)
+            np.testing.assert_allclose(
+                model.predict(X), pytorch_model(torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06
             )
 
 
