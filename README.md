@@ -28,8 +28,7 @@ In general, the syntax is very similar to [skl2onnx](https://github.com/onnx/skl
 import torch
 import numpy as np
 import lightgbm as lgb
-from onnxconverter_common.data_types import FloatTensorType
-from hummingbird import convert_sklearn
+from hummingbird import convert_lightgbm
 
 # Create some random data for binary classification
 num_classes = 2
@@ -41,7 +40,7 @@ model = model = lgb.LGBMClassifier()
 model.fit(X, y)
 
 # Use Hummingbird to convert the model to pytorch
-pytorch_model = convert_sklearn(model,[("input", FloatTensorType([100000, 28]))])
+pytorch_model = convert_lightgbm(model)
 
 # Run Hummingbird on CPU
 pytorch_model.to('cpu')
