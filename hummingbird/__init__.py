@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 """
-Main entry point to the converter from the *scikit-learn* to *PyTorch*.
+Main entry point to the Humminbird converters.
 """
 
 __version__ = "0.0.1"

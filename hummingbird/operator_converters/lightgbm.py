@@ -9,60 +9,51 @@ from hummingbird.operator_converters.gbdt import BatchGBDTClassifier, BatchGBDTR
 from hummingbird.operator_converters.gbdt import BeamPPGBDTRegressor, BeamGBDTClassifier, BeamGBDTRegressor
 
 from ._tree_commons import get_gbdt_by_config_or_depth, TreeImpl
-from ._tree_commons import get_parameters_for_tree_trav_generic, get_parameters_for_gemm_generic
-from ..common._registration import register_converter
+from ._tree_commons import get_parameters_for_tree_trav_common, get_parameters_for_gemm_common
+from .._registration import register_converter
 
 
-def _tree_traversal(node, ls, rs, fs, ts, vs, count):
+def _tree_traversal(node, lefts, rights, features, thresholds, values, count):
+    """
+    Recursive function for parsing a tree and filling the input data structures.
+    """
     if "left_child" in node:
-        fs.append(node["split_feature"])
-        ts.append(node["threshold"])
-        vs.append([-1])
-        ls.append(count + 1)
-        rs.append(-1)
-        pos = len(rs) - 1
-        count = _tree_traversal(node["left_child"], ls, rs, fs, ts, vs, count + 1)
-        rs[pos] = count + 1
-        return _tree_traversal(node["right_child"], ls, rs, fs, ts, vs, count + 1)
+        features.append(node["split_feature"])
+        thresholds.append(node["threshold"])
+        values.append([-1])
+        lefts.append(count + 1)
+        rights.append(-1)
+        pos = len(rights) - 1
+        count = _tree_traversal(node["left_child"], lefts, rights, features, thresholds, values, count + 1)
+        rights[pos] = count + 1
+        return _tree_traversal(node["right_child"], lefts, rights, features, thresholds, values, count + 1)
     else:
-        fs.append(0)
-        ts.append(0)
-        vs.append([node["leaf_value"]])
-        ls.append(-1)
-        rs.append(-1)
+        features.append(0)
+        thresholds.append(0)
+        values.append([node["leaf_value"]])
+        lefts.append(-1)
+        rights.append(-1)
         return count
 
 
 def _get_tree_parameters_for_gemm(tree_info, n_features):
+    """
+    Parse the tree and prepare it according to the GEMM strategy.
+    """
     lefts = []
     rights = []
     features = []
     thresholds = []
     values = []
     _tree_traversal(tree_info["tree_structure"], lefts, rights, features, thresholds, values, 0)
-    weights = []
-    biases = []
 
-    values = np.array(values)
-
-    # first hidden layer has all inequalities
-    hidden_weights = []
-    hidden_biases = []
-    for left, feature, thresh in zip(lefts, features, thresholds):
-        if left != -1:
-            hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
-            hidden_biases.append(thresh)
-
-    weights.append(np.array(hidden_weights).astype("float32"))
-    biases.append(np.array(hidden_biases).astype("float32"))
-    n_splits = len(hidden_weights)
-
-    # second hidden layer has ANDs for each leaf of the decision tree.
-    # depth first enumeration of the tree in order to determine the AND by the path.
-    return get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits)
+    return get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features)
 
 
 def _get_tree_parameters_for_tree_trav(tree_info):
+    """
+    Parse the tree and prepare it according to the tree traversal strategies.
+    """
     lefts = []
     rights = []
     features = []
@@ -70,7 +61,7 @@ def _get_tree_parameters_for_tree_trav(tree_info):
     values = []
     _tree_traversal(tree_info["tree_structure"], lefts, rights, features, thresholds, values, 0)
 
-    return get_parameters_for_tree_trav_generic(lefts, rights, features, thresholds, values)
+    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
 
 
 def convert_sklearn_lgbm_classifier(operator, device, extra_config):

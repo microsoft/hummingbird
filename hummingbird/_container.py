@@ -17,7 +17,7 @@ class RawModelContainerNode(object):
 
     def __init__(self, raw_model):
         """
-        :param raw_model: *scikit-learn* model to convert
+        :param raw_model: the model to convert
         """
         self._raw_model = raw_model
 
@@ -46,9 +46,9 @@ class RawModelContainerNode(object):
 
 class SklearnModelContainerNode(RawModelContainerNode):
     """
-    Main container for one *scikit-learn* model.
+    Main container for a *scikit-learn* model.
     Every converter adds nodes to an existing container
-    which is converted into a *PyTorch* graph by an instance of
+    which is the converted into a tensor graph by an instance of
     :class:`Topology <hummingbird.common._topology.Topology>`.
     """
 
@@ -65,8 +65,8 @@ class SklearnModelContainerNode(RawModelContainerNode):
 
     @property
     def output_names(self):
-        # Raw names are non unique. Hence using pytorch names.
-        return [variable.pytorch_name for variable in self._outputs]
+        # Raw names are non unique. Hence using backend names.
+        return [variable.backend_name for variable in self._outputs]
 
     def add_input(self, variable):
         # The order of adding variables matters. The final model's
@@ -81,35 +81,40 @@ class SklearnModelContainerNode(RawModelContainerNode):
             self._outputs.append(variable)
 
 
-class HBPyTorchModel(torch.nn.Module):
-    def __init__(self, input_names, output_names, operator_map, topology, device, extra_config):
-        super(HBPyTorchModel, self).__init__()
+class PyTorchBackendModel(torch.nn.Module):
+    """
+    Container for a model compiled for the PyTorch Backend.
+    """
+
+    def __init__(self, input_names, output_names, operator_map, topology, extra_config):
+        super(PyTorchBackendModel, self).__init__()
         self.input_names = input_names
         self.output_names = output_names
         self.operator_map = torch.nn.ModuleDict(operator_map)
         self.topology = topology
-        self.device = device
         self.extra_config = extra_config
 
     def forward(self, *pytorch_inputs):
         with torch.no_grad():
             pytorch_inputs = [*pytorch_inputs]
             variable_map = {}
+
+            # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self.input_names):
-                if self.device is not None and not isinstance(self.topology.variables[input_name].type, TensorType):
-                    pytorch_inputs[i] = pytorch_inputs[i].to(self.device)
                 variable_map[input_name] = pytorch_inputs[i]
 
+            # Evaluate all the operators in the topology by properly wiring inputs \ outputs
             for operator in self.topology.topological_operator_iterator():
                 pytorch_op = self.operator_map[operator.full_name]
-                pytorch_outputs = pytorch_op(*(variable_map[input.pytorch_name] for input in operator.inputs))
+                pytorch_outputs = pytorch_op(*(variable_map[input.backend_name] for input in operator.inputs))
 
                 if len(operator.outputs) == 1:
-                    variable_map[operator.outputs[0].pytorch_name] = pytorch_outputs
+                    variable_map[operator.outputs[0].backend_name] = pytorch_outputs
                 else:
                     for i, output in enumerate(operator.outputs):
-                        variable_map[output.pytorch_name] = pytorch_outputs[i]
+                        variable_map[output.backend_name] = pytorch_outputs[i]
 
+            # Prepare and return the output.
             if len(self.output_names) == 1:
                 return variable_map[self.output_names[0]]
             else:

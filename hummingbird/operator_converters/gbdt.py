@@ -9,12 +9,12 @@ import warnings
 import torch
 import numpy as np
 from ._tree_commons import (
-    get_parameters_for_gemm,
+    get_parameters_for_gemm_sklearn_common,
     get_parameters_for_tree_trav_sklearn_estimators,
     get_gbdt_by_config_or_depth,
 )
 from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble, TreeImpl
-from ..common._registration import register_converter
+from .._registration import register_converter
 
 
 class BatchGBDTClassifier(BatchedTreeEnsemble):
@@ -252,7 +252,7 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
 
     # TODO: automatically find the max tree depth by traversing the trees without relying on user input.
     if tree_type == TreeImpl.gemm:
-        net_parameters = [get_parameters_for_gemm(e) for e in sklearn_rf_classifier.estimators_]
+        net_parameters = [get_parameters_for_gemm_sklearn_common(e) for e in sklearn_rf_classifier.estimators_]
         return BatchGBDTClassifier(net_parameters, n_features, classes_list, learning_rate, alpha, device)
 
     net_parameters = [get_parameters_for_tree_trav_sklearn_estimators(e) for e in sklearn_rf_classifier.estimators_]

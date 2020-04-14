@@ -7,22 +7,21 @@
 
 # Tree-based models
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, ExtraTreesClassifier
-
-# Operators for preprocessing and feature engineering
 from sklearn.tree import DecisionTreeClassifier
-
 from xgboost import XGBClassifier, XGBRegressor
 from lightgbm import LGBMClassifier, LGBMRegressor
 
 
-# Associate scikit-learn types with our operator names. If two
-# scikit-learn models share a single name, it means their are
-# equivalent in terms of conversion.
-def build_sklearn_operator_name_map():
+def _build_sklearn_api_operator_name_map():
+    """
+    Associate Sklearn with the operator class names. If two
+    scikit-learn (API) models share a single name, it means their are
+    equivalent in terms of conversion.
+    """
     res = {
         k: "Sklearn" + k.__name__
         for k in [
-            # Classifiers: Trees
+            # Tree-methods
             DecisionTreeClassifier,
             RandomForestClassifier,
             RandomForestRegressor,
@@ -39,20 +38,20 @@ def build_sklearn_operator_name_map():
     return res
 
 
-def _get_sklearn_operator_name(model_type):
+def get_sklearn_api_operator_name(model_type):
     """
-    Get operator name of the input argument
+    Get operator name of the input model in *scikit-learn API* format.
 
-    :param model_type:  A scikit-learn object (e.g., SGDClassifier
-                        and Binarizer)
+    :param model_type:  A scikit-learn object (e.g., RandomForestClassifier)
+                        or an object with scikit-learn API (e.g., LightGBM)
     :return: A string which stands for the type of the input model in
              our conversion framework
     """
-    if model_type not in sklearn_operator_name_map:
-        # "No proper operator name found, it means a local operator.
+    if model_type not in sklearn_api_operator_name_map:
+        # "No proper operator name found", it means a local operator.
         return None
-    return sklearn_operator_name_map[model_type]
+    return sklearn_api_operator_name_map[model_type]
 
 
-# registered converters
-sklearn_operator_name_map = build_sklearn_operator_name_map()
+# Registered converters.
+sklearn_api_operator_name_map = _build_sklearn_api_operator_name_map()

@@ -8,10 +8,15 @@ import copy
 
 import torch
 
-from ._tree_commons import get_parameters_for_gemm, get_parameters_for_tree_trav_sklearn_estimators, find_depth, Node
+from ._tree_commons import (
+    get_parameters_for_gemm_sklearn_common,
+    get_parameters_for_tree_trav_sklearn_estimators,
+    find_depth,
+    Node,
+)
 from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble
 from ._tree_commons import TreeImpl, get_gbdt_by_config_or_depth
-from ..common._registration import register_converter
+from .._registration import register_converter
 
 
 class BatchRandomForestClassifier(BatchedTreeEnsemble):
@@ -168,7 +173,7 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
     tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth, low=4)
 
     if tree_type == TreeImpl.gemm:
-        net_parameters = [get_parameters_for_gemm(e) for e in sklearn_rf_classifier.estimators_]
+        net_parameters = [get_parameters_for_gemm_sklearn_common(e) for e in sklearn_rf_classifier.estimators_]
         return BatchRandomForestClassifier(
             net_parameters, sklearn_rf_classifier.n_features_, operator.raw_operator.classes_.tolist(), device
         )
@@ -191,7 +196,7 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     tree_type = get_gbdt_by_config_or_depth(extra_config, sklearn_rf_regressor.max_depth, low=4)
 
     if tree_type == TreeImpl.gemm:
-        net_parameters = [get_parameters_for_gemm(e) for e in sklearn_rf_regressor.estimators_]
+        net_parameters = [get_parameters_for_gemm_sklearn_common(e) for e in sklearn_rf_regressor.estimators_]
         return BatchRandomForestRegressor(net_parameters, sklearn_rf_regressor.n_features_, device)
 
     net_parameters = [get_parameters_for_tree_trav_sklearn_estimators(e) for e in sklearn_rf_regressor.estimators_]

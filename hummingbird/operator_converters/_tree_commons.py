@@ -20,6 +20,12 @@ class Node:
         self.value = None
 
 
+class TreeImpl(Enum):
+    gemm = 1
+    tree_trav = 2
+    perf_tree_trav = 3
+
+
 def find_depth(node, current_depth):
     if node.left == -1 and node.right == -1:
         return current_depth + 1
@@ -29,12 +35,6 @@ def find_depth(node, current_depth):
         return find_depth(node.r, current_depth + 1)
     elif node.right != -1 and node.left != -1:
         return max(find_depth(node.left, current_depth + 1), find_depth(node.right, current_depth + 1))
-
-
-class TreeImpl(Enum):
-    gemm = 1
-    tree_trav = 2
-    perf_tree_trav = 3
 
 
 # @low and @high are optimization parameters
@@ -58,7 +58,7 @@ def get_gbdt_by_config_or_depth(extra_config, max_depth, low=3, high=10):
         raise ValueError("Tree implementation {} not found".format(extra_config))
 
 
-def get_parameters_for_tree_trav_generic(lefts, rights, features, thresholds, values):
+def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values):
     """This is used by all trees."""
     ids = [i for i in range(len(lefts))]
     nodes = list(zip(ids, lefts, rights, features, thresholds, values))
@@ -122,12 +122,40 @@ def get_parameters_for_tree_trav_sklearn_estimators(tree):
     if values.shape[1] > 1:
         values /= np.sum(values, axis=1, keepdims=True)
 
-    return get_parameters_for_tree_trav_generic(lefts, rights, features, thresholds, values)
+    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits):
-    """This is used by all trees."""
+def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features):
+    """
+    Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
+    """
+    if len(lefts) == 1:
+        # Model creating trees with just a single leaf node. We transform it
+        # to a model with one internal node.
+        lefts = [1, -1, -1]
+        rights = [2, -1, -1]
+        features = [0, 0, 0]
+        thresholds = [0, 0, 0]
+        values = [np.array([0.0]), values[0], values[0]]
 
+    values = np.array(values)
+    weights = []
+    biases = []
+
+    # First hidden layer has all inequalities.
+    hidden_weights = []
+    hidden_biases = []
+    for left, feature, thresh in zip(lefts, features, thresholds):
+        if left != -1:
+            hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
+            hidden_biases.append(thresh)
+    weights.append(np.array(hidden_weights).astype("float32"))
+    biases.append(np.array(hidden_biases).astype("float32"))
+
+    n_splits = len(hidden_weights)
+
+    # Second hidden layer has ANDs for each leaf of the decision tree.
+    # Depth first enumeration of the tree in order to determine the AND by the path.
     hidden_weights = []
     hidden_biases = []
 
@@ -144,7 +172,7 @@ def get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values,
         left, right, feature, threshold, value = nodes[i]
         if left == -1 and right == -1:
             vec = [0 for _ in range(n_splits)]
-            # keep track of positive weights for calculating bias.
+            # Keep track of positive weights for calculating bias.
             num_positive = 0
             for j, p in enumerate(path[:-1]):
                 num_leaves_before_p = list(lefts[:p]).count(-1)
@@ -159,7 +187,7 @@ def get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values,
             if values.shape[-1] > 1:
                 class_proba.append((values[i] / np.sum(values[i])).flatten())
             else:
-                # we have only a single value. e.g., GBDT
+                # We have only a single value. e.g., GBDT
                 class_proba.append(values[i].flatten())
 
             hidden_weights.append(vec)
@@ -182,10 +210,10 @@ def get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values,
     return weights, biases
 
 
-def get_parameters_for_gemm(tree):
-    """This function is used by sklearn-based trees.
-
-    Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+def get_parameters_for_gemm_sklearn_common(tree):
+    """Parse the tree and prepare it according to the GEMM strategy.
+    This function is used by sklearn-based trees, including
+    SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
     """
     lefts = tree.tree_.children_left
     rights = tree.tree_.children_right
@@ -194,29 +222,7 @@ def get_parameters_for_gemm(tree):
     values = tree.tree_.value
     n_features = tree.tree_.n_features
 
-    weights = []
-    biases = []
-
-    hidden_weights = []
-    hidden_biases = []
-    for feature, threshold in zip(features, thresholds):
-        if feature >= 0:
-            hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
-            hidden_biases.append(threshold)
-
-    if len(hidden_weights) == 0:
-        weights.append(np.ones((1, n_features)).astype("float32"))
-        weights.append(np.ones((1, 1)).astype("float32"))
-        weights.append(np.transpose(np.array(values).astype("float32")).reshape(-1, 1))
-        biases.append(np.array([0]).astype("float32"))
-        biases.append(np.array([0]).astype("float32"))
-        biases.append(None)
-        return weights, biases
-
-    weights.append(np.array(hidden_weights).astype("float32"))
-    biases.append(np.array(hidden_biases).astype("float32"))
-    n_splits = len(hidden_weights)
-    return get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits)
+    return get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features)
 
 
 class BatchedTreeEnsemble(torch.nn.Module):

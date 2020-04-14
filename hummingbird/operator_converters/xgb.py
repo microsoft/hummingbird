@@ -9,24 +9,27 @@ from hummingbird.operator_converters.gbdt import BatchGBDTClassifier, BatchGBDTR
 from hummingbird.operator_converters.gbdt import BeamPPGBDTRegressor, BeamGBDTClassifier, BeamGBDTRegressor
 
 from ._tree_commons import get_gbdt_by_config_or_depth, TreeImpl
-from ._tree_commons import get_parameters_for_tree_trav_generic, get_parameters_for_gemm_generic
-from ..common._registration import register_converter
+from ._tree_commons import get_parameters_for_tree_trav_common, get_parameters_for_gemm_common
+from .._registration import register_converter
 
 
-def _tree_traversal(tree_info, ls, rs, fs, ts, vs):
+def _tree_traversal(tree_info, lefts, rights, features, thresholds, values):
+    """
+    Recursive function for parsing a tree and filling the input data structures.
+    """
     count = 0
     while count < len(tree_info):
         if "leaf" in tree_info[count]:
-            fs.append(0)
-            ts.append(0)
-            vs.append([float(tree_info[count].split("=")[1])])
-            ls.append(-1)
-            rs.append(-1)
+            features.append(0)
+            thresholds.append(0)
+            values.append([float(tree_info[count].split("=")[1])])
+            lefts.append(-1)
+            rights.append(-1)
             count += 1
         else:
-            fs.append(int(tree_info[count].split(":")[1].split("<")[0].replace("[f", "")))
-            ts.append(float(tree_info[count].split(":")[1].split("<")[1].replace("]", "")))
-            vs.append([-1])
+            features.append(int(tree_info[count].split(":")[1].split("<")[0].replace("[f", "")))
+            thresholds.append(float(tree_info[count].split(":")[1].split("<")[1].replace("]", "")))
+            values.append([-1])
             count += 1
             l_wrong_id = tree_info[count].split(",")[0].replace("yes=", "")
             l_correct_id = 0
@@ -37,7 +40,7 @@ def _tree_traversal(tree_info, ls, rs, fs, ts, vs):
                 else:
                     temp += 2
                 l_correct_id += 1
-            ls.append(l_correct_id)
+            lefts.append(l_correct_id)
 
             r_wrong_id = tree_info[count].split(",")[1].replace("no=", "")
             r_correct_id = 0
@@ -48,12 +51,15 @@ def _tree_traversal(tree_info, ls, rs, fs, ts, vs):
                 else:
                     temp += 2
                 r_correct_id += 1
-            rs.append(r_correct_id)
+            rights.append(r_correct_id)
 
             count += 1
 
 
 def _get_tree_parameters_for_gemm(tree_info, n_features):
+    """
+    Parse the tree and prepare it according to the GEMM strategy.
+    """
     lefts = []
     rights = []
     features = []
@@ -63,37 +69,13 @@ def _get_tree_parameters_for_gemm(tree_info, n_features):
         tree_info.replace("[f", "").replace("[", "").replace("]", "").split(), lefts, rights, features, thresholds, values
     )
 
-    if len(lefts) == 1:
-        # XGB model creating tree with just a single leaf node. We transform it
-        # to a model with one internal node.
-        lefts = [1, -1, -1]
-        rights = [2, -1, -1]
-        features = [0, 0, 0]
-        thresholds = [0, 0, 0]
-        values = [np.array([0.0]), values[0], values[0]]
-
-    weights = []
-    biases = []
-
-    values = np.array(values)
-
-    # first hidden layer has all inequalities
-    hidden_weights = []
-    hidden_biases = []
-    for left, feature, thresh in zip(lefts, features, thresholds):
-        if left != -1:
-            hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
-            hidden_biases.append(thresh)
-    weights.append(np.array(hidden_weights).astype("float32"))
-    biases.append(np.array(hidden_biases).astype("float32"))
-    n_splits = len(hidden_weights)
-
-    # second hidden layer has ANDs for each leaf of the decision tree.
-    # depth first enumeration of the tree in order to determine the AND by the path.
-    return get_parameters_for_gemm_generic(lefts, rights, features, thresholds, values, weights, biases, n_splits)
+    return get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features)
 
 
 def _get_tree_parameters_for_tree_trav(tree_info):
+    """
+    Parse the tree and prepare it according to the tree traversal strategies.
+    """
     lefts = []
     rights = []
     features = []
@@ -112,7 +94,7 @@ def _get_tree_parameters_for_tree_trav(tree_info):
         thresholds = [0, 0, 0]
         values = [np.array([0.0]), values[0], values[0]]
 
-    return get_parameters_for_tree_trav_generic(lefts, rights, features, thresholds, values)
+    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
 
 
 def convert_sklearn_xgb_classifier(operator, device, extra_config):

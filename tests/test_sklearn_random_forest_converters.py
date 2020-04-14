@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, Extr
 
 from hummingbird import convert_sklearn
 from sklearn.tree import DecisionTreeClassifier
-from hummingbird.common.exceptions import MissingConverter
+from hummingbird.exceptions import MissingConverter
 
 
 class TestSklearnRandomForestConverter(unittest.TestCase):
@@ -105,7 +105,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
         y = np.random.randint(3, size=100)
 
         model.fit(X, y)
-        pytorch_model = convert_sklearn(model, device="cpu")
+        pytorch_model = convert_sklearn(model)
         self.assertTrue(pytorch_model is not None)
         np.testing.assert_allclose(
             model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06

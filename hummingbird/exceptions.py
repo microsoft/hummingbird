@@ -3,13 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
+
 """
 Common errors.
 """
 _missing_converter = """
 It usually means the pipeline being converted contains a
-transformer or a predictor with no corresponding converter
-implemented in sklearn-pytorch.
+transformer or a predictor with no corresponding converter implemented.
+Please fill an issue at https://github.com/microsoft/hummingbird.
 """
 
 
