@@ -81,7 +81,7 @@ class Operator:
         :param type: A object which uniquely characterizes the type of
                      this operator. For example, it can be a string.
         :param raw_operator: The original operator which defines this operator.
-        """
+        """  # noqa
 
         if isinstance(raw_operator, str):
             raise RuntimeError("Parameter raw_operator must be an object not " "a string '{0}'.".format(raw_operator))
