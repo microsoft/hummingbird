@@ -6,7 +6,7 @@
 
 import numpy as np
 
-from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_regressor_common
+from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
 from ._tree_commons import TreeParameters
 from .._registration import register_converter
 
@@ -74,9 +74,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     n_features = operator.raw_operator._n_features
     tree_infos = operator.raw_operator.booster_.dump_model()["tree_info"]
 
-    return convert_gbdt_regressor_common(
-        tree_infos, _get_tree_parameters, n_features, device=device, extra_config=extra_config
-    )
+    return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, device=device, extra_config=extra_config)
 
 
 # Register the converters.

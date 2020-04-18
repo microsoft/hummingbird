@@ -6,7 +6,7 @@
 
 import numpy as np
 
-from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_regressor_common
+from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
 from ._tree_commons import TreeParameters
 from .._registration import register_converter
 
@@ -111,7 +111,9 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
     if type(alpha) is float:
         alpha = [alpha]
 
-    return convert_gbdt_regressor_common(tree_infos, _get_tree_parameters, n_features, alpha, device, extra_config)
+    return convert_gbdt_common(
+        tree_infos, _get_tree_parameters, n_features, alpha=alpha, device=device, extra_config=extra_config
+    )
 
 
 # Register the converters.
