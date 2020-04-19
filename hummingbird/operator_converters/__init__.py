@@ -8,5 +8,5 @@
 
 from . import gbdt
 from . import lightgbm
-from . import random_forest
+from . import decision_tree
 from . import xgb
