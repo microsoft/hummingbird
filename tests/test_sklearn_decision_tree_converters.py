@@ -125,10 +125,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
     # small tree
     def test_decision_tree_classifier_single_node_tree_converter(self):
         warnings.filterwarnings("ignore")
-        # TODO: There is a bug in perf_tree_trav for RF with node size 1
-        #       somewhere related to tree_commons.py:481
-        # for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
-        for extra_config_param in ["tree_trav", "gemm"]:
+        for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
             X = np.random.rand(1, 1)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(1, size=1)
