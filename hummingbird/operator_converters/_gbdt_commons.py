@@ -7,179 +7,101 @@
 import torch
 import numpy as np
 
-from ._tree_commons import get_tree_implementation_by_config_or_depth, find_max_depth
-from ._tree_commons import get_parameters_for_tree_trav_common, get_parameters_for_gemm_common
-from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble, TreeImpl
+from ._tree_commons import get_tree_params_and_type, get_parameters_for_tree_trav_common, get_parameters_for_gemm_common
+from ._tree_commons import GEMMTreeEnsemble, TreeTraversalTreeEnsemble, PerfectTreeTraversalTreeEnsemble, TreeImpl
 
 
-class GEMMGBDT(BatchedTreeEnsemble):
+class GEMMGBDT(GEMMTreeEnsemble):
     """
-    Class implementing the GEMM strategy in PyTorch.
+    Class implementing the GEMM strategy (in PyTorch) for GBDT models.
     """
 
     def __init__(self, net_parameters, n_features, classes=None, learning_rate=None, alpha=None, device=None):
-        super(GEMMGBDT, self).__init__(net_parameters, n_features, 1)
-        self.perform_class_select = False
-        self.binary_classification = False
+        super(GEMMGBDT, self).__init__(net_parameters, n_features, classes, 1)
         self.n_gbdt_classes = 1
-        self.n_classes = 1
         self.learning_rate = learning_rate
-        self.regression = False
-        self.alpha = alpha
 
-        if self.alpha is not None:
+        if alpha is not None:
             self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
 
-        # Are we doing regression or classification?
-        if classes is None:
-            self.regression = True
-        else:
-            if min(classes) != 0 or max(classes) != len(classes) - 1:
-                self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
-                self.perform_class_select = True
-
+        if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
             if self.n_gbdt_classes == 1:
                 self.binary_classification = True
 
         self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
 
-    def forward(self, x):
-        output = super().forward(x)
-        output = torch.squeeze(output).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+    def aggregation(self, x):
+        return torch.squeeze(x).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
-        if self.learning_rate is not None:
-            output = output * self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
-        if self.regression:
-            return output
+    def calibation(self, x):
         if self.binary_classification:
-            output = torch.sigmoid(output)
-            output = torch.cat([1 - output, output], dim=1)
+            output = torch.sigmoid(x)
+            return torch.cat([1 - output, output], dim=1)
         else:
-            output = torch.softmax(output, dim=1)
-        if self.perform_class_select:
-            return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
-        else:
-            return torch.argmax(output, dim=1), output
+            return torch.softmax(x, dim=1)
 
 
-class TreeTraversalGBDT(BeamTreeEnsemble):
+class TreeTraversalGBDT(TreeTraversalTreeEnsemble):
     """
     Class implementing the Tree Traversal strategy in PyTorch.
     """
 
     def __init__(self, net_parameters, max_detph, n_features, classes=None, learning_rate=None, alpha=None, device=None):
-        super(TreeTraversalGBDT, self).__init__(net_parameters, max_detph, n_features, 1)
-        self.perform_class_select = False
-        self.binary_classification = False
+        super(TreeTraversalGBDT, self).__init__(net_parameters, max_detph, n_features, classes, 1)
         self.n_gbdt_classes = 1
-        self.n_classes = 1
         self.learning_rate = learning_rate
-        self.regression = False
-        self.alpha = alpha
 
-        if self.alpha is not None:
+        if alpha is not None:
             self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
 
-        # Are we doing regression or classification?
-        if classes is None:
-            self.regression = True
-        else:
-            if min(classes) != 0 or max(classes) != len(classes) - 1:
-                self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
-                self.perform_class_select = True
-
+        if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
             if self.n_gbdt_classes == 1:
                 self.binary_classification = True
 
         self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
 
-    def forward(self, x):
-        output = super().forward(x)
-        output = output.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+    def aggregation(self, x):
+        return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
-        if self.learning_rate is not None:
-            output = output * self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
-        if self.regression:
-            return output
+    def calibation(self, x):
         if self.binary_classification:
-            output = torch.sigmoid(output)
-            output = torch.cat([1 - output, output], dim=1)
+            output = torch.sigmoid(x)
+            return torch.cat([1 - output, output], dim=1)
         else:
-            output = torch.softmax(output, dim=1)
-        if self.perform_class_select:
-            return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
-        else:
-            return torch.argmax(output, dim=1), output
+            return torch.softmax(x, dim=1)
 
 
-class PerfectTreeTraversalGBDT(BeamPPTreeEnsemble):
+class PerfectTreeTraversalGBDT(PerfectTreeTraversalTreeEnsemble):
     """
     Class implementing the Perfect Tree Traversal strategy in PyTorch.
     """
 
     def __init__(self, net_parameters, max_depth, n_features, classes=None, learning_rate=None, alpha=None, device=None):
-        super(PerfectTreeTraversalGBDT, self).__init__(net_parameters, max_depth, n_features, 1)
-        self.perform_class_select = False
-        self.binary_classification = False
+        super(PerfectTreeTraversalGBDT, self).__init__(net_parameters, max_depth, n_features, classes, 1)
         self.n_gbdt_classes = 1
-        self.n_classes = 1
         self.learning_rate = learning_rate
-        self.regression = False
-        self.alpha = alpha
 
-        if self.alpha is not None:
+        if alpha is not None:
             self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
 
-        # Are we doing regression or classification?
-        if classes is None:
-            self.regression = True
-        else:
-            if min(classes) != 0 or max(classes) != len(classes) - 1:
-                self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
-                self.perform_class_select = True
-
+        if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
             if self.n_gbdt_classes == 1:
                 self.binary_classification = True
 
         self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
 
-    def forward(self, x):
-        output = super().forward(x)
-        output = output.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+    def aggregation(self, x):
+        return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
-        if self.learning_rate is not None:
-            output = output * self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
-        if self.regression:
-            return output
+    def calibation(self, x):
         if self.binary_classification:
-            output = torch.sigmoid(output)
-            output = torch.cat([1 - output, output], dim=1)
+            output = torch.sigmoid(x)
+            return torch.cat([1 - output, output], dim=1)
         else:
-            output = torch.softmax(output, dim=1)
-        if self.perform_class_select:
-            return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
-        else:
-            return torch.argmax(output, dim=1), output
-
-
-def _get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
-    """
-    Populate the parameters from the trees and pick the tree implementation strategy.
-    """
-    tree_parameters = [get_tree_parameters(tree_info) for tree_info in tree_infos]
-    max_depth = max(1, find_max_depth(tree_parameters))
-    tree_type = get_tree_implementation_by_config_or_depth(extra_config, max_depth)
-
-    return tree_parameters, max_depth, tree_type
+            return torch.softmax(x, dim=1)
 
 
 def convert_gbdt_classifier_common(
@@ -223,7 +145,7 @@ def convert_gbdt_common(
     assert get_tree_parameters is not None
     assert n_features is not None
 
-    tree_parameters, max_depth, tree_type = _get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config)
+    tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config)
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
