@@ -4,12 +4,9 @@
 # license information.
 # --------------------------------------------------------------------------
 
-# To register a converter for scikit-learn operators,
-# import associated modules here.
+# To register a converter for scikit-learn API operators, import associated modules here.
 
-from . import random_forest
-from . import xgb
+from . import gbdt
 from . import lightgbm
-
-
-__all__ = [random_forest, xgb, lightgbm]
+from . import decision_tree
+from . import xgb

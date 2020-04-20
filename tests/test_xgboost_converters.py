@@ -27,35 +27,35 @@ class TestXGBoostConverter(unittest.TestCase):
                 model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
             )
 
-    # binary classifier
+    # Binary classifier
     def test_xgb_binary_classifier_converter(self):
         self._run_xgb_classifier_converter(2)
 
-    # gemm classifier
+    # Gemm classifier
     def test_xgb_gemm_classifier_converter(self):
         self._run_xgb_classifier_converter(2, extra_config={"tree_implementation": "gemm"})
 
-    # tree_trav classifier
+    # Tree_trav classifier
     def test_xgb_tree_trav_classifier_converter(self):
         self._run_xgb_classifier_converter(2, extra_config={"tree_implementation": "tree_trav"})
 
-    # perf_tree_trav classifier
+    # Perf_tree_trav classifier
     def test_xgb_perf_tree_trav_classifier_converter(self):
         self._run_xgb_classifier_converter(2, extra_config={"tree_implementation": "perf_tree_trav"})
 
-    # multi classifier
+    # Multi classifier
     def test_xgb_multi_classifier_converter(self):
         self._run_xgb_classifier_converter(3)
 
-    # gemm multi classifier
+    # Gemm multi classifier
     def test_xgb_gemm_multi_classifier_converter(self):
         self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
-    # tree_trav multi classifier
+    # Tree_trav multi classifier
     def test_xgb_tree_trav_multi_classifier_converter(self):
         self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
-    # perf_tree_trav multi classifier
+    # Perf_tree_trav multi classifier
     def test_xgb_perf_tree_trav_multi_classifier_converter(self):
         self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
@@ -74,19 +74,19 @@ class TestXGBoostConverter(unittest.TestCase):
                 model.predict(X), pytorch_model(torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06
             )
 
-    # regressor
+    # Regressor
     def test_xgb_binary_regressor_converter(self):
         self._run_xgb_regressor_converter(1000)
 
-    # gemm regressor
+    # Gemm regressor
     def test_xgb_gemm_regressor_converter(self):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "gemm"})
 
-    # tree_trav regressor
+    # Tree_trav regressor
     def test_xgb_tree_trav_regressor_converter(self):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "tree_trav"})
 
-    # perf_tree_trav regressor
+    # Perf_tree_trav regressor
     def test_xgb_perf_tree_trav_regressor_converter(self):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 

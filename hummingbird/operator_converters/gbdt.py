@@ -3,273 +3,64 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
-# GBDT -  Gradient Boosting Decision Tree
+
 import warnings
 
-import torch
 import numpy as np
-from ._tree_commons import (
-    get_parameters_for_gemm,
-    get_parameters_for_tree_trav_sklearn_estimators,
-    get_gbdt_by_config_or_depth,
-)
-from ._tree_commons import BatchedTreeEnsemble, BeamTreeEnsemble, BeamPPTreeEnsemble, TreeImpl
-from ..common._registration import register_converter
+from onnxconverter_common.registration import register_converter
+
+from ._gbdt_commons import convert_gbdt_classifier_common
+from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn
 
 
-class BatchGBDTClassifier(BatchedTreeEnsemble):
-    def __init__(self, net_parameters, n_features, classes, learning_rate=None, alpha=None, device=None):
-        super(BatchGBDTClassifier, self).__init__(net_parameters, n_features, 1)
-        self.perform_class_select = False
-        if min(classes) != 0 or max(classes) != len(classes) - 1:
-            self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
-            self.perform_class_select = True
+def convert_sklearn_gbdt_classifier(model, device, extra_config):
+    """
+    Converter for Sklearn's GBDT classifier.
+    """
+    assert model is not None
 
-        self.n_classes = 1
-        self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
-        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
+    # Get tree information out of the model.
+    tree_infos = model.raw_operator.estimators_
+    n_features = model.raw_operator.n_features_
+    learning_rate = model.raw_operator.learning_rate
+    classes = model.raw_operator.classes_.tolist()
+    n_classes = len(classes)
 
-        self.binary_classification = False
-        if self.n_gbdt_classes == 1:
-            self.binary_classification = True
-
-        self.learning_rate = learning_rate
-        if alpha is not None:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
-        else:
-            self.alpha = None
-
-    def forward(self, x):
-        output = super().forward(x)
-        output = torch.squeeze(output).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
-        if self.learning_rate is not None:
-            output = output * self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
-
-        if self.binary_classification:
-            output = torch.sigmoid(output)
-            output = torch.cat([1 - output, output], dim=1)
-        else:
-            output = torch.softmax(output, dim=1)
-
-        if self.perform_class_select:
-            return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
-        else:
-            return torch.argmax(output, dim=1), output
-
-
-class BatchGBDTRegressor(BatchedTreeEnsemble):
-    def __init__(self, net_parameters, n_features, classes=[0], learning_rate=None, alpha=None, device=None):
-
-        super(BatchGBDTRegressor, self).__init__(net_parameters, n_features, 1)
-
-        self.n_gbdt_classes = 1
-        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
-
-        self.learning_rate = learning_rate
-        if alpha is not None:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
-        else:
-            self.alpha = None
-
-    def forward(self, x):
-        output = super().forward(x)
-        output = torch.squeeze(output).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
-        if self.learning_rate is not None:
-            output = output * self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
-
-        return output
-
-
-class BeamGBDTClassifier(BeamTreeEnsemble):
-    def __init__(self, net_parameters, n_features, classes, learning_rate=None, alpha=None, device=None):
-        super(BeamGBDTClassifier, self).__init__(net_parameters, n_features, 1)
-        self.perform_class_select = False
-        if min(classes) != 0 or max(classes) != len(classes) - 1:
-            self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
-            self.perform_class_select = True
-
-        self.n_classes = 1
-        self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
-        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
-
-        self.binary_classification = False
-        if self.n_gbdt_classes == 1:
-            self.binary_classification = True
-
-        self.learning_rate = learning_rate
-        if alpha is not None:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
-        else:
-            self.alpha = None
-
-    def forward(self, x):
-        output = super().forward(x)
-        output = output.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
-        if self.learning_rate is not None:
-            output = output * self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
-
-        if self.binary_classification:
-            output = torch.sigmoid(output)
-            output = torch.cat([1 - output, output], dim=1)
-        else:
-            output = torch.softmax(output, dim=1)
-
-        if self.perform_class_select:
-            return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
-        else:
-            return torch.argmax(output, dim=1), output
-
-
-class BeamGBDTRegressor(BeamTreeEnsemble):
-    def __init__(self, net_parameters, n_features, learning_rate=None, alpha=None, device=None):
-        super(BeamGBDTRegressor, self).__init__(net_parameters, n_features, 1)
-
-        self.n_classes = 1
-        self.n_gbdt_classes = 1
-        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
-
-        self.learning_rate = learning_rate
-        if alpha is not None:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor([alpha]), requires_grad=False)
-        else:
-            self.alpha = None
-
-    def forward(self, x):
-        output = super().forward(x)
-        output = output.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
-        if self.learning_rate is not None:
-            output = output * self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
-
-        return output
-
-
-class BeamPPGBDTClassifier(BeamPPTreeEnsemble):
-    def __init__(self, net_parameters, n_features, classes, learning_rate=None, alpha=None, device=None):
-        super(BeamPPGBDTClassifier, self).__init__(net_parameters, n_features, 1)
-
-        self.perform_class_select = False
-        if min(classes) != 0 or max(classes) != len(classes) - 1:
-            self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
-            self.perform_class_select = True
-
-        self.n_classes = 1
-        self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
-        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
-
-        self.binary_classification = False
-        if self.n_gbdt_classes == 1:
-            self.binary_classification = True
-
-        self.learning_rate = learning_rate
-        if alpha is not None:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
-        else:
-            self.alpha = None
-
-    def forward(self, x):
-        output = super().forward(x)
-        output = output.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
-        if self.learning_rate is not None:
-            output = output * self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
-
-        if self.binary_classification:
-            output = torch.sigmoid(output)
-            output = torch.cat([1 - output, output], dim=1)
-        else:
-            output = torch.softmax(output, dim=1)
-
-        if self.perform_class_select:
-            return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
-        else:
-            return torch.argmax(output, dim=1), output
-
-
-class BeamPPGBDTRegressor(BeamPPTreeEnsemble):
-    def __init__(self, net_parameters, n_features, learning_rate=None, alpha=None, device=None):
-        super(BeamPPGBDTRegressor, self).__init__(net_parameters, n_features, 1)
-
-        self.n_classes = 1
-        self.n_gbdt_classes = 1
-        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
-
-        self.learning_rate = learning_rate
-        if alpha is not None:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor([alpha]), requires_grad=False)
-        else:
-            self.alpha = None
-
-    def forward(self, x):
-        output = super().forward(x)
-        output = output.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
-        if self.learning_rate is not None:
-            output = output * self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
-
-        return output
-
-
-def convert_sklearn_gbdt_classifier(operator, device, extra_config):
-    sklearn_rf_classifier = operator.raw_operator
-    n_features = sklearn_rf_classifier.n_features_
-    learning_rate = operator.raw_operator.learning_rate
-
-    # analyze classes
-    classes_list = operator.raw_operator.classes_.tolist()
-    if not all(isinstance(c, int) for c in classes_list):
-        raise RuntimeError("GBDT Classifier translation only supports integer class labels")
-    n_classes = len(operator.raw_operator.classes_)
+    # Analyze classes.
+    if not all(isinstance(c, int) for c in classes):
+        raise RuntimeError("GBDT Classifier translation only supports integer class labels.")
     if n_classes == 2:
         n_classes -= 1
-    sklearn_rf_classifier.estimators_ = [
-        sklearn_rf_classifier.estimators_[i][j]
-        for j in range(n_classes)
-        for i in range(len(sklearn_rf_classifier.estimators_))
-    ]
 
-    if operator.raw_operator.init == "zero":
+    # Reshape the tree_infos to a more generic format.
+    tree_infos = [tree_infos[i][j] for j in range(n_classes) for i in range(len(tree_infos))]
+
+    # Get the value for Alpha.
+    if model.raw_operator.init == "zero":
         alpha = [[0.0]]
-    elif operator.raw_operator.init is None:
+    elif model.raw_operator.init is None:
         if n_classes == 1:
-            alpha = [[np.log(operator.raw_operator.init_.class_prior_[1] / (1 - operator.raw_operator.init_.class_prior_[1]))]]
+            alpha = [[np.log(model.raw_operator.init_.class_prior_[1] / (1 - model.raw_operator.init_.class_prior_[1]))]]
         else:
-            alpha = [[np.log(operator.raw_operator.init_.class_prior_[i]) for i in range(n_classes)]]
+            alpha = [[np.log(model.raw_operator.init_.class_prior_[i]) for i in range(n_classes)]]
     else:
-        raise RuntimeError("Custom initializers for GBDT are not yet supported in hummingbird")
+        raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
 
-    max_depth = sklearn_rf_classifier.max_depth
-    tree_type = get_gbdt_by_config_or_depth(extra_config, max_depth, low=4)
+    # For sklear models we need to massage the parameters a bit before generating the parameters for tree_trav.
+    extra_config["get_parameters_for_tree_trav"] = get_parameters_for_tree_trav_sklearn
 
-    # TODO: automatically find the max tree depth by traversing the trees without relying on user input.
-    if tree_type == TreeImpl.gemm:
-        net_parameters = [get_parameters_for_gemm(e) for e in sklearn_rf_classifier.estimators_]
-        return BatchGBDTClassifier(net_parameters, n_features, classes_list, learning_rate, alpha, device)
-
-    net_parameters = [get_parameters_for_tree_trav_sklearn_estimators(e) for e in sklearn_rf_classifier.estimators_]
-    if tree_type == TreeImpl.perf_tree_trav:
-        return BeamPPGBDTClassifier(net_parameters, n_features, classes_list, learning_rate, alpha, device)
-    else:  # Remaining possible case: tree_type == TreeImpl.tree_trav
-        if sklearn_rf_classifier.max_depth is None:
-            warnings.warn(
-                "GBDT model does not have a defined max_depth value. Consider setting one as it "
-                "will help the translator to pick a better translation method"
-            )
-        elif sklearn_rf_classifier.max_depth > 10:
-            warnings.warn(
-                "GBDT model max_depth value is {0}. Consider setting a smaller value as it improves"
-                " translated tree scoring performance.".format(sklearn_rf_classifier.max_depth)
-            )
-        return BeamGBDTClassifier(net_parameters, n_features, classes_list, learning_rate, alpha, device)
+    return convert_gbdt_classifier_common(
+        tree_infos,
+        get_parameters_for_sklearn_common,
+        n_features,
+        n_classes,
+        classes,
+        learning_rate,
+        alpha,
+        device,
+        extra_config,
+    )
 
 
+# Register the converters.
 register_converter("SklearnGradientBoostingClassifier", convert_sklearn_gbdt_classifier)

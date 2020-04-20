@@ -6,78 +6,73 @@
 
 from copy import deepcopy
 import numpy as np
-from .common._topology import convert_topology
-from ._parse import parse_sklearn_model
 
-# Invoke the registration of all our converters and shape calculators.
+from onnxconverter_common.registration import get_converter
+
+from ._container import PyTorchBackendModel
+from .exceptions import MissingConverter
+from ._parse import parse_sklearn_api_model
+from .utils import torch_installed, lightgbm_installed, xgboost_installed
+
+# Invoke the registration of all our converters.
 from . import operator_converters  # noqa
 
 
 def convert_sklearn(model, test_input=None, device=None, extra_config={}):
     """
-    This function produces an equivalent PyTorch model of the given scikit-learn model.
-    The supported converters is returned by function
-    :func:`supported_converters <hummingbird.supported_converters>`.
+    This function produces, given a scikit-learn model, an equivalent model in the selected backend.
+    The supported operators and backends be found at :func:`supported_operators <hummingbird._supported_opeartors>`.
 
     For pipeline conversion, user needs to make sure each component
     is one of our supported items.
 
     This function converts the specified *scikit-learn* model into its *PyTorch* counterpart.
-    Note that for all conversions, initial types are required.
-    *TorchScript* model file name can also be specified.
 
     :param model: A scikit-learn model
     :param test_input: some input data used to trace the model execution
-    :param device: torch.device Which device to translate them model
+    :param device: Which device to translate the model to. CPU by default
     :param extra_config: Extra configurations to be used by the individual operator converters
-    :return: A PyTorch model which is equivalent to the input scikit-learn model
+    :return: A model implemented in PyTorch, which is equivalent to the input scikit-learn model
+    """
+    assert torch_installed(), "To use Hummingbird you need to instal torch."
 
-    .. note::
-        If a pipeline includes an instance of
-        `ColumnTransformer <https://scikit-learn.org/stable/modules/generated/sklearn.compose.ColumnTransformer.html>`_,
-        *scikit-learn* allow the user to specify columns by names. This option is not supported
-        by *sklearn-pytorch* as features names could be different in input data and the PyTorch model.
-
-    """  # noqa
-
-    # Parse scikit-learn model as our internal data structure
-    # (i.e., Topology)
-    # we modify the scikit learn model during optimizations
+    # Parse scikit-learn model as our internal data structure (i.e., Topology)
+    # We modify the scikit learn model during optimizations.
     model = deepcopy(model)
-    topology = parse_sklearn_model(model)
+    topology = parse_sklearn_api_model(model)
 
-    # Convert our Topology object into PyTorch. The outcome is a PyTorch model.
-    pytorch_model = convert_topology(topology, device, extra_config).eval()
-    if device is not None:
-        pytorch_model = pytorch_model.to(device)
-    return pytorch_model
-
-
-"""
-This function is used to generate a PyTorch model from a given LighGBM model
-:param model: A LightGBM model (trained using the scikit-learn API)
-:param test_input: some input data used to trace the model execution
-:param device: torch.device Which device to translate them model
-:param extra_config: Extra configurations to be used by the individual operator converters
-:return: A PyTorch model which is equivalent to the input LightGBM model
-"""
+    # Convert the Topology object into a PyTorch model.
+    hb_model = _convert_topology(topology, device, extra_config)
+    return hb_model
 
 
 def convert_lightgbm(model, test_input=None, device=None, extra_config={}):
+    """
+    This function is used to generate a PyTorch model from a given LightGBM model
+    :param model: A LightGBM model (trained using the scikit-learn API)
+    :param test_input: some input data used to trace the model execution
+    :param device: Which device to translate the model to. CPU by default
+    :param extra_config: Extra configurations to be used by the individual operator converters
+    :return: A PyTorch model which is equivalent to the input LightGBM model
+    """
+    assert lightgbm_installed(), "To convert LightGBM models you need to instal LightGBM."
+
     return convert_sklearn(model, test_input, device, extra_config)
 
 
-"""
-This function is used to generate a PyTorch model from a given XGBoost model
-:param model: A XGBoost model (trained using the scikit-learn API)
-:param test_input: some input data used to trace the model execution
-:param device: torch.device Which device to translate them model
-:param extra_config: Extra configurations to be used by the individual operator converters
-:return: A PyTorch model which is equivalent to the input XGBoost model
-"""
-
-
 def convert_xgboost(model, test_input, device=None, extra_config={}):
+    """
+    This function is used to generate a PyTorch model from a given XGBoost model
+    :param model: A XGBoost model (trained using the scikit-learn API)
+    :param test_input: some input data used to trace the model execution
+    :param device: Which device to translate the model to. CPU by default
+    :param extra_config: Extra configurations to be used by the individual operator converters
+    :return: A PyTorch model which is equivalent to the input XGBoost model
+    """
+    assert xgboost_installed(), "To convert XGboost models you need to instal XGBoost."
+
+    # For XGBoostRegressor and Classifier have different API for extracting the number of features.
+    # In the former case we need to infer them from the test_input.
     if "_features_count" in dir(model):
         extra_config["n_features"] = model._features_count
     elif test_input is not None:
@@ -95,3 +90,33 @@ def convert_xgboost(model, test_input, device=None, extra_config={}):
                 Please pass some test_input to the converter."
         )
     return convert_sklearn(model, test_input, device, extra_config)
+
+
+def _convert_topology(topology, device=None, extra_config={}):
+    """
+    This function is used to convert our Topology object defined in _parser.py into a PyTorch model.
+    :param topology: The Topology object we are going to convert
+    :param device: torch.device which device to translate the model
+    :param extra_config: Extra configurations to be used by individual operator converters
+    :return: a PyTorch model
+    """
+
+    operator_map = {}
+    for operator in topology.topological_operator_iterator():
+        try:
+            converter = get_converter(operator.type)
+            operator_map[operator.full_name] = converter(operator, device, extra_config)
+        except ValueError:
+            raise MissingConverter(
+                "Unable to find converter for {} type {} with extra config: {}".format(
+                    operator.type, type(getattr(operator, "raw_model", None)), extra_config
+                )
+            )
+
+    pytorch_model = PyTorchBackendModel(
+        topology.raw_model.input_names, topology.raw_model.output_names, operator_map, topology, extra_config
+    ).eval()
+
+    if device is not None:
+        pytorch_model = pytorch_model.to(device)
+    return pytorch_model
