@@ -79,7 +79,7 @@ class AbstractTreeEnsemble(ABC):
         pass
 
     @abstractmethod
-    def calibation(self, x):
+    def calibration(self, x):
         """
         Method implementating the calibration operation for classifiers.
         """
@@ -163,7 +163,7 @@ class GEMMTreeEnsemble(AbstractPyTorchTreeEnsemble):
     def aggregation(self, x):
         return x
 
-    def calibation(self, x):
+    def calibration(self, x):
         return x
 
     def forward(self, x):
@@ -190,7 +190,7 @@ class GEMMTreeEnsemble(AbstractPyTorchTreeEnsemble):
         if self.regression:
             return x
 
-        x = self.calibation(x)
+        x = self.calibration(x)
 
         if self.perform_class_select:
             return torch.index_select(self.classes, 0, torch.argmax(x, dim=1)), x
@@ -239,7 +239,7 @@ class TreeTraversalTreeEnsemble(AbstractPyTorchTreeEnsemble):
     def aggregation(self, x):
         return x
 
-    def calibation(self, x):
+    def calibration(self, x):
         return x
 
     def forward(self, x):
@@ -271,7 +271,7 @@ class TreeTraversalTreeEnsemble(AbstractPyTorchTreeEnsemble):
         if self.regression:
             return output
 
-        output = self.calibation(output)
+        output = self.calibration(output)
 
         if self.perform_class_select:
             return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
@@ -333,7 +333,7 @@ class PerfectTreeTraversalTreeEnsemble(AbstractPyTorchTreeEnsemble):
     def aggregation(self, x):
         return x
 
-    def calibation(self, x):
+    def calibration(self, x):
         return x
 
     def forward(self, x):
@@ -360,7 +360,7 @@ class PerfectTreeTraversalTreeEnsemble(AbstractPyTorchTreeEnsemble):
         if self.regression:
             return output
 
-        output = self.calibation(output)
+        output = self.calibration(output)
 
         if self.perform_class_select:
             return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output

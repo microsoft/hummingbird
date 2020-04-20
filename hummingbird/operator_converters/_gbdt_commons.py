@@ -34,7 +34,7 @@ class GEMMGBDT(GEMMTreeEnsemble):
     def aggregation(self, x):
         return torch.squeeze(x).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
-    def calibation(self, x):
+    def calibration(self, x):
         if self.binary_classification:
             output = torch.sigmoid(x)
             return torch.cat([1 - output, output], dim=1)
@@ -65,7 +65,7 @@ class TreeTraversalGBDT(TreeTraversalTreeEnsemble):
     def aggregation(self, x):
         return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
-    def calibation(self, x):
+    def calibration(self, x):
         if self.binary_classification:
             output = torch.sigmoid(x)
             return torch.cat([1 - output, output], dim=1)
@@ -96,7 +96,7 @@ class PerfectTreeTraversalGBDT(PerfectTreeTraversalTreeEnsemble):
     def aggregation(self, x):
         return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
-    def calibation(self, x):
+    def calibration(self, x):
         if self.binary_classification:
             output = torch.sigmoid(x)
             return torch.cat([1 - output, output], dim=1)
@@ -157,7 +157,7 @@ def convert_gbdt_common(
         ]
         return GEMMGBDT(net_parameters, n_features, classes, learning_rate, alpha, device)
 
-    # Some model requires some additional massagging of the parameters before generating the tree_trav implementation.
+    # Some models require some additional massagging of the parameters before generating the tree_trav implementation.
     get_parameters_for_tree_trav = get_parameters_for_tree_trav_common
     if "get_parameters_for_tree_trav" in extra_config:
         get_parameters_for_tree_trav = extra_config["get_parameters_for_tree_trav"]

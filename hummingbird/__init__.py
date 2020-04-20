@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 """
-Main entry point to the Humminbird converters.
+Main entry point to the Hummingbird converters.
 """
 
 __version__ = "0.0.1"

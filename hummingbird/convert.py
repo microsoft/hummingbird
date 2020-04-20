@@ -21,7 +21,7 @@ from . import operator_converters  # noqa
 def convert_sklearn(model, test_input=None, device=None, extra_config={}):
     """
     This function produces, given a scikit-learn model, an equivalent model in the selected backend.
-    The supported operators and backends be found at :func:`supported_converters <hummingbird._supported_opeartors>`.
+    The supported operators and backends be found at :func:`supported_operators <hummingbird._supported_opeartors>`.
 
     For pipeline conversion, user needs to make sure each component
     is one of our supported items.
@@ -30,7 +30,7 @@ def convert_sklearn(model, test_input=None, device=None, extra_config={}):
 
     :param model: A scikit-learn model
     :param test_input: some input data used to trace the model execution
-    :param device: Which device to translate the model to. CPU by defauls
+    :param device: Which device to translate the model to. CPU by default
     :param extra_config: Extra configurations to be used by the individual operator converters
     :return: A model implemented in PyTorch, which is equivalent to the input scikit-learn model
     """
@@ -48,13 +48,12 @@ def convert_sklearn(model, test_input=None, device=None, extra_config={}):
 
 def convert_lightgbm(model, test_input=None, device=None, extra_config={}):
     """
-    This function is used to generate a PyTorch model from a given LighGBM model
+    This function is used to generate a PyTorch model from a given LightGBM model
     :param model: A LightGBM model (trained using the scikit-learn API)
     :param test_input: some input data used to trace the model execution
-    :param backend: Which backend to translate the model to. PyTorch by default
-    :param device: Which device to translate the model to. CPU by defauls
+    :param device: Which device to translate the model to. CPU by default
     :param extra_config: Extra configurations to be used by the individual operator converters
-    :return: A backend model which is equivalent to the input LightGBM model
+    :return: A PyTorch model which is equivalent to the input LightGBM model
     """
     assert lightgbm_installed(), "To convert LightGBM models you need to instal LightGBM."
 
@@ -66,7 +65,7 @@ def convert_xgboost(model, test_input, device=None, extra_config={}):
     This function is used to generate a PyTorch model from a given XGBoost model
     :param model: A XGBoost model (trained using the scikit-learn API)
     :param test_input: some input data used to trace the model execution
-    :param device: Which device to translate the model to. CPU by defauls
+    :param device: Which device to translate the model to. CPU by default
     :param extra_config: Extra configurations to be used by the individual operator converters
     :return: A PyTorch model which is equivalent to the input XGBoost model
     """
