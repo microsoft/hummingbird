@@ -17,7 +17,7 @@ Collections of classes and functions shared among all tree converters.
 
 class Node:
     """
-    Class definig a tree node.
+    Class defining a tree node.
     """
 
     def __init__(self, id=None):
