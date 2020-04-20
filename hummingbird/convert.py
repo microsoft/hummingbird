@@ -7,9 +7,12 @@
 from copy import deepcopy
 import numpy as np
 
-from .utils import torch_installed, lightgbm_installed, xgboost_installed
-from ._topology import convert_topology
+from onnxconverter_common.registration import get_converter
+
+from ._container import PyTorchBackendModel
+from .exceptions import MissingConverter
 from ._parse import parse_sklearn_api_model
+from .utils import torch_installed, lightgbm_installed, xgboost_installed
 
 # Invoke the registration of all our converters.
 from . import operator_converters  # noqa
@@ -38,8 +41,8 @@ def convert_sklearn(model, test_input=None, device=None, extra_config={}):
     model = deepcopy(model)
     topology = parse_sklearn_api_model(model)
 
-    # Convert our Topology object into PyTorch.
-    hb_model = convert_topology(topology, device, extra_config)
+    # Convert the Topology object into a PyTorch model.
+    hb_model = _convert_topology(topology, device, extra_config)
     return hb_model
 
 
@@ -88,3 +91,33 @@ def convert_xgboost(model, test_input, device=None, extra_config={}):
                 Please pass some test_input to the converter."
         )
     return convert_sklearn(model, test_input, device, extra_config)
+
+
+def _convert_topology(topology, device=None, extra_config={}):
+    """
+    This function is used to convert our Topology object defined in _parser.py into a PyTorch model.
+    :param topology: The Topology object we are going to convert
+    :param device: torch.device which device to translate the model
+    :param extra_config: Extra configurations to be used by individual operator converters
+    :return: a PyTorch model
+    """
+
+    operator_map = {}
+    for operator in topology.topological_operator_iterator():
+        try:
+            converter = get_converter(operator.type)
+            operator_map[operator.full_name] = converter(operator, device, extra_config)
+        except ValueError:
+            raise MissingConverter(
+                "Unable to find converter for {} type {} with extra config: {}".format(
+                    operator.type, type(getattr(operator, "raw_model", None)), extra_config
+                )
+            )
+
+    pytorch_model = PyTorchBackendModel(
+        topology.raw_model.input_names, topology.raw_model.output_names, operator_map, topology, extra_config
+    ).eval()
+
+    if device is not None:
+        pytorch_model = pytorch_model.to(device)
+    return pytorch_model

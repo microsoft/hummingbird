@@ -5,10 +5,10 @@
 # --------------------------------------------------------------------------
 
 import numpy as np
+from onnxconverter_common.registration import register_converter
 
 from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
 from ._tree_commons import TreeParameters
-from .._registration import register_converter
 
 
 def _tree_traversal(node, lefts, rights, features, thresholds, values, count):

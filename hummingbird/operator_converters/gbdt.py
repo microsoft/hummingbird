@@ -7,9 +7,10 @@
 import warnings
 
 import numpy as np
+from onnxconverter_common.registration import register_converter
+
 from ._gbdt_commons import convert_gbdt_classifier_common
 from ._tree_commons import get_parameters_sklearn_common, get_parameters_for_tree_trav_sklearn
-from .._registration import register_converter
 
 
 def convert_sklearn_gbdt_classifier(model, device, extra_config):

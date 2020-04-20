@@ -7,11 +7,11 @@ import warnings
 import copy
 
 import torch
+from onnxconverter_common.registration import register_converter
 
 from ._tree_commons import get_parameters_sklearn_common, get_parameters_for_tree_trav_sklearn
 from ._tree_commons import get_tree_params_and_type, get_parameters_for_gemm_common
 from ._tree_commons import GEMMTreeEnsemble, TreeTraversalTreeEnsemble, PerfectTreeTraversalTreeEnsemble, TreeImpl
-from .._registration import register_converter
 
 
 class GEMMDecisionTree(GEMMTreeEnsemble):
