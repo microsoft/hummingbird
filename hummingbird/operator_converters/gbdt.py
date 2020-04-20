@@ -10,7 +10,7 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 
 from ._gbdt_commons import convert_gbdt_classifier_common
-from ._tree_commons import get_parameters_sklearn_common, get_parameters_for_tree_trav_sklearn
+from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn
 
 
 def convert_sklearn_gbdt_classifier(model, device, extra_config):
@@ -50,7 +50,15 @@ def convert_sklearn_gbdt_classifier(model, device, extra_config):
     extra_config["get_parameters_for_tree_trav"] = get_parameters_for_tree_trav_sklearn
 
     return convert_gbdt_classifier_common(
-        tree_infos, get_parameters_sklearn_common, n_features, n_classes, classes, learning_rate, alpha, device, extra_config
+        tree_infos,
+        get_parameters_for_sklearn_common,
+        n_features,
+        n_classes,
+        classes,
+        learning_rate,
+        alpha,
+        device,
+        extra_config,
     )
 
 

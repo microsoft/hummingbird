@@ -8,16 +8,21 @@ import torch
 import numpy as np
 
 from ._tree_commons import get_tree_params_and_type, get_parameters_for_tree_trav_common, get_parameters_for_gemm_common
-from ._tree_commons import GEMMTreeEnsemble, TreeTraversalTreeEnsemble, PerfectTreeTraversalTreeEnsemble, TreeImpl
+from ._tree_implementations import GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl, TreeImpl
 
 
-class GEMMGBDT(GEMMTreeEnsemble):
+"""
+Collections of classes and functions shared among GBDT converters.
+"""
+
+
+class GEMMGBDTImpl(GEMMTreeImpl):
     """
     Class implementing the GEMM strategy (in PyTorch) for GBDT models.
     """
 
     def __init__(self, net_parameters, n_features, classes=None, learning_rate=None, alpha=None, device=None):
-        super(GEMMGBDT, self).__init__(net_parameters, n_features, classes, 1)
+        super(GEMMGBDTImpl, self).__init__(net_parameters, n_features, classes, 1)
         self.n_gbdt_classes = 1
         self.learning_rate = learning_rate
 
@@ -42,13 +47,13 @@ class GEMMGBDT(GEMMTreeEnsemble):
             return torch.softmax(x, dim=1)
 
 
-class TreeTraversalGBDT(TreeTraversalTreeEnsemble):
+class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
     """
     Class implementing the Tree Traversal strategy in PyTorch.
     """
 
     def __init__(self, net_parameters, max_detph, n_features, classes=None, learning_rate=None, alpha=None, device=None):
-        super(TreeTraversalGBDT, self).__init__(net_parameters, max_detph, n_features, classes, 1)
+        super(TreeTraversalGBDTImpl, self).__init__(net_parameters, max_detph, n_features, classes, 1)
         self.n_gbdt_classes = 1
         self.learning_rate = learning_rate
 
@@ -73,13 +78,13 @@ class TreeTraversalGBDT(TreeTraversalTreeEnsemble):
             return torch.softmax(x, dim=1)
 
 
-class PerfectTreeTraversalGBDT(PerfectTreeTraversalTreeEnsemble):
+class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
     """
     Class implementing the Perfect Tree Traversal strategy in PyTorch.
     """
 
     def __init__(self, net_parameters, max_depth, n_features, classes=None, learning_rate=None, alpha=None, device=None):
-        super(PerfectTreeTraversalGBDT, self).__init__(net_parameters, max_depth, n_features, classes, 1)
+        super(PerfectTreeTraversalGBDTImpl, self).__init__(net_parameters, max_depth, n_features, classes, 1)
         self.n_gbdt_classes = 1
         self.learning_rate = learning_rate
 
@@ -155,7 +160,7 @@ def convert_gbdt_common(
             )
             for tree_param in tree_parameters
         ]
-        return GEMMGBDT(net_parameters, n_features, classes, learning_rate, alpha, device)
+        return GEMMGBDTImpl(net_parameters, n_features, classes, learning_rate, alpha, device)
 
     # Some models require some additional massagging of the parameters before generating the tree_trav implementation.
     get_parameters_for_tree_trav = get_parameters_for_tree_trav_common
@@ -168,6 +173,6 @@ def convert_gbdt_common(
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalGBDT(net_parameters, max_depth, n_features, classes, learning_rate, alpha, device)
+        return TreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, learning_rate, alpha, device)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav.
-        return PerfectTreeTraversalGBDT(net_parameters, max_depth, n_features, classes, learning_rate, alpha, device)
+        return PerfectTreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, learning_rate, alpha, device)
