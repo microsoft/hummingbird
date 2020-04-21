@@ -4,13 +4,16 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+Collection of utility functions used throughout Hummingbird.
+"""
 from distutils.version import LooseVersion
 import warnings
 
 
 def torch_installed():
     """
-    Checks that *pytorch* is available.
+    Checks that *PyTorch* is available.
     """
     try:
         import torch
@@ -22,7 +25,7 @@ def torch_installed():
 
 def lightgbm_installed():
     """
-    Checks that *lightgbm* is available.
+    Checks that *LightGBM* is available.
     """
     try:
         import lightgbm
@@ -34,7 +37,7 @@ def lightgbm_installed():
 
 def xgboost_installed():
     """
-    Checks that *xgboost* is available.
+    Checks that *XGBoost* is available.
     """
     try:
         import xgboost

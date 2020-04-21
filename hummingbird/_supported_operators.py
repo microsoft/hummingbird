@@ -4,6 +4,10 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+All operators supported in Hummingbird are registred here.
+"""
+from .exceptions import MissingConverter
 
 # Tree-based models
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, ExtraTreesClassifier
@@ -14,9 +18,8 @@ from lightgbm import LGBMClassifier, LGBMRegressor
 
 def _build_sklearn_api_operator_name_map():
     """
-    Associate Sklearn with the operator class names. If two
-    scikit-learn (API) models share a single name, it means their are
-    equivalent in terms of conversion.
+    Associate Sklearn with the operator class names.
+    If two scikit-learn (API) models share a single name, it means their are equivalent in terms of conversion.
     """
     res = {
         k: "Sklearn" + k.__name__
@@ -40,16 +43,15 @@ def _build_sklearn_api_operator_name_map():
 
 def get_sklearn_api_operator_name(model_type):
     """
-    Get operator name of the input model in *scikit-learn API* format.
+    Get the operator name for the input model type in *scikit-learn API* format.
 
-    :param model_type:  A scikit-learn object (e.g., RandomForestClassifier)
-                        or an object with scikit-learn API (e.g., LightGBM)
-    :return: A string which stands for the type of the input model in
-             our conversion framework
+    :param model_type: A scikit-learn object (e.g., RandomForestClassifier)
+                       or an object with scikit-learn API (e.g., LightGBM)
+
+    :return: A string which stands for the type of the input model in the Hummingbird conversion framework
     """
     if model_type not in sklearn_api_operator_name_map:
-        # "No proper operator name found", it means a local operator.
-        return None
+        raise MissingConverter("Unable to find converter for model type {}.".format(model_type))
     return sklearn_api_operator_name_map[model_type]
 
 
