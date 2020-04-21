@@ -32,9 +32,7 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 ## Developing
 The simplest setup is:
 ```
-mkdir hummingbird
-cd hummingbird
-git clone https://github.com/microsoft/hummingbird.git .
+git clone https://github.com/microsoft/hummingbird.git
 pip install -e .
 ```
 
