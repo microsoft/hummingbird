@@ -7,6 +7,7 @@
 import torch
 import numpy as np
 
+from . import constants
 from ._tree_commons import get_tree_params_and_type, get_parameters_for_tree_trav_common, get_parameters_for_gemm_common
 from ._tree_implementations import GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl, TreeImpl
 
@@ -21,13 +22,14 @@ class GEMMGBDTImpl(GEMMTreeImpl):
     Class implementing the GEMM strategy (in PyTorch) for GBDT models.
     """
 
-    def __init__(self, net_parameters, n_features, classes=None, learning_rate=None, alpha=None, device=None):
+    def __init__(self, net_parameters, n_features, classes=None, extra_config={}):
         super(GEMMGBDTImpl, self).__init__(net_parameters, n_features, classes, 1)
         self.n_gbdt_classes = 1
-        self.learning_rate = learning_rate
 
-        if alpha is not None:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
+        if constants.LEARNING_RATE in extra_config:
+            self.learning_rate = extra_config[constants.LEARNING_RATE]
+        if constants.ALPHA in extra_config:
+            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
@@ -52,13 +54,14 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch.
     """
 
-    def __init__(self, net_parameters, max_detph, n_features, classes=None, learning_rate=None, alpha=None, device=None):
+    def __init__(self, net_parameters, max_detph, n_features, classes=None, extra_config={}):
         super(TreeTraversalGBDTImpl, self).__init__(net_parameters, max_detph, n_features, classes, 1)
         self.n_gbdt_classes = 1
-        self.learning_rate = learning_rate
 
-        if alpha is not None:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
+        if constants.LEARNING_RATE in extra_config:
+            self.learning_rate = extra_config[constants.LEARNING_RATE]
+        if constants.ALPHA in extra_config:
+            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
@@ -83,13 +86,14 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch.
     """
 
-    def __init__(self, net_parameters, max_depth, n_features, classes=None, learning_rate=None, alpha=None, device=None):
+    def __init__(self, net_parameters, max_depth, n_features, classes=None, extra_config={}):
         super(PerfectTreeTraversalGBDTImpl, self).__init__(net_parameters, max_depth, n_features, classes, 1)
         self.n_gbdt_classes = 1
-        self.learning_rate = learning_rate
 
-        if alpha is not None:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(alpha), requires_grad=False)
+        if constants.LEARNING_RATE in extra_config:
+            self.learning_rate = extra_config[constants.LEARNING_RATE]
+        if constants.ALPHA in extra_config:
+            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
@@ -109,17 +113,7 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
             return torch.softmax(x, dim=1)
 
 
-def convert_gbdt_classifier_common(
-    tree_infos,
-    get_tree_parameters,
-    n_features,
-    n_classes,
-    classes=None,
-    learning_rate=None,
-    alpha=None,
-    device=None,
-    extra_config={},
-):
+def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, n_classes, classes=None, extra_config={}):
     """
     Common converter for GBDT classifiers.
     """
@@ -135,14 +129,10 @@ def convert_gbdt_classifier_common(
         classes = [i for i in range(n_classes)]
         tree_infos = [tree_infos[i * n_classes + j] for j in range(n_classes) for i in range(len(tree_infos) // n_classes)]
 
-    return convert_gbdt_common(
-        tree_infos, get_tree_parameters, n_features, classes, learning_rate, alpha, device, extra_config
-    )
+    return convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes, extra_config)
 
 
-def convert_gbdt_common(
-    tree_infos, get_tree_parameters, n_features, classes=None, learning_rate=None, alpha=None, device=None, extra_config={}
-):
+def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=None, extra_config={}):
     """
     Common converter for GBDT models.
     """
@@ -160,12 +150,12 @@ def convert_gbdt_common(
             )
             for tree_param in tree_parameters
         ]
-        return GEMMGBDTImpl(net_parameters, n_features, classes, learning_rate, alpha, device)
+        return GEMMGBDTImpl(net_parameters, n_features, classes, extra_config)
 
     # Some models require some additional massagging of the parameters before generating the tree_trav implementation.
     get_parameters_for_tree_trav = get_parameters_for_tree_trav_common
-    if "get_parameters_for_tree_trav" in extra_config:
-        get_parameters_for_tree_trav = extra_config["get_parameters_for_tree_trav"]
+    if constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL in extra_config:
+        get_parameters_for_tree_trav = extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL]
     net_parameters = [
         get_parameters_for_tree_trav(
             tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values
@@ -173,6 +163,6 @@ def convert_gbdt_common(
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, learning_rate, alpha, device)
+        return TreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav.
-        return PerfectTreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, learning_rate, alpha, device)
+        return PerfectTreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, extra_config)

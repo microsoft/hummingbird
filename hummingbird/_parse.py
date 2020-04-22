@@ -19,7 +19,7 @@ def parse_sklearn_api_model(model):
 
     :param model: A model object in scikit-learn format
 
-    :return: :class:`Topology <onnxconverter_common.topology.Topology>`
+    :return: A :class:`Topology <onnxconverter_common.topology.Topology>` object
 
     """
     assert model is not None, "Cannot convert a mode of type None."

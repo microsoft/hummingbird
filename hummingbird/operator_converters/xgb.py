@@ -4,9 +4,14 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+Converters for XGBoost models.
+"""
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
+from . import constants
 from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
 from ._tree_commons import TreeParameters
 
@@ -72,7 +77,13 @@ def _get_tree_parameters(tree_info):
 
 def convert_sklearn_xgb_classifier(operator, device, extra_config):
     """
-    Converter for XGBoost classifiers trained using the Sklearn API.
+    Converter for *XGBoost classifiers* trained using the Sklearn API.
+
+    :param operator: An operator wrapping a XGBoost classifier model
+    :param device: String defining the type of device the converted operator should be run on
+    :param extra_config: Extra configuration used to select the best conversion strategy
+
+    :return: A PyTorch model
     """
     assert operator is not None
 
@@ -87,14 +98,18 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
     tree_infos = operator.raw_operator.get_booster().get_dump()
     n_classes = operator.raw_operator.n_classes_
 
-    return convert_gbdt_classifier_common(
-        tree_infos, _get_tree_parameters, n_features, n_classes, device=device, extra_config=extra_config
-    )
+    return convert_gbdt_classifier_common(tree_infos, _get_tree_parameters, n_features, n_classes, extra_config=extra_config)
 
 
 def convert_sklearn_xgb_regressor(operator, device, extra_config):
     """
-    Converter for XGBoost regressors trained using the Sklearn API.
+    Converter for *XGBoost regressors* trained using the Sklearn API.
+
+    :param operator: An operator wrapping a XGBoost regressor model
+    :param device: String defining the type of device the converted operator should be run on
+    :param extra_config: Extra configuration used to select the best conversion strategy
+
+    :return: A PyTorch model
     """
     assert operator is not None
     if "n_features" in extra_config:
@@ -111,9 +126,9 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
     if type(alpha) is float:
         alpha = [alpha]
 
-    return convert_gbdt_common(
-        tree_infos, _get_tree_parameters, n_features, alpha=alpha, device=device, extra_config=extra_config
-    )
+    extra_config[constants.ALPHA] = alpha
+
+    return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 
 
 # Register the converters.

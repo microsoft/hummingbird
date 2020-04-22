@@ -12,6 +12,9 @@ It usually means the pipeline being converted contains a
 transformer or a predictor with no corresponding converter implemented.
 Please fill an issue at https://github.com/microsoft/hummingbird.
 """
+_constant_error = """
+It usually means a constant is not available or you are trying to override a constant value.
+"""
 
 
 class MissingConverter(RuntimeError):
@@ -21,3 +24,12 @@ class MissingConverter(RuntimeError):
 
     def __init__(self, msg):
         super().__init__(msg + _missing_converter)
+
+
+class ConstantError(TypeError):
+    """
+    Raised when a constant is not available or it get overwritten.
+    """
+
+    def __init__(self, msg):
+        super().__init__(msg + _constant_error)
