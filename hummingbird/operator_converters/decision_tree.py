@@ -26,6 +26,11 @@ class GEMMDecisionTreeImpl(GEMMTreeImpl):
     """
 
     def __init__(self, net_parameters, n_features, classes=None):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        """
         super(GEMMDecisionTreeImpl, self).__init__(net_parameters, n_features, classes)
         self.final_probability_divider = len(net_parameters)
 
@@ -44,6 +49,12 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
     """
 
     def __init__(self, net_parameters, max_depth, n_features, classes=None):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param max_depth: The maximum tree-depth in the model
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        """
         super(TreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
         self.final_probability_divider = len(net_parameters)
 
@@ -62,6 +73,12 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
     """
 
     def __init__(self, net_parameters, max_depth, n_features, classes=None):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param max_depth: The maximum tree-depth in the model
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        """
         super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
         self.final_probability_divider = len(net_parameters)
 

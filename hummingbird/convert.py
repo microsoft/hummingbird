@@ -13,6 +13,7 @@ from ._container import PyTorchBackendModel
 from .exceptions import MissingConverter
 from ._parse import parse_sklearn_api_model
 from .utils import torch_installed, lightgbm_installed, xgboost_installed
+from . import constants
 
 # Invoke the registration of all our converters.
 from . import operator_converters  # noqa
@@ -25,7 +26,8 @@ def convert_sklearn(model, test_input=None, extra_config={}):
 
     :param model: A scikit-learn model
     :param test_input: some input data used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters
+    :param extra_config: Extra configurations to be used by the individual operator converters.
+                         The set of supported extra configurations can be found at :file:supported_configurations
 
     :return: A model implemented in PyTorch, which is equivalent to the input scikit-learn model
     """
@@ -47,7 +49,8 @@ def convert_lightgbm(model, test_input=None, extra_config={}):
 
     :param model: A LightGBM model (trained using the scikit-learn API)
     :param test_input: Some input data that will be used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters
+    :param extra_config: Extra configurations to be used by the individual operator converters.
+                        The set of supported extra configurations can be found at :file:supported_configurations
 
     :return: A PyTorch model which is equivalent to the input LightGBM model
     """
@@ -62,7 +65,8 @@ def convert_xgboost(model, test_input, extra_config={}):
 
     :param model: A XGBoost model (trained using the scikit-learn API)
     :param test_input: Some input data used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters
+    :param extra_config: Extra configurations to be used by the individual operator converters.
+                        The set of supported extra configurations can be found at :file:supported_configurations
 
     :return: A PyTorch model which is equivalent to the input XGBoost model
     """
@@ -71,10 +75,10 @@ def convert_xgboost(model, test_input, extra_config={}):
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
     if "_features_count" in dir(model):
-        extra_config["n_features"] = model._features_count
+        extra_config[constants.N_FEATURES] = model._features_count
     elif test_input is not None:
         if type(test_input) is np.ndarray and len(test_input.shape) == 2:
-            extra_config["n_features"] = test_input.shape[1]
+            extra_config[constants.N_FEATURES] = test_input.shape[1]
         else:
             raise RuntimeError(
                 "XGBoost converter is not able to infer the number of input features.\

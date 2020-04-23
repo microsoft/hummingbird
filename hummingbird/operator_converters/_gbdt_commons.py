@@ -23,6 +23,12 @@ class GEMMGBDTImpl(GEMMTreeImpl):
     """
 
     def __init__(self, net_parameters, n_features, classes=None, extra_config={}):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        :param extra_config: Extra configuration used to properly implement the source tree
+        """
         super(GEMMGBDTImpl, self).__init__(net_parameters, n_features, classes, 1)
         self.n_gbdt_classes = 1
 
@@ -55,6 +61,13 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
     """
 
     def __init__(self, net_parameters, max_detph, n_features, classes=None, extra_config={}):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param max_depth: The maximum tree-depth in the model
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        :param extra_config: Extra configuration used to properly implement the source tree
+        """
         super(TreeTraversalGBDTImpl, self).__init__(net_parameters, max_detph, n_features, classes, 1)
         self.n_gbdt_classes = 1
 
@@ -87,6 +100,13 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
     """
 
     def __init__(self, net_parameters, max_depth, n_features, classes=None, extra_config={}):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param max_depth: The maximum tree-depth in the model
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        :param extra_config: Extra configuration used to properly implement the source tree
+        """
         super(PerfectTreeTraversalGBDTImpl, self).__init__(net_parameters, max_depth, n_features, classes, 1)
         self.n_gbdt_classes = 1
 
@@ -116,6 +136,15 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
 def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, n_classes, classes=None, extra_config={}):
     """
     Common converter for GBDT classifiers.
+
+    :param tree_infos: The information representaing a tree (ensemble)
+    :param get_tree_parameters: A function specifying how to parse the tree_infos into parameters
+    :param n_features: The number of features input to the model
+    :param n_classes: How many classes are expected. 1 for regression tasks
+    :param classes: The classes used for classification. None if implementing a regression model
+    :param extra_config: Extra configuration used to properly implement the source tree
+
+    :return: A tree implementation in PyTorch
     """
     assert tree_infos is not None
     assert get_tree_parameters is not None
@@ -135,6 +164,14 @@ def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, 
 def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=None, extra_config={}):
     """
     Common converter for GBDT models.
+
+    :param tree_infos: The information representaing a tree (ensemble)
+    :param get_tree_parameters: A function specifying how to parse the tree_infos into parameters
+    :param n_features: The number of features input to the model
+    :param classes: The classes used for classification. None if implementing a regression model
+    :param extra_config: Extra configuration used to properly implement the source tree
+
+    :return: A tree implementation in PyTorch
     """
     assert tree_infos is not None
     assert get_tree_parameters is not None
