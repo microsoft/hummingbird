@@ -15,6 +15,14 @@ __producer_version__ = __version__
 __domain__ = "microsoft.gsl"
 __model_version__ = 0
 
+# Register constants used for Hummingbird extra configs.
+from . import supported_configurations as hummingbird_constants
+from .utils import _Constants
+
+# Add constants in scope.
+constants = _Constants(hummingbird_constants)
+
+# Add the converters in the Hummingbird scope.
 from .convert import convert_sklearn  # noqa: F401
 from .convert import convert_lightgbm  # noqa: F401
 from .convert import convert_xgboost  # noqa: F401

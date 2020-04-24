@@ -3,6 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
+
+"""
+Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees
+"""
+
 import warnings
 import copy
 
@@ -14,17 +19,18 @@ from ._tree_commons import get_tree_params_and_type, get_parameters_for_gemm_com
 from ._tree_implementations import GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl, TreeImpl
 
 
-"""
-Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees
-"""
-
-
 class GEMMDecisionTreeImpl(GEMMTreeImpl):
     """
     Class implementing the GEMM strategy in PyTorch for decision tree models.
+
     """
 
-    def __init__(self, net_parameters, n_features, classes=None, device=None):
+    def __init__(self, net_parameters, n_features, classes=None):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        """
         super(GEMMDecisionTreeImpl, self).__init__(net_parameters, n_features, classes)
         self.final_probability_divider = len(net_parameters)
 
@@ -42,7 +48,13 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, net_parameters, max_depth, n_features, classes=None, device=None):
+    def __init__(self, net_parameters, max_depth, n_features, classes=None):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param max_depth: The maximum tree-depth in the model
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        """
         super(TreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
         self.final_probability_divider = len(net_parameters)
 
@@ -60,7 +72,13 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, net_parameters, max_depth, n_features, classes=None, device=None):
+    def __init__(self, net_parameters, max_depth, n_features, classes=None):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param max_depth: The maximum tree-depth in the model
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        """
         super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
         self.final_probability_divider = len(net_parameters)
 
@@ -73,16 +91,22 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
         return output
 
 
-def convert_sklearn_random_forest_classifier(model, device, extra_config):
+def convert_sklearn_random_forest_classifier(operator, device, extra_config):
     """
     Converter for Sklearn's Random Forest, DecisionTree, ExtraTrees classifiers.
+
+    :param operator: An operator wrapping a tree (ensemble) classifier model
+    :param device: String defining the type of device the converted operator should be run on
+    :param extra_config: Extra configuration used to select the best conversion strategy
+
+    :return: A PyTorch model
     """
-    assert model is not None
+    assert operator is not None
 
     # Get tree information out of the model.
-    tree_infos = model.raw_operator.estimators_
-    n_features = model.raw_operator.n_features_
-    classes = model.raw_operator.classes_.tolist()
+    tree_infos = operator.raw_operator.estimators_
+    n_features = operator.raw_operator.n_features_
+    classes = operator.raw_operator.classes_.tolist()
 
     # Analyze classes.
     if not all(isinstance(c, int) for c in classes):
@@ -100,7 +124,7 @@ def convert_sklearn_random_forest_classifier(model, device, extra_config):
             )
             for tree_param in tree_parameters
         ]
-        return GEMMDecisionTreeImpl(net_parameters, n_features, classes, device)
+        return GEMMDecisionTreeImpl(net_parameters, n_features, classes)
 
     net_parameters = [
         get_parameters_for_tree_trav_sklearn(
@@ -109,20 +133,26 @@ def convert_sklearn_random_forest_classifier(model, device, extra_config):
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes, device)
+        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
-        return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes, device)
+        return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)
 
 
-def convert_sklearn_random_forest_regressor(model, device, extra_config):
+def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     """
-    Converter for Sklearn's Random Forest, DecisionTree, ExtraTrees regressors.
-    """
-    assert model is not None
+    Converter for Sklearn's Random Forest, DecisionTree and ExtraTrees regressors.
 
-    # Get tree information out of the model.
-    tree_infos = model.raw_operator.estimators_
-    n_features = model.raw_operator.n_features_
+    :param operator: An operator wrapping a tree (ensemble) classifier model
+    :param device: String defining the type of device the converted operator should be run on
+    :param extra_config: Extra configuration used to select the best conversion strategy
+
+    :return: A PyTorch model
+    """
+    assert operator is not None
+
+    # Get tree information out of the operator.
+    tree_infos = operator.raw_operator.estimators_
+    n_features = operator.raw_operator.n_features_
 
     tree_parameters, max_depth, tree_type = get_tree_params_and_type(
         tree_infos, get_parameters_for_sklearn_common, extra_config
@@ -136,7 +166,7 @@ def convert_sklearn_random_forest_regressor(model, device, extra_config):
             )
             for tree_param in tree_parameters
         ]
-        return GEMMDecisionTreeImpl(net_parameters, n_features, device=device)
+        return GEMMDecisionTreeImpl(net_parameters, n_features)
 
     net_parameters = [
         get_parameters_for_tree_trav_sklearn(
@@ -145,17 +175,25 @@ def convert_sklearn_random_forest_regressor(model, device, extra_config):
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.perf_tree_trav:
-        return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, device=device)
+        return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features)
     else:  # Remaining possible case: tree_type == TreeImpl.tree_trav
-        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, device=device)
+        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features)
 
 
-def convert_sklearn_decision_tree_classifier(model, device, extra_config):
+def convert_sklearn_decision_tree_classifier(operator, device, extra_config):
     """
     Converter for Sklearn Decision Tree classifier.
+
+    :param operator: An operator wrapping a decision tree classifier model
+    :param device: String defining the type of device the converted operator should be run on
+    :param extra_config: Extra configuration used to select the best conversion strategy
+
+    :return: A PyTorch model
     """
-    model.raw_operator.estimators_ = [model.raw_operator]
-    return convert_sklearn_random_forest_classifier(model, device, extra_config)
+    assert operator is not None
+
+    operator.raw_operator.estimators_ = [operator.raw_operator]
+    return convert_sklearn_random_forest_classifier(operator, device, extra_config)
 
 
 # Register the converters.

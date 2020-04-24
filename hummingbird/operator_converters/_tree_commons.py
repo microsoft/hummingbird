@@ -8,6 +8,7 @@ import copy
 import numpy as np
 
 from ._tree_implementations import TreeImpl
+from . import constants
 
 
 """
@@ -120,10 +121,12 @@ def get_tree_implementation_by_config_or_depth(extra_config, max_depth, low=3, h
     Utility function used to pick the tree implementation based on input parameters and heurstics.
     The current heuristic is such that GEMM <= low < PerfTreeTrav <= high < TreeTrav
     :param max_depth: The maximum tree-depth found in the tree model.
-    :param low: the maximum depth below which GEMM strategy is used
-    :param high: the maximum depth for which PerfTreeTrav strategy is used
+    :param low: The maximum depth below which GEMM strategy is used
+    :param high: The maximum depth for which PerfTreeTrav strategy is used
+
+    :return: A tree implementation
     """
-    if "tree_implementation" not in extra_config:
+    if constants.TREE_IMPLEMENTATION not in extra_config:
         if max_depth is not None and max_depth <= low:
             return TreeImpl.gemm
         elif max_depth is not None and max_depth <= high:
@@ -131,11 +134,11 @@ def get_tree_implementation_by_config_or_depth(extra_config, max_depth, low=3, h
         else:
             return TreeImpl.perf_tree_trav
 
-    if extra_config["tree_implementation"] == "gemm":
+    if extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.gemm.name:
         return TreeImpl.gemm
-    elif extra_config["tree_implementation"] == "tree_trav":
+    elif extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.tree_trav.name:
         return TreeImpl.tree_trav
-    elif extra_config["tree_implementation"] == "perf_tree_trav":
+    elif extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.perf_tree_trav.name:
         return TreeImpl.perf_tree_trav
     else:
         raise ValueError("Tree implementation {} not found".format(extra_config))
@@ -144,6 +147,13 @@ def get_tree_implementation_by_config_or_depth(extra_config, max_depth, low=3, h
 def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
     """
     Populate the parameters from the trees and pick the tree implementation strategy.
+
+    :param tree_infos: The information representaing a tree (ensemble)
+    :param get_tree_parameters: A function specifying how to parse the tree_infos into a
+                                :class: `TreeParameters <operator_converters._tree_commons_TreeParameters>` object
+    :param extra_config: param extra_config: Extra configuration used also to select the best conversion strategy
+
+    :return: The tree parameters, the maximum tree-depth and the tre implementation to use
     """
     tree_parameters = [get_tree_parameters(tree_info) for tree_info in tree_infos]
     max_depth = max(1, _find_max_depth(tree_parameters))
@@ -152,17 +162,22 @@ def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
     return tree_parameters, max_depth, tree_type
 
 
-def get_parameters_for_sklearn_common(tree_info):
+def get_parameters_for_sklearn_common(tree_infos):
     """
     Parse sklearn-based trees, including
     SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+
+    :param tree_infos: The information representaing a tree (ensemble)
+
+    :return: The tree parameters wrapped into an instance of
+             :class: `TreeParameters <operator_converters._tree_commons_TreeParameters>`
     """
-    tree = tree_info
-    lefts = tree.tree_.children_left
-    rights = tree.tree_.children_right
-    features = tree.tree_.feature
-    thresholds = tree.tree_.threshold
-    values = tree.tree_.value
+    trees = tree_infos
+    lefts = trees.tree_.children_left
+    rights = trees.tree_.children_right
+    features = trees.tree_.feature
+    thresholds = trees.tree_.threshold
+    values = trees.tree_.value
 
     return TreeParameters(lefts, rights, features, thresholds, values)
 
@@ -170,6 +185,14 @@ def get_parameters_for_sklearn_common(tree_info):
 def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values):
     """
     Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
+
+    :params left: The left nodes
+    :params right: The right nodes
+    :params features: The features used in the decision nodes
+    :params thresholds: The thresholds used in the decision nodes
+    :params values: The values stored in the leaf nodes
+
+    :return: An array containing the extracted parameters
     """
     if len(lefts) == 1:
         # Model creating tree with just a single leaf node. We transform it
@@ -226,6 +249,14 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
     """
     This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
     Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+
+    :params left: The left nodes
+    :params right: The right nodes
+    :params features: The features used in the decision nodes
+    :params thresholds: The thresholds used in the decision nodes
+    :params values: The values stored in the leaf nodes
+
+    :return: An array containing the extracted parameters
     """
     features = [max(x, 0) for x in features]
     values = np.array(values)
@@ -240,6 +271,15 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
 def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features):
     """
     Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
+
+    :params left: The left nodes
+    :params right: The right nodes
+    :params features: The features used in the decision nodes
+    :params thresholds: The thresholds used in the decision nodes
+    :params values: The values stored in the leaf nodes
+    :params n_features: The number of expected input features
+
+    :return: The weights and bias for the GEMM implementation
     """
     if len(lefts) == 1:
         # Model creating trees with just a single leaf node. We transform it

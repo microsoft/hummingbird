@@ -4,13 +4,18 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+Collection of utility functions used throughout Hummingbird.
+"""
 from distutils.version import LooseVersion
 import warnings
+
+from .exceptions import ConstantError
 
 
 def torch_installed():
     """
-    Checks that *pytorch* is available.
+    Checks that *PyTorch* is available.
     """
     try:
         import torch
@@ -22,7 +27,7 @@ def torch_installed():
 
 def lightgbm_installed():
     """
-    Checks that *lightgbm* is available.
+    Checks that *LightGBM* is available.
     """
     try:
         import lightgbm
@@ -34,7 +39,7 @@ def lightgbm_installed():
 
 def xgboost_installed():
     """
-    Checks that *xgboost* is available.
+    Checks that *XGBoost* is available.
     """
     try:
         import xgboost
@@ -56,3 +61,22 @@ def xgboost_installed():
     if vers < allowed_min or vers > allowed_max:
         warnings.warn("The converter works for xgboost >= 0.7 and <= 0.9. Different versions might not.")
     return True
+
+
+class _Constants(object):
+    """
+    Class enabling the proper definition of constants.
+    """
+
+    def __init__(self, constants, other_constants=None):
+        for constant in dir(constants):
+            if constant.isupper():
+                setattr(self, constant, getattr(constants, constant))
+        for constant in dir(other_constants):
+            if constant.isupper():
+                setattr(self, constant, getattr(other_constants, constant))
+
+    def __setattr__(self, name, value):
+        if name in self.__dict__:
+            raise ConstantError("Overwriting a constant is not allowed {}".format(name))
+        self.__dict__[name] = value

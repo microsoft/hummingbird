@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 
 
 """
-Base classes for tree algorithms implementations.
+Base classes for tree algorithm implementations.
 """
 
 
@@ -37,6 +37,10 @@ class AbstracTreeImpl(ABC):
     def aggregation(self, x):
         """
         Method defining the aggregation operation to execute after the model is evaluated.
+
+        :param x: An input tensor
+
+        :return: The tensor result of the aggregation
         """
         pass
 
@@ -44,6 +48,10 @@ class AbstracTreeImpl(ABC):
     def calibration(self, x):
         """
         Method implementating the calibration operation for classifiers.
+
+        :param x: An input tensor
+
+        :return: The tensor result of the calibration
         """
         pass
 
@@ -54,6 +62,12 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
     """
 
     def __init__(self, net_parameters, n_features, classes, n_classes):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        :param n_classes: The total number of used classes
+        """
         super(AbstractPyTorchTreeImpl, self).__init__()
 
         # Set up the variables for the subclasses.
@@ -82,6 +96,12 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     """
 
     def __init__(self, net_parameters, n_features, classes, n_classes=None):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        :param n_classes: The total number of used classes
+        """
         super(GEMMTreeImpl, self).__init__(net_parameters, n_features, classes, n_classes)
 
         # Initialize the actual model.
@@ -146,7 +166,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         x = self.aggregation(x)
 
         if self.learning_rate is not None:
-            x = x * self.learning_rate
+            x *= self.learning_rate
         if self.alpha is not None:
             x += self.alpha
         if self.regression:
@@ -166,6 +186,13 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     """
 
     def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param max_depth: The maximum tree-depth in the model
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        :param n_classes: The total number of used classes
+        """
         super(TreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
 
         # Initialize the actual model.
@@ -227,7 +254,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         output = self.aggregation(output)
 
         if self.learning_rate is not None:
-            output = output * self.learning_rate
+            output *= self.learning_rate
         if self.alpha is not None:
             output += self.alpha
         if self.regression:
@@ -247,6 +274,13 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     """
 
     def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
+        """
+        :param net_parameters: The parameters defining the tree structure
+        :param max_depth: The maximum tree-depth in the model
+        :param n_features: The number of features input to the model
+        :param classes: The classes used for classification. None if implementing a regression model
+        :param n_classes: The total number of used classes
+        """
         super(PerfectTreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
 
         # Initialize the actual model.
@@ -316,7 +350,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         output = self.aggregation(output)
 
         if self.learning_rate is not None:
-            output = output * self.learning_rate
+            output *= self.learning_rate
         if self.alpha is not None:
             output += self.alpha
         if self.regression:

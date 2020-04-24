@@ -4,6 +4,10 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+Converters for LightGBM models.
+"""
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
@@ -50,7 +54,13 @@ def _get_tree_parameters(tree_info):
 
 def convert_sklearn_lgbm_classifier(operator, device, extra_config):
     """
-    Converter for LightGBM classifier trained using the Sklearn API.
+    Converter for *LightGBM classifier* trained using the Sklearn API.
+
+    :param operator: An operator wrapping a LightGBM classifier model
+    :param device: String defining the type of device the converted operator should be run on
+    :param extra_config: Extra configuration used to select the best conversion strategy
+
+    :return: A PyTorch model
     """
     assert operator is not None
 
@@ -59,14 +69,18 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
     tree_infos = operator.raw_operator.booster_.dump_model()["tree_info"]
     n_classes = operator.raw_operator._n_classes
 
-    return convert_gbdt_classifier_common(
-        tree_infos, _get_tree_parameters, n_features, n_classes, device=device, extra_config=extra_config
-    )
+    return convert_gbdt_classifier_common(tree_infos, _get_tree_parameters, n_features, n_classes, extra_config=extra_config)
 
 
 def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     """
-    Converter for LightGBM regressors trained using the Sklearn API.
+    Converter for *LightGBM regressors* trained using the Sklearn API.
+
+    :param operator: An operator wrapping a LightGBM regressor model
+    :param device: String defining the type of device the converted operator should be run on
+    :param extra_config: Extra configuration used to select the best conversion strategy
+
+    :return: A PyTorch model
     """
     assert operator is not None
 
@@ -74,7 +88,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     n_features = operator.raw_operator._n_features
     tree_infos = operator.raw_operator.booster_.dump_model()["tree_info"]
 
-    return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, device=device, extra_config=extra_config)
+    return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 
 
 # Register the converters.

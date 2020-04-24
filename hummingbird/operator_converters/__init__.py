@@ -4,9 +4,16 @@
 # license information.
 # --------------------------------------------------------------------------
 
-# To register a converter for scikit-learn API operators, import associated modules here.
+# Register constants used within Hummingbird converters.
+from . import constants as converter_constants
+from .. import supported_configurations as hummingbird_constants
+from ..utils import _Constants
 
-from . import gbdt
-from . import lightgbm
-from . import decision_tree
-from . import xgb
+# Add constants in scope.
+constants = _Constants(converter_constants, hummingbird_constants)
+
+# To register a converter for scikit-learn API operators, import associated modules here.
+from . import gbdt  # noqa: E402
+from . import lightgbm  # noqa: E402
+from . import decision_tree  # noqa: E402
+from . import xgb  # noqa: E402
