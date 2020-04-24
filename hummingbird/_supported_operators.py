@@ -19,7 +19,7 @@ from lightgbm import LGBMClassifier, LGBMRegressor
 def _build_sklearn_api_operator_name_map():
     """
     Associate Sklearn with the operator class names.
-    If two scikit-learn (API) models share a single name, it means their are equivalent in terms of conversion.
+    If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     """
     res = {
         k: "Sklearn" + k.__name__

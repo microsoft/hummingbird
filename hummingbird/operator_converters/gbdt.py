@@ -59,7 +59,7 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
 
     extra_config[constants.ALPHA] = alpha
     extra_config[constants.LEARNING_RATE] = learning_rate
-    # For skleanr models we need to massage the parameters a bit before generating the parameters for tree_trav.
+    # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
     extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
 
     return convert_gbdt_classifier_common(

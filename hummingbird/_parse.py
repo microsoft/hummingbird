@@ -39,7 +39,7 @@ def parse_sklearn_api_model(model):
     inputs = []
     inputs.append(scope.declare_local_variable("input"))
 
-    # The object raw_model_container is a part of the topology  we're going to return.
+    # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the inputs of the scikit-learn's computational graph.
     for variable in inputs:
         raw_model_container.add_input(variable)

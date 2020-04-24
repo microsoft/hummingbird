@@ -95,7 +95,7 @@ def convert_xgboost(model, test_input, extra_config={}):
 
 def _convert_topology(topology, device=None, extra_config={}):
     """
-    This function is used to convert a ONNX *Topology* object into a *PyTorch* model.
+    This function is used to convert a *Topology* object into a *PyTorch* model.
 
     :param topology: The Topology object that will be converted into Pytorch
     :param device: Which device the translated model will be run on

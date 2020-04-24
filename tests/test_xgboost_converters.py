@@ -74,38 +74,38 @@ class TestXGBoostConverter(unittest.TestCase):
                 model.predict(X), pytorch_model(torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06
             )
 
-    # # Regressor
-    # def test_xgb_binary_regressor_converter(self):
-    #     self._run_xgb_regressor_converter(1000)
+    # Regressor
+    def test_xgb_binary_regressor_converter(self):
+        self._run_xgb_regressor_converter(1000)
 
-    # # Gemm regressor
-    # def test_xgb_gemm_regressor_converter(self):
-    #     self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "gemm"})
+    # Gemm regressor
+    def test_xgb_gemm_regressor_converter(self):
+        self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "gemm"})
 
-    # # Tree_trav regressor
-    # def test_xgb_tree_trav_regressor_converter(self):
-    #     self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "tree_trav"})
+    # Tree_trav regressor
+    def test_xgb_tree_trav_regressor_converter(self):
+        self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "tree_trav"})
 
     # Perf_tree_trav regressor
     def test_xgb_perf_tree_trav_regressor_converter(self):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
-    # # small tree
-    # def test_run_xgb_classifier_converter(self):
-    #     warnings.filterwarnings("ignore")
-    #     for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
-    #         model = xgb.XGBClassifier(n_estimators=1, max_depth=1)
-    #         X = np.random.rand(1, 1)
-    #         X = np.array(X, dtype=np.float32)
-    #         y = np.random.randint(2, size=1)
+    # small tree
+    def test_run_xgb_classifier_converter(self):
+        warnings.filterwarnings("ignore")
+        for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
+            model = xgb.XGBClassifier(n_estimators=1, max_depth=1)
+            X = np.random.rand(1, 1)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(2, size=1)
 
-    #         model.fit(X, y)
+            model.fit(X, y)
 
-    #         pytorch_model = convert_xgboost(model, [], extra_config={"tree_implementation": extra_config_param})
-    #         self.assertTrue(pytorch_model is not None)
-    #         np.testing.assert_allclose(
-    #             model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
-    #         )
+            pytorch_model = convert_xgboost(model, [], extra_config={"tree_implementation": extra_config_param})
+            self.assertTrue(pytorch_model is not None)
+            np.testing.assert_allclose(
+                model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].numpy(), rtol=1e-06, atol=1e-06
+            )
 
 
 if __name__ == "__main__":
