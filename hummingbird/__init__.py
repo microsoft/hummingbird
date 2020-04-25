@@ -26,3 +26,8 @@ constants = _Constants(hummingbird_constants)
 from .convert import convert_sklearn  # noqa: F401
 from .convert import convert_lightgbm  # noqa: F401
 from .convert import convert_xgboost  # noqa: F401
+
+__pdoc__ = {}
+__pdoc__['hummingbird._container'] = True
+__pdoc__['hummingbird._parse'] = True
+__pdoc__['hummingbird._supported_operators'] = True
