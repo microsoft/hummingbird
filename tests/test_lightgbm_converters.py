@@ -7,10 +7,29 @@ import warnings
 import numpy as np
 import torch
 import lightgbm as lgb
+
 from hummingbird import convert_lightgbm
+from tree_utils import gbdt_implementation_map
 
 
 class TestLGBMConverter(unittest.TestCase):
+    # Check tree implementation
+    def test_lgbm_implementation(self):
+        warnings.filterwarnings("ignore")
+        X = np.random.rand(10, 1)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=10)
+
+        for model in [lgb.LGBMClassifier(n_estimators=1, max_depth=1), lgb.LGBMRegressor(n_estimators=1, max_depth=1)]:
+            for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
+                model.fit(X, y)
+
+                pytorch_model = convert_lightgbm(model, extra_config={"tree_implementation": extra_config_param})
+                self.assertTrue(pytorch_model is not None)
+                self.assertTrue(
+                    str(type(list(pytorch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
+                )
+
     def _run_lgbm_classifier_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
