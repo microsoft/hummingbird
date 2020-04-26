@@ -7,10 +7,29 @@ import warnings
 import numpy as np
 import torch
 import xgboost as xgb
+
 from hummingbird import convert_xgboost
+from tree_utils import gbdt_implementation_map
 
 
 class TestXGBoostConverter(unittest.TestCase):
+    # Check tree implementation
+    def test_xgb_implementation(self):
+        warnings.filterwarnings("ignore")
+        X = np.random.rand(1, 1)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=1)
+
+        for model in [xgb.XGBClassifier(n_estimators=1, max_depth=1), xgb.XGBRegressor(n_estimators=1, max_depth=1)]:
+            for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
+                model.fit(X, y)
+
+                pytorch_model = convert_xgboost(model, X[0:1], extra_config={"tree_implementation": extra_config_param})
+                self.assertTrue(pytorch_model is not None)
+                self.assertTrue(
+                    str(type(list(pytorch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
+                )
+
     def _run_xgb_classifier_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12]:
@@ -90,7 +109,7 @@ class TestXGBoostConverter(unittest.TestCase):
     def test_xgb_perf_tree_trav_regressor_converter(self):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
-    # small tree
+    # Small tree
     def test_run_xgb_classifier_converter(self):
         warnings.filterwarnings("ignore")
         for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:

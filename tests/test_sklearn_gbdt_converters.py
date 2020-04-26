@@ -9,9 +9,27 @@ import torch
 from sklearn.ensemble import GradientBoostingClassifier
 
 from hummingbird import convert_sklearn
+from tree_utils import gbdt_implementation_map
 
 
 class TestSklearnGradientBoostingClassifier(unittest.TestCase):
+    # Check tree implementation
+    def test_gbdt_implementation(self):
+        warnings.filterwarnings("ignore")
+        X = np.random.rand(10, 1)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=10)
+
+        for model in [GradientBoostingClassifier(n_estimators=1, max_depth=1)]:
+            for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
+                model.fit(X, y)
+
+                pytorch_model = convert_sklearn(model, extra_config={"tree_implementation": extra_config_param})
+                self.assertTrue(pytorch_model is not None)
+                self.assertTrue(
+                    str(type(list(pytorch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
+                )
+
     def _run_GB_trees_classifier_converter(self, num_classes, extra_config={}, labels_shift=0):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
@@ -59,7 +77,7 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
     def test_GBDT_perf_tree_trav_multi_classifier_converter(self):
         self._run_GB_trees_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
-    # shifted classes
+    # Shifted classes
     def test_GBDT_shifted_labels_converter(self):
         self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "gemm"})
         self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "tree_trav"})
