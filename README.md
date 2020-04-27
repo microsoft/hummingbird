@@ -36,7 +36,7 @@ X = np.array(np.random.rand(100000, 28), dtype=np.float32)
 y = np.random.randint(num_classes, size=100000)
 
 # Create and train a model (LightGBM in this case)
-model = model = lgb.LGBMClassifier()
+model = lgb.LGBMClassifier()
 model.fit(X, y)
 
 # Use Hummingbird to convert the model to pytorch
