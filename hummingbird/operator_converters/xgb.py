@@ -77,13 +77,15 @@ def _get_tree_parameters(tree_info):
 
 def convert_sklearn_xgb_classifier(operator, device, extra_config):
     """
-    Converter for *XGBoost classifiers* trained using the Sklearn API.
+    Converter for `xgboost.XGBClassifier` (trained using the Sklearn API).
 
-    :param operator: An operator wrapping a XGBoost classifier model
-    :param device: String defining the type of device the converted operator should be run on
-    :param extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping a `xgboost.XGBClassifier` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    :return: A PyTorch model
+    Returns:
+        A PyTorch model
     """
     assert operator is not None
 
@@ -103,13 +105,15 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
 
 def convert_sklearn_xgb_regressor(operator, device, extra_config):
     """
-    Converter for *XGBoost regressors* trained using the Sklearn API.
+    Converter for `xgboost.XGBRegressor` (trained using the Sklearn API).
 
-    :param operator: An operator wrapping a XGBoost regressor model
-    :param device: String defining the type of device the converted operator should be run on
-    :param extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping a `xgboost.XGBRegressor` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    :return: A PyTorch model
+    Returns:
+        A PyTorch model
     """
     assert operator is not None
     if "n_features" in extra_config:

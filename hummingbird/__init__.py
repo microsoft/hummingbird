@@ -5,7 +5,9 @@
 # --------------------------------------------------------------------------
 
 """
-Main entry point to the Hummingbird converters.
+Hummingbird is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
+(e.g., one-hot encoding) into tensor operations.
+Through Hummingbird, DNN frameworks can be used for both optimizing and enabling seamless hardware acceleration of traditional ML.
 """
 
 __version__ = "0.0.1"
@@ -17,7 +19,7 @@ __model_version__ = 0
 
 # Register constants used for Hummingbird extra configs.
 from . import supported_configurations as hummingbird_constants
-from .utils import _Constants
+from ._utils import _Constants
 
 # Add constants in scope.
 constants = _Constants(hummingbird_constants)
@@ -28,6 +30,6 @@ from .convert import convert_lightgbm  # noqa: F401
 from .convert import convert_xgboost  # noqa: F401
 
 __pdoc__ = {}
-__pdoc__['hummingbird._container'] = True
-__pdoc__['hummingbird._parse'] = True
-__pdoc__['hummingbird._supported_operators'] = True
+__pdoc__["hummingbird._container"] = True
+__pdoc__["hummingbird._parse"] = True
+__pdoc__["hummingbird._supported_operators"] = True

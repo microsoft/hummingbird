@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>hummingbird.operator_converters._gbdt_commons API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Collections of classes and functions shared among GBDT converters." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,6 +20,7 @@
 <h1 class="title">Module <code>hummingbird.operator_converters._gbdt_commons</code></h1>
 </header>
 <section id="section-intro">
+<p>Collections of classes and functions shared among GBDT converters.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -30,17 +31,16 @@
 # license information.
 # --------------------------------------------------------------------------
 
+&#34;&#34;&#34;
+Collections of classes and functions shared among GBDT converters.
+&#34;&#34;&#34;
+
 import torch
 import numpy as np
 
 from . import constants
 from ._tree_commons import get_tree_params_and_type, get_parameters_for_tree_trav_common, get_parameters_for_gemm_common
 from ._tree_implementations import GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl, TreeImpl
-
-
-&#34;&#34;&#34;
-Collections of classes and functions shared among GBDT converters.
-&#34;&#34;&#34;
 
 
 class GEMMGBDTImpl(GEMMTreeImpl):
@@ -50,10 +50,11 @@ class GEMMGBDTImpl(GEMMTreeImpl):
 
     def __init__(self, net_parameters, n_features, classes=None, extra_config={}):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param extra_config: Extra configuration used to properly implement the source tree
+        Args:
+            net_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
         &#34;&#34;&#34;
         super(GEMMGBDTImpl, self).__init__(net_parameters, n_features, classes, 1)
         self.n_gbdt_classes = 1
@@ -88,11 +89,12 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
 
     def __init__(self, net_parameters, max_detph, n_features, classes=None, extra_config={}):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param extra_config: Extra configuration used to properly implement the source tree
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
         &#34;&#34;&#34;
         super(TreeTraversalGBDTImpl, self).__init__(net_parameters, max_detph, n_features, classes, 1)
         self.n_gbdt_classes = 1
@@ -127,11 +129,12 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
 
     def __init__(self, net_parameters, max_depth, n_features, classes=None, extra_config={}):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param extra_config: Extra configuration used to properly implement the source tree
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
         &#34;&#34;&#34;
         super(PerfectTreeTraversalGBDTImpl, self).__init__(net_parameters, max_depth, n_features, classes, 1)
         self.n_gbdt_classes = 1
@@ -163,14 +166,16 @@ def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, 
     &#34;&#34;&#34;
     Common converter for GBDT classifiers.
 
-    :param tree_infos: The information representaing a tree (ensemble)
-    :param get_tree_parameters: A function specifying how to parse the tree_infos into parameters
-    :param n_features: The number of features input to the model
-    :param n_classes: How many classes are expected. 1 for regression tasks
-    :param classes: The classes used for classification. None if implementing a regression model
-    :param extra_config: Extra configuration used to properly implement the source tree
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+        get_tree_parameters: A function specifying how to parse the tree_infos into parameters
+        n_features: The number of features input to the model
+        n_classes: How many classes are expected. 1 for regression tasks
+        classes: The classes used for classification. None if implementing a regression model
+        extra_config: Extra configuration used to properly implement the source tree
 
-    :return: A tree implementation in PyTorch
+    Returns:
+        A tree implementation in PyTorch
     &#34;&#34;&#34;
     assert tree_infos is not None
     assert get_tree_parameters is not None
@@ -191,13 +196,15 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
     &#34;&#34;&#34;
     Common converter for GBDT models.
 
-    :param tree_infos: The information representaing a tree (ensemble)
-    :param get_tree_parameters: A function specifying how to parse the tree_infos into parameters
-    :param n_features: The number of features input to the model
-    :param classes: The classes used for classification. None if implementing a regression model
-    :param extra_config: Extra configuration used to properly implement the source tree
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+        get_tree_parameters: A function specifying how to parse the tree_infos into parameters
+        n_features: The number of features input to the model
+        classes: The classes used for classification. None if implementing a regression model
+        extra_config: Extra configuration used to properly implement the source tree
 
-    :return: A tree implementation in PyTorch
+    Returns:
+        A tree implementation in PyTorch
     &#34;&#34;&#34;
     assert tree_infos is not None
     assert get_tree_parameters is not None
@@ -243,13 +250,26 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 </code></dt>
 <dd>
 <div class="desc"><p>Common converter for GBDT classifiers.</p>
-<p>:param tree_infos: The information representaing a tree (ensemble)
-:param get_tree_parameters: A function specifying how to parse the tree_infos into parameters
-:param n_features: The number of features input to the model
-:param n_classes: How many classes are expected. 1 for regression tasks
-:param classes: The classes used for classification. None if implementing a regression model
-:param extra_config: Extra configuration used to properly implement the source tree</p>
-<p>:return: A tree implementation in PyTorch</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree_infos</code></strong></dt>
+<dd>The information representaing a tree (ensemble)</dd>
+<dt><strong><code>get_tree_parameters</code></strong></dt>
+<dd>A function specifying how to parse the tree_infos into parameters</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of features input to the model</dd>
+<dt><strong><code>n_classes</code></strong></dt>
+<dd>How many classes are expected. 1 for regression tasks</dd>
+<dt><strong><code>classes</code></strong></dt>
+<dd>The classes used for classification. None if implementing a regression model</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to properly implement the source tree</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A tree implementation in PyTorch</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -258,14 +278,16 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
     &#34;&#34;&#34;
     Common converter for GBDT classifiers.
 
-    :param tree_infos: The information representaing a tree (ensemble)
-    :param get_tree_parameters: A function specifying how to parse the tree_infos into parameters
-    :param n_features: The number of features input to the model
-    :param n_classes: How many classes are expected. 1 for regression tasks
-    :param classes: The classes used for classification. None if implementing a regression model
-    :param extra_config: Extra configuration used to properly implement the source tree
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+        get_tree_parameters: A function specifying how to parse the tree_infos into parameters
+        n_features: The number of features input to the model
+        n_classes: How many classes are expected. 1 for regression tasks
+        classes: The classes used for classification. None if implementing a regression model
+        extra_config: Extra configuration used to properly implement the source tree
 
-    :return: A tree implementation in PyTorch
+    Returns:
+        A tree implementation in PyTorch
     &#34;&#34;&#34;
     assert tree_infos is not None
     assert get_tree_parameters is not None
@@ -287,12 +309,24 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 </code></dt>
 <dd>
 <div class="desc"><p>Common converter for GBDT models.</p>
-<p>:param tree_infos: The information representaing a tree (ensemble)
-:param get_tree_parameters: A function specifying how to parse the tree_infos into parameters
-:param n_features: The number of features input to the model
-:param classes: The classes used for classification. None if implementing a regression model
-:param extra_config: Extra configuration used to properly implement the source tree</p>
-<p>:return: A tree implementation in PyTorch</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree_infos</code></strong></dt>
+<dd>The information representaing a tree (ensemble)</dd>
+<dt><strong><code>get_tree_parameters</code></strong></dt>
+<dd>A function specifying how to parse the tree_infos into parameters</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of features input to the model</dd>
+<dt><strong><code>classes</code></strong></dt>
+<dd>The classes used for classification. None if implementing a regression model</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to properly implement the source tree</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A tree implementation in PyTorch</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -301,13 +335,15 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
     &#34;&#34;&#34;
     Common converter for GBDT models.
 
-    :param tree_infos: The information representaing a tree (ensemble)
-    :param get_tree_parameters: A function specifying how to parse the tree_infos into parameters
-    :param n_features: The number of features input to the model
-    :param classes: The classes used for classification. None if implementing a regression model
-    :param extra_config: Extra configuration used to properly implement the source tree
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+        get_tree_parameters: A function specifying how to parse the tree_infos into parameters
+        n_features: The number of features input to the model
+        classes: The classes used for classification. None if implementing a regression model
+        extra_config: Extra configuration used to properly implement the source tree
 
-    :return: A tree implementation in PyTorch
+    Returns:
+        A tree implementation in PyTorch
     &#34;&#34;&#34;
     assert tree_infos is not None
     assert get_tree_parameters is not None
@@ -352,10 +388,17 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 </code></dt>
 <dd>
 <div class="desc"><p>Class implementing the GEMM strategy (in PyTorch) for GBDT models.</p>
-<p>:param net_parameters: The parameters defining the tree structure
-:param n_features: The number of features input to the model
-:param classes: The classes used for classification. None if implementing a regression model
-:param extra_config: Extra configuration used to properly implement the source tree</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>net_parameters</code></strong></dt>
+<dd>The parameters defining the tree structure</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of features input to the model</dd>
+<dt><strong><code>classes</code></strong></dt>
+<dd>The classes used for classification. None if implementing a regression model</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to properly implement the source tree</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -367,10 +410,11 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 
     def __init__(self, net_parameters, n_features, classes=None, extra_config={}):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param extra_config: Extra configuration used to properly implement the source tree
+        Args:
+            net_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
         &#34;&#34;&#34;
         super(GEMMGBDTImpl, self).__init__(net_parameters, n_features, classes, 1)
         self.n_gbdt_classes = 1
@@ -422,11 +466,19 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 </code></dt>
 <dd>
 <div class="desc"><p>Class implementing the Perfect Tree Traversal strategy in PyTorch.</p>
-<p>:param net_parameters: The parameters defining the tree structure
-:param max_depth: The maximum tree-depth in the model
-:param n_features: The number of features input to the model
-:param classes: The classes used for classification. None if implementing a regression model
-:param extra_config: Extra configuration used to properly implement the source tree</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>net_parameters</code></strong></dt>
+<dd>The parameters defining the tree structure</dd>
+<dt><strong><code>max_depth</code></strong></dt>
+<dd>The maximum tree-depth in the model</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of features input to the model</dd>
+<dt><strong><code>classes</code></strong></dt>
+<dd>The classes used for classification. None if implementing a regression model</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to properly implement the source tree</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -438,11 +490,12 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 
     def __init__(self, net_parameters, max_depth, n_features, classes=None, extra_config={}):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param extra_config: Extra configuration used to properly implement the source tree
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
         &#34;&#34;&#34;
         super(PerfectTreeTraversalGBDTImpl, self).__init__(net_parameters, max_depth, n_features, classes, 1)
         self.n_gbdt_classes = 1
@@ -494,11 +547,19 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 </code></dt>
 <dd>
 <div class="desc"><p>Class implementing the Tree Traversal strategy in PyTorch.</p>
-<p>:param net_parameters: The parameters defining the tree structure
-:param max_depth: The maximum tree-depth in the model
-:param n_features: The number of features input to the model
-:param classes: The classes used for classification. None if implementing a regression model
-:param extra_config: Extra configuration used to properly implement the source tree</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>net_parameters</code></strong></dt>
+<dd>The parameters defining the tree structure</dd>
+<dt><strong><code>max_depth</code></strong></dt>
+<dd>The maximum tree-depth in the model</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of features input to the model</dd>
+<dt><strong><code>classes</code></strong></dt>
+<dd>The classes used for classification. None if implementing a regression model</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to properly implement the source tree</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -510,11 +571,12 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 
     def __init__(self, net_parameters, max_detph, n_features, classes=None, extra_config={}):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param extra_config: Extra configuration used to properly implement the source tree
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
         &#34;&#34;&#34;
         super(TreeTraversalGBDTImpl, self).__init__(net_parameters, max_detph, n_features, classes, 1)
         self.n_gbdt_classes = 1

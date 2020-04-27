@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>hummingbird.convert API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Hummingbird main (converters) API." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,6 +20,7 @@
 <h1 class="title">Module <code>hummingbird.convert</code></h1>
 </header>
 <section id="section-intro">
+<p>Hummingbird main (converters) API.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -30,6 +31,9 @@
 # license information.
 # --------------------------------------------------------------------------
 
+&#34;&#34;&#34;
+Hummingbird main (converters) API.
+&#34;&#34;&#34;
 from copy import deepcopy
 import numpy as np
 
@@ -38,7 +42,7 @@ from onnxconverter_common.registration import get_converter
 from ._container import PyTorchBackendModel
 from .exceptions import MissingConverter
 from ._parse import parse_sklearn_api_model
-from .utils import torch_installed, lightgbm_installed, xgboost_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed
 from . import constants
 
 # Invoke the registration of all our converters.
@@ -47,15 +51,22 @@ from . import operator_converters  # noqa
 
 def convert_sklearn(model, test_input=None, extra_config={}):
     &#34;&#34;&#34;
-    This function converts the specified *scikit-learn* model into its *PyTorch* counterpart.
-    The supported operators can be found at :func:`supported_operators &lt;hummingbird._supported_opeartors&gt;`.
+    This function converts the specified [scikit-learn] model into its [PyTorch] counterpart.
+    The supported operators can be found at `hummingbird._supported_operators`.
+    [scikit-learn]: https://scikit-learn.org/
+    [PyTorch]: https://pytorch.org/
 
-    :param model: A scikit-learn model
-    :param test_input: some input data used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters.
-                         The set of supported extra configurations can be found at :file:supported_configurations
+    Args:
+        model: A scikit-learn model
+        test_input: some input data used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
-    :return: A model implemented in PyTorch, which is equivalent to the input scikit-learn model
+    Examples:
+        &gt;&gt;&gt; pytorch_model = convert_sklearn(sklearn_model)
+
+    Returns:
+        A model implemented in *PyTorch*, which is equivalent to the input *scikit-learn* model
     &#34;&#34;&#34;
     assert torch_installed(), &#34;To use Hummingbird you need to install torch.&#34;
 
@@ -71,14 +82,21 @@ def convert_sklearn(model, test_input=None, extra_config={}):
 
 def convert_lightgbm(model, test_input=None, extra_config={}):
     &#34;&#34;&#34;
-    This function is used to generate a *PyTorch* model from a given input *LightGBM* model
+    This function is used to generate a [PyTorch] model from a given input [LightGBM] model.
+    [LightGBM]: https://lightgbm.readthedocs.io/
+    [PyTorch]: https://pytorch.org/
 
-    :param model: A LightGBM model (trained using the scikit-learn API)
-    :param test_input: Some input data that will be used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters.
-                        The set of supported extra configurations can be found at :file:supported_configurations
+    Args:
+        model: A LightGBM model (trained using the scikit-learn API)
+        test_input: Some input data that will be used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
-    :return: A PyTorch model which is equivalent to the input LightGBM model
+    Examples:
+        &gt;&gt;&gt; pytorch_model = convert_lightgbm(lgbm_model)
+
+    Returns:
+        A *PyTorch* model which is equivalent to the input *LightGBM* model
     &#34;&#34;&#34;
     assert lightgbm_installed(), &#34;To convert LightGBM models you need to instal LightGBM.&#34;
 
@@ -87,47 +105,57 @@ def convert_lightgbm(model, test_input=None, extra_config={}):
 
 def convert_xgboost(model, test_input, extra_config={}):
     &#34;&#34;&#34;
-    This function is used to generate a *PyTorch* model from a given input *XGBoost* model
+    This function is used to generate a [PyTorch] model from a given input [XGBoost] model.
+    [PyTorch]: https://pytorch.org/
+    [XGBoost]: https://xgboost.readthedocs.io/
 
-    :param model: A XGBoost model (trained using the scikit-learn API)
-    :param test_input: Some input data used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters.
-                        The set of supported extra configurations can be found at :file:supported_configurations
+    Args:
+        model: A XGBoost model (trained using the scikit-learn API)
+        test_input: Some input data used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
-    :return: A PyTorch model which is equivalent to the input XGBoost model
+    Examples:
+        &gt;&gt;&gt; pytorch_model = convert_xgboost(xgb_model, [], extra_config={&#34;n_features&#34;:200})
+
+    Returns:
+        A *PyTorch* model which is equivalent to the input *XGBoost* model
     &#34;&#34;&#34;
     assert xgboost_installed(), &#34;To convert XGboost models you need to instal XGBoost.&#34;
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
-    if &#34;_features_count&#34; in dir(model):
-        extra_config[constants.N_FEATURES] = model._features_count
-    elif test_input is not None:
-        if type(test_input) is np.ndarray and len(test_input.shape) == 2:
-            extra_config[constants.N_FEATURES] = test_input.shape[1]
+    if constants.N_FEATURES not in extra_config:
+        if &#34;_features_count&#34; in dir(model):
+            extra_config[constants.N_FEATURES] = model._features_count
+        elif test_input is not None:
+            if type(test_input) is np.ndarray and len(test_input.shape) == 2:
+                extra_config[constants.N_FEATURES] = test_input.shape[1]
+            else:
+                raise RuntimeError(
+                    &#34;XGBoost converter is not able to infer the number of input features.\
+                        Apparently test_input is not an ndarray. \
+                        Please fill an issue at https://github.com/microsoft/hummingbird/.&#34;
+                )
         else:
             raise RuntimeError(
                 &#34;XGBoost converter is not able to infer the number of input features.\
-                    Apparently test_input is not an ndarray. \
-                    Please fill an issue at https://github.com/microsoft/hummingbird/.&#34;
+                    Please pass some test_input to the converter.&#34;
             )
-    else:
-        raise RuntimeError(
-            &#34;XGBoost converter is not able to infer the number of input features.\
-                Please pass some test_input to the converter.&#34;
-        )
     return convert_sklearn(model, test_input, extra_config)
 
 
 def _convert_topology(topology, device=None, extra_config={}):
     &#34;&#34;&#34;
-    This function is used to convert a *Topology* object into a *PyTorch* model.
+    This function is used to convert a `onnxconverter_common.topology.Topology` object into a *PyTorch* model.
 
-    :param topology: The Topology object that will be converted into Pytorch
-    :param device: Which device the translated model will be run on
-    :param extra_config: Extra configurations to be used by individual operator converters
+    Args:
+        topology: The `onnxconverter_common.topology.Topology` object that will be converted into Pytorch
+        device: Which device the translated model will be run on
+        extra_config: Extra configurations to be used by individual operator converters
 
-    :return: a PyTorch model
+    Returns:
+        A *PyTorch* model
     &#34;&#34;&#34;
     assert topology is not None, &#34;Cannot convert a Topology object of type None.&#34;
 
@@ -166,26 +194,43 @@ def _convert_topology(topology, device=None, extra_config={}):
 <span>def <span class="ident">convert_lightgbm</span></span>(<span>model, test_input=None, extra_config={})</span>
 </code></dt>
 <dd>
-<div class="desc"><p>This function is used to generate a <em>PyTorch</em> model from a given input <em>LightGBM</em> model</p>
-<p>:param model: A LightGBM model (trained using the scikit-learn API)
-:param test_input: Some input data that will be used to trace the model execution
-:param extra_config: Extra configurations to be used by the individual operator converters.
-The set of supported extra configurations can be found at :file:supported_configurations</p>
-<p>:return: A PyTorch model which is equivalent to the input LightGBM model</p></div>
+<div class="desc"><p>This function is used to generate a <a href="https://pytorch.org/">PyTorch</a> model from a given input <a href="https://lightgbm.readthedocs.io/">LightGBM</a> model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong></dt>
+<dd>A LightGBM model (trained using the scikit-learn API)</dd>
+<dt><strong><code>test_input</code></strong></dt>
+<dd>Some input data that will be used to trace the model execution</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configurations to be used by the individual operator converters.
+The set of supported extra configurations can be found at <code><a title="hummingbird.supported_configurations" href="supported_configurations.html">hummingbird.supported_configurations</a></code></dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python">&gt;&gt;&gt; pytorch_model = convert_lightgbm(lgbm_model)
+</code></pre>
+<h2 id="returns">Returns</h2>
+<p>A <em>PyTorch</em> model which is equivalent to the input <em>LightGBM</em> model</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def convert_lightgbm(model, test_input=None, extra_config={}):
     &#34;&#34;&#34;
-    This function is used to generate a *PyTorch* model from a given input *LightGBM* model
+    This function is used to generate a [PyTorch] model from a given input [LightGBM] model.
+    [LightGBM]: https://lightgbm.readthedocs.io/
+    [PyTorch]: https://pytorch.org/
 
-    :param model: A LightGBM model (trained using the scikit-learn API)
-    :param test_input: Some input data that will be used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters.
-                        The set of supported extra configurations can be found at :file:supported_configurations
+    Args:
+        model: A LightGBM model (trained using the scikit-learn API)
+        test_input: Some input data that will be used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
-    :return: A PyTorch model which is equivalent to the input LightGBM model
+    Examples:
+        &gt;&gt;&gt; pytorch_model = convert_lightgbm(lgbm_model)
+
+    Returns:
+        A *PyTorch* model which is equivalent to the input *LightGBM* model
     &#34;&#34;&#34;
     assert lightgbm_installed(), &#34;To convert LightGBM models you need to instal LightGBM.&#34;
 
@@ -196,28 +241,45 @@ The set of supported extra configurations can be found at :file:supported_config
 <span>def <span class="ident">convert_sklearn</span></span>(<span>model, test_input=None, extra_config={})</span>
 </code></dt>
 <dd>
-<div class="desc"><p>This function converts the specified <em>scikit-learn</em> model into its <em>PyTorch</em> counterpart.
-The supported operators can be found at :func:<code>supported_operators &lt;hummingbird._supported_opeartors&gt;</code>.</p>
-<p>:param model: A scikit-learn model
-:param test_input: some input data used to trace the model execution
-:param extra_config: Extra configurations to be used by the individual operator converters.
-The set of supported extra configurations can be found at :file:supported_configurations</p>
-<p>:return: A model implemented in PyTorch, which is equivalent to the input scikit-learn model</p></div>
+<div class="desc"><p>This function converts the specified <a href="https://scikit-learn.org/">scikit-learn</a> model into its <a href="https://pytorch.org/">PyTorch</a> counterpart.
+The supported operators can be found at <code><a title="hummingbird._supported_operators" href="_supported_operators.html">hummingbird._supported_operators</a></code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong></dt>
+<dd>A scikit-learn model</dd>
+<dt><strong><code>test_input</code></strong></dt>
+<dd>some input data used to trace the model execution</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configurations to be used by the individual operator converters.
+The set of supported extra configurations can be found at <code><a title="hummingbird.supported_configurations" href="supported_configurations.html">hummingbird.supported_configurations</a></code></dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python">&gt;&gt;&gt; pytorch_model = convert_sklearn(sklearn_model)
+</code></pre>
+<h2 id="returns">Returns</h2>
+<p>A model implemented in <em>PyTorch</em>, which is equivalent to the input <em>scikit-learn</em> model</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def convert_sklearn(model, test_input=None, extra_config={}):
     &#34;&#34;&#34;
-    This function converts the specified *scikit-learn* model into its *PyTorch* counterpart.
-    The supported operators can be found at :func:`supported_operators &lt;hummingbird._supported_opeartors&gt;`.
+    This function converts the specified [scikit-learn] model into its [PyTorch] counterpart.
+    The supported operators can be found at `hummingbird._supported_operators`.
+    [scikit-learn]: https://scikit-learn.org/
+    [PyTorch]: https://pytorch.org/
 
-    :param model: A scikit-learn model
-    :param test_input: some input data used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters.
-                         The set of supported extra configurations can be found at :file:supported_configurations
+    Args:
+        model: A scikit-learn model
+        test_input: some input data used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
-    :return: A model implemented in PyTorch, which is equivalent to the input scikit-learn model
+    Examples:
+        &gt;&gt;&gt; pytorch_model = convert_sklearn(sklearn_model)
+
+    Returns:
+        A model implemented in *PyTorch*, which is equivalent to the input *scikit-learn* model
     &#34;&#34;&#34;
     assert torch_installed(), &#34;To use Hummingbird you need to install torch.&#34;
 
@@ -235,47 +297,65 @@ The set of supported extra configurations can be found at :file:supported_config
 <span>def <span class="ident">convert_xgboost</span></span>(<span>model, test_input, extra_config={})</span>
 </code></dt>
 <dd>
-<div class="desc"><p>This function is used to generate a <em>PyTorch</em> model from a given input <em>XGBoost</em> model</p>
-<p>:param model: A XGBoost model (trained using the scikit-learn API)
-:param test_input: Some input data used to trace the model execution
-:param extra_config: Extra configurations to be used by the individual operator converters.
-The set of supported extra configurations can be found at :file:supported_configurations</p>
-<p>:return: A PyTorch model which is equivalent to the input XGBoost model</p></div>
+<div class="desc"><p>This function is used to generate a <a href="https://pytorch.org/">PyTorch</a> model from a given input <a href="https://xgboost.readthedocs.io/">XGBoost</a> model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model</code></strong></dt>
+<dd>A XGBoost model (trained using the scikit-learn API)</dd>
+<dt><strong><code>test_input</code></strong></dt>
+<dd>Some input data used to trace the model execution</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configurations to be used by the individual operator converters.
+The set of supported extra configurations can be found at <code><a title="hummingbird.supported_configurations" href="supported_configurations.html">hummingbird.supported_configurations</a></code></dd>
+</dl>
+<h2 id="examples">Examples</h2>
+<pre><code class="python">&gt;&gt;&gt; pytorch_model = convert_xgboost(xgb_model, [], extra_config={&quot;n_features&quot;:200})
+</code></pre>
+<h2 id="returns">Returns</h2>
+<p>A <em>PyTorch</em> model which is equivalent to the input <em>XGBoost</em> model</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def convert_xgboost(model, test_input, extra_config={}):
     &#34;&#34;&#34;
-    This function is used to generate a *PyTorch* model from a given input *XGBoost* model
+    This function is used to generate a [PyTorch] model from a given input [XGBoost] model.
+    [PyTorch]: https://pytorch.org/
+    [XGBoost]: https://xgboost.readthedocs.io/
 
-    :param model: A XGBoost model (trained using the scikit-learn API)
-    :param test_input: Some input data used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters.
-                        The set of supported extra configurations can be found at :file:supported_configurations
+    Args:
+        model: A XGBoost model (trained using the scikit-learn API)
+        test_input: Some input data used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
-    :return: A PyTorch model which is equivalent to the input XGBoost model
+    Examples:
+        &gt;&gt;&gt; pytorch_model = convert_xgboost(xgb_model, [], extra_config={&#34;n_features&#34;:200})
+
+    Returns:
+        A *PyTorch* model which is equivalent to the input *XGBoost* model
     &#34;&#34;&#34;
     assert xgboost_installed(), &#34;To convert XGboost models you need to instal XGBoost.&#34;
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
-    if &#34;_features_count&#34; in dir(model):
-        extra_config[constants.N_FEATURES] = model._features_count
-    elif test_input is not None:
-        if type(test_input) is np.ndarray and len(test_input.shape) == 2:
-            extra_config[constants.N_FEATURES] = test_input.shape[1]
+    if constants.N_FEATURES not in extra_config:
+        if &#34;_features_count&#34; in dir(model):
+            extra_config[constants.N_FEATURES] = model._features_count
+        elif test_input is not None:
+            if type(test_input) is np.ndarray and len(test_input.shape) == 2:
+                extra_config[constants.N_FEATURES] = test_input.shape[1]
+            else:
+                raise RuntimeError(
+                    &#34;XGBoost converter is not able to infer the number of input features.\
+                        Apparently test_input is not an ndarray. \
+                        Please fill an issue at https://github.com/microsoft/hummingbird/.&#34;
+                )
         else:
             raise RuntimeError(
                 &#34;XGBoost converter is not able to infer the number of input features.\
-                    Apparently test_input is not an ndarray. \
-                    Please fill an issue at https://github.com/microsoft/hummingbird/.&#34;
+                    Please pass some test_input to the converter.&#34;
             )
-    else:
-        raise RuntimeError(
-            &#34;XGBoost converter is not able to infer the number of input features.\
-                Please pass some test_input to the converter.&#34;
-        )
     return convert_sklearn(model, test_input, extra_config)</code></pre>
 </details>
 </dd>

@@ -20,13 +20,15 @@ from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for
 
 def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     """
-    Converter for Sklearn's *GBDT classifier*.
+    Converter for `sklearn.ensemble.GradientBoostingClassifier`.
 
-    :param operator: An operator wrapping a GBDT classifier model
-    :param device: String defining the type of device the converted operator should be run on
-    :param extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingClassifier` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    :return: A PyTorch model
+    Returns:
+        A PyTorch model
     """
     assert operator is not None
 

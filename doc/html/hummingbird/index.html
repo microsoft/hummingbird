@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.operator_converters API documentation</title>
-<meta name="description" content="" />
+<title>hummingbird API documentation</title>
+<meta name="description" content=".. image:: doc/hummingbird.png
+Hummingbird is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
+(e.g., …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,9 +19,13 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.operator_converters</code></h1>
+<h1 class="title">Package <code>hummingbird</code></h1>
 </header>
 <section id="section-intro">
+<p><img alt="" src="doc/hummingbird.png"></p>
+<p>Hummingbird is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
+(e.g., one-hot encoding) into tensor operations.
+Through Hummingbird, DNN frameworks can be used for both optimizing and enabling seamless hardware acceleration of traditional ML.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -30,60 +36,68 @@
 # license information.
 # --------------------------------------------------------------------------
 
-# Register constants used within Hummingbird converters.
-from . import constants as converter_constants
-from .. import supported_configurations as hummingbird_constants
-from ..utils import _Constants
+&#34;&#34;&#34;
+.. image:: doc/hummingbird.png
+Hummingbird is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
+(e.g., one-hot encoding) into tensor operations.
+Through Hummingbird, DNN frameworks can be used for both optimizing and enabling seamless hardware acceleration of traditional ML.
+&#34;&#34;&#34;
+
+__version__ = &#34;0.0.1&#34;
+__author__ = &#34;Microsoft&#34;
+__producer__ = &#34;hummingbird&#34;
+__producer_version__ = __version__
+__domain__ = &#34;microsoft.gsl&#34;
+__model_version__ = 0
+
+# Register constants used for Hummingbird extra configs.
+from . import supported_configurations as hummingbird_constants
+from ._utils import _Constants
 
 # Add constants in scope.
-constants = _Constants(converter_constants, hummingbird_constants)
+constants = _Constants(hummingbird_constants)
 
-# To register a converter for scikit-learn API operators, import associated modules here.
-from . import gbdt  # noqa: E402
-from . import lightgbm  # noqa: E402
-from . import decision_tree  # noqa: E402
-from . import xgb  # noqa: E402
+# Add the converters in the Hummingbird scope.
+from .convert import convert_sklearn  # noqa: F401
+from .convert import convert_lightgbm  # noqa: F401
+from .convert import convert_xgboost  # noqa: F401
 
 __pdoc__ = {}
-__pdoc__[&#39;hummingbird.operator_converters._gbdt_commons&#39;] = True
-__pdoc__[&#39;hummingbird.operator_converters._tree_commons&#39;] = True
-__pdoc__[&#39;hummingbird.operator_converters._tree_implementations&#39;] = True</code></pre>
+__pdoc__[&#39;hummingbird._container&#39;] = True
+__pdoc__[&#39;hummingbird._parse&#39;] = True
+__pdoc__[&#39;hummingbird._supported_operators&#39;] = True</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="hummingbird.operator_converters._gbdt_commons" href="_gbdt_commons.html">hummingbird.operator_converters._gbdt_commons</a></code></dt>
+<dt><code class="name"><a title="hummingbird._container" href="_container.html">hummingbird._container</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>All custom model containers are listed here.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.operator_converters._tree_commons" href="_tree_commons.html">hummingbird.operator_converters._tree_commons</a></code></dt>
+<dt><code class="name"><a title="hummingbird._parse" href="_parse.html">hummingbird._parse</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>All functions used for parsing input models are listed here.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.operator_converters._tree_implementations" href="_tree_implementations.html">hummingbird.operator_converters._tree_implementations</a></code></dt>
+<dt><code class="name"><a title="hummingbird._supported_operators" href="_supported_operators.html">hummingbird._supported_operators</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>All operators supported in Hummingbird are registred here.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.operator_converters.constants" href="constants.html">hummingbird.operator_converters.constants</a></code></dt>
+<dt><code class="name"><a title="hummingbird.convert" href="convert.html">hummingbird.convert</a></code></dt>
 <dd>
-<div class="desc"><p>Constants used in the Hummingbird converters are defined here.</p></div>
+<div class="desc"><p>Hummingbird main (converters) API.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.operator_converters.decision_tree" href="decision_tree.html">hummingbird.operator_converters.decision_tree</a></code></dt>
+<dt><code class="name"><a title="hummingbird.exceptions" href="exceptions.html">hummingbird.exceptions</a></code></dt>
 <dd>
-<div class="desc"><p>Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees</p></div>
+<div class="desc"><p>Common errors.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.operator_converters.gbdt" href="gbdt.html">hummingbird.operator_converters.gbdt</a></code></dt>
+<dt><code class="name"><a title="hummingbird.operator_converters" href="operator_converters/index.html">hummingbird.operator_converters</a></code></dt>
 <dd>
-<div class="desc"><p>Converters for Sklearn's GradientBoosting models.</p></div>
+<div class="desc"><p>All operators converters are stored under this package.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.operator_converters.lightgbm" href="lightgbm.html">hummingbird.operator_converters.lightgbm</a></code></dt>
+<dt><code class="name"><a title="hummingbird.supported_configurations" href="supported_configurations.html">hummingbird.supported_configurations</a></code></dt>
 <dd>
-<div class="desc"><p>Converters for LightGBM models.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.operator_converters.xgb" href="xgb.html">hummingbird.operator_converters.xgb</a></code></dt>
-<dd>
-<div class="desc"><p>Converters for XGBoost models.</p></div>
+<div class="desc"><p>Supported configurations settings accepted by Hummingbird are defined here.</p></div>
 </dd>
 </dl>
 </section>
@@ -100,21 +114,15 @@ __pdoc__[&#39;hummingbird.operator_converters._tree_implementations&#39;] = True
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3>Super-module</h3>
-<ul>
-<li><code><a title="hummingbird" href="../index.html">hummingbird</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="hummingbird.operator_converters._gbdt_commons" href="_gbdt_commons.html">hummingbird.operator_converters._gbdt_commons</a></code></li>
-<li><code><a title="hummingbird.operator_converters._tree_commons" href="_tree_commons.html">hummingbird.operator_converters._tree_commons</a></code></li>
-<li><code><a title="hummingbird.operator_converters._tree_implementations" href="_tree_implementations.html">hummingbird.operator_converters._tree_implementations</a></code></li>
-<li><code><a title="hummingbird.operator_converters.constants" href="constants.html">hummingbird.operator_converters.constants</a></code></li>
-<li><code><a title="hummingbird.operator_converters.decision_tree" href="decision_tree.html">hummingbird.operator_converters.decision_tree</a></code></li>
-<li><code><a title="hummingbird.operator_converters.gbdt" href="gbdt.html">hummingbird.operator_converters.gbdt</a></code></li>
-<li><code><a title="hummingbird.operator_converters.lightgbm" href="lightgbm.html">hummingbird.operator_converters.lightgbm</a></code></li>
-<li><code><a title="hummingbird.operator_converters.xgb" href="xgb.html">hummingbird.operator_converters.xgb</a></code></li>
+<li><code><a title="hummingbird._container" href="_container.html">hummingbird._container</a></code></li>
+<li><code><a title="hummingbird._parse" href="_parse.html">hummingbird._parse</a></code></li>
+<li><code><a title="hummingbird._supported_operators" href="_supported_operators.html">hummingbird._supported_operators</a></code></li>
+<li><code><a title="hummingbird.convert" href="convert.html">hummingbird.convert</a></code></li>
+<li><code><a title="hummingbird.exceptions" href="exceptions.html">hummingbird.exceptions</a></code></li>
+<li><code><a title="hummingbird.operator_converters" href="operator_converters/index.html">hummingbird.operator_converters</a></code></li>
+<li><code><a title="hummingbird.supported_configurations" href="supported_configurations.html">hummingbird.supported_configurations</a></code></li>
 </ul>
 </li>
 </ul>

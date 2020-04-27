@@ -4,6 +4,10 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+All functions used for parsing input models are listed here.
+"""
+
 from sklearn import pipeline
 
 from onnxconverter_common.container import CommonSklearnModelContainer
@@ -17,10 +21,11 @@ def parse_sklearn_api_model(model):
     Puts *scikit-learn* object into an abstract representation so that our framework can work seamlessly on models created
     with different machine learning tools.
 
-    :param model: A model object in scikit-learn format
+    Args:
+        model: A model object in scikit-learn format
 
-    :return: A :class:`Topology <onnxconverter_common.topology.Topology>` object
-
+    Returns:
+        A `onnxconverter_common.topology.Topology` object representing the input model
     """
     assert model is not None, "Cannot convert a mode of type None."
 
@@ -61,11 +66,13 @@ def _parse_sklearn_api(scope, model, inputs):
     This is a delegate function adding the model to the input scope.
     It does nothing but invokes the correct parsing function according to the input model's type.
 
-    :param scope: The scope where the model will be added
-    :param model: A scikit-learn object
-    :param inputs: A list of variables
+    Args:
+        scope: The `onnxconverter_common.topology.Scope` object where the model will be added
+        model: A scikit-learn model object
+        inputs: A list of `onnxconverter_common.topology.Variable`s
 
-    :return: The output variables produced by the input model
+    Returns:
+        The output `onnxconverter_common.topology.Variable`s produced by the input model
     """
     tmodel = type(model)
     if tmodel in sklearn_api_parsers_map:
@@ -80,11 +87,13 @@ def _parse_sklearn_single_model(scope, model, inputs):
     """
     This function handles all sklearn objects composed by a single model.
 
-    :param scope: The scope where the model will be added
-    :param model: A scikit-learn object
-    :param inputs: A list of variables
+    Args:
+        scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
+        model: A scikit-learn model object
+        inputs: A list of `onnxconverter_common.topology.Variable`s
 
-    :return: A list of output variables which will be passed to next stage
+    Returns:
+        A list of output `onnxconverter_common.topology.Variable` which will be passed to next stage
     """
     if isinstance(model, str):
         raise RuntimeError("Parameter model must be an object not a " "string '{0}'.".format(model))
@@ -105,14 +114,16 @@ def _parse_sklearn_pipeline(scope, model, inputs):
     The basic ideas of scikit-learn pipeline parsing:
         1. Sequentially go though all stages defined in the considered
            scikit-learn pipeline
-        2. The output variables of one stage will be fed into its next
+        2. The output `onnxconverter_common.topology.Variable`s of one stage will be fed into its next
            stage as the inputs.
 
-    :param scope: The scope for the model
-    :param model: scikit-learn pipeline object
-    :param inputs: A list of Variable objects
+    Args:
+        scope: The ``onnxconverter_common.topology.Scope`` for the model
+        model: A `sklearn.pipeline.Pipeline` object
+        inputs: A list of `onnxconverter_common.topology.Variable` objects
 
-    :return: A list of output variables produced by the input pipeline
+    Returns:
+        A list of output `onnxconverter_common.topology.Variable`s produced by the input pipeline
     """
     for step in model.steps:
         inputs = _parse_sklearn_api(scope, step[1], inputs)

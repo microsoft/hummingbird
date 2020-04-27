@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird API documentation</title>
-<meta name="description" content="Main entry point to the Hummingbird converters." />
+<title>hummingbird.operator_converters.constants API documentation</title>
+<meta name="description" content="Constants used in the Hummingbird converters are defined here." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,10 +17,10 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>hummingbird</code></h1>
+<h1 class="title">Module <code>hummingbird.operator_converters.constants</code></h1>
 </header>
 <section id="section-intro">
-<p>Main entry point to the Hummingbird converters.</p>
+<p>Constants used in the Hummingbird converters are defined here.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -32,72 +32,37 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Main entry point to the Hummingbird converters.
+Constants used in the Hummingbird converters are defined here.
 &#34;&#34;&#34;
 
-__version__ = &#34;0.0.1&#34;
-__author__ = &#34;Microsoft&#34;
-__producer__ = &#34;hummingbird&#34;
-__producer_version__ = __version__
-__domain__ = &#34;microsoft.gsl&#34;
-__model_version__ = 0
+ALPHA = &#34;alpha&#34;
+&#34;&#34;&#34;Alpha&#34;&#34;&#34;
 
-# Register constants used for Hummingbird extra configs.
-from . import supported_configurations as hummingbird_constants
-from .utils import _Constants
+LEARNING_RATE = &#34;learning_rate&#34;
+&#34;&#34;&#34;Learning Rate&#34;&#34;&#34;
 
-# Add constants in scope.
-constants = _Constants(hummingbird_constants)
-
-# Add the converters in the Hummingbird scope.
-from .convert import convert_sklearn  # noqa: F401
-from .convert import convert_lightgbm  # noqa: F401
-from .convert import convert_xgboost  # noqa: F401
-
-__pdoc__ = {}
-__pdoc__[&#39;hummingbird._container&#39;] = True
-__pdoc__[&#39;hummingbird._parse&#39;] = True
-__pdoc__[&#39;hummingbird._supported_operators&#39;] = True</code></pre>
+GET_PARAMETERS_FOR_TREE_TRAVERSAL = &#34;get_parameters_for_tree_trav&#34;
+&#34;&#34;&#34;Which function to use to extract the parameters for the tree traversal strategy&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="hummingbird._container" href="_container.html">hummingbird._container</a></code></dt>
-<dd>
-<div class="desc"><p>All custom model containers are listed here.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird._parse" href="_parse.html">hummingbird._parse</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="hummingbird._supported_operators" href="_supported_operators.html">hummingbird._supported_operators</a></code></dt>
-<dd>
-<div class="desc"><p>All operators supported in Hummingbird are registred here.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.convert" href="convert.html">hummingbird.convert</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.exceptions" href="exceptions.html">hummingbird.exceptions</a></code></dt>
-<dd>
-<div class="desc"><p>Common errors.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.operator_converters" href="operator_converters/index.html">hummingbird.operator_converters</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.supported_configurations" href="supported_configurations.html">hummingbird.supported_configurations</a></code></dt>
-<dd>
-<div class="desc"><p>Supported configurations settings accepted by Hummingbird are defined here.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.utils" href="utils.html">hummingbird.utils</a></code></dt>
-<dd>
-<div class="desc"><p>Collection of utility functions used throughout Hummingbird.</p></div>
-</dd>
-</dl>
 </section>
 <section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="hummingbird.operator_converters.constants.ALPHA"><code class="name">var <span class="ident">ALPHA</span></code></dt>
+<dd>
+<div class="desc"><p>Alpha</p></div>
+</dd>
+<dt id="hummingbird.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL"><code class="name">var <span class="ident">GET_PARAMETERS_FOR_TREE_TRAVERSAL</span></code></dt>
+<dd>
+<div class="desc"><p>Which function to use to extract the parameters for the tree traversal strategy</p></div>
+</dd>
+<dt id="hummingbird.operator_converters.constants.LEARNING_RATE"><code class="name">var <span class="ident">LEARNING_RATE</span></code></dt>
+<dd>
+<div class="desc"><p>Learning Rate</p></div>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -110,16 +75,16 @@ __pdoc__[&#39;hummingbird._supported_operators&#39;] = True</code></pre>
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird._container" href="_container.html">hummingbird._container</a></code></li>
-<li><code><a title="hummingbird._parse" href="_parse.html">hummingbird._parse</a></code></li>
-<li><code><a title="hummingbird._supported_operators" href="_supported_operators.html">hummingbird._supported_operators</a></code></li>
-<li><code><a title="hummingbird.convert" href="convert.html">hummingbird.convert</a></code></li>
-<li><code><a title="hummingbird.exceptions" href="exceptions.html">hummingbird.exceptions</a></code></li>
-<li><code><a title="hummingbird.operator_converters" href="operator_converters/index.html">hummingbird.operator_converters</a></code></li>
-<li><code><a title="hummingbird.supported_configurations" href="supported_configurations.html">hummingbird.supported_configurations</a></code></li>
-<li><code><a title="hummingbird.utils" href="utils.html">hummingbird.utils</a></code></li>
+<li><code><a title="hummingbird.operator_converters" href="index.html">hummingbird.operator_converters</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="hummingbird.operator_converters.constants.ALPHA" href="#hummingbird.operator_converters.constants.ALPHA">ALPHA</a></code></li>
+<li><code><a title="hummingbird.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL" href="#hummingbird.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL">GET_PARAMETERS_FOR_TREE_TRAVERSAL</a></code></li>
+<li><code><a title="hummingbird.operator_converters.constants.LEARNING_RATE" href="#hummingbird.operator_converters.constants.LEARNING_RATE">LEARNING_RATE</a></code></li>
 </ul>
 </li>
 </ul>

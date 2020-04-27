@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.operator_converters.constants API documentation</title>
-<meta name="description" content="Constants used in the Hummingbird converters are defined here." />
+<title>hummingbird.operator_converters API documentation</title>
+<meta name="description" content="All operators converters are stored under this package." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -17,10 +17,10 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.operator_converters.constants</code></h1>
+<h1 class="title">Module <code>hummingbird.operator_converters</code></h1>
 </header>
 <section id="section-intro">
-<p>Constants used in the Hummingbird converters are defined here.</p>
+<p>All operators converters are stored under this package.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -32,16 +32,65 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Constants used in the Hummingbird converters are defined here.
+All operators converters are stored under this package.
 &#34;&#34;&#34;
 
-ALPHA = &#34;alpha&#34;
-LEARNING_RATE = &#34;learning_rate&#34;
+# Register constants used within Hummingbird converters.
+from . import constants as converter_constants
+from .. import supported_configurations as hummingbird_constants
+from .._utils import _Constants
 
-GET_PARAMETERS_FOR_TREE_TRAVERSAL = &#34;get_parameters_for_tree_trav&#34;</code></pre>
+# Add constants in scope.
+constants = _Constants(converter_constants, hummingbird_constants)
+
+# To register a converter for scikit-learn API operators, import associated modules here.
+from . import gbdt  # noqa: E402
+from . import lightgbm  # noqa: E402
+from . import decision_tree  # noqa: E402
+from . import xgb  # noqa: E402
+
+__pdoc__ = {}
+__pdoc__[&#39;hummingbird.operator_converters._gbdt_commons&#39;] = True
+__pdoc__[&#39;hummingbird.operator_converters._tree_commons&#39;] = True
+__pdoc__[&#39;hummingbird.operator_converters._tree_implementations&#39;] = True</code></pre>
 </details>
 </section>
 <section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="hummingbird.operator_converters._gbdt_commons" href="_gbdt_commons.html">hummingbird.operator_converters._gbdt_commons</a></code></dt>
+<dd>
+<div class="desc"><p>Collections of classes and functions shared among GBDT converters.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.operator_converters._tree_commons" href="_tree_commons.html">hummingbird.operator_converters._tree_commons</a></code></dt>
+<dd>
+<div class="desc"><p>Collections of classes and functions shared among all tree converters.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.operator_converters._tree_implementations" href="_tree_implementations.html">hummingbird.operator_converters._tree_implementations</a></code></dt>
+<dd>
+<div class="desc"><p>Base classes for tree algorithm implementations.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.operator_converters.constants" href="constants.html">hummingbird.operator_converters.constants</a></code></dt>
+<dd>
+<div class="desc"><p>Constants used in the Hummingbird converters are defined here.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.operator_converters.decision_tree" href="decision_tree.html">hummingbird.operator_converters.decision_tree</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.operator_converters.gbdt" href="gbdt.html">hummingbird.operator_converters.gbdt</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for Sklearn's GradientBoosting models.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.operator_converters.lightgbm" href="lightgbm.html">hummingbird.operator_converters.lightgbm</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for LightGBM models.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.operator_converters.xgb" href="xgb.html">hummingbird.operator_converters.xgb</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for XGBoost models.</p></div>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -58,7 +107,19 @@ GET_PARAMETERS_FOR_TREE_TRAVERSAL = &#34;get_parameters_for_tree_trav&#34;</code
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.operator_converters" href="index.html">hummingbird.operator_converters</a></code></li>
+<li><code><a title="hummingbird" href="../index.html">hummingbird</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="hummingbird.operator_converters._gbdt_commons" href="_gbdt_commons.html">hummingbird.operator_converters._gbdt_commons</a></code></li>
+<li><code><a title="hummingbird.operator_converters._tree_commons" href="_tree_commons.html">hummingbird.operator_converters._tree_commons</a></code></li>
+<li><code><a title="hummingbird.operator_converters._tree_implementations" href="_tree_implementations.html">hummingbird.operator_converters._tree_implementations</a></code></li>
+<li><code><a title="hummingbird.operator_converters.constants" href="constants.html">hummingbird.operator_converters.constants</a></code></li>
+<li><code><a title="hummingbird.operator_converters.decision_tree" href="decision_tree.html">hummingbird.operator_converters.decision_tree</a></code></li>
+<li><code><a title="hummingbird.operator_converters.gbdt" href="gbdt.html">hummingbird.operator_converters.gbdt</a></code></li>
+<li><code><a title="hummingbird.operator_converters.lightgbm" href="lightgbm.html">hummingbird.operator_converters.lightgbm</a></code></li>
+<li><code><a title="hummingbird.operator_converters.xgb" href="xgb.html">hummingbird.operator_converters.xgb</a></code></li>
 </ul>
 </li>
 </ul>

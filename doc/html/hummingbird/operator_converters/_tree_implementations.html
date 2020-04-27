@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>hummingbird.operator_converters._tree_implementations API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Base classes for tree algorithm implementations." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,6 +20,7 @@
 <h1 class="title">Module <code>hummingbird.operator_converters._tree_implementations</code></h1>
 </header>
 <section id="section-intro">
+<p>Base classes for tree algorithm implementations.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -30,15 +31,14 @@
 # license information.
 # --------------------------------------------------------------------------
 
+&#34;&#34;&#34;
+Base classes for tree algorithm implementations.
+&#34;&#34;&#34;
+
 import torch
 import numpy as np
 from enum import Enum
 from abc import ABC, abstractmethod
-
-
-&#34;&#34;&#34;
-Base classes for tree algorithm implementations.
-&#34;&#34;&#34;
 
 
 class TreeImpl(Enum):
@@ -64,9 +64,11 @@ class AbstracTreeImpl(ABC):
         &#34;&#34;&#34;
         Method defining the aggregation operation to execute after the model is evaluated.
 
-        :param x: An input tensor
+        Args:
+            x: An input tensor
 
-        :return: The tensor result of the aggregation
+        Returns:
+            The tensor result of the aggregation
         &#34;&#34;&#34;
         pass
 
@@ -75,9 +77,11 @@ class AbstracTreeImpl(ABC):
         &#34;&#34;&#34;
         Method implementating the calibration operation for classifiers.
 
-        :param x: An input tensor
+        Args:
+            x: An input tensor
 
-        :return: The tensor result of the calibration
+        Returns:
+            The tensor result of the calibration
         &#34;&#34;&#34;
         pass
 
@@ -89,10 +93,11 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
 
     def __init__(self, net_parameters, n_features, classes, n_classes):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param n_classes: The total number of used classes
+        Args:
+            net_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            n_classes: The total number of used classes
         &#34;&#34;&#34;
         super(AbstractPyTorchTreeImpl, self).__init__()
 
@@ -123,10 +128,11 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
     def __init__(self, net_parameters, n_features, classes, n_classes=None):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param n_classes: The total number of used classes
+        Args:
+            net_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            n_classes: The total number of used classes
         &#34;&#34;&#34;
         super(GEMMTreeImpl, self).__init__(net_parameters, n_features, classes, n_classes)
 
@@ -213,11 +219,12 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
     def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param n_classes: The total number of used classes
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            n_classes: The total number of used classes
         &#34;&#34;&#34;
         super(TreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
 
@@ -301,11 +308,12 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
     def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param n_classes: The total number of used classes
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            n_classes: The total number of used classes
         &#34;&#34;&#34;
         super(PerfectTreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
 
@@ -462,9 +470,11 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         &#34;&#34;&#34;
         Method defining the aggregation operation to execute after the model is evaluated.
 
-        :param x: An input tensor
+        Args:
+            x: An input tensor
 
-        :return: The tensor result of the aggregation
+        Returns:
+            The tensor result of the aggregation
         &#34;&#34;&#34;
         pass
 
@@ -473,9 +483,11 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         &#34;&#34;&#34;
         Method implementating the calibration operation for classifiers.
 
-        :param x: An input tensor
+        Args:
+            x: An input tensor
 
-        :return: The tensor result of the calibration
+        Returns:
+            The tensor result of the calibration
         &#34;&#34;&#34;
         pass</code></pre>
 </details>
@@ -494,8 +506,13 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 </code></dt>
 <dd>
 <div class="desc"><p>Method defining the aggregation operation to execute after the model is evaluated.</p>
-<p>:param x: An input tensor</p>
-<p>:return: The tensor result of the aggregation</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong></dt>
+<dd>An input tensor</dd>
+<dt><strong><code>Returns</code></strong></dt>
+<dd>The tensor result of the aggregation</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -505,9 +522,11 @@ def aggregation(self, x):
     &#34;&#34;&#34;
     Method defining the aggregation operation to execute after the model is evaluated.
 
-    :param x: An input tensor
+    Args:
+        x: An input tensor
 
-    :return: The tensor result of the aggregation
+    Returns:
+        The tensor result of the aggregation
     &#34;&#34;&#34;
     pass</code></pre>
 </details>
@@ -517,8 +536,13 @@ def aggregation(self, x):
 </code></dt>
 <dd>
 <div class="desc"><p>Method implementating the calibration operation for classifiers.</p>
-<p>:param x: An input tensor</p>
-<p>:return: The tensor result of the calibration</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong></dt>
+<dd>An input tensor</dd>
+<dt><strong><code>Returns</code></strong></dt>
+<dd>The tensor result of the calibration</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -528,9 +552,11 @@ def calibration(self, x):
     &#34;&#34;&#34;
     Method implementating the calibration operation for classifiers.
 
-    :param x: An input tensor
+    Args:
+        x: An input tensor
 
-    :return: The tensor result of the calibration
+    Returns:
+        The tensor result of the calibration
     &#34;&#34;&#34;
     pass</code></pre>
 </details>
@@ -543,10 +569,17 @@ def calibration(self, x):
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract class definig the basic structure for tree-base models implemented in PyTorch.</p>
-<p>:param net_parameters: The parameters defining the tree structure
-:param n_features: The number of features input to the model
-:param classes: The classes used for classification. None if implementing a regression model
-:param n_classes: The total number of used classes</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>net_parameters</code></strong></dt>
+<dd>The parameters defining the tree structure</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of features input to the model</dd>
+<dt><strong><code>classes</code></strong></dt>
+<dd>The classes used for classification. None if implementing a regression model</dd>
+<dt><strong><code>n_classes</code></strong></dt>
+<dd>The total number of used classes</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -558,10 +591,11 @@ def calibration(self, x):
 
     def __init__(self, net_parameters, n_features, classes, n_classes):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param n_classes: The total number of used classes
+        Args:
+            net_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            n_classes: The total number of used classes
         &#34;&#34;&#34;
         super(AbstractPyTorchTreeImpl, self).__init__()
 
@@ -612,10 +646,17 @@ def calibration(self, x):
 </code></dt>
 <dd>
 <div class="desc"><p>Class implementing the GEMM strategy in PyTorch for tree-base models.</p>
-<p>:param net_parameters: The parameters defining the tree structure
-:param n_features: The number of features input to the model
-:param classes: The classes used for classification. None if implementing a regression model
-:param n_classes: The total number of used classes</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>net_parameters</code></strong></dt>
+<dd>The parameters defining the tree structure</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of features input to the model</dd>
+<dt><strong><code>classes</code></strong></dt>
+<dd>The classes used for classification. None if implementing a regression model</dd>
+<dt><strong><code>n_classes</code></strong></dt>
+<dd>The total number of used classes</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -627,10 +668,11 @@ def calibration(self, x):
 
     def __init__(self, net_parameters, n_features, classes, n_classes=None):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param n_classes: The total number of used classes
+        Args:
+            net_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            n_classes: The total number of used classes
         &#34;&#34;&#34;
         super(GEMMTreeImpl, self).__init__(net_parameters, n_features, classes, n_classes)
 
@@ -789,11 +831,19 @@ registered hooks while the latter silently ignores them.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Class implementing the Perfect Tree Traversal strategy in PyTorch for tree-base models.</p>
-<p>:param net_parameters: The parameters defining the tree structure
-:param max_depth: The maximum tree-depth in the model
-:param n_features: The number of features input to the model
-:param classes: The classes used for classification. None if implementing a regression model
-:param n_classes: The total number of used classes</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>net_parameters</code></strong></dt>
+<dd>The parameters defining the tree structure</dd>
+<dt><strong><code>max_depth</code></strong></dt>
+<dd>The maximum tree-depth in the model</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of features input to the model</dd>
+<dt><strong><code>classes</code></strong></dt>
+<dd>The classes used for classification. None if implementing a regression model</dd>
+<dt><strong><code>n_classes</code></strong></dt>
+<dd>The total number of used classes</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -805,11 +855,12 @@ registered hooks while the latter silently ignores them.</p>
 
     def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param n_classes: The total number of used classes
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            n_classes: The total number of used classes
         &#34;&#34;&#34;
         super(PerfectTreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
 
@@ -1053,11 +1104,19 @@ registered hooks while the latter silently ignores them.</p>
 </code></dt>
 <dd>
 <div class="desc"><p>Class implementing the Tree Traversal strategy in PyTorch for tree-base models.</p>
-<p>:param net_parameters: The parameters defining the tree structure
-:param max_depth: The maximum tree-depth in the model
-:param n_features: The number of features input to the model
-:param classes: The classes used for classification. None if implementing a regression model
-:param n_classes: The total number of used classes</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>net_parameters</code></strong></dt>
+<dd>The parameters defining the tree structure</dd>
+<dt><strong><code>max_depth</code></strong></dt>
+<dd>The maximum tree-depth in the model</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of features input to the model</dd>
+<dt><strong><code>classes</code></strong></dt>
+<dd>The classes used for classification. None if implementing a regression model</dd>
+<dt><strong><code>n_classes</code></strong></dt>
+<dd>The total number of used classes</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1069,11 +1128,12 @@ registered hooks while the latter silently ignores them.</p>
 
     def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
         &#34;&#34;&#34;
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
-        :param n_classes: The total number of used classes
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            n_classes: The total number of used classes
         &#34;&#34;&#34;
         super(TreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
 

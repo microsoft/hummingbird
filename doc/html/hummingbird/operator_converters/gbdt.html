@@ -47,13 +47,15 @@ from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for
 
 def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for Sklearn&#39;s *GBDT classifier*.
+    Converter for `sklearn.ensemble.GradientBoostingClassifier`.
 
-    :param operator: An operator wrapping a GBDT classifier model
-    :param device: String defining the type of device the converted operator should be run on
-    :param extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingClassifier` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    :return: A PyTorch model
+    Returns:
+        A PyTorch model
     &#34;&#34;&#34;
     assert operator is not None
 
@@ -109,24 +111,36 @@ register_converter(&#34;SklearnGradientBoostingClassifier&#34;, convert_sklearn_
 <span>def <span class="ident">convert_sklearn_gbdt_classifier</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for Sklearn's <em>GBDT classifier</em>.</p>
-<p>:param operator: An operator wrapping a GBDT classifier model
-:param device: String defining the type of device the converted operator should be run on
-:param extra_config: Extra configuration used to select the best conversion strategy</p>
-<p>:return: A PyTorch model</p></div>
+<div class="desc"><p>Converter for <code>sklearn.ensemble.GradientBoostingClassifier</code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>operator</code></strong></dt>
+<dd>An operator wrapping a <code>sklearn.ensemble.GradientBoostingClassifier</code> model</dd>
+<dt><strong><code>device</code></strong></dt>
+<dd>String defining the type of device the converted operator should be run on</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to select the best conversion strategy</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A PyTorch model</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for Sklearn&#39;s *GBDT classifier*.
+    Converter for `sklearn.ensemble.GradientBoostingClassifier`.
 
-    :param operator: An operator wrapping a GBDT classifier model
-    :param device: String defining the type of device the converted operator should be run on
-    :param extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingClassifier` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    :return: A PyTorch model
+    Returns:
+        A PyTorch model
     &#34;&#34;&#34;
     assert operator is not None
 

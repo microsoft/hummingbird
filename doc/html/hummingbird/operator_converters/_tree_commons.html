@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>hummingbird.operator_converters._tree_commons API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="Collections of classes and functions shared among all tree converters." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,6 +20,7 @@
 <h1 class="title">Module <code>hummingbird.operator_converters._tree_commons</code></h1>
 </header>
 <section id="section-intro">
+<p>Collections of classes and functions shared among all tree converters.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -30,16 +31,15 @@
 # license information.
 # --------------------------------------------------------------------------
 
+&#34;&#34;&#34;
+Collections of classes and functions shared among all tree converters.
+&#34;&#34;&#34;
+
 import copy
 import numpy as np
 
 from ._tree_implementations import TreeImpl
 from . import constants
-
-
-&#34;&#34;&#34;
-Collections of classes and functions shared among all tree converters.
-&#34;&#34;&#34;
 
 
 class Node:
@@ -49,12 +49,13 @@ class Node:
 
     def __init__(self, id=None):
         &#34;&#34;&#34;
-        :param id: A unique ID for the node
-        :param left: The id of the left node
-        :param right: The id of the right node
-        :param feature: The feature used to make a decision (if not leaf node, ignored otherwise)
-        :param threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
-        :param value: The value stored in the leaf (ignored if not leaf node).
+        Args:
+            id: A unique ID for the node
+            left: The id of the left node
+            right: The id of the right node
+            feature: The feature used to make a decision (if not leaf node, ignored otherwise)
+            threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
+            value: The value stored in the leaf (ignored if not leaf node).
         &#34;&#34;&#34;
         self.id = id
         self.left = None
@@ -71,11 +72,12 @@ class TreeParameters:
 
     def __init__(self, lefts, rights, features, thresholds, values):
         &#34;&#34;&#34;
-        :param lefts: The id of the left nodes
-        :param rights: The id of the right nodes
-        :param feature: The features used to make decisions
-        :param thresholds: The thresholds used in the decisions
-        :param values: The value stored in the leaves
+        Args:
+            lefts: The id of the left nodes
+            rights: The id of the right nodes
+            feature: The features used to make decisions
+            thresholds: The thresholds used in the decisions
+            values: The value stored in the leaves
         &#34;&#34;&#34;
         self.lefts = lefts
         self.rights = rights
@@ -141,16 +143,16 @@ def _find_depth(node, current_depth):
     elif node.right != -1 and node.left != -1:
         return max(_find_depth(node.left, current_depth + 1), _find_depth(node.right, current_depth + 1))
 
-
 def get_tree_implementation_by_config_or_depth(extra_config, max_depth, low=3, high=10):
     &#34;&#34;&#34;
     Utility function used to pick the tree implementation based on input parameters and heurstics.
     The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &lt; TreeTrav
-    :param max_depth: The maximum tree-depth found in the tree model.
-    :param low: The maximum depth below which GEMM strategy is used
-    :param high: The maximum depth for which PerfTreeTrav strategy is used
+    Args:
+        max_depth: The maximum tree-depth found in the tree model.
+        low: The maximum depth below which GEMM strategy is used
+        high: The maximum depth for which PerfTreeTrav strategy is used
 
-    :return: A tree implementation
+    Returns: A tree implementation
     &#34;&#34;&#34;
     if constants.TREE_IMPLEMENTATION not in extra_config:
         if max_depth is not None and max_depth &lt;= low:
@@ -174,12 +176,14 @@ def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
     &#34;&#34;&#34;
     Populate the parameters from the trees and pick the tree implementation strategy.
 
-    :param tree_infos: The information representaing a tree (ensemble)
-    :param get_tree_parameters: A function specifying how to parse the tree_infos into a
-                                :class: `TreeParameters &lt;operator_converters._tree_commons_TreeParameters&gt;` object
-    :param extra_config: param extra_config: Extra configuration used also to select the best conversion strategy
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+        get_tree_parameters: A function specifying how to parse the tree_infos into a
+                             `operator_converters._tree_commons_TreeParameters` object
+        extra_config: param extra_config: Extra configuration used also to select the best conversion strategy
 
-    :return: The tree parameters, the maximum tree-depth and the tre implementation to use
+    Returns:
+        The tree parameters, the maximum tree-depth and the tre implementation to use
     &#34;&#34;&#34;
     tree_parameters = [get_tree_parameters(tree_info) for tree_info in tree_infos]
     max_depth = max(1, _find_max_depth(tree_parameters))
@@ -193,10 +197,11 @@ def get_parameters_for_sklearn_common(tree_infos):
     Parse sklearn-based trees, including
     SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
 
-    :param tree_infos: The information representaing a tree (ensemble)
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
 
-    :return: The tree parameters wrapped into an instance of
-             :class: `TreeParameters &lt;operator_converters._tree_commons_TreeParameters&gt;`
+    Returns: The tree parameters wrapped into an instance of
+             `operator_converters._tree_commons_TreeParameters`
     &#34;&#34;&#34;
     trees = tree_infos
     lefts = trees.tree_.children_left
@@ -212,13 +217,15 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     &#34;&#34;&#34;
     Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
 
-    :params left: The left nodes
-    :params right: The right nodes
-    :params features: The features used in the decision nodes
-    :params thresholds: The thresholds used in the decision nodes
-    :params values: The values stored in the leaf nodes
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
 
-    :return: An array containing the extracted parameters
+    Returns:
+        An array containing the extracted parameters
     &#34;&#34;&#34;
     if len(lefts) == 1:
         # Model creating tree with just a single leaf node. We transform it
@@ -276,13 +283,15 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
     This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
     Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
 
-    :params left: The left nodes
-    :params right: The right nodes
-    :params features: The features used in the decision nodes
-    :params thresholds: The thresholds used in the decision nodes
-    :params values: The values stored in the leaf nodes
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
 
-    :return: An array containing the extracted parameters
+    Returns:
+        An array containing the extracted parameters
     &#34;&#34;&#34;
     features = [max(x, 0) for x in features]
     values = np.array(values)
@@ -298,14 +307,16 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
     &#34;&#34;&#34;
     Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
 
-    :params left: The left nodes
-    :params right: The right nodes
-    :params features: The features used in the decision nodes
-    :params thresholds: The thresholds used in the decision nodes
-    :params values: The values stored in the leaf nodes
-    :params n_features: The number of expected input features
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
+        n_features: The number of expected input features
 
-    :return: The weights and bias for the GEMM implementation
+    Returns:
+        The weights and bias for the GEMM implementation
     &#34;&#34;&#34;
     if len(lefts) == 1:
         # Model creating trees with just a single leaf node. We transform it
@@ -400,13 +411,23 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
 </code></dt>
 <dd>
 <div class="desc"><p>Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.</p>
-<p>:params left: The left nodes
-:params right: The right nodes
-:params features: The features used in the decision nodes
-:params thresholds: The thresholds used in the decision nodes
-:params values: The values stored in the leaf nodes
-:params n_features: The number of expected input features</p>
-<p>:return: The weights and bias for the GEMM implementation</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>left</code></strong></dt>
+<dd>The left nodes</dd>
+<dt><strong><code>right</code></strong></dt>
+<dd>The right nodes</dd>
+<dt><strong><code>features</code></strong></dt>
+<dd>The features used in the decision nodes</dd>
+<dt><strong><code>thresholds</code></strong></dt>
+<dd>The thresholds used in the decision nodes</dd>
+<dt><strong><code>values</code></strong></dt>
+<dd>The values stored in the leaf nodes</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of expected input features</dd>
+<dt><strong><code>Returns</code></strong></dt>
+<dd>The weights and bias for the GEMM implementation</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -415,14 +436,16 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
     &#34;&#34;&#34;
     Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
 
-    :params left: The left nodes
-    :params right: The right nodes
-    :params features: The features used in the decision nodes
-    :params thresholds: The thresholds used in the decision nodes
-    :params values: The values stored in the leaf nodes
-    :params n_features: The number of expected input features
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
+        n_features: The number of expected input features
 
-    :return: The weights and bias for the GEMM implementation
+    Returns:
+        The weights and bias for the GEMM implementation
     &#34;&#34;&#34;
     if len(lefts) == 1:
         # Model creating trees with just a single leaf node. We transform it
@@ -511,9 +534,13 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
 <dd>
 <div class="desc"><p>Parse sklearn-based trees, including
 SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier</p>
-<p>:param tree_infos: The information representaing a tree (ensemble)</p>
-<p>:return: The tree parameters wrapped into an instance of
-:class: <code>TreeParameters &lt;operator_converters._tree_commons_TreeParameters&gt;</code></p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree_infos</code></strong></dt>
+<dd>The information representaing a tree (ensemble)</dd>
+<dt><strong><code>Returns</code></strong> :&ensp;<code>The tree parameters wrapped into an instance of</code></dt>
+<dd><code>operator_converters._tree_commons_TreeParameters</code></dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -523,10 +550,11 @@ SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier</p
     Parse sklearn-based trees, including
     SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
 
-    :param tree_infos: The information representaing a tree (ensemble)
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
 
-    :return: The tree parameters wrapped into an instance of
-             :class: `TreeParameters &lt;operator_converters._tree_commons_TreeParameters&gt;`
+    Returns: The tree parameters wrapped into an instance of
+             `operator_converters._tree_commons_TreeParameters`
     &#34;&#34;&#34;
     trees = tree_infos
     lefts = trees.tree_.children_left
@@ -543,12 +571,24 @@ SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier</p
 </code></dt>
 <dd>
 <div class="desc"><p>Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.</p>
-<p>:params left: The left nodes
-:params right: The right nodes
-:params features: The features used in the decision nodes
-:params thresholds: The thresholds used in the decision nodes
-:params values: The values stored in the leaf nodes</p>
-<p>:return: An array containing the extracted parameters</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>left</code></strong></dt>
+<dd>The left nodes</dd>
+<dt><strong><code>right</code></strong></dt>
+<dd>The right nodes</dd>
+<dt><strong><code>features</code></strong></dt>
+<dd>The features used in the decision nodes</dd>
+<dt><strong><code>thresholds</code></strong></dt>
+<dd>The thresholds used in the decision nodes</dd>
+<dt><strong><code>values</code></strong></dt>
+<dd>The values stored in the leaf nodes</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>An array containing the extracted parameters</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -557,13 +597,15 @@ SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier</p
     &#34;&#34;&#34;
     Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
 
-    :params left: The left nodes
-    :params right: The right nodes
-    :params features: The features used in the decision nodes
-    :params thresholds: The thresholds used in the decision nodes
-    :params values: The values stored in the leaf nodes
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
 
-    :return: An array containing the extracted parameters
+    Returns:
+        An array containing the extracted parameters
     &#34;&#34;&#34;
     if len(lefts) == 1:
         # Model creating tree with just a single leaf node. We transform it
@@ -622,12 +664,24 @@ SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier</p
 <dd>
 <div class="desc"><p>This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
 Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier</p>
-<p>:params left: The left nodes
-:params right: The right nodes
-:params features: The features used in the decision nodes
-:params thresholds: The thresholds used in the decision nodes
-:params values: The values stored in the leaf nodes</p>
-<p>:return: An array containing the extracted parameters</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>left</code></strong></dt>
+<dd>The left nodes</dd>
+<dt><strong><code>right</code></strong></dt>
+<dd>The right nodes</dd>
+<dt><strong><code>features</code></strong></dt>
+<dd>The features used in the decision nodes</dd>
+<dt><strong><code>thresholds</code></strong></dt>
+<dd>The thresholds used in the decision nodes</dd>
+<dt><strong><code>values</code></strong></dt>
+<dd>The values stored in the leaf nodes</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>An array containing the extracted parameters</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -637,13 +691,15 @@ Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClas
     This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
     Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
 
-    :params left: The left nodes
-    :params right: The right nodes
-    :params features: The features used in the decision nodes
-    :params thresholds: The thresholds used in the decision nodes
-    :params values: The values stored in the leaf nodes
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
 
-    :return: An array containing the extracted parameters
+    Returns:
+        An array containing the extracted parameters
     &#34;&#34;&#34;
     features = [max(x, 0) for x in features]
     values = np.array(values)
@@ -660,11 +716,18 @@ Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClas
 </code></dt>
 <dd>
 <div class="desc"><p>Utility function used to pick the tree implementation based on input parameters and heurstics.
-The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &lt; TreeTrav
-:param max_depth: The maximum tree-depth found in the tree model.
-:param low: The maximum depth below which GEMM strategy is used
-:param high: The maximum depth for which PerfTreeTrav strategy is used</p>
-<p>:return: A tree implementation</p></div>
+The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &lt; TreeTrav</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>max_depth</code></strong></dt>
+<dd>The maximum tree-depth found in the tree model.</dd>
+<dt><strong><code>low</code></strong></dt>
+<dd>The maximum depth below which GEMM strategy is used</dd>
+<dt><strong><code>high</code></strong></dt>
+<dd>The maximum depth for which PerfTreeTrav strategy is used</dd>
+<dt><strong><code>Returns</code></strong> :&ensp;<code>A tree implementation</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -673,11 +736,12 @@ The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &
     &#34;&#34;&#34;
     Utility function used to pick the tree implementation based on input parameters and heurstics.
     The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &lt; TreeTrav
-    :param max_depth: The maximum tree-depth found in the tree model.
-    :param low: The maximum depth below which GEMM strategy is used
-    :param high: The maximum depth for which PerfTreeTrav strategy is used
+    Args:
+        max_depth: The maximum tree-depth found in the tree model.
+        low: The maximum depth below which GEMM strategy is used
+        high: The maximum depth for which PerfTreeTrav strategy is used
 
-    :return: A tree implementation
+    Returns: A tree implementation
     &#34;&#34;&#34;
     if constants.TREE_IMPLEMENTATION not in extra_config:
         if max_depth is not None and max_depth &lt;= low:
@@ -702,11 +766,18 @@ The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &
 </code></dt>
 <dd>
 <div class="desc"><p>Populate the parameters from the trees and pick the tree implementation strategy.</p>
-<p>:param tree_infos: The information representaing a tree (ensemble)
-:param get_tree_parameters: A function specifying how to parse the tree_infos into a
-:class: <code>TreeParameters &lt;operator_converters._tree_commons_TreeParameters&gt;</code> object
-:param extra_config: param extra_config: Extra configuration used also to select the best conversion strategy</p>
-<p>:return: The tree parameters, the maximum tree-depth and the tre implementation to use</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree_infos</code></strong></dt>
+<dd>The information representaing a tree (ensemble)</dd>
+<dt><strong><code>get_tree_parameters</code></strong></dt>
+<dd>A function specifying how to parse the tree_infos into a
+<code>operator_converters._tree_commons_TreeParameters</code> object</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>param extra_config: Extra configuration used also to select the best conversion strategy</dd>
+<dt><strong><code>Returns</code></strong></dt>
+<dd>The tree parameters, the maximum tree-depth and the tre implementation to use</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -715,12 +786,14 @@ The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &
     &#34;&#34;&#34;
     Populate the parameters from the trees and pick the tree implementation strategy.
 
-    :param tree_infos: The information representaing a tree (ensemble)
-    :param get_tree_parameters: A function specifying how to parse the tree_infos into a
-                                :class: `TreeParameters &lt;operator_converters._tree_commons_TreeParameters&gt;` object
-    :param extra_config: param extra_config: Extra configuration used also to select the best conversion strategy
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+        get_tree_parameters: A function specifying how to parse the tree_infos into a
+                             `operator_converters._tree_commons_TreeParameters` object
+        extra_config: param extra_config: Extra configuration used also to select the best conversion strategy
 
-    :return: The tree parameters, the maximum tree-depth and the tre implementation to use
+    Returns:
+        The tree parameters, the maximum tree-depth and the tre implementation to use
     &#34;&#34;&#34;
     tree_parameters = [get_tree_parameters(tree_info) for tree_info in tree_infos]
     max_depth = max(1, _find_max_depth(tree_parameters))
@@ -740,12 +813,21 @@ The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &
 </code></dt>
 <dd>
 <div class="desc"><p>Class defining a tree node.</p>
-<p>:param id: A unique ID for the node
-:param left: The id of the left node
-:param right: The id of the right node
-:param feature: The feature used to make a decision (if not leaf node, ignored otherwise)
-:param threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
-:param value: The value stored in the leaf (ignored if not leaf node).</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong></dt>
+<dd>A unique ID for the node</dd>
+<dt><strong><code>left</code></strong></dt>
+<dd>The id of the left node</dd>
+<dt><strong><code>right</code></strong></dt>
+<dd>The id of the right node</dd>
+<dt><strong><code>feature</code></strong></dt>
+<dd>The feature used to make a decision (if not leaf node, ignored otherwise)</dd>
+<dt><strong><code>threshold</code></strong></dt>
+<dd>The threshold used in the decision (if not leaf node, ignored otherwise)</dd>
+<dt><strong><code>value</code></strong></dt>
+<dd>The value stored in the leaf (ignored if not leaf node).</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -757,12 +839,13 @@ The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &
 
     def __init__(self, id=None):
         &#34;&#34;&#34;
-        :param id: A unique ID for the node
-        :param left: The id of the left node
-        :param right: The id of the right node
-        :param feature: The feature used to make a decision (if not leaf node, ignored otherwise)
-        :param threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
-        :param value: The value stored in the leaf (ignored if not leaf node).
+        Args:
+            id: A unique ID for the node
+            left: The id of the left node
+            right: The id of the right node
+            feature: The feature used to make a decision (if not leaf node, ignored otherwise)
+            threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
+            value: The value stored in the leaf (ignored if not leaf node).
         &#34;&#34;&#34;
         self.id = id
         self.left = None
@@ -778,11 +861,19 @@ The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &
 </code></dt>
 <dd>
 <div class="desc"><p>Class containing a convenient in-memory representation of a decision tree.</p>
-<p>:param lefts: The id of the left nodes
-:param rights: The id of the right nodes
-:param feature: The features used to make decisions
-:param thresholds: The thresholds used in the decisions
-:param values: The value stored in the leaves</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lefts</code></strong></dt>
+<dd>The id of the left nodes</dd>
+<dt><strong><code>rights</code></strong></dt>
+<dd>The id of the right nodes</dd>
+<dt><strong><code>feature</code></strong></dt>
+<dd>The features used to make decisions</dd>
+<dt><strong><code>thresholds</code></strong></dt>
+<dd>The thresholds used in the decisions</dd>
+<dt><strong><code>values</code></strong></dt>
+<dd>The value stored in the leaves</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -794,11 +885,12 @@ The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &
 
     def __init__(self, lefts, rights, features, thresholds, values):
         &#34;&#34;&#34;
-        :param lefts: The id of the left nodes
-        :param rights: The id of the right nodes
-        :param feature: The features used to make decisions
-        :param thresholds: The thresholds used in the decisions
-        :param values: The value stored in the leaves
+        Args:
+            lefts: The id of the left nodes
+            rights: The id of the right nodes
+            feature: The features used to make decisions
+            thresholds: The thresholds used in the decisions
+            values: The value stored in the leaves
         &#34;&#34;&#34;
         self.lefts = lefts
         self.rights = rights

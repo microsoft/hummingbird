@@ -4,6 +4,9 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+Hummingbird main (converters) API.
+"""
 from copy import deepcopy
 import numpy as np
 
@@ -12,7 +15,7 @@ from onnxconverter_common.registration import get_converter
 from ._container import PyTorchBackendModel
 from .exceptions import MissingConverter
 from ._parse import parse_sklearn_api_model
-from .utils import torch_installed, lightgbm_installed, xgboost_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed
 from . import constants
 
 # Invoke the registration of all our converters.
@@ -21,15 +24,22 @@ from . import operator_converters  # noqa
 
 def convert_sklearn(model, test_input=None, extra_config={}):
     """
-    This function converts the specified *scikit-learn* model into its *PyTorch* counterpart.
-    The supported operators can be found at :func:`supported_operators <hummingbird._supported_opeartors>`.
+    This function converts the specified [scikit-learn] model into its [PyTorch] counterpart.
+    The supported operators can be found at `hummingbird._supported_operators`.
+    [scikit-learn]: https://scikit-learn.org/
+    [PyTorch]: https://pytorch.org/
 
-    :param model: A scikit-learn model
-    :param test_input: some input data used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters.
-                         The set of supported extra configurations can be found at :file:supported_configurations
+    Args:
+        model: A scikit-learn model
+        test_input: some input data used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
-    :return: A model implemented in PyTorch, which is equivalent to the input scikit-learn model
+    Examples:
+        >>> pytorch_model = convert_sklearn(sklearn_model)
+
+    Returns:
+        A model implemented in *PyTorch*, which is equivalent to the input *scikit-learn* model
     """
     assert torch_installed(), "To use Hummingbird you need to install torch."
 
@@ -45,14 +55,21 @@ def convert_sklearn(model, test_input=None, extra_config={}):
 
 def convert_lightgbm(model, test_input=None, extra_config={}):
     """
-    This function is used to generate a *PyTorch* model from a given input *LightGBM* model
+    This function is used to generate a [PyTorch] model from a given input [LightGBM] model.
+    [LightGBM]: https://lightgbm.readthedocs.io/
+    [PyTorch]: https://pytorch.org/
 
-    :param model: A LightGBM model (trained using the scikit-learn API)
-    :param test_input: Some input data that will be used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters.
-                        The set of supported extra configurations can be found at :file:supported_configurations
+    Args:
+        model: A LightGBM model (trained using the scikit-learn API)
+        test_input: Some input data that will be used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
-    :return: A PyTorch model which is equivalent to the input LightGBM model
+    Examples:
+        >>> pytorch_model = convert_lightgbm(lgbm_model)
+
+    Returns:
+        A *PyTorch* model which is equivalent to the input *LightGBM* model
     """
     assert lightgbm_installed(), "To convert LightGBM models you need to instal LightGBM."
 
@@ -61,47 +78,57 @@ def convert_lightgbm(model, test_input=None, extra_config={}):
 
 def convert_xgboost(model, test_input, extra_config={}):
     """
-    This function is used to generate a *PyTorch* model from a given input *XGBoost* model
+    This function is used to generate a [PyTorch] model from a given input [XGBoost] model.
+    [PyTorch]: https://pytorch.org/
+    [XGBoost]: https://xgboost.readthedocs.io/
 
-    :param model: A XGBoost model (trained using the scikit-learn API)
-    :param test_input: Some input data used to trace the model execution
-    :param extra_config: Extra configurations to be used by the individual operator converters.
-                        The set of supported extra configurations can be found at :file:supported_configurations
+    Args:
+        model: A XGBoost model (trained using the scikit-learn API)
+        test_input: Some input data used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
-    :return: A PyTorch model which is equivalent to the input XGBoost model
+    Examples:
+        >>> pytorch_model = convert_xgboost(xgb_model, [], extra_config={"n_features":200})
+
+    Returns:
+        A *PyTorch* model which is equivalent to the input *XGBoost* model
     """
     assert xgboost_installed(), "To convert XGboost models you need to instal XGBoost."
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
-    if "_features_count" in dir(model):
-        extra_config[constants.N_FEATURES] = model._features_count
-    elif test_input is not None:
-        if type(test_input) is np.ndarray and len(test_input.shape) == 2:
-            extra_config[constants.N_FEATURES] = test_input.shape[1]
+    if constants.N_FEATURES not in extra_config:
+        if "_features_count" in dir(model):
+            extra_config[constants.N_FEATURES] = model._features_count
+        elif test_input is not None:
+            if type(test_input) is np.ndarray and len(test_input.shape) == 2:
+                extra_config[constants.N_FEATURES] = test_input.shape[1]
+            else:
+                raise RuntimeError(
+                    "XGBoost converter is not able to infer the number of input features.\
+                        Apparently test_input is not an ndarray. \
+                        Please fill an issue at https://github.com/microsoft/hummingbird/."
+                )
         else:
             raise RuntimeError(
                 "XGBoost converter is not able to infer the number of input features.\
-                    Apparently test_input is not an ndarray. \
-                    Please fill an issue at https://github.com/microsoft/hummingbird/."
+                    Please pass some test_input to the converter."
             )
-    else:
-        raise RuntimeError(
-            "XGBoost converter is not able to infer the number of input features.\
-                Please pass some test_input to the converter."
-        )
     return convert_sklearn(model, test_input, extra_config)
 
 
 def _convert_topology(topology, device=None, extra_config={}):
     """
-    This function is used to convert a *Topology* object into a *PyTorch* model.
+    This function is used to convert a `onnxconverter_common.topology.Topology` object into a *PyTorch* model.
 
-    :param topology: The Topology object that will be converted into Pytorch
-    :param device: Which device the translated model will be run on
-    :param extra_config: Extra configurations to be used by individual operator converters
+    Args:
+        topology: The `onnxconverter_common.topology.Topology` object that will be converted into Pytorch
+        device: Which device the translated model will be run on
+        extra_config: Extra configurations to be used by individual operator converters
 
-    :return: a PyTorch model
+    Returns:
+        A *PyTorch* model
     """
     assert topology is not None, "Cannot convert a Topology object of type None."
 
