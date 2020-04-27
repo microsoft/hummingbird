@@ -10,7 +10,7 @@ Currently we support [these](https://github.com/microsoft/hummingbird/blob/devel
 
 ## Installation
 
-This was tested on Python 3.7 on a Unix machine.
+This was tested on Python 3.7 on a Linux machine.
 ```
 mkdir hummingbird
 cd hummingbird
