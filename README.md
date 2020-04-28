@@ -1,3 +1,5 @@
+[![](https://i.imgur.com/0pp9lMS.png?1)](https://github.com/microsoft/hummingbird/)
+
 # Hummingbird
 
 ![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
