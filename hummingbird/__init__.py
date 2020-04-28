@@ -33,3 +33,4 @@ __pdoc__ = {}
 __pdoc__["hummingbird._container"] = True
 __pdoc__["hummingbird._parse"] = True
 __pdoc__["hummingbird._supported_operators"] = True
+__pdoc__["hummingbird._utils"] = True
