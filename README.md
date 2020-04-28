@@ -48,7 +48,7 @@ pytorch_model = convert_lightgbm(model)
 pytorch_model.to('cpu')
 hb_cpu = pytorch_model(torch.from_numpy(X))
 
-# Run hummingbird on GPU
+# Run Hummingbird on GPU
 pytorch_model.to('cuda')
 hb_gpu = pytorch_model(torch.from_numpy(X).to('cuda'))
 ```
