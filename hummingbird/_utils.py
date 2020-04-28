@@ -7,6 +7,7 @@
 """
 Collection of utility functions used throughout Hummingbird.
 """
+
 from distutils.version import LooseVersion
 import warnings
 

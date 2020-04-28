@@ -8,6 +8,8 @@
 Supported configurations settings accepted by Hummingbird are defined here.
 """
 
-# Constants used within extra_config.
-N_FEATURES = "n_features"  # Number of features expected in the input data.
-TREE_IMPLEMENTATION = "tree_implementation"  # Tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav.
+N_FEATURES = "n_features"
+"""Number of features expected in the input data."""
+
+TREE_IMPLEMENTATION = "tree_implementation"
+"""Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav."""

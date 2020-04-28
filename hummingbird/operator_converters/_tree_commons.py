@@ -4,16 +4,15 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+Collections of classes and functions shared among all tree converters.
+"""
+
 import copy
 import numpy as np
 
 from ._tree_implementations import TreeImpl
 from . import constants
-
-
-"""
-Collections of classes and functions shared among all tree converters.
-"""
 
 
 class Node:
@@ -23,12 +22,13 @@ class Node:
 
     def __init__(self, id=None):
         """
-        :param id: A unique ID for the node
-        :param left: The id of the left node
-        :param right: The id of the right node
-        :param feature: The feature used to make a decision (if not leaf node, ignored otherwise)
-        :param threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
-        :param value: The value stored in the leaf (ignored if not leaf node).
+        Args:
+            id: A unique ID for the node
+            left: The id of the left node
+            right: The id of the right node
+            feature: The feature used to make a decision (if not leaf node, ignored otherwise)
+            threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
+            value: The value stored in the leaf (ignored if not leaf node).
         """
         self.id = id
         self.left = None
@@ -45,11 +45,12 @@ class TreeParameters:
 
     def __init__(self, lefts, rights, features, thresholds, values):
         """
-        :param lefts: The id of the left nodes
-        :param rights: The id of the right nodes
-        :param feature: The features used to make decisions
-        :param thresholds: The thresholds used in the decisions
-        :param values: The value stored in the leaves
+        Args:
+            lefts: The id of the left nodes
+            rights: The id of the right nodes
+            feature: The features used to make decisions
+            thresholds: The thresholds used in the decisions
+            values: The value stored in the leaves
         """
         self.lefts = lefts
         self.rights = rights
@@ -120,11 +121,12 @@ def get_tree_implementation_by_config_or_depth(extra_config, max_depth, low=3, h
     """
     Utility function used to pick the tree implementation based on input parameters and heurstics.
     The current heuristic is such that GEMM <= low < PerfTreeTrav <= high < TreeTrav
-    :param max_depth: The maximum tree-depth found in the tree model.
-    :param low: The maximum depth below which GEMM strategy is used
-    :param high: The maximum depth for which PerfTreeTrav strategy is used
+    Args:
+        max_depth: The maximum tree-depth found in the tree model.
+        low: The maximum depth below which GEMM strategy is used
+        high: The maximum depth for which PerfTreeTrav strategy is used
 
-    :return: A tree implementation
+    Returns: A tree implementation
     """
     if constants.TREE_IMPLEMENTATION not in extra_config:
         if max_depth is not None and max_depth <= low:
@@ -148,12 +150,14 @@ def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
     """
     Populate the parameters from the trees and pick the tree implementation strategy.
 
-    :param tree_infos: The information representaing a tree (ensemble)
-    :param get_tree_parameters: A function specifying how to parse the tree_infos into a
-                                :class: `TreeParameters <operator_converters._tree_commons_TreeParameters>` object
-    :param extra_config: param extra_config: Extra configuration used also to select the best conversion strategy
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+        get_tree_parameters: A function specifying how to parse the tree_infos into a
+                             `operator_converters._tree_commons_TreeParameters` object
+        extra_config: param extra_config: Extra configuration used also to select the best conversion strategy
 
-    :return: The tree parameters, the maximum tree-depth and the tre implementation to use
+    Returns:
+        The tree parameters, the maximum tree-depth and the tre implementation to use
     """
     tree_parameters = [get_tree_parameters(tree_info) for tree_info in tree_infos]
     max_depth = max(1, _find_max_depth(tree_parameters))
@@ -167,10 +171,11 @@ def get_parameters_for_sklearn_common(tree_infos):
     Parse sklearn-based trees, including
     SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
 
-    :param tree_infos: The information representaing a tree (ensemble)
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
 
-    :return: The tree parameters wrapped into an instance of
-             :class: `TreeParameters <operator_converters._tree_commons_TreeParameters>`
+    Returns: The tree parameters wrapped into an instance of
+             `operator_converters._tree_commons_TreeParameters`
     """
     trees = tree_infos
     lefts = trees.tree_.children_left
@@ -186,13 +191,15 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     """
     Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
 
-    :params left: The left nodes
-    :params right: The right nodes
-    :params features: The features used in the decision nodes
-    :params thresholds: The thresholds used in the decision nodes
-    :params values: The values stored in the leaf nodes
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
 
-    :return: An array containing the extracted parameters
+    Returns:
+        An array containing the extracted parameters
     """
     if len(lefts) == 1:
         # Model creating tree with just a single leaf node. We transform it
@@ -250,13 +257,15 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
     This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
     Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
 
-    :params left: The left nodes
-    :params right: The right nodes
-    :params features: The features used in the decision nodes
-    :params thresholds: The thresholds used in the decision nodes
-    :params values: The values stored in the leaf nodes
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
 
-    :return: An array containing the extracted parameters
+    Returns:
+        An array containing the extracted parameters
     """
     features = [max(x, 0) for x in features]
     values = np.array(values)
@@ -272,14 +281,16 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
     """
     Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
 
-    :params left: The left nodes
-    :params right: The right nodes
-    :params features: The features used in the decision nodes
-    :params thresholds: The thresholds used in the decision nodes
-    :params values: The values stored in the leaf nodes
-    :params n_features: The number of expected input features
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
+        n_features: The number of expected input features
 
-    :return: The weights and bias for the GEMM implementation
+    Returns:
+        The weights and bias for the GEMM implementation
     """
     if len(lefts) == 1:
         # Model creating trees with just a single leaf node. We transform it

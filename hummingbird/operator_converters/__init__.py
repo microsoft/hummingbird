@@ -4,10 +4,14 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+All operators converters are stored under this package.
+"""
+
 # Register constants used within Hummingbird converters.
 from . import constants as converter_constants
 from .. import supported_configurations as hummingbird_constants
-from ..utils import _Constants
+from .._utils import _Constants
 
 # Add constants in scope.
 constants = _Constants(converter_constants, hummingbird_constants)
@@ -17,3 +21,8 @@ from . import gbdt  # noqa: E402
 from . import lightgbm  # noqa: E402
 from . import decision_tree  # noqa: E402
 from . import xgb  # noqa: E402
+
+__pdoc__ = {}
+__pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
+__pdoc__["hummingbird.operator_converters._tree_commons"] = True
+__pdoc__["hummingbird.operator_converters._tree_implementations"] = True

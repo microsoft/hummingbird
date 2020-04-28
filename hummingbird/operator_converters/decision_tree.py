@@ -27,9 +27,10 @@ class GEMMDecisionTreeImpl(GEMMTreeImpl):
 
     def __init__(self, net_parameters, n_features, classes=None):
         """
-        :param net_parameters: The parameters defining the tree structure
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
+        Args:
+            net_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
         """
         super(GEMMDecisionTreeImpl, self).__init__(net_parameters, n_features, classes)
         self.final_probability_divider = len(net_parameters)
@@ -50,10 +51,11 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
 
     def __init__(self, net_parameters, max_depth, n_features, classes=None):
         """
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
         """
         super(TreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
         self.final_probability_divider = len(net_parameters)
@@ -74,10 +76,11 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
 
     def __init__(self, net_parameters, max_depth, n_features, classes=None):
         """
-        :param net_parameters: The parameters defining the tree structure
-        :param max_depth: The maximum tree-depth in the model
-        :param n_features: The number of features input to the model
-        :param classes: The classes used for classification. None if implementing a regression model
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
         """
         super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
         self.final_probability_divider = len(net_parameters)
@@ -93,13 +96,15 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
 
 def convert_sklearn_random_forest_classifier(operator, device, extra_config):
     """
-    Converter for Sklearn's Random Forest, DecisionTree, ExtraTrees classifiers.
+    Converter for `sklearn.ensemble.RandomForestClassifier` and `sklearn.ensemble.ExtraTreesClassifier`.
 
-    :param operator: An operator wrapping a tree (ensemble) classifier model
-    :param device: String defining the type of device the converted operator should be run on
-    :param extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping a tree (ensemble) classifier model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    :return: A PyTorch model
+    Returns:
+        A PyTorch model
     """
     assert operator is not None
 
@@ -140,13 +145,15 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
 
 def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     """
-    Converter for Sklearn's Random Forest, DecisionTree and ExtraTrees regressors.
+    Converter for `sklearn.ensemble.RandomForestRegressor`
 
-    :param operator: An operator wrapping a tree (ensemble) classifier model
-    :param device: String defining the type of device the converted operator should be run on
-    :param extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping the `sklearn.ensemble.RandomForestRegressor model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    :return: A PyTorch model
+    Returns:
+        A PyTorch model
     """
     assert operator is not None
 
@@ -182,13 +189,15 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
 
 def convert_sklearn_decision_tree_classifier(operator, device, extra_config):
     """
-    Converter for Sklearn Decision Tree classifier.
+    Converter for `sklearn.tree.DecisionTreeClassifier`.
 
-    :param operator: An operator wrapping a decision tree classifier model
-    :param device: String defining the type of device the converted operator should be run on
-    :param extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping a `sklearn.tree.DecisionTreeClassifier` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    :return: A PyTorch model
+    Returns:
+        A PyTorch model
     """
     assert operator is not None
 
