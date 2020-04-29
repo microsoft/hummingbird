@@ -1,0 +1,49 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python application
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # The GitHub editor is 127 chars wide
+        flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pip install -r requirements.txt && pip install -e . && pip install pytest
+        pytest
+    - name: Coverage
+      run: |
+        pip install -r requirements.txt && pip install -e . && pip install coverage
+        coverage run -m pytest tests
+        MINIMUM=70
+        SCORE=$(coverage report -m | tail -n 1 | awk '{print $NF}' | rev | cut -c2- | rev)
+        if [ $SCORE -ge $MINIMUM ]; then echo "COVERAGE ($SCORE) OK"; else echo "WARNING: Coverage is $SCORE but should be at least $MINIMUM"; fi
