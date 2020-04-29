@@ -22,7 +22,7 @@ python setup.py install
 
 
 
-See also [Troubleshooting](TROUBLESHOOTING.md).
+See also [Troubleshooting](TROUBLESHOOTING.md) for common problems.
 
 ## Examples
 
