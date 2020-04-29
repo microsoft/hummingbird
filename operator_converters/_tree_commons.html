@@ -1,0 +1,961 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>hummingbird.operator_converters._tree_commons API documentation</title>
+<meta name="description" content="Collections of classes and functions shared among all tree converters." />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/operator_converters/_tree_commons.html">
+<link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>hummingbird.operator_converters._tree_commons</code></h1>
+</header>
+<section id="section-intro">
+<p>Collections of classes and functions shared among all tree converters.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
+# --------------------------------------------------------------------------
+
+&#34;&#34;&#34;
+Collections of classes and functions shared among all tree converters.
+&#34;&#34;&#34;
+
+import copy
+import numpy as np
+
+from ._tree_implementations import TreeImpl
+from . import constants
+
+
+class Node:
+    &#34;&#34;&#34;
+    Class defining a tree node.
+    &#34;&#34;&#34;
+
+    def __init__(self, id=None):
+        &#34;&#34;&#34;
+        Args:
+            id: A unique ID for the node
+            left: The id of the left node
+            right: The id of the right node
+            feature: The feature used to make a decision (if not leaf node, ignored otherwise)
+            threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
+            value: The value stored in the leaf (ignored if not leaf node).
+        &#34;&#34;&#34;
+        self.id = id
+        self.left = None
+        self.right = None
+        self.feature = None
+        self.threshold = None
+        self.value = None
+
+
+class TreeParameters:
+    &#34;&#34;&#34;
+    Class containing a convenient in-memory representation of a decision tree.
+    &#34;&#34;&#34;
+
+    def __init__(self, lefts, rights, features, thresholds, values):
+        &#34;&#34;&#34;
+        Args:
+            lefts: The id of the left nodes
+            rights: The id of the right nodes
+            feature: The features used to make decisions
+            thresholds: The thresholds used in the decisions
+            values: The value stored in the leaves
+        &#34;&#34;&#34;
+        self.lefts = lefts
+        self.rights = rights
+        self.features = features
+        self.thresholds = thresholds
+        self.values = values
+
+
+def _find_max_depth(tree_parameters):
+    &#34;&#34;&#34;
+    Function traversing all trees in sequence and returning the maximum depth.
+    &#34;&#34;&#34;
+    depth = 0
+
+    for tree in tree_parameters:
+        tree = copy.deepcopy(tree)
+
+        lefts = tree.lefts
+        rights = tree.rights
+
+        ids = [i for i in range(len(lefts))]
+        nodes = list(zip(ids, lefts, rights))
+
+        nodes_map = {0: Node(0)}
+        current_node = 0
+        for i, node in enumerate(nodes):
+            id, left, right = node
+
+            if left != -1:
+                l_node = Node(left)
+                nodes_map[left] = l_node
+            else:
+                lefts[i] = id
+                l_node = -1
+
+            if right != -1:
+                r_node = Node(right)
+                nodes_map[right] = r_node
+            else:
+                rights[i] = id
+                r_node = -1
+
+            nodes_map[current_node].left = l_node
+            nodes_map[current_node].right = r_node
+
+            current_node += 1
+
+        depth = max(depth, _find_depth(nodes_map[0], -1))
+
+    return depth
+
+
+def _find_depth(node, current_depth):
+    &#34;&#34;&#34;
+    Recursive function traversing a tree and returning the maximum depth.
+    &#34;&#34;&#34;
+    if node.left == -1 and node.right == -1:
+        return current_depth + 1
+    elif node.left != -1 and node.right == -1:
+        return _find_depth(node.l, current_depth + 1)
+    elif node.right != -1 and node.left == -1:
+        return _find_depth(node.r, current_depth + 1)
+    elif node.right != -1 and node.left != -1:
+        return max(_find_depth(node.left, current_depth + 1), _find_depth(node.right, current_depth + 1))
+
+
+def get_tree_implementation_by_config_or_depth(extra_config, max_depth, low=3, high=10):
+    &#34;&#34;&#34;
+    Utility function used to pick the tree implementation based on input parameters and heurstics.
+    The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &lt; TreeTrav
+    Args:
+        max_depth: The maximum tree-depth found in the tree model.
+        low: The maximum depth below which GEMM strategy is used
+        high: The maximum depth for which PerfTreeTrav strategy is used
+
+    Returns: A tree implementation
+    &#34;&#34;&#34;
+    if constants.TREE_IMPLEMENTATION not in extra_config:
+        if max_depth is not None and max_depth &lt;= low:
+            return TreeImpl.gemm
+        elif max_depth is not None and max_depth &lt;= high:
+            return TreeImpl.tree_trav
+        else:
+            return TreeImpl.perf_tree_trav
+
+    if extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.gemm.name:
+        return TreeImpl.gemm
+    elif extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.tree_trav.name:
+        return TreeImpl.tree_trav
+    elif extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.perf_tree_trav.name:
+        return TreeImpl.perf_tree_trav
+    else:
+        raise ValueError(&#34;Tree implementation {} not found&#34;.format(extra_config))
+
+
+def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
+    &#34;&#34;&#34;
+    Populate the parameters from the trees and pick the tree implementation strategy.
+
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+        get_tree_parameters: A function specifying how to parse the tree_infos into a
+                             `operator_converters._tree_commons_TreeParameters` object
+        extra_config: param extra_config: Extra configuration used also to select the best conversion strategy
+
+    Returns:
+        The tree parameters, the maximum tree-depth and the tre implementation to use
+    &#34;&#34;&#34;
+    tree_parameters = [get_tree_parameters(tree_info) for tree_info in tree_infos]
+    max_depth = max(1, _find_max_depth(tree_parameters))
+    tree_type = get_tree_implementation_by_config_or_depth(extra_config, max_depth)
+
+    return tree_parameters, max_depth, tree_type
+
+
+def get_parameters_for_sklearn_common(tree_infos):
+    &#34;&#34;&#34;
+    Parse sklearn-based trees, including
+    SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+
+    Returns: The tree parameters wrapped into an instance of
+             `operator_converters._tree_commons_TreeParameters`
+    &#34;&#34;&#34;
+    trees = tree_infos
+    lefts = trees.tree_.children_left
+    rights = trees.tree_.children_right
+    features = trees.tree_.feature
+    thresholds = trees.tree_.threshold
+    values = trees.tree_.value
+
+    return TreeParameters(lefts, rights, features, thresholds, values)
+
+
+def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values):
+    &#34;&#34;&#34;
+    Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
+
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
+
+    Returns:
+        An array containing the extracted parameters
+    &#34;&#34;&#34;
+    if len(lefts) == 1:
+        # Model creating tree with just a single leaf node. We transform it
+        # to a model with one internal node.
+        lefts = [1, -1, -1]
+        rights = [2, -1, -1]
+        features = [0, 0, 0]
+        thresholds = [0, 0, 0]
+        values = [np.array([0.0]), values[0], values[0]]
+
+    ids = [i for i in range(len(lefts))]
+    nodes = list(zip(ids, lefts, rights, features, thresholds, values))
+
+    # Refactor the tree parameters in the proper format.
+    nodes_map = {0: Node(0)}
+    current_node = 0
+    for i, node in enumerate(nodes):
+        id, left, right, feature, threshold, value = node
+
+        if left != -1:
+            l_node = Node(left)
+            nodes_map[left] = l_node
+        else:
+            lefts[i] = id
+            l_node = -1
+            feature = -1
+
+        if right != -1:
+            r_node = Node(right)
+            nodes_map[right] = r_node
+        else:
+            rights[i] = id
+            r_node = -1
+            feature = -1
+
+        nodes_map[current_node].left = l_node
+        nodes_map[current_node].right = r_node
+        nodes_map[current_node].feature = feature
+        nodes_map[current_node].threshold = threshold
+        nodes_map[current_node].value = value
+
+        current_node += 1
+
+    lefts = np.array(lefts)
+    rights = np.array(rights)
+    features = np.array(features)
+    thresholds = np.array(thresholds)
+    values = np.array(values)
+
+    return [nodes_map, ids, lefts, rights, features, thresholds, values]
+
+
+def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values):
+    &#34;&#34;&#34;
+    This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
+    Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
+
+    Returns:
+        An array containing the extracted parameters
+    &#34;&#34;&#34;
+    features = [max(x, 0) for x in features]
+    values = np.array(values)
+    if len(values.shape) == 3:
+        values = values.reshape(values.shape[0], -1)
+    if values.shape[1] &gt; 1:
+        values /= np.sum(values, axis=1, keepdims=True)
+
+    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
+
+
+def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features):
+    &#34;&#34;&#34;
+    Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
+
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
+        n_features: The number of expected input features
+
+    Returns:
+        The weights and bias for the GEMM implementation
+    &#34;&#34;&#34;
+    if len(lefts) == 1:
+        # Model creating trees with just a single leaf node. We transform it
+        # to a model with one internal node.
+        lefts = [1, -1, -1]
+        rights = [2, -1, -1]
+        features = [0, 0, 0]
+        thresholds = [0, 0, 0]
+        values = [np.array([0.0]), values[0], values[0]]
+
+    values = np.array(values)
+    weights = []
+    biases = []
+
+    # First hidden layer has all inequalities.
+    hidden_weights = []
+    hidden_biases = []
+    for left, feature, thresh in zip(lefts, features, thresholds):
+        if left != -1:
+            hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
+            hidden_biases.append(thresh)
+    weights.append(np.array(hidden_weights).astype(&#34;float32&#34;))
+    biases.append(np.array(hidden_biases).astype(&#34;float32&#34;))
+
+    n_splits = len(hidden_weights)
+
+    # Second hidden layer has ANDs for each leaf of the decision tree.
+    # Depth first enumeration of the tree in order to determine the AND by the path.
+    hidden_weights = []
+    hidden_biases = []
+
+    path = [0]
+    n_nodes = len(lefts)
+    visited = [False for _ in range(n_nodes)]
+
+    class_proba = []
+    nodes = list(zip(lefts, rights, features, thresholds, values))
+
+    while True and len(path) &gt; 0:
+        i = path[-1]
+        visited[i] = True
+        left, right, feature, threshold, value = nodes[i]
+        if left == -1 and right == -1:
+            vec = [0 for _ in range(n_splits)]
+            # Keep track of positive weights for calculating bias.
+            num_positive = 0
+            for j, p in enumerate(path[:-1]):
+                num_leaves_before_p = list(lefts[:p]).count(-1)
+                if path[j + 1] in lefts:
+                    vec[p - num_leaves_before_p] = 1
+                    num_positive += 1
+                elif path[j + 1] in rights:
+                    vec[p - num_leaves_before_p] = -1
+                else:
+                    raise RuntimeError(&#34;Inconsistent state encountered while tree translation.&#34;)
+
+            if values.shape[-1] &gt; 1:
+                class_proba.append((values[i] / np.sum(values[i])).flatten())
+            else:
+                # We have only a single value. e.g., GBDT
+                class_proba.append(values[i].flatten())
+
+            hidden_weights.append(vec)
+            hidden_biases.append(num_positive)
+            path.pop()
+        elif not visited[left]:
+            path.append(left)
+        elif not visited[right]:
+            path.append(right)
+        else:
+            path.pop()
+
+    weights.append(np.array(hidden_weights).astype(&#34;float32&#34;))
+    biases.append(np.array(hidden_biases).astype(&#34;float32&#34;))
+
+    # OR neurons from the preceding layer in order to get final classes.
+    weights.append(np.transpose(np.array(class_proba).astype(&#34;float32&#34;)))
+    biases.append(None)
+
+    return weights, biases</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="hummingbird.operator_converters._tree_commons.get_parameters_for_gemm_common"><code class="name flex">
+<span>def <span class="ident">get_parameters_for_gemm_common</span></span>(<span>lefts, rights, features, thresholds, values, n_features)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>left</code></strong></dt>
+<dd>The left nodes</dd>
+<dt><strong><code>right</code></strong></dt>
+<dd>The right nodes</dd>
+<dt><strong><code>features</code></strong></dt>
+<dd>The features used in the decision nodes</dd>
+<dt><strong><code>thresholds</code></strong></dt>
+<dd>The thresholds used in the decision nodes</dd>
+<dt><strong><code>values</code></strong></dt>
+<dd>The values stored in the leaf nodes</dd>
+<dt><strong><code>n_features</code></strong></dt>
+<dd>The number of expected input features</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>The weights and bias for the GEMM implementation</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features):
+    &#34;&#34;&#34;
+    Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
+
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
+        n_features: The number of expected input features
+
+    Returns:
+        The weights and bias for the GEMM implementation
+    &#34;&#34;&#34;
+    if len(lefts) == 1:
+        # Model creating trees with just a single leaf node. We transform it
+        # to a model with one internal node.
+        lefts = [1, -1, -1]
+        rights = [2, -1, -1]
+        features = [0, 0, 0]
+        thresholds = [0, 0, 0]
+        values = [np.array([0.0]), values[0], values[0]]
+
+    values = np.array(values)
+    weights = []
+    biases = []
+
+    # First hidden layer has all inequalities.
+    hidden_weights = []
+    hidden_biases = []
+    for left, feature, thresh in zip(lefts, features, thresholds):
+        if left != -1:
+            hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
+            hidden_biases.append(thresh)
+    weights.append(np.array(hidden_weights).astype(&#34;float32&#34;))
+    biases.append(np.array(hidden_biases).astype(&#34;float32&#34;))
+
+    n_splits = len(hidden_weights)
+
+    # Second hidden layer has ANDs for each leaf of the decision tree.
+    # Depth first enumeration of the tree in order to determine the AND by the path.
+    hidden_weights = []
+    hidden_biases = []
+
+    path = [0]
+    n_nodes = len(lefts)
+    visited = [False for _ in range(n_nodes)]
+
+    class_proba = []
+    nodes = list(zip(lefts, rights, features, thresholds, values))
+
+    while True and len(path) &gt; 0:
+        i = path[-1]
+        visited[i] = True
+        left, right, feature, threshold, value = nodes[i]
+        if left == -1 and right == -1:
+            vec = [0 for _ in range(n_splits)]
+            # Keep track of positive weights for calculating bias.
+            num_positive = 0
+            for j, p in enumerate(path[:-1]):
+                num_leaves_before_p = list(lefts[:p]).count(-1)
+                if path[j + 1] in lefts:
+                    vec[p - num_leaves_before_p] = 1
+                    num_positive += 1
+                elif path[j + 1] in rights:
+                    vec[p - num_leaves_before_p] = -1
+                else:
+                    raise RuntimeError(&#34;Inconsistent state encountered while tree translation.&#34;)
+
+            if values.shape[-1] &gt; 1:
+                class_proba.append((values[i] / np.sum(values[i])).flatten())
+            else:
+                # We have only a single value. e.g., GBDT
+                class_proba.append(values[i].flatten())
+
+            hidden_weights.append(vec)
+            hidden_biases.append(num_positive)
+            path.pop()
+        elif not visited[left]:
+            path.append(left)
+        elif not visited[right]:
+            path.append(right)
+        else:
+            path.pop()
+
+    weights.append(np.array(hidden_weights).astype(&#34;float32&#34;))
+    biases.append(np.array(hidden_biases).astype(&#34;float32&#34;))
+
+    # OR neurons from the preceding layer in order to get final classes.
+    weights.append(np.transpose(np.array(class_proba).astype(&#34;float32&#34;)))
+    biases.append(None)
+
+    return weights, biases</code></pre>
+</details>
+</dd>
+<dt id="hummingbird.operator_converters._tree_commons.get_parameters_for_sklearn_common"><code class="name flex">
+<span>def <span class="ident">get_parameters_for_sklearn_common</span></span>(<span>tree_infos)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parse sklearn-based trees, including
+SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree_infos</code></strong></dt>
+<dd>The information representaing a tree (ensemble)</dd>
+<dt><strong><code>Returns</code></strong> :&ensp;<code>The tree parameters wrapped into an instance of</code></dt>
+<dd><code>operator_converters._tree_commons_TreeParameters</code></dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_parameters_for_sklearn_common(tree_infos):
+    &#34;&#34;&#34;
+    Parse sklearn-based trees, including
+    SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+
+    Returns: The tree parameters wrapped into an instance of
+             `operator_converters._tree_commons_TreeParameters`
+    &#34;&#34;&#34;
+    trees = tree_infos
+    lefts = trees.tree_.children_left
+    rights = trees.tree_.children_right
+    features = trees.tree_.feature
+    thresholds = trees.tree_.threshold
+    values = trees.tree_.value
+
+    return TreeParameters(lefts, rights, features, thresholds, values)</code></pre>
+</details>
+</dd>
+<dt id="hummingbird.operator_converters._tree_commons.get_parameters_for_tree_trav_common"><code class="name flex">
+<span>def <span class="ident">get_parameters_for_tree_trav_common</span></span>(<span>lefts, rights, features, thresholds, values)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>left</code></strong></dt>
+<dd>The left nodes</dd>
+<dt><strong><code>right</code></strong></dt>
+<dd>The right nodes</dd>
+<dt><strong><code>features</code></strong></dt>
+<dd>The features used in the decision nodes</dd>
+<dt><strong><code>thresholds</code></strong></dt>
+<dd>The thresholds used in the decision nodes</dd>
+<dt><strong><code>values</code></strong></dt>
+<dd>The values stored in the leaf nodes</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>An array containing the extracted parameters</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values):
+    &#34;&#34;&#34;
+    Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
+
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
+
+    Returns:
+        An array containing the extracted parameters
+    &#34;&#34;&#34;
+    if len(lefts) == 1:
+        # Model creating tree with just a single leaf node. We transform it
+        # to a model with one internal node.
+        lefts = [1, -1, -1]
+        rights = [2, -1, -1]
+        features = [0, 0, 0]
+        thresholds = [0, 0, 0]
+        values = [np.array([0.0]), values[0], values[0]]
+
+    ids = [i for i in range(len(lefts))]
+    nodes = list(zip(ids, lefts, rights, features, thresholds, values))
+
+    # Refactor the tree parameters in the proper format.
+    nodes_map = {0: Node(0)}
+    current_node = 0
+    for i, node in enumerate(nodes):
+        id, left, right, feature, threshold, value = node
+
+        if left != -1:
+            l_node = Node(left)
+            nodes_map[left] = l_node
+        else:
+            lefts[i] = id
+            l_node = -1
+            feature = -1
+
+        if right != -1:
+            r_node = Node(right)
+            nodes_map[right] = r_node
+        else:
+            rights[i] = id
+            r_node = -1
+            feature = -1
+
+        nodes_map[current_node].left = l_node
+        nodes_map[current_node].right = r_node
+        nodes_map[current_node].feature = feature
+        nodes_map[current_node].threshold = threshold
+        nodes_map[current_node].value = value
+
+        current_node += 1
+
+    lefts = np.array(lefts)
+    rights = np.array(rights)
+    features = np.array(features)
+    thresholds = np.array(thresholds)
+    values = np.array(values)
+
+    return [nodes_map, ids, lefts, rights, features, thresholds, values]</code></pre>
+</details>
+</dd>
+<dt id="hummingbird.operator_converters._tree_commons.get_parameters_for_tree_trav_sklearn"><code class="name flex">
+<span>def <span class="ident">get_parameters_for_tree_trav_sklearn</span></span>(<span>lefts, rights, features, thresholds, values)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
+Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>left</code></strong></dt>
+<dd>The left nodes</dd>
+<dt><strong><code>right</code></strong></dt>
+<dd>The right nodes</dd>
+<dt><strong><code>features</code></strong></dt>
+<dd>The features used in the decision nodes</dd>
+<dt><strong><code>thresholds</code></strong></dt>
+<dd>The thresholds used in the decision nodes</dd>
+<dt><strong><code>values</code></strong></dt>
+<dd>The values stored in the leaf nodes</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>An array containing the extracted parameters</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values):
+    &#34;&#34;&#34;
+    This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
+    Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+
+    Args:
+        left: The left nodes
+        right: The right nodes
+        features: The features used in the decision nodes
+        thresholds: The thresholds used in the decision nodes
+        values: The values stored in the leaf nodes
+
+    Returns:
+        An array containing the extracted parameters
+    &#34;&#34;&#34;
+    features = [max(x, 0) for x in features]
+    values = np.array(values)
+    if len(values.shape) == 3:
+        values = values.reshape(values.shape[0], -1)
+    if values.shape[1] &gt; 1:
+        values /= np.sum(values, axis=1, keepdims=True)
+
+    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)</code></pre>
+</details>
+</dd>
+<dt id="hummingbird.operator_converters._tree_commons.get_tree_implementation_by_config_or_depth"><code class="name flex">
+<span>def <span class="ident">get_tree_implementation_by_config_or_depth</span></span>(<span>extra_config, max_depth, low=3, high=10)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Utility function used to pick the tree implementation based on input parameters and heurstics.
+The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &lt; TreeTrav</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>max_depth</code></strong></dt>
+<dd>The maximum tree-depth found in the tree model.</dd>
+<dt><strong><code>low</code></strong></dt>
+<dd>The maximum depth below which GEMM strategy is used</dd>
+<dt><strong><code>high</code></strong></dt>
+<dd>The maximum depth for which PerfTreeTrav strategy is used</dd>
+<dt><strong><code>Returns</code></strong> :&ensp;<code>A tree implementation</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_tree_implementation_by_config_or_depth(extra_config, max_depth, low=3, high=10):
+    &#34;&#34;&#34;
+    Utility function used to pick the tree implementation based on input parameters and heurstics.
+    The current heuristic is such that GEMM &lt;= low &lt; PerfTreeTrav &lt;= high &lt; TreeTrav
+    Args:
+        max_depth: The maximum tree-depth found in the tree model.
+        low: The maximum depth below which GEMM strategy is used
+        high: The maximum depth for which PerfTreeTrav strategy is used
+
+    Returns: A tree implementation
+    &#34;&#34;&#34;
+    if constants.TREE_IMPLEMENTATION not in extra_config:
+        if max_depth is not None and max_depth &lt;= low:
+            return TreeImpl.gemm
+        elif max_depth is not None and max_depth &lt;= high:
+            return TreeImpl.tree_trav
+        else:
+            return TreeImpl.perf_tree_trav
+
+    if extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.gemm.name:
+        return TreeImpl.gemm
+    elif extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.tree_trav.name:
+        return TreeImpl.tree_trav
+    elif extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.perf_tree_trav.name:
+        return TreeImpl.perf_tree_trav
+    else:
+        raise ValueError(&#34;Tree implementation {} not found&#34;.format(extra_config))</code></pre>
+</details>
+</dd>
+<dt id="hummingbird.operator_converters._tree_commons.get_tree_params_and_type"><code class="name flex">
+<span>def <span class="ident">get_tree_params_and_type</span></span>(<span>tree_infos, get_tree_parameters, extra_config)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Populate the parameters from the trees and pick the tree implementation strategy.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>tree_infos</code></strong></dt>
+<dd>The information representaing a tree (ensemble)</dd>
+<dt><strong><code>get_tree_parameters</code></strong></dt>
+<dd>A function specifying how to parse the tree_infos into a
+<code>operator_converters._tree_commons_TreeParameters</code> object</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>param extra_config: Extra configuration used also to select the best conversion strategy</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>The tree parameters, the maximum tree-depth and the tre implementation to use</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
+    &#34;&#34;&#34;
+    Populate the parameters from the trees and pick the tree implementation strategy.
+
+    Args:
+        tree_infos: The information representaing a tree (ensemble)
+        get_tree_parameters: A function specifying how to parse the tree_infos into a
+                             `operator_converters._tree_commons_TreeParameters` object
+        extra_config: param extra_config: Extra configuration used also to select the best conversion strategy
+
+    Returns:
+        The tree parameters, the maximum tree-depth and the tre implementation to use
+    &#34;&#34;&#34;
+    tree_parameters = [get_tree_parameters(tree_info) for tree_info in tree_infos]
+    max_depth = max(1, _find_max_depth(tree_parameters))
+    tree_type = get_tree_implementation_by_config_or_depth(extra_config, max_depth)
+
+    return tree_parameters, max_depth, tree_type</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="hummingbird.operator_converters._tree_commons.Node"><code class="flex name class">
+<span>class <span class="ident">Node</span></span>
+<span>(</span><span>id=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class defining a tree node.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong></dt>
+<dd>A unique ID for the node</dd>
+<dt><strong><code>left</code></strong></dt>
+<dd>The id of the left node</dd>
+<dt><strong><code>right</code></strong></dt>
+<dd>The id of the right node</dd>
+<dt><strong><code>feature</code></strong></dt>
+<dd>The feature used to make a decision (if not leaf node, ignored otherwise)</dd>
+<dt><strong><code>threshold</code></strong></dt>
+<dd>The threshold used in the decision (if not leaf node, ignored otherwise)</dd>
+<dt><strong><code>value</code></strong></dt>
+<dd>The value stored in the leaf (ignored if not leaf node).</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Node:
+    &#34;&#34;&#34;
+    Class defining a tree node.
+    &#34;&#34;&#34;
+
+    def __init__(self, id=None):
+        &#34;&#34;&#34;
+        Args:
+            id: A unique ID for the node
+            left: The id of the left node
+            right: The id of the right node
+            feature: The feature used to make a decision (if not leaf node, ignored otherwise)
+            threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
+            value: The value stored in the leaf (ignored if not leaf node).
+        &#34;&#34;&#34;
+        self.id = id
+        self.left = None
+        self.right = None
+        self.feature = None
+        self.threshold = None
+        self.value = None</code></pre>
+</details>
+</dd>
+<dt id="hummingbird.operator_converters._tree_commons.TreeParameters"><code class="flex name class">
+<span>class <span class="ident">TreeParameters</span></span>
+<span>(</span><span>lefts, rights, features, thresholds, values)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class containing a convenient in-memory representation of a decision tree.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>lefts</code></strong></dt>
+<dd>The id of the left nodes</dd>
+<dt><strong><code>rights</code></strong></dt>
+<dd>The id of the right nodes</dd>
+<dt><strong><code>feature</code></strong></dt>
+<dd>The features used to make decisions</dd>
+<dt><strong><code>thresholds</code></strong></dt>
+<dd>The thresholds used in the decisions</dd>
+<dt><strong><code>values</code></strong></dt>
+<dd>The value stored in the leaves</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TreeParameters:
+    &#34;&#34;&#34;
+    Class containing a convenient in-memory representation of a decision tree.
+    &#34;&#34;&#34;
+
+    def __init__(self, lefts, rights, features, thresholds, values):
+        &#34;&#34;&#34;
+        Args:
+            lefts: The id of the left nodes
+            rights: The id of the right nodes
+            feature: The features used to make decisions
+            thresholds: The thresholds used in the decisions
+            values: The value stored in the leaves
+        &#34;&#34;&#34;
+        self.lefts = lefts
+        self.rights = rights
+        self.features = features
+        self.thresholds = thresholds
+        self.values = values</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<header>
+<a class="homelink" rel="home" title="Hummingbird Home" href="https://github.com/microsoft/hummingbird">
+<img src="https://i.imgur.com/0pp9lMS.png?1" alt=""> Hummingbird
+</a>
+</header>
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="hummingbird.operator_converters" href="index.html">hummingbird.operator_converters</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="hummingbird.operator_converters._tree_commons.get_parameters_for_gemm_common" href="#hummingbird.operator_converters._tree_commons.get_parameters_for_gemm_common">get_parameters_for_gemm_common</a></code></li>
+<li><code><a title="hummingbird.operator_converters._tree_commons.get_parameters_for_sklearn_common" href="#hummingbird.operator_converters._tree_commons.get_parameters_for_sklearn_common">get_parameters_for_sklearn_common</a></code></li>
+<li><code><a title="hummingbird.operator_converters._tree_commons.get_parameters_for_tree_trav_common" href="#hummingbird.operator_converters._tree_commons.get_parameters_for_tree_trav_common">get_parameters_for_tree_trav_common</a></code></li>
+<li><code><a title="hummingbird.operator_converters._tree_commons.get_parameters_for_tree_trav_sklearn" href="#hummingbird.operator_converters._tree_commons.get_parameters_for_tree_trav_sklearn">get_parameters_for_tree_trav_sklearn</a></code></li>
+<li><code><a title="hummingbird.operator_converters._tree_commons.get_tree_implementation_by_config_or_depth" href="#hummingbird.operator_converters._tree_commons.get_tree_implementation_by_config_or_depth">get_tree_implementation_by_config_or_depth</a></code></li>
+<li><code><a title="hummingbird.operator_converters._tree_commons.get_tree_params_and_type" href="#hummingbird.operator_converters._tree_commons.get_tree_params_and_type">get_tree_params_and_type</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="hummingbird.operator_converters._tree_commons.Node" href="#hummingbird.operator_converters._tree_commons.Node">Node</a></code></h4>
+</li>
+<li>
+<h4><code><a title="hummingbird.operator_converters._tree_commons.TreeParameters" href="#hummingbird.operator_converters._tree_commons.TreeParameters">TreeParameters</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p><span style="color:#ddd">&#21328;</span></p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
