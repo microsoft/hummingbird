@@ -55,11 +55,11 @@ hb_gpu = pytorch_model(torch.from_numpy(X).to('cuda'))
 
 # Documentation
 
-The API documentation is [here](https://microsoft.github.io/hummingbird/). 
+The API documentation is [here](https://microsoft.github.io/hummingbird/).
 
 For more details on the vision and on the technical details related to Hummingbird, please check our papers:
 
-* [Taming Model Serving Complexity, Performance and Cost: A Compilation to Tensor Computations Approach](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf). Supun Nakandalam, Karla Saur , Gyeong-In Yu, Konstantinos Karanasos, Carlo Curino, Markus Weimer, Matteo Interlandi. Technical Report
+* [Taming Model Serving Complexity, Performance and Cost: A Compilation to Tensor Computations Approach](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf). Supun Nakandalam, Karla Saur, Gyeong-In Yu, Konstantinos Karanasos, Carlo Curino, Markus Weimer, Matteo Interlandi. Technical Report
 * [Compiling Classical ML Pipelines into Tensor Computations for One-size-fits-all Prediction Serving](http://learningsys.org/neurips19/assets/papers/27_CameraReadySubmission_Hummingbird%20(5).pdf). Supun Nakandala, Gyeong-In Yu, Markus Weimer, Matteo Interlandi. System for ML Workshop. NeurIPS 2019
 
 # Contributing
