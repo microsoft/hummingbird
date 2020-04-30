@@ -12,13 +12,17 @@ Currently we support [these](https://github.com/microsoft/hummingbird/blob/devel
 
 ## Installation
 
-This was tested on Python 3.7 on a Linux machine.
+This was tested on Python 3.7 on a Linux machine.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
 ```
 mkdir hummingbird
 cd hummingbird
 git clone https://github.com/microsoft/hummingbird.git .
 python setup.py install
 ```
+
+
+
+See also [Troubleshooting](TROUBLESHOOTING.md) for common problems.
 
 ## Examples
 
