@@ -11,6 +11,7 @@ from copy import deepcopy
 import numpy as np
 
 from onnxconverter_common.registration import get_converter
+from onnxconverter_common.optimizer import LinkedNode
 
 from ._container import PyTorchBackendModel
 from .exceptions import MissingConverter
@@ -51,6 +52,78 @@ def convert_sklearn(model, test_input=None, extra_config={}):
     # Convert the Topology object into a PyTorch model.
     hb_model = _convert_topology(topology, extra_config=extra_config)
     return hb_model
+
+
+def convert_onnxml(model, initial_types=None, input_names=None, output_names=None, test_data=None, extra_config={}):
+    """
+    This function converts the specified [ONNX-ML] model into its [ONNX] counterpart.
+    The supported operators can be found at `hummingbird._supported_operators`.
+    [ONNX-ML]: https://scikit-learn.org/
+    [ONNX]: https://pytorch.org/
+
+    Args:
+        model: A model containing ONNX-ML operators
+        initial_types: a python list where each element is a tuple of a input name and a `onnxmltools.convert.common.data_types`
+        input_names: a python list containig input names. Should be a subset of the input variables in the input ONNX-ML model.
+        output_names: a python list containing the names output expected from the translated model.
+                      Should be a subset of the output variables in the input ONNX-ML model.
+        test_data: some input data used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
+
+    Examples:
+        >>> pytorch_model = convert_onnxml(onnx_ml_model)
+
+    Returns:
+        A model containing only *ONNX* operators. The mode is equivalent to the input *ONNX-ML* model
+    """
+    assert model is not None
+    assert torch_installed(), "To use Hummingbird you need to install torch."
+    assert (
+        test_data is not None or initial_types is not None
+    ), "Cannot generate test input data. Either pass some input data or the initial_types"
+
+    # Parse an ONNX-ML model into our internal data structure (i.e., LinkedNode)
+    input_names = input_names if input_names is not None else [in_.name for in_ in model.input]
+    inputs = [in_ for in_ in model.input if in_.name in input_names]
+
+    assert len(inputs) > 0, "Provided input name does not match with any model's input."
+    assert len(inputs) == 1, "Hummingbird currently do not support models with more than 1 input."
+    assert initial_types is None or len(initial_types) == 1, "len(initial_types) {} differs from len(inputs) {}.".format(
+        len(initial_types), len(inputs)
+    )
+
+    if output_names is None:
+        output_names = [] if model.output is None else [o_.name for o_ in model.output]
+
+    if test_data is None:
+        assert (
+            not initial_types[0][1].shape is None
+        ), "Cannot generate test input data. Initial_types do not contain shape information."
+        assert len(initial_types[0][1].shape) == 2, "Hummingbird currently support only inputs with len(shape) == 2."
+
+        from onnxmltools.convert.common.data_types import FloatTensorType, Int32TensorType
+
+        test_data = np.random.rand(initial_types[0][1].shape[0], initial_types[0][1].shape[1])
+        if type(initial_types[0][1]) is FloatTensorType:
+            test_data = np.array(test_data, dtype=np.float32)
+        elif type(initial_types[0][1]) is Int32TensorType:
+            test_data = np.array(test_data, dtype=np.int32)
+        else:
+            raise RuntimeError(
+                "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
+                    type(initial_types[0][1])
+                )
+            )
+
+    ir_model = LinkedNode.build_from_onnx(
+        model.node, [], [in_.name for in_ in model.input], output_names, [init_ for init_ in model.initializer]
+    )
+
+    # Convert the input model object into ONNX. The outcome is an ONNX model.
+    # onnx_model = convert_ir_model(ir_model, inputs, model.initializer, output_names, test_data, extra_config)
+    # return onnx_model
+    return ir_model
 
 
 def convert_lightgbm(model, test_input=None, extra_config={}):
