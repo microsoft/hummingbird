@@ -8,6 +8,7 @@
 All custom model containers are listed here.
 """
 
+import numpy as np
 import torch
 
 
@@ -29,20 +30,28 @@ class PyTorchBackendModel(torch.nn.Module):
         self.input_names = input_names
         self.output_names = output_names
         self.operator_map = torch.nn.ModuleDict(operator_map)
-        self.topology = topology
+        self.operators = list(topology.topological_operator_iterator())
         self.extra_config = extra_config
+        self.is_regression = self.operator_map[self.operators[-1].full_name].regression
 
-    def forward(self, *pytorch_inputs):
+    def forward(self, *inputs):
         with torch.no_grad():
-            pytorch_inputs = [*pytorch_inputs]
+            inputs = [*inputs]
             variable_map = {}
+            device = next(self.parameters()).device  # Assuming we are using a single device for all parameters
 
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self.input_names):
-                variable_map[input_name] = pytorch_inputs[i]
+                if type(inputs[i]) is np.ndarray:
+                    inputs[i] = torch.from_numpy(inputs[i])
+                elif type(inputs[i]) is not torch.Tensor:
+                    raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(inputs[i])))
+                if device is not None:
+                    inputs[i] = inputs[i].to(device)
+                variable_map[input_name] = inputs[i]
 
             # Evaluate all the operators in the topology by properly wiring inputs \ outputs
-            for operator in self.topology.topological_operator_iterator():
+            for operator in self.operators:
                 pytorch_op = self.operator_map[operator.full_name]
                 pytorch_outputs = pytorch_op(*(variable_map[input] for input in operator.input_full_names))
 
@@ -57,3 +66,15 @@ class PyTorchBackendModel(torch.nn.Module):
                 return variable_map[self.output_names[0]]
             else:
                 return list(variable_map[output_name] for output_name in self.output_names)
+
+    def predict(self, *inputs):
+        if self.is_regression:
+            return self.forward(*inputs).numpy().flatten()
+        else:
+            return self.forward(*inputs)[0].numpy()
+
+    def predict_proba(self, *inputs):
+        if self.is_regression:
+            raise RuntimeError("Predict_proba not available for regression tasks.")
+        else:
+            return self.forward(*inputs)[1].numpy()

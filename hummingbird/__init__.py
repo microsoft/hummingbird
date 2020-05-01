@@ -25,10 +25,25 @@ from ._utils import _Constants
 constants = _Constants(hummingbird_constants)
 
 # Add the converters in the Hummingbird scope.
-from .convert import convert_sklearn  # noqa: F401
-from .convert import convert_lightgbm  # noqa: F401
-from .convert import convert_xgboost  # noqa: F401
+from .convert import to_pytorch_sklearn  # noqa: F401
+from .convert import to_pytorch_lightgbm  # noqa: F401
+from .convert import to_pytorch_xgboost  # noqa: F401
 
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    RandomForestRegressor,
+    GradientBoostingClassifier,
+    ExtraTreesClassifier,
+)  # noqa: F401
+from sklearn.tree import DecisionTreeClassifier  # noqa: F401
+
+RandomForestClassifier.to_pytorch = to_pytorch_sklearn
+RandomForestRegressor.to_pytorch = to_pytorch_sklearn
+GradientBoostingClassifier.to_pytorch = to_pytorch_sklearn
+ExtraTreesClassifier.to_pytorch = to_pytorch_sklearn
+DecisionTreeClassifier.to_pytorch = to_pytorch_sklearn
+
+# Pdoc stuff.
 __pdoc__ = {}
 __pdoc__["hummingbird._container"] = True
 __pdoc__["hummingbird._parse"] = True
