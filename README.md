@@ -3,6 +3,8 @@
 # Hummingbird
 
 ![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
+.. image:: https://codecov.io/gh/microsoft/hummingbird/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/microsoft/hummingbird
 
 ## Introduction
 *Hummingbird* converts trained traditional Machine Learning models into [PyTorch](https://pytorch.org/). Once in the PyTorch format, <!--you can further convert to [ONNX](https://github.com/onnx/onnx) or [TorchScript](https://pytorch.org/docs/stable/jit.html), and --> you can run the models on GPU for high performance native scoring. For full details, see [our papers](#documentation).

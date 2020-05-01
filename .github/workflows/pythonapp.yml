@@ -47,3 +47,5 @@ jobs:
         MINIMUM=70
         SCORE=$(coverage report -m | tail -n 1 | awk '{print $NF}' | rev | cut -c2- | rev)
         if [ $SCORE -ge $MINIMUM ]; then echo "COVERAGE ($SCORE) OK"; else echo "WARNING: Coverage is $SCORE but should be at least $MINIMUM"; fi
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
