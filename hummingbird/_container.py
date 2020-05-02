@@ -69,12 +69,12 @@ class PyTorchBackendModel(torch.nn.Module):
 
     def predict(self, *inputs):
         if self.is_regression:
-            return self.forward(*inputs).numpy().flatten()
+            return self.forward(*inputs).cpu().numpy().flatten()
         else:
-            return self.forward(*inputs)[0].numpy()
+            return self.forward(*inputs)[0].cpu().numpy()
 
     def predict_proba(self, *inputs):
         if self.is_regression:
             raise RuntimeError("Predict_proba not available for regression tasks.")
         else:
-            return self.forward(*inputs)[1].numpy()
+            return self.forward(*inputs)[1].cpu().numpy()

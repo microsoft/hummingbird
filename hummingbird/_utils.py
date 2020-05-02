@@ -26,6 +26,18 @@ def torch_installed():
         return False
 
 
+def sklearn_installed():
+    """
+    Checks that *Sklearn* is available.
+    """
+    try:
+        import sklearn
+
+        return True
+    except ImportError:
+        return False
+
+
 def lightgbm_installed():
     """
     Checks that *LightGBM* is available.

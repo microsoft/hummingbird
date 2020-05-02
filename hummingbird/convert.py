@@ -13,8 +13,9 @@ import numpy as np
 from onnxconverter_common.registration import get_converter
 
 from ._container import PyTorchBackendModel
-from .exceptions import MissingConverter
+from .exceptions import MissingConverter, MissingBackend
 from ._parse import parse_sklearn_api_model
+from .supported import backend_map
 from ._utils import torch_installed, lightgbm_installed, xgboost_installed
 from . import constants
 
@@ -22,19 +23,30 @@ from . import constants
 from . import operator_converters  # noqa
 
 
-def to_pytorch_sklearn(self, test_input=None, extra_config={}):
-    return _convert_sklearn(self, test_input, extra_config)
+def _supported_backend_check(backend):
+    if not backend.lower() in backend_map:
+        raise MissingBackend("Backend: {}", backend)
 
 
-def to_pytorch_lightgbm(self, test_input=None, extra_config={}):
-    return _convert_lightgbm(self, test_input, extra_config)
+def _to_pytorch_sklearn(self, backend, test_input=None, extra_config={}):
+    _supported_backend_check(backend)
+
+    return convert_sklearn(self, test_input, extra_config)
 
 
-def to_pytorch_xgboost(self, test_input, extra_config={}):
-    return _convert_xgboost(self, test_input, extra_config)
+def _to_pytorch_lightgbm(self, backend, test_input=None, extra_config={}):
+    _supported_backend_check(backend)
+
+    return convert_lightgbm(self, test_input, extra_config)
 
 
-def _convert_sklearn(model, test_input=None, extra_config={}):
+def _to_pytorch_xgboost(self, backend, test_input, extra_config={}):
+    _supported_backend_check(backend)
+
+    return convert_xgboost(self, test_input, extra_config)
+
+
+def convert_sklearn(model, test_input=None, extra_config={}):
     """
     This function converts the specified [scikit-learn] model into its [PyTorch] counterpart.
     The supported operators can be found at `hummingbird._supported_operators`.
@@ -66,7 +78,7 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
     return hb_model
 
 
-def _convert_lightgbm(model, test_input=None, extra_config={}):
+def convert_lightgbm(model, test_input=None, extra_config={}):
     """
     This function is used to generate a [PyTorch] model from a given input [LightGBM] model.
     [LightGBM]: https://lightgbm.readthedocs.io/
@@ -86,10 +98,10 @@ def _convert_lightgbm(model, test_input=None, extra_config={}):
     """
     assert lightgbm_installed(), "To convert LightGBM models you need to instal LightGBM."
 
-    return _convert_sklearn(model, test_input, extra_config)
+    return convert_sklearn(model, test_input, extra_config)
 
 
-def _convert_xgboost(model, test_input, extra_config={}):
+def convert_xgboost(model, test_input, extra_config={}):
     """
     This function is used to generate a [PyTorch] model from a given input [XGBoost] model.
     [PyTorch]: https://pytorch.org/
@@ -128,7 +140,7 @@ def _convert_xgboost(model, test_input, extra_config={}):
                 "XGBoost converter is not able to infer the number of input features.\
                     Please pass some test_input to the converter."
             )
-    return _convert_sklearn(model, test_input, extra_config)
+    return convert_sklearn(model, test_input, extra_config)
 
 
 def _convert_topology(topology, device=None, extra_config={}):
