@@ -7,7 +7,7 @@ If you are here, it means you are interested in helping us out. A hearty welcome
 * Offer PR's to fix bugs or implement new features;
 * Give us feedback and bug reports regarding the software or the documentation;
 * Improve our examples, and documentation.
-This project welcomes contributions and suggestions.  
+This project welcomes contributions and suggestions.
 
 ## Getting Started
 
@@ -74,7 +74,7 @@ flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
 
 For coverage, we use [coverage.py](https://coverage.readthedocs.io/en/coverage-5.0.4/) in our Github Actions.  Run  `pip install coverage` if you don't already have this, and any code you commit should generally not significantly impact coverage.
 
-We strive to keep our test coverage about 70%.  To run all unit tests:
+We strive to not let check-ins decrease coverage.  To run all unit tests:
 ```
 coverage run -m pytest tests
 ```
