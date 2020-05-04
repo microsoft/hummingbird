@@ -27,12 +27,12 @@ constants = _Constants(hummingbird_constants)
 
 
 # Add the converters in the Hummingbird scope.
-from .convert import _to_pytorch_sklearn  # noqa: F401
-from .convert import _to_pytorch_lightgbm  # noqa: F401
-from .convert import _to_pytorch_xgboost  # noqa: F401
+from .convert import _to_sklearn  # noqa: F401
+from .convert import _to_lightgbm  # noqa: F401
+from .convert import _to_xgboost  # noqa: F401
 
 
-# Set up the converter dispatcher. 
+# Set up the converter dispatcher.
 from .supported import sklearn_operator_list  # noqa: F401
 from .supported import xgb_operator_list  # noqa: F401
 from .supported import lgbm_operator_list  # noqa: F401
@@ -40,15 +40,15 @@ from .supported import lgbm_operator_list  # noqa: F401
 
 for operator in sklearn_operator_list:
     if operator is not None:
-        operator.to = _to_pytorch_sklearn
+        operator.to = _to_sklearn
 
 for operator in xgb_operator_list:
     if operator is not None:
-        operator.to = _to_pytorch_xgboost
+        operator.to = _to_xgboost
 
 for operator in lgbm_operator_list:
     if operator is not None:
-        operator.to = _to_pytorch_lightgbm
+        operator.to = _to_lightgbm
 
 
 # Pdoc stuff.

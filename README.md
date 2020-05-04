@@ -12,7 +12,7 @@ Currently we support [these](https://github.com/microsoft/hummingbird/blob/devel
 
 ## Installation
 
-This was tested on Python 3.7 on a Linux machine.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
+Hummingbird was tests on Python 3.6. and 3.7 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
 ```
 mkdir hummingbird
 cd hummingbird
@@ -28,13 +28,13 @@ See also [Troubleshooting](TROUBLESHOOTING.md) for common problems.
 
 See the [notebooks](notebooks) section for examples that demonstrate use and speedups.
 
-In general, the syntax is very similar to [skl2onnx](https://github.com/onnx/sklearn-onnx), as hummingbird started as a fork of that project.
+In general, Hummingbird syntax is very intuitive and minimal. Basically, to run your traditional ML model on DNN frameworks, you only need to `import hummingbird` and add `to('dnn_framework')` to your code. Below an example using a [LightGBM](https://lightgbm.readthedocs.io/en/latest/) model and [PyTorch](https://pytorch.org/) as target framework.
 
 ```python
 import torch
 import numpy as np
 import lightgbm as lgb
-from hummingbird import convert_lightgbm
+import hummingbird
 
 # Create some random data for binary classification
 num_classes = 2
@@ -46,15 +46,14 @@ model = lgb.LGBMClassifier()
 model.fit(X, y)
 
 # Use Hummingbird to convert the model to pytorch
-pytorch_model = convert_lightgbm(model)
+model = model.to('pytorch')
 
-# Run Hummingbird on CPU
-pytorch_model.to('cpu')
-hb_cpu = pytorch_model(torch.from_numpy(X))
+# Run predictions on CPU
+model.predict(X)
 
-# Run Hummingbird on GPU
-pytorch_model.to('cuda')
-hb_gpu = pytorch_model(torch.from_numpy(X).to('cuda'))
+# Run predictions on GPU
+model.to('cuda')
+model.predict(X)
 ```
 
 # Documentation

@@ -24,23 +24,35 @@ from . import operator_converters  # noqa
 
 
 def _supported_backend_check(backend):
+    """
+    Function used to check whether the specified backend is supported or not.
+    """
     if not backend.lower() in backend_map:
         raise MissingBackend("Backend: {}", backend)
 
 
-def _to_pytorch_sklearn(self, backend, test_input=None, extra_config={}):
+def _to_sklearn(self, backend, test_input=None, extra_config={}):
+    """
+    Utility function used to call the *scikit-learn* converter.
+    """
     _supported_backend_check(backend)
 
     return convert_sklearn(self, test_input, extra_config)
 
 
-def _to_pytorch_lightgbm(self, backend, test_input=None, extra_config={}):
+def _to_lightgbm(self, backend, test_input=None, extra_config={}):
+    """
+    Utility function used to call the *LightGBM* converter.
+    """
     _supported_backend_check(backend)
 
     return convert_lightgbm(self, test_input, extra_config)
 
 
-def _to_pytorch_xgboost(self, backend, test_input, extra_config={}):
+def _to_xgboost(self, backend, test_input, extra_config={}):
+    """
+    Utility function used to call the *XGboost* converter.
+    """
     _supported_backend_check(backend)
 
     return convert_xgboost(self, test_input, extra_config)

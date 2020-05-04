@@ -68,12 +68,22 @@ class PyTorchBackendModel(torch.nn.Module):
                 return list(variable_map[output_name] for output_name in self.output_names)
 
     def predict(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On regression returns the predicted values.
+        On classification tasks returns the predicted class labels for the input data.
+        """
         if self.is_regression:
             return self.forward(*inputs).cpu().numpy().flatten()
         else:
             return self.forward(*inputs)[0].cpu().numpy()
 
     def predict_proba(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On regression a call to this method returns a `RuntimeError`.
+        On classification tasks returns the probability estimates.
+        """
         if self.is_regression:
             raise RuntimeError("Predict_proba not available for regression tasks.")
         else:
