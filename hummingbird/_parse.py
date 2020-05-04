@@ -129,7 +129,7 @@ def _parse_sklearn_pipeline(scope, model, inputs):
 
 def _build_sklearn_api_parsers_map():
     from sklearn import pipeline
-    
+
     # Parsers for edge cases are going here.
     map_parser = {
         pipeline.Pipeline: _parse_sklearn_pipeline
