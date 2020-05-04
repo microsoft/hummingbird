@@ -5,7 +5,6 @@ import unittest
 import warnings
 
 import numpy as np
-import torch
 import lightgbm as lgb
 
 import hummingbird

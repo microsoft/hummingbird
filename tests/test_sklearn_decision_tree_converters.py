@@ -5,11 +5,10 @@ import unittest
 import warnings
 
 import numpy as np
-import torch
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, ExtraTreesClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 import hummingbird
-from sklearn.tree import DecisionTreeClassifier
 from hummingbird.exceptions import MissingConverter
 from tree_utils import dt_implementation_map
 

@@ -28,7 +28,7 @@ def _supported_backend_check(backend):
     Function used to check whether the specified backend is supported or not.
     """
     if not backend.lower() in backend_map:
-        raise MissingBackend("Backend: {}", backend)
+        raise MissingBackend("Backend: {}".format(backend))
 
 
 def _to_sklearn(self, backend, test_input=None, extra_config={}):
