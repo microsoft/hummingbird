@@ -20,16 +20,22 @@ def _build_sklearn_operator_list():
     """
     if sklearn_installed():
         # Tree-based models
-        from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, ExtraTreesClassifier
+        from sklearn.ensemble import (
+            RandomForestClassifier,
+            RandomForestRegressor,
+            GradientBoostingClassifier,
+            ExtraTreesClassifier,
+        )
         from sklearn.tree import DecisionTreeClassifier
+
         return [
-                # Tree-methods
-                DecisionTreeClassifier,
-                RandomForestClassifier,
-                RandomForestRegressor,
-                GradientBoostingClassifier,
-                ExtraTreesClassifier
-            ]
+            # Tree-methods
+            DecisionTreeClassifier,
+            RandomForestClassifier,
+            RandomForestRegressor,
+            GradientBoostingClassifier,
+            ExtraTreesClassifier,
+        ]
 
     return None
 
@@ -59,17 +65,14 @@ def _build_sklearn_api_operator_name_map():
     Associate Sklearn with the operator class names.
     If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     """
-    return {
-        k: "Sklearn" + k.__name__
-        for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list if k is not None
-    }
+    return {k: "Sklearn" + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list if k is not None}
 
 
 def _build_backend_map():
     """
     The set of supported backends is defined here.
     """
-    return { 'pytorch' }
+    return {"pytorch"}
 
 
 def get_sklearn_api_operator_name(model_type):
@@ -105,4 +108,3 @@ N_FEATURES = "n_features"
 
 TREE_IMPLEMENTATION = "tree_implementation"
 """Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav."""
-
