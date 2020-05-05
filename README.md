@@ -7,10 +7,11 @@
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Introduction
-*Hummingbird* converts trained traditional Machine Learning models into [PyTorch](https://pytorch.org/). Once in the PyTorch format, <!--you can further convert to [ONNX](https://github.com/onnx/onnx) or [TorchScript](https://pytorch.org/docs/stable/jit.html), and --> you can run the models on GPU for high performance native scoring. For full details, see [our papers](#documentation).
 
-Currently we support [these](https://github.com/microsoft/hummingbird/blob/develop/hummingbird/_supported_operators.py#L26) tree-based classifiers and regressors.  These models include
-[scikit-learn](https://scikit-learn.org/stable/) models such as  Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors.
+*Hummingbird* is a library for accelerating inference (scoring/prediction) in traditional machine learning (ML) models. It  compiles traditional ML pipelines into tensor computations, which allows users to seamlessly leverage hardware acceleration without having to re-engineer their models. 
+
+You can use *Hummingbird* to convert your trained traditional ML models into [PyTorch](https://pytorch.org/). Currently we support a variety of tree-based classifiers and regressors.  These models include
+[scikit-learn](https://scikit-learn.org/stable/) Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors.
 
 ## Installation
 
