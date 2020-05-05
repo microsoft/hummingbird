@@ -44,11 +44,11 @@ X = np.array(np.random.rand(100000, 28), dtype=np.float32)
 y = np.random.randint(num_classes, size=100000)
 
 # Create and train a model (LightGBM in this case)
-model = lgb.LGBMClassifier()
-model.fit(X, y)
+lgb_model = lgb.LGBMClassifier()
+lgb_model.fit(X, y)
 
-# Use Hummingbird to convert the model to pytorch
-model = model.to('pytorch')
+# Use Hummingbird to convert the model to PyTorch
+model = lgb_model.to('pytorch')
 
 # Run predictions on CPU
 model.predict(X)
