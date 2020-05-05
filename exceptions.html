@@ -42,6 +42,10 @@ It usually means the pipeline being converted contains a
 transformer or a predictor with no corresponding converter implemented.
 Please fill an issue at https://github.com/microsoft/hummingbird.
 &#34;&#34;&#34;
+_missing_backend = &#34;&#34;&#34;
+It usually means the backend is not currently supported.
+Please check the spelling or fill an issue at https://github.com/microsoft/hummingbird.
+&#34;&#34;&#34;
 _constant_error = &#34;&#34;&#34;
 It usually means a constant is not available or you are trying to override a constant value.
 &#34;&#34;&#34;
@@ -54,6 +58,15 @@ class MissingConverter(RuntimeError):
 
     def __init__(self, msg):
         super().__init__(msg + _missing_converter)
+
+
+class MissingBackend(RuntimeError):
+    &#34;&#34;&#34;
+    Raised when the selected backend is not supported.
+    &#34;&#34;&#34;
+
+    def __init__(self, msg):
+        super().__init__(msg + _missing_backend)
 
 
 class ConstantError(TypeError):
@@ -95,6 +108,31 @@ class ConstantError(TypeError):
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.TypeError</li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+<dt id="hummingbird.exceptions.MissingBackend"><code class="flex name class">
+<span>class <span class="ident">MissingBackend</span></span>
+<span>(</span><span>msg)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Raised when the selected backend is not supported.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MissingBackend(RuntimeError):
+    &#34;&#34;&#34;
+    Raised when the selected backend is not supported.
+    &#34;&#34;&#34;
+
+    def __init__(self, msg):
+        super().__init__(msg + _missing_backend)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.RuntimeError</li>
 <li>builtins.Exception</li>
 <li>builtins.BaseException</li>
 </ul>
@@ -147,6 +185,9 @@ class ConstantError(TypeError):
 <ul>
 <li>
 <h4><code><a title="hummingbird.exceptions.ConstantError" href="#hummingbird.exceptions.ConstantError">ConstantError</a></code></h4>
+</li>
+<li>
+<h4><code><a title="hummingbird.exceptions.MissingBackend" href="#hummingbird.exceptions.MissingBackend">MissingBackend</a></code></h4>
 </li>
 <li>
 <h4><code><a title="hummingbird.exceptions.MissingConverter" href="#hummingbird.exceptions.MissingConverter">MissingConverter</a></code></h4>

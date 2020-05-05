@@ -38,6 +38,7 @@
 All custom model containers are listed here.
 &#34;&#34;&#34;
 
+import numpy as np
 import torch
 
 
@@ -59,20 +60,28 @@ class PyTorchBackendModel(torch.nn.Module):
         self.input_names = input_names
         self.output_names = output_names
         self.operator_map = torch.nn.ModuleDict(operator_map)
-        self.topology = topology
+        self.operators = list(topology.topological_operator_iterator())
         self.extra_config = extra_config
+        self.is_regression = self.operator_map[self.operators[-1].full_name].regression
 
-    def forward(self, *pytorch_inputs):
+    def forward(self, *inputs):
         with torch.no_grad():
-            pytorch_inputs = [*pytorch_inputs]
+            inputs = [*inputs]
             variable_map = {}
+            device = next(self.parameters()).device  # Assuming we are using a single device for all parameters
 
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self.input_names):
-                variable_map[input_name] = pytorch_inputs[i]
+                if type(inputs[i]) is np.ndarray:
+                    inputs[i] = torch.from_numpy(inputs[i])
+                elif type(inputs[i]) is not torch.Tensor:
+                    raise RuntimeError(&#34;Inputer tensor {} of not supported type {}&#34;.format(input_name, type(inputs[i])))
+                if device is not None:
+                    inputs[i] = inputs[i].to(device)
+                variable_map[input_name] = inputs[i]
 
             # Evaluate all the operators in the topology by properly wiring inputs \ outputs
-            for operator in self.topology.topological_operator_iterator():
+            for operator in self.operators:
                 pytorch_op = self.operator_map[operator.full_name]
                 pytorch_outputs = pytorch_op(*(variable_map[input] for input in operator.input_full_names))
 
@@ -86,7 +95,29 @@ class PyTorchBackendModel(torch.nn.Module):
             if len(self.output_names) == 1:
                 return variable_map[self.output_names[0]]
             else:
-                return list(variable_map[output_name] for output_name in self.output_names)</code></pre>
+                return list(variable_map[output_name] for output_name in self.output_names)
+
+    def predict(self, *inputs):
+        &#34;&#34;&#34;
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On regression returns the predicted values.
+        On classification tasks returns the predicted class labels for the input data.
+        &#34;&#34;&#34;
+        if self.is_regression:
+            return self.forward(*inputs).cpu().numpy().flatten()
+        else:
+            return self.forward(*inputs)[0].cpu().numpy()
+
+    def predict_proba(self, *inputs):
+        &#34;&#34;&#34;
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On regression a call to this method returns a `RuntimeError`.
+        On classification tasks returns the probability estimates.
+        &#34;&#34;&#34;
+        if self.is_regression:
+            raise RuntimeError(&#34;Predict_proba not available for regression tasks.&#34;)
+        else:
+            return self.forward(*inputs)[1].cpu().numpy()</code></pre>
 </details>
 </section>
 <section>
@@ -139,20 +170,28 @@ class PyTorchBackendModel(torch.nn.Module):
         self.input_names = input_names
         self.output_names = output_names
         self.operator_map = torch.nn.ModuleDict(operator_map)
-        self.topology = topology
+        self.operators = list(topology.topological_operator_iterator())
         self.extra_config = extra_config
+        self.is_regression = self.operator_map[self.operators[-1].full_name].regression
 
-    def forward(self, *pytorch_inputs):
+    def forward(self, *inputs):
         with torch.no_grad():
-            pytorch_inputs = [*pytorch_inputs]
+            inputs = [*inputs]
             variable_map = {}
+            device = next(self.parameters()).device  # Assuming we are using a single device for all parameters
 
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self.input_names):
-                variable_map[input_name] = pytorch_inputs[i]
+                if type(inputs[i]) is np.ndarray:
+                    inputs[i] = torch.from_numpy(inputs[i])
+                elif type(inputs[i]) is not torch.Tensor:
+                    raise RuntimeError(&#34;Inputer tensor {} of not supported type {}&#34;.format(input_name, type(inputs[i])))
+                if device is not None:
+                    inputs[i] = inputs[i].to(device)
+                variable_map[input_name] = inputs[i]
 
             # Evaluate all the operators in the topology by properly wiring inputs \ outputs
-            for operator in self.topology.topological_operator_iterator():
+            for operator in self.operators:
                 pytorch_op = self.operator_map[operator.full_name]
                 pytorch_outputs = pytorch_op(*(variable_map[input] for input in operator.input_full_names))
 
@@ -166,7 +205,29 @@ class PyTorchBackendModel(torch.nn.Module):
             if len(self.output_names) == 1:
                 return variable_map[self.output_names[0]]
             else:
-                return list(variable_map[output_name] for output_name in self.output_names)</code></pre>
+                return list(variable_map[output_name] for output_name in self.output_names)
+
+    def predict(self, *inputs):
+        &#34;&#34;&#34;
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On regression returns the predicted values.
+        On classification tasks returns the predicted class labels for the input data.
+        &#34;&#34;&#34;
+        if self.is_regression:
+            return self.forward(*inputs).cpu().numpy().flatten()
+        else:
+            return self.forward(*inputs)[0].cpu().numpy()
+
+    def predict_proba(self, *inputs):
+        &#34;&#34;&#34;
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On regression a call to this method returns a `RuntimeError`.
+        On classification tasks returns the probability estimates.
+        &#34;&#34;&#34;
+        if self.is_regression:
+            raise RuntimeError(&#34;Predict_proba not available for regression tasks.&#34;)
+        else:
+            return self.forward(*inputs)[1].cpu().numpy()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -175,7 +236,7 @@ class PyTorchBackendModel(torch.nn.Module):
 <h3>Methods</h3>
 <dl>
 <dt id="hummingbird._container.PyTorchBackendModel.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, *pytorch_inputs)</span>
+<span>def <span class="ident">forward</span></span>(<span>self, *inputs)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Defines the computation performed at every call.</p>
@@ -191,17 +252,24 @@ registered hooks while the latter silently ignores them.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def forward(self, *pytorch_inputs):
+<pre><code class="python">def forward(self, *inputs):
     with torch.no_grad():
-        pytorch_inputs = [*pytorch_inputs]
+        inputs = [*inputs]
         variable_map = {}
+        device = next(self.parameters()).device  # Assuming we are using a single device for all parameters
 
         # Maps data inputs to the expected variables.
         for i, input_name in enumerate(self.input_names):
-            variable_map[input_name] = pytorch_inputs[i]
+            if type(inputs[i]) is np.ndarray:
+                inputs[i] = torch.from_numpy(inputs[i])
+            elif type(inputs[i]) is not torch.Tensor:
+                raise RuntimeError(&#34;Inputer tensor {} of not supported type {}&#34;.format(input_name, type(inputs[i])))
+            if device is not None:
+                inputs[i] = inputs[i].to(device)
+            variable_map[input_name] = inputs[i]
 
         # Evaluate all the operators in the topology by properly wiring inputs \ outputs
-        for operator in self.topology.topological_operator_iterator():
+        for operator in self.operators:
             pytorch_op = self.operator_map[operator.full_name]
             pytorch_outputs = pytorch_op(*(variable_map[input] for input in operator.input_full_names))
 
@@ -216,6 +284,52 @@ registered hooks while the latter silently ignores them.</p>
             return variable_map[self.output_names[0]]
         else:
             return list(variable_map[output_name] for output_name in self.output_names)</code></pre>
+</details>
+</dd>
+<dt id="hummingbird._container.PyTorchBackendModel.predict"><code class="name flex">
+<span>def <span class="ident">predict</span></span>(<span>self, *inputs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Utility functions used to emulate the behavior of the Sklearn API.
+On regression returns the predicted values.
+On classification tasks returns the predicted class labels for the input data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def predict(self, *inputs):
+    &#34;&#34;&#34;
+    Utility functions used to emulate the behavior of the Sklearn API.
+    On regression returns the predicted values.
+    On classification tasks returns the predicted class labels for the input data.
+    &#34;&#34;&#34;
+    if self.is_regression:
+        return self.forward(*inputs).cpu().numpy().flatten()
+    else:
+        return self.forward(*inputs)[0].cpu().numpy()</code></pre>
+</details>
+</dd>
+<dt id="hummingbird._container.PyTorchBackendModel.predict_proba"><code class="name flex">
+<span>def <span class="ident">predict_proba</span></span>(<span>self, *inputs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Utility functions used to emulate the behavior of the Sklearn API.
+On regression a call to this method returns a <code>RuntimeError</code>.
+On classification tasks returns the probability estimates.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def predict_proba(self, *inputs):
+    &#34;&#34;&#34;
+    Utility functions used to emulate the behavior of the Sklearn API.
+    On regression a call to this method returns a `RuntimeError`.
+    On classification tasks returns the probability estimates.
+    &#34;&#34;&#34;
+    if self.is_regression:
+        raise RuntimeError(&#34;Predict_proba not available for regression tasks.&#34;)
+    else:
+        return self.forward(*inputs)[1].cpu().numpy()</code></pre>
 </details>
 </dd>
 </dl>
@@ -245,6 +359,8 @@ registered hooks while the latter silently ignores them.</p>
 <h4><code><a title="hummingbird._container.PyTorchBackendModel" href="#hummingbird._container.PyTorchBackendModel">PyTorchBackendModel</a></code></h4>
 <ul class="">
 <li><code><a title="hummingbird._container.PyTorchBackendModel.forward" href="#hummingbird._container.PyTorchBackendModel.forward">forward</a></code></li>
+<li><code><a title="hummingbird._container.PyTorchBackendModel.predict" href="#hummingbird._container.PyTorchBackendModel.predict">predict</a></code></li>
+<li><code><a title="hummingbird._container.PyTorchBackendModel.predict_proba" href="#hummingbird._container.PyTorchBackendModel.predict_proba">predict_proba</a></code></li>
 </ul>
 </li>
 </ul>

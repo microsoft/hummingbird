@@ -50,23 +50,46 @@ __producer_version__ = __version__
 __domain__ = &#34;microsoft.gsl&#34;
 __model_version__ = 0
 
-__pdoc__ = {}
-__pdoc__[&#34;hummingbird._container&#34;] = True
-__pdoc__[&#34;hummingbird._parse&#34;] = True
-__pdoc__[&#34;hummingbird._supported_operators&#34;] = True
-__pdoc__[&#34;hummingbird._utils&#34;] = True
 
 # Register constants used for Hummingbird extra configs.
-from . import supported_configurations as hummingbird_constants
+from . import supported as hummingbird_constants
 from ._utils import _Constants
 
 # Add constants in scope.
 constants = _Constants(hummingbird_constants)
 
+
 # Add the converters in the Hummingbird scope.
-from .convert import convert_sklearn  # noqa: F401
-from .convert import convert_lightgbm  # noqa: F401
-from .convert import convert_xgboost  # noqa: F401</code></pre>
+from .convert import _to_sklearn  # noqa: F401
+from .convert import _to_lightgbm  # noqa: F401
+from .convert import _to_xgboost  # noqa: F401
+
+
+# Set up the converter dispatcher.
+from .supported import sklearn_operator_list  # noqa: F401
+from .supported import xgb_operator_list  # noqa: F401
+from .supported import lgbm_operator_list  # noqa: F401
+
+
+for operator in sklearn_operator_list:
+    if operator is not None:
+        operator.to = _to_sklearn
+
+for operator in xgb_operator_list:
+    if operator is not None:
+        operator.to = _to_xgboost
+
+for operator in lgbm_operator_list:
+    if operator is not None:
+        operator.to = _to_lightgbm
+
+
+# Pdoc stuff.
+__pdoc__ = {}
+__pdoc__[&#34;hummingbird._container&#34;] = True
+__pdoc__[&#34;hummingbird._parse&#34;] = True
+__pdoc__[&#34;hummingbird._supported_operators&#34;] = True
+__pdoc__[&#34;hummingbird._utils&#34;] = True</code></pre>
 </details>
 </section>
 <section>
@@ -79,10 +102,6 @@ from .convert import convert_xgboost  # noqa: F401</code></pre>
 <dt><code class="name"><a title="hummingbird._parse" href="_parse.html">hummingbird._parse</a></code></dt>
 <dd>
 <div class="desc"><p>All functions used for parsing input models are listed here.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird._supported_operators" href="_supported_operators.html">hummingbird._supported_operators</a></code></dt>
-<dd>
-<div class="desc"><p>All operators supported in Hummingbird are registred here.</p></div>
 </dd>
 <dt><code class="name"><a title="hummingbird._utils" href="_utils.html">hummingbird._utils</a></code></dt>
 <dd>
@@ -100,9 +119,9 @@ from .convert import convert_xgboost  # noqa: F401</code></pre>
 <dd>
 <div class="desc"><p>All operators converters are stored under this package.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.supported_configurations" href="supported_configurations.html">hummingbird.supported_configurations</a></code></dt>
+<dt><code class="name"><a title="hummingbird.supported" href="supported.html">hummingbird.supported</a></code></dt>
 <dd>
-<div class="desc"><p>Supported configurations settings accepted by Hummingbird are defined here.</p></div>
+<div class="desc"><p>All operators, backends, and configurations settings supported in Hummingbird are registered here …</p></div>
 </dd>
 </dl>
 </section>
@@ -128,12 +147,11 @@ from .convert import convert_xgboost  # noqa: F401</code></pre>
 <ul>
 <li><code><a title="hummingbird._container" href="_container.html">hummingbird._container</a></code></li>
 <li><code><a title="hummingbird._parse" href="_parse.html">hummingbird._parse</a></code></li>
-<li><code><a title="hummingbird._supported_operators" href="_supported_operators.html">hummingbird._supported_operators</a></code></li>
 <li><code><a title="hummingbird._utils" href="_utils.html">hummingbird._utils</a></code></li>
 <li><code><a title="hummingbird.convert" href="convert.html">hummingbird.convert</a></code></li>
 <li><code><a title="hummingbird.exceptions" href="exceptions.html">hummingbird.exceptions</a></code></li>
 <li><code><a title="hummingbird.operator_converters" href="operator_converters/index.html">hummingbird.operator_converters</a></code></li>
-<li><code><a title="hummingbird.supported_configurations" href="supported_configurations.html">hummingbird.supported_configurations</a></code></li>
+<li><code><a title="hummingbird.supported" href="supported.html">hummingbird.supported</a></code></li>
 </ul>
 </li>
 </ul>
