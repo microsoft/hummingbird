@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 """
-All operators, backends, and configurations settings supported in Hummingbird are registred here.
+All operators, backends, and configurations settings supported in Hummingbird are registered here.
 """
 from .exceptions import MissingConverter
 from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
@@ -60,19 +60,19 @@ def _build_lightgbm_operator_list():
     return None
 
 
+def _build_backend_map():
+    """
+    The set of supported backends is defined here.
+    """
+    return {"pytorch"}
+
+
 def _build_sklearn_api_operator_name_map():
     """
     Associate Sklearn with the operator class names.
     If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     """
     return {k: "Sklearn" + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list if k is not None}
-
-
-def _build_backend_map():
-    """
-    The set of supported backends is defined here.
-    """
-    return {"pytorch"}
 
 
 def get_sklearn_api_operator_name(model_type):
