@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from sklearn.ensemble import GradientBoostingClassifier
 
-from hummingbird import convert_sklearn
+import hummingbird
 from tree_utils import gbdt_implementation_map
 
 
@@ -24,7 +24,7 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
             for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
                 model.fit(X, y)
 
-                pytorch_model = convert_sklearn(model, extra_config={"tree_implementation": extra_config_param})
+                pytorch_model = model.to('pytorch', extra_config={"tree_implementation": extra_config_param})
                 self.assertTrue(pytorch_model is not None)
                 self.assertTrue(
                     str(type(list(pytorch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
@@ -39,10 +39,10 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
             y = np.random.randint(num_classes, size=100) + labels_shift
 
             model.fit(X, y)
-            pytorch_model = convert_sklearn(model, extra_config=extra_config)
+            pytorch_model = model.to('pytorch', extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
-                model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].data.numpy(), rtol=1e-06, atol=1e-06
+                model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06
             )
 
     # Binary classifier
@@ -92,10 +92,10 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
             y = np.random.randint(3, size=100)
 
             model.fit(X, y)
-            pytorch_model = convert_sklearn(model)
+            pytorch_model = model.to('pytorch')
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
-                model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].data.numpy(), rtol=1e-06, atol=1e-06
+                model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06
             )
 
     # Failure Cases
@@ -105,7 +105,7 @@ class TestSklearnGradientBoostingClassifier(unittest.TestCase):
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error
         model = GradientBoostingClassifier(n_estimators=10).fit(X, y)
-        self.assertRaises(RuntimeError, convert_sklearn, model, [])
+        self.assertRaises(RuntimeError, model.to, 'pytorch')
 
 
 if __name__ == "__main__":

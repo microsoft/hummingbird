@@ -13,13 +13,49 @@ import numpy as np
 from onnxconverter_common.registration import get_converter
 
 from ._container import PyTorchBackendModel
-from .exceptions import MissingConverter
+from .exceptions import MissingConverter, MissingBackend
 from ._parse import parse_sklearn_api_model
+from .supported import backend_map
 from ._utils import torch_installed, lightgbm_installed, xgboost_installed
 from . import constants
 
 # Invoke the registration of all our converters.
 from . import operator_converters  # noqa
+
+
+def _supported_backend_check(backend):
+    """
+    Function used to check whether the specified backend is supported or not.
+    """
+    if not backend.lower() in backend_map:
+        raise MissingBackend("Backend: {}".format(backend))
+
+
+def _to_sklearn(self, backend, test_input=None, extra_config={}):
+    """
+    Utility function used to call the *scikit-learn* converter.
+    """
+    _supported_backend_check(backend)
+
+    return convert_sklearn(self, test_input, extra_config)
+
+
+def _to_lightgbm(self, backend, test_input=None, extra_config={}):
+    """
+    Utility function used to call the *LightGBM* converter.
+    """
+    _supported_backend_check(backend)
+
+    return convert_lightgbm(self, test_input, extra_config)
+
+
+def _to_xgboost(self, backend, test_input, extra_config={}):
+    """
+    Utility function used to call the *XGboost* converter.
+    """
+    _supported_backend_check(backend)
+
+    return convert_xgboost(self, test_input, extra_config)
 
 
 def convert_sklearn(model, test_input=None, extra_config={}):

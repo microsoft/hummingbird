@@ -7,13 +7,10 @@
 """
 All functions used for parsing input models are listed here.
 """
-
-from sklearn import pipeline
-
 from onnxconverter_common.container import CommonSklearnModelContainer
 from onnxconverter_common.topology import Topology
 
-from ._supported_operators import get_sklearn_api_operator_name
+from .supported import get_sklearn_api_operator_name
 
 
 def parse_sklearn_api_model(model):
@@ -131,6 +128,8 @@ def _parse_sklearn_pipeline(scope, model, inputs):
 
 
 def _build_sklearn_api_parsers_map():
+    from sklearn import pipeline
+
     # Parsers for edge cases are going here.
     map_parser = {
         pipeline.Pipeline: _parse_sklearn_pipeline

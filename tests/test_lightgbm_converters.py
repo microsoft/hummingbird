@@ -5,10 +5,9 @@ import unittest
 import warnings
 
 import numpy as np
-import torch
 import lightgbm as lgb
 
-from hummingbird import convert_lightgbm
+import hummingbird
 from tree_utils import gbdt_implementation_map
 
 
@@ -24,7 +23,7 @@ class TestLGBMConverter(unittest.TestCase):
             for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
                 model.fit(X, y)
 
-                pytorch_model = convert_lightgbm(model, extra_config={"tree_implementation": extra_config_param})
+                pytorch_model = model.to('pytorch', extra_config={"tree_implementation": extra_config_param})
                 self.assertTrue(pytorch_model is not None)
                 self.assertTrue(
                     str(type(list(pytorch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
@@ -40,10 +39,10 @@ class TestLGBMConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            pytorch_model = convert_lightgbm(model, extra_config=extra_config)
+            pytorch_model = model.to('pytorch', extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
-                model.predict_proba(X), pytorch_model(torch.from_numpy(X))[1].data.numpy(), rtol=1e-06, atol=1e-06
+                model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06
             )
 
     # Binary classifier
@@ -87,10 +86,10 @@ class TestLGBMConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            pytorch_model = convert_lightgbm(model, extra_config=extra_config)
+            pytorch_model = model.to('pytorch', extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(
-                model.predict(X), pytorch_model(torch.from_numpy(X)).numpy().flatten(), rtol=1e-06, atol=1e-06
+                model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06
             )
 
     # Regressor
