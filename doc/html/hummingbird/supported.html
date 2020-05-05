@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird._utils API documentation</title>
-<meta name="description" content="Collection of utility functions used throughout Hummingbird." />
+<title>hummingbird.supported API documentation</title>
+<meta name="description" content="All operators, backends, and configurations settings supported in Hummingbird are registered here …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,17 +13,29 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/_utils.html">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/supported.html">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird._utils</code></h1>
+<h1 class="title">Module <code>hummingbird.supported</code></h1>
 </header>
 <section id="section-intro">
-<p>Collection of utility functions used throughout Hummingbird.</p>
+<p>All operators, backends, and configurations settings supported in Hummingbird are registered here.</p>
+<p><strong>Supported Backends</strong>
+PyTorch</p>
+<p><strong>Supported Operators</strong>
+DecisionTreeClassifier,
+RandomForestClassifier,
+RandomForestRegressor,
+GradientBoostingClassifier,
+ExtraTreesClassifier,
+LGBMClassifier,
+LGBMRegressor,
+XGBClassifier,
+XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -35,199 +47,178 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Collection of utility functions used throughout Hummingbird.
+All operators, backends, and configurations settings supported in Hummingbird are registered here.
+
+**Supported Backends**
+PyTorch
+
+**Supported Operators**
+DecisionTreeClassifier,
+RandomForestClassifier,
+RandomForestRegressor,
+GradientBoostingClassifier,
+ExtraTreesClassifier,
+LGBMClassifier,
+LGBMRegressor,
+XGBClassifier,
+XGBRegressor
+
 &#34;&#34;&#34;
+from .exceptions import MissingConverter
+from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
 
-from distutils.version import LooseVersion
-import warnings
-
-from .exceptions import ConstantError
+from xgboost import XGBClassifier, XGBRegressor
+from lightgbm import LGBMClassifier, LGBMRegressor
 
 
-def torch_installed():
+def _build_sklearn_operator_list():
     &#34;&#34;&#34;
-    Checks that *PyTorch* is available.
+    Put all suported Sklearn operators on a list.
     &#34;&#34;&#34;
-    try:
-        import torch
+    if sklearn_installed():
+        # Tree-based models
+        from sklearn.ensemble import (
+            RandomForestClassifier,
+            RandomForestRegressor,
+            GradientBoostingClassifier,
+            ExtraTreesClassifier,
+        )
+        from sklearn.tree import DecisionTreeClassifier
 
-        return True
-    except ImportError:
-        return False
+        return [
+            # Tree-methods
+            DecisionTreeClassifier,
+            RandomForestClassifier,
+            RandomForestRegressor,
+            GradientBoostingClassifier,
+            ExtraTreesClassifier,
+        ]
+
+    return None
 
 
-def sklearn_installed():
+def _build_xgboost_operator_list():
     &#34;&#34;&#34;
-    Checks that *Sklearn* is available.
+    List all suported XGBoost (Sklearn API) operators.
     &#34;&#34;&#34;
-    try:
-        import sklearn
+    if xgboost_installed():
+        return [XGBClassifier, XGBRegressor]
 
-        return True
-    except ImportError:
-        return False
+    return None
 
 
-def lightgbm_installed():
+def _build_lightgbm_operator_list():
     &#34;&#34;&#34;
-    Checks that *LightGBM* is available.
+    List all suported LightGBM (Sklearn API) operators.
     &#34;&#34;&#34;
-    try:
-        import lightgbm
+    if lightgbm_installed:
+        return [LGBMClassifier, LGBMRegressor]
 
-        return True
-    except ImportError:
-        return False
+    return None
 
 
-def xgboost_installed():
+def _build_backend_map():
     &#34;&#34;&#34;
-    Checks that *XGBoost* is available.
+    The set of supported backends is defined here.
     &#34;&#34;&#34;
-    try:
-        import xgboost
-    except ImportError:
-        return False
-    from xgboost.core import _LIB
-
-    try:
-        _LIB.XGBoosterDumpModelEx
-    except AttributeError:
-        # The version is not recent enough even though it is version 0.6.
-        # You need to install xgboost from github and not from pypi.
-        return False
-    from xgboost import __version__
-
-    vers = LooseVersion(__version__)
-    allowed_min = LooseVersion(&#34;0.70&#34;)
-    allowed_max = LooseVersion(&#34;0.90&#34;)
-    if vers &lt; allowed_min or vers &gt; allowed_max:
-        warnings.warn(&#34;The converter works for xgboost &gt;= 0.7 and &lt;= 0.9. Different versions might not.&#34;)
-    return True
+    return {&#34;pytorch&#34;}
 
 
-class _Constants(object):
+def _build_sklearn_api_operator_name_map():
     &#34;&#34;&#34;
-    Class enabling the proper definition of constants.
+    Associate Sklearn with the operator class names.
+    If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     &#34;&#34;&#34;
+    return {k: &#34;Sklearn&#34; + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list if k is not None}
 
-    def __init__(self, constants, other_constants=None):
-        for constant in dir(constants):
-            if constant.isupper():
-                setattr(self, constant, getattr(constants, constant))
-        for constant in dir(other_constants):
-            if constant.isupper():
-                setattr(self, constant, getattr(other_constants, constant))
 
-    def __setattr__(self, name, value):
-        if name in self.__dict__:
-            raise ConstantError(&#34;Overwriting a constant is not allowed {}&#34;.format(name))
-        self.__dict__[name] = value</code></pre>
+def get_sklearn_api_operator_name(model_type):
+    &#34;&#34;&#34;
+    Get the operator name for the input model type in *scikit-learn API* format.
+
+    Args:
+        model_type: A scikit-learn model object (e.g., RandomForestClassifier)
+                    or an object with scikit-learn API (e.g., LightGBM)
+
+    Returns:
+        A string which stands for the type of the input model in the Hummingbird conversion framework
+    &#34;&#34;&#34;
+    if model_type not in sklearn_api_operator_name_map:
+        raise MissingConverter(&#34;Unable to find converter for model type {}.&#34;.format(model_type))
+    return sklearn_api_operator_name_map[model_type]
+
+
+# Supported operators.
+sklearn_operator_list = _build_sklearn_operator_list()
+xgb_operator_list = _build_xgboost_operator_list()
+lgbm_operator_list = _build_lightgbm_operator_list()
+sklearn_api_operator_name_map = _build_sklearn_api_operator_name_map()
+
+
+# Supported backends.
+backend_map = _build_backend_map()
+
+
+# Supported configurations settings accepted by Hummingbird are defined below.
+N_FEATURES = &#34;n_features&#34;
+&#34;&#34;&#34;Number of features expected in the input data.&#34;&#34;&#34;
+
+TREE_IMPLEMENTATION = &#34;tree_implementation&#34;
+&#34;&#34;&#34;Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav.&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-variables">Global variables</h2>
+<dl>
+<dt id="hummingbird.supported.N_FEATURES"><code class="name">var <span class="ident">N_FEATURES</span></code></dt>
+<dd>
+<div class="desc"><p>Number of features expected in the input data.</p></div>
+</dd>
+<dt id="hummingbird.supported.TREE_IMPLEMENTATION"><code class="name">var <span class="ident">TREE_IMPLEMENTATION</span></code></dt>
+<dd>
+<div class="desc"><p>Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav.</p></div>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird._utils.lightgbm_installed"><code class="name flex">
-<span>def <span class="ident">lightgbm_installed</span></span>(<span>)</span>
+<dt id="hummingbird.supported.get_sklearn_api_operator_name"><code class="name flex">
+<span>def <span class="ident">get_sklearn_api_operator_name</span></span>(<span>model_type)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Checks that <em>LightGBM</em> is available.</p></div>
+<div class="desc"><p>Get the operator name for the input model type in <em>scikit-learn API</em> format.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_type</code></strong></dt>
+<dd>A scikit-learn model object (e.g., RandomForestClassifier)
+or an object with scikit-learn API (e.g., LightGBM)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A string which stands for the type</code> of <code>the input model in the Hummingbird conversion framework</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def lightgbm_installed():
+<pre><code class="python">def get_sklearn_api_operator_name(model_type):
     &#34;&#34;&#34;
-    Checks that *LightGBM* is available.
-    &#34;&#34;&#34;
-    try:
-        import lightgbm
+    Get the operator name for the input model type in *scikit-learn API* format.
 
-        return True
-    except ImportError:
-        return False</code></pre>
-</details>
-</dd>
-<dt id="hummingbird._utils.sklearn_installed"><code class="name flex">
-<span>def <span class="ident">sklearn_installed</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Checks that <em>Sklearn</em> is available.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sklearn_installed():
-    &#34;&#34;&#34;
-    Checks that *Sklearn* is available.
-    &#34;&#34;&#34;
-    try:
-        import sklearn
+    Args:
+        model_type: A scikit-learn model object (e.g., RandomForestClassifier)
+                    or an object with scikit-learn API (e.g., LightGBM)
 
-        return True
-    except ImportError:
-        return False</code></pre>
-</details>
-</dd>
-<dt id="hummingbird._utils.torch_installed"><code class="name flex">
-<span>def <span class="ident">torch_installed</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Checks that <em>PyTorch</em> is available.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def torch_installed():
+    Returns:
+        A string which stands for the type of the input model in the Hummingbird conversion framework
     &#34;&#34;&#34;
-    Checks that *PyTorch* is available.
-    &#34;&#34;&#34;
-    try:
-        import torch
-
-        return True
-    except ImportError:
-        return False</code></pre>
-</details>
-</dd>
-<dt id="hummingbird._utils.xgboost_installed"><code class="name flex">
-<span>def <span class="ident">xgboost_installed</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Checks that <em>XGBoost</em> is available.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def xgboost_installed():
-    &#34;&#34;&#34;
-    Checks that *XGBoost* is available.
-    &#34;&#34;&#34;
-    try:
-        import xgboost
-    except ImportError:
-        return False
-    from xgboost.core import _LIB
-
-    try:
-        _LIB.XGBoosterDumpModelEx
-    except AttributeError:
-        # The version is not recent enough even though it is version 0.6.
-        # You need to install xgboost from github and not from pypi.
-        return False
-    from xgboost import __version__
-
-    vers = LooseVersion(__version__)
-    allowed_min = LooseVersion(&#34;0.70&#34;)
-    allowed_max = LooseVersion(&#34;0.90&#34;)
-    if vers &lt; allowed_min or vers &gt; allowed_max:
-        warnings.warn(&#34;The converter works for xgboost &gt;= 0.7 and &lt;= 0.9. Different versions might not.&#34;)
-    return True</code></pre>
+    if model_type not in sklearn_api_operator_name_map:
+        raise MissingConverter(&#34;Unable to find converter for model type {}.&#34;.format(model_type))
+    return sklearn_api_operator_name_map[model_type]</code></pre>
 </details>
 </dd>
 </dl>
@@ -251,12 +242,15 @@ class _Constants(object):
 <li><code><a title="hummingbird" href="index.html">hummingbird</a></code></li>
 </ul>
 </li>
+<li><h3><a href="#header-variables">Global variables</a></h3>
+<ul class="">
+<li><code><a title="hummingbird.supported.N_FEATURES" href="#hummingbird.supported.N_FEATURES">N_FEATURES</a></code></li>
+<li><code><a title="hummingbird.supported.TREE_IMPLEMENTATION" href="#hummingbird.supported.TREE_IMPLEMENTATION">TREE_IMPLEMENTATION</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird._utils.lightgbm_installed" href="#hummingbird._utils.lightgbm_installed">lightgbm_installed</a></code></li>
-<li><code><a title="hummingbird._utils.sklearn_installed" href="#hummingbird._utils.sklearn_installed">sklearn_installed</a></code></li>
-<li><code><a title="hummingbird._utils.torch_installed" href="#hummingbird._utils.torch_installed">torch_installed</a></code></li>
-<li><code><a title="hummingbird._utils.xgboost_installed" href="#hummingbird._utils.xgboost_installed">xgboost_installed</a></code></li>
+<li><code><a title="hummingbird.supported.get_sklearn_api_operator_name" href="#hummingbird.supported.get_sklearn_api_operator_name">get_sklearn_api_operator_name</a></code></li>
 </ul>
 </li>
 </ul>
