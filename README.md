@@ -3,6 +3,8 @@
 # Hummingbird
 
 ![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
+![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/master/graph/badge.svg)
+[![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Introduction
 *Hummingbird* converts trained traditional Machine Learning models into [PyTorch](https://pytorch.org/). Once in the PyTorch format, <!--you can further convert to [ONNX](https://github.com/onnx/onnx) or [TorchScript](https://pytorch.org/docs/stable/jit.html), and --> you can run the models on GPU for high performance native scoring. For full details, see [our papers](#documentation).
@@ -73,7 +75,7 @@ Also, see our [roadmap](wiki/Roadmap-for-Upcoming-Features-and-Support) of plann
 
 # Community
 
-Join our community! *gitter badge here*
+Join our community! [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
  For more formal enquiries, you can [contact us](mailto:hummingbird-dev@microsoft.com).
 
