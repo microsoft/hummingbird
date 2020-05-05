@@ -10,7 +10,7 @@
 
 *Hummingbird* is a library for accelerating inference (scoring/prediction) in traditional machine learning (ML) models. It  compiles traditional ML pipelines into tensor computations, which allows users to seamlessly leverage hardware acceleration without having to re-engineer their models. 
 
-You can use *Hummingbird* to convert your trained traditional ML models into [PyTorch](https://pytorch.org/). Currently we support a variety of tree-based classifiers and regressors.  These models include
+You can use *Hummingbird* to convert your trained traditional ML models into [PyTorch](https://pytorch.org/). Currently we support a variety of tree-based classifiers and regressors (list [here](https://github.com/microsoft/hummingbird/wiki/Supported-Operators)).  These models include
 [scikit-learn](https://scikit-learn.org/stable/) Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors.
 
 ## Installation
