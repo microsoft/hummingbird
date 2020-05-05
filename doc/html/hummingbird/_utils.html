@@ -56,6 +56,18 @@ def torch_installed():
         return False
 
 
+def sklearn_installed():
+    &#34;&#34;&#34;
+    Checks that *Sklearn* is available.
+    &#34;&#34;&#34;
+    try:
+        import sklearn
+
+        return True
+    except ImportError:
+        return False
+
+
 def lightgbm_installed():
     &#34;&#34;&#34;
     Checks that *LightGBM* is available.
@@ -135,6 +147,27 @@ class _Constants(object):
     &#34;&#34;&#34;
     try:
         import lightgbm
+
+        return True
+    except ImportError:
+        return False</code></pre>
+</details>
+</dd>
+<dt id="hummingbird._utils.sklearn_installed"><code class="name flex">
+<span>def <span class="ident">sklearn_installed</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks that <em>Sklearn</em> is available.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sklearn_installed():
+    &#34;&#34;&#34;
+    Checks that *Sklearn* is available.
+    &#34;&#34;&#34;
+    try:
+        import sklearn
 
         return True
     except ImportError:
@@ -221,6 +254,7 @@ class _Constants(object):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="hummingbird._utils.lightgbm_installed" href="#hummingbird._utils.lightgbm_installed">lightgbm_installed</a></code></li>
+<li><code><a title="hummingbird._utils.sklearn_installed" href="#hummingbird._utils.sklearn_installed">sklearn_installed</a></code></li>
 <li><code><a title="hummingbird._utils.torch_installed" href="#hummingbird._utils.torch_installed">torch_installed</a></code></li>
 <li><code><a title="hummingbird._utils.xgboost_installed" href="#hummingbird._utils.xgboost_installed">xgboost_installed</a></code></li>
 </ul>

@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.supported_configurations API documentation</title>
-<meta name="description" content="Supported configurations settings accepted by Hummingbird are defined here." />
+<title>hummingbird.supported API documentation</title>
+<meta name="description" content="All operators, backends, and configurations settings supported in Hummingbird are registered here …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,17 +13,29 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/supported_configurations.html">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/supported.html">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.supported_configurations</code></h1>
+<h1 class="title">Module <code>hummingbird.supported</code></h1>
 </header>
 <section id="section-intro">
-<p>Supported configurations settings accepted by Hummingbird are defined here.</p>
+<p>All operators, backends, and configurations settings supported in Hummingbird are registered here.</p>
+<p><strong>Supported Backends</strong>
+PyTorch</p>
+<p><strong>Supported Operators</strong>
+DecisionTreeClassifier,
+RandomForestClassifier,
+RandomForestRegressor,
+GradientBoostingClassifier,
+ExtraTreesClassifier,
+LGBMClassifier,
+LGBMRegressor,
+XGBClassifier,
+XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -35,9 +47,119 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Supported configurations settings accepted by Hummingbird are defined here.
-&#34;&#34;&#34;
+All operators, backends, and configurations settings supported in Hummingbird are registered here.
 
+**Supported Backends**
+PyTorch
+
+**Supported Operators**
+DecisionTreeClassifier,
+RandomForestClassifier,
+RandomForestRegressor,
+GradientBoostingClassifier,
+ExtraTreesClassifier,
+LGBMClassifier,
+LGBMRegressor,
+XGBClassifier,
+XGBRegressor
+
+&#34;&#34;&#34;
+from .exceptions import MissingConverter
+from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
+
+from xgboost import XGBClassifier, XGBRegressor
+from lightgbm import LGBMClassifier, LGBMRegressor
+
+
+def _build_sklearn_operator_list():
+    &#34;&#34;&#34;
+    Put all suported Sklearn operators on a list.
+    &#34;&#34;&#34;
+    if sklearn_installed():
+        # Tree-based models
+        from sklearn.ensemble import (
+            RandomForestClassifier,
+            RandomForestRegressor,
+            GradientBoostingClassifier,
+            ExtraTreesClassifier,
+        )
+        from sklearn.tree import DecisionTreeClassifier
+
+        return [
+            # Tree-methods
+            DecisionTreeClassifier,
+            RandomForestClassifier,
+            RandomForestRegressor,
+            GradientBoostingClassifier,
+            ExtraTreesClassifier,
+        ]
+
+    return None
+
+
+def _build_xgboost_operator_list():
+    &#34;&#34;&#34;
+    List all suported XGBoost (Sklearn API) operators.
+    &#34;&#34;&#34;
+    if xgboost_installed():
+        return [XGBClassifier, XGBRegressor]
+
+    return None
+
+
+def _build_lightgbm_operator_list():
+    &#34;&#34;&#34;
+    List all suported LightGBM (Sklearn API) operators.
+    &#34;&#34;&#34;
+    if lightgbm_installed:
+        return [LGBMClassifier, LGBMRegressor]
+
+    return None
+
+
+def _build_backend_map():
+    &#34;&#34;&#34;
+    The set of supported backends is defined here.
+    &#34;&#34;&#34;
+    return {&#34;pytorch&#34;}
+
+
+def _build_sklearn_api_operator_name_map():
+    &#34;&#34;&#34;
+    Associate Sklearn with the operator class names.
+    If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
+    &#34;&#34;&#34;
+    return {k: &#34;Sklearn&#34; + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list if k is not None}
+
+
+def get_sklearn_api_operator_name(model_type):
+    &#34;&#34;&#34;
+    Get the operator name for the input model type in *scikit-learn API* format.
+
+    Args:
+        model_type: A scikit-learn model object (e.g., RandomForestClassifier)
+                    or an object with scikit-learn API (e.g., LightGBM)
+
+    Returns:
+        A string which stands for the type of the input model in the Hummingbird conversion framework
+    &#34;&#34;&#34;
+    if model_type not in sklearn_api_operator_name_map:
+        raise MissingConverter(&#34;Unable to find converter for model type {}.&#34;.format(model_type))
+    return sklearn_api_operator_name_map[model_type]
+
+
+# Supported operators.
+sklearn_operator_list = _build_sklearn_operator_list()
+xgb_operator_list = _build_xgboost_operator_list()
+lgbm_operator_list = _build_lightgbm_operator_list()
+sklearn_api_operator_name_map = _build_sklearn_api_operator_name_map()
+
+
+# Supported backends.
+backend_map = _build_backend_map()
+
+
+# Supported configurations settings accepted by Hummingbird are defined below.
 N_FEATURES = &#34;n_features&#34;
 &#34;&#34;&#34;Number of features expected in the input data.&#34;&#34;&#34;
 
@@ -50,17 +172,56 @@ TREE_IMPLEMENTATION = &#34;tree_implementation&#34;
 <section>
 <h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
-<dt id="hummingbird.supported_configurations.N_FEATURES"><code class="name">var <span class="ident">N_FEATURES</span></code></dt>
+<dt id="hummingbird.supported.N_FEATURES"><code class="name">var <span class="ident">N_FEATURES</span></code></dt>
 <dd>
 <div class="desc"><p>Number of features expected in the input data.</p></div>
 </dd>
-<dt id="hummingbird.supported_configurations.TREE_IMPLEMENTATION"><code class="name">var <span class="ident">TREE_IMPLEMENTATION</span></code></dt>
+<dt id="hummingbird.supported.TREE_IMPLEMENTATION"><code class="name">var <span class="ident">TREE_IMPLEMENTATION</span></code></dt>
 <dd>
 <div class="desc"><p>Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav.</p></div>
 </dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="hummingbird.supported.get_sklearn_api_operator_name"><code class="name flex">
+<span>def <span class="ident">get_sklearn_api_operator_name</span></span>(<span>model_type)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the operator name for the input model type in <em>scikit-learn API</em> format.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_type</code></strong></dt>
+<dd>A scikit-learn model object (e.g., RandomForestClassifier)
+or an object with scikit-learn API (e.g., LightGBM)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A string which stands for the type</code> of <code>the input model in the Hummingbird conversion framework</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sklearn_api_operator_name(model_type):
+    &#34;&#34;&#34;
+    Get the operator name for the input model type in *scikit-learn API* format.
+
+    Args:
+        model_type: A scikit-learn model object (e.g., RandomForestClassifier)
+                    or an object with scikit-learn API (e.g., LightGBM)
+
+    Returns:
+        A string which stands for the type of the input model in the Hummingbird conversion framework
+    &#34;&#34;&#34;
+    if model_type not in sklearn_api_operator_name_map:
+        raise MissingConverter(&#34;Unable to find converter for model type {}.&#34;.format(model_type))
+    return sklearn_api_operator_name_map[model_type]</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 </section>
@@ -83,8 +244,13 @@ TREE_IMPLEMENTATION = &#34;tree_implementation&#34;
 </li>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.supported_configurations.N_FEATURES" href="#hummingbird.supported_configurations.N_FEATURES">N_FEATURES</a></code></li>
-<li><code><a title="hummingbird.supported_configurations.TREE_IMPLEMENTATION" href="#hummingbird.supported_configurations.TREE_IMPLEMENTATION">TREE_IMPLEMENTATION</a></code></li>
+<li><code><a title="hummingbird.supported.N_FEATURES" href="#hummingbird.supported.N_FEATURES">N_FEATURES</a></code></li>
+<li><code><a title="hummingbird.supported.TREE_IMPLEMENTATION" href="#hummingbird.supported.TREE_IMPLEMENTATION">TREE_IMPLEMENTATION</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="hummingbird.supported.get_sklearn_api_operator_name" href="#hummingbird.supported.get_sklearn_api_operator_name">get_sklearn_api_operator_name</a></code></li>
 </ul>
 </li>
 </ul>
