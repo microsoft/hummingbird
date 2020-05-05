@@ -6,6 +6,21 @@
 
 """
 All operators, backends, and configurations settings supported in Hummingbird are registered here.
+
+**Supported Backends**
+PyTorch
+
+**Supported Operators**
+DecisionTreeClassifier,
+RandomForestClassifier,
+RandomForestRegressor,
+GradientBoostingClassifier,
+ExtraTreesClassifier,
+LGBMClassifier,
+LGBMRegressor,
+XGBClassifier,
+XGBRegressor
+
 """
 from .exceptions import MissingConverter
 from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
