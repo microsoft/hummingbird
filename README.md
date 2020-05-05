@@ -7,10 +7,10 @@
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Introduction
-*Hummingbird* is a library for accelerating inference (scoring/prediction) in traditional machine learning (ML) models. It  compiles traditional ML pipelines into tensor computations, which allows users to seamlessly leverage hardware acceleration without having to re-engineer their models. 
+*Hummingbird* is a library for compiling trained traditional ML models into tensor computations. *Hummingbird* allows users to seamlessly leverage neural network frameworks (such as [PyTorch](https://pytorch.org/)) to accelererate traditional ML models. Thanks to *Hummingbird*, users can benefit of: (1) all the current and future optimizations implemented in neural network frameworks; (2) native hardware acceleration; (3) having a unique platform to support for both traditional and neural network models; and (4) without having to re-engineer their models.
 
-You can use *Hummingbird* to convert your trained traditional ML models into [PyTorch](https://pytorch.org/). Currently we support a variety of tree-based classifiers and regressors (list [here](https://github.com/microsoft/hummingbird/wiki/Supported-Operators)).  These models include
-[scikit-learn](https://scikit-learn.org/stable/) Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors.
+Currently, you can use *Hummingbird* to convert your trained traditional ML models into [PyTorch](https://pytorch.org/). *Hummingbird* [supports](https://github.com/microsoft/hummingbird/wiki/Supported-Operators) a variety of tree-based classifiers and regressors.  These models include
+[scikit-learn](https://scikit-learn.org/stable/) Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors. Support for other neural network frameworks (e.g., [ONNX](https://onnx.ai/), [TVM](https://docs.tvm.ai/), and models is on our [roadmap](wiki/Roadmap-for-Upcoming-Features-and-Support).
 
 ## Installation
 
