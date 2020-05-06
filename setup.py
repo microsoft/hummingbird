@@ -27,7 +27,7 @@ with open(README) as f:
 setup(
     name="hummingbird",
     version=version_str,
-    description="Convert scikit-learn models to PyTorch",
+    description="Convert trained traditional machine learning models into tensor computations",
     license="MIT License",
     author="Microsoft Corporation",
     author_email="hummingbird-dev@microsoft.com",
@@ -40,8 +40,7 @@ setup(
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
     ],
+    python_requires='>=3.6',
 )

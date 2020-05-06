@@ -7,8 +7,8 @@ import warnings
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 
-import hummingbird
-from hummingbird.exceptions import MissingBackend
+import hummingbird.ml
+from hummingbird.ml.exceptions import MissingBackend
 from tree_utils import gbdt_implementation_map
 
 

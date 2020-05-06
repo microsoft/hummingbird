@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from sklearn.ensemble import GradientBoostingClassifier
 
-import hummingbird
+import hummingbird.ml
 from tree_utils import gbdt_implementation_map
 
 

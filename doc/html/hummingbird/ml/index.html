@@ -4,8 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird API documentation</title>
-<meta name="description" content="Entrypoint for Hummingbird modules." />
+<title>hummingbird.ml API documentation</title>
+<meta name="description" content="Hummingbird.ml is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
+(e.g., one-hot encoding) into tensor …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,17 +14,19 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>hummingbird</code></h1>
+<h1 class="title">Module <code>hummingbird.ml</code></h1>
 </header>
 <section id="section-intro">
-<p>Entrypoint for Hummingbird modules.</p>
+<p>Hummingbird.ml is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
+(e.g., one-hot encoding) into tensor operations.
+Through Hummingbird, DNN frameworks can be used for both optimizing and enabling seamless hardware acceleration of traditional ML.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -35,24 +38,71 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Entrypoint for Hummingbird modules.
+Hummingbird.ml is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
+(e.g., one-hot encoding) into tensor operations.
+Through Hummingbird, DNN frameworks can be used for both optimizing and enabling seamless hardware acceleration of traditional ML.
 &#34;&#34;&#34;
 
-__version__ = &#34;0.0.1&#34;
-__author__ = &#34;Microsoft&#34;
-__producer__ = &#34;hummingbird&#34;
-__producer_version__ = __version__
-__domain__ = &#34;microsoft.gsl&#34;
-__model_version__ = 0</code></pre>
+
+# Register constants used for Hummingbird extra configs.
+from . import supported as hummingbird_constants
+from ._utils import _Constants
+
+# Add constants in scope.
+constants = _Constants(hummingbird_constants)
+
+
+# Add the converters in the Hummingbird scope.
+from .convert import _to_sklearn  # noqa: F401
+from .convert import _to_lightgbm  # noqa: F401
+from .convert import _to_xgboost  # noqa: F401
+
+
+# Set up the converter dispatcher.
+from .supported import sklearn_operator_list  # noqa: F401
+from .supported import xgb_operator_list  # noqa: F401
+from .supported import lgbm_operator_list  # noqa: F401
+
+
+for operator in sklearn_operator_list:
+    if operator is not None:
+        operator.to = _to_sklearn
+
+for operator in xgb_operator_list:
+    if operator is not None:
+        operator.to = _to_xgboost
+
+for operator in lgbm_operator_list:
+    if operator is not None:
+        operator.to = _to_lightgbm
+
+
+# Pdoc stuff.
+__pdoc__ = {}
+__pdoc__[&#34;hummingbird._container&#34;] = True
+__pdoc__[&#34;hummingbird._parse&#34;] = True
+__pdoc__[&#34;hummingbird._supported_operators&#34;] = True
+__pdoc__[&#34;hummingbird._utils&#34;] = True</code></pre>
 </details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="hummingbird.ml" href="ml/index.html">hummingbird.ml</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.convert" href="convert.html">hummingbird.ml.convert</a></code></dt>
 <dd>
-<div class="desc"><p>Hummingbird.ml is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
-(e.g., one-hot encoding) into tensor …</p></div>
+<div class="desc"><p>Hummingbird main (converters) API.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.exceptions" href="exceptions.html">hummingbird.ml.exceptions</a></code></dt>
+<dd>
+<div class="desc"><p>Common errors.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters" href="operator_converters/index.html">hummingbird.ml.operator_converters</a></code></dt>
+<dd>
+<div class="desc"><p>All operators converters are stored under this package.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.supported" href="supported.html">hummingbird.ml.supported</a></code></dt>
+<dd>
+<div class="desc"><p>All operators, backends, and configurations settings supported in Hummingbird are registered here …</p></div>
 </dd>
 </dl>
 </section>
@@ -74,9 +124,17 @@ __model_version__ = 0</code></pre>
 <ul></ul>
 </div>
 <ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="hummingbird" href="../index.html">hummingbird</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="hummingbird.ml" href="ml/index.html">hummingbird.ml</a></code></li>
+<li><code><a title="hummingbird.ml.convert" href="convert.html">hummingbird.ml.convert</a></code></li>
+<li><code><a title="hummingbird.ml.exceptions" href="exceptions.html">hummingbird.ml.exceptions</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters" href="operator_converters/index.html">hummingbird.ml.operator_converters</a></code></li>
+<li><code><a title="hummingbird.ml.supported" href="supported.html">hummingbird.ml.supported</a></code></li>
 </ul>
 </li>
 </ul>

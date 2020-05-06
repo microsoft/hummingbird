@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import lightgbm as lgb
 
-import hummingbird
+import hummingbird.ml
 from tree_utils import gbdt_implementation_map
 
 

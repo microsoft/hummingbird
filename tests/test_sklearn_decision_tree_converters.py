@@ -8,8 +8,8 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, ExtraTreesClassifier
 from sklearn.tree import DecisionTreeClassifier
 
-import hummingbird
-from hummingbird.exceptions import MissingConverter
+import hummingbird.ml
+from hummingbird.ml.exceptions import MissingConverter
 from tree_utils import dt_implementation_map
 
 
