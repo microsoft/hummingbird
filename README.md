@@ -72,7 +72,7 @@ For more details on the vision and on the technical details related to Hummingbi
 
 We welcome contributions! Please see the guide on [Contributing](CONTRIBUTING.md).
 
-Also, see our [roadmap](wiki/Roadmap-for-Upcoming-Features-and-Support) of planned features.
+Also, see our [roadmap](https://github.com/microsoft/hummingbird/wiki/Roadmap-for-Upcoming-Features-and-Support) of planned features.
 
 # Community
 
