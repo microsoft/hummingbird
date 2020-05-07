@@ -25,7 +25,7 @@ with open(README) as f:
         long_description = long_description[start_pos:]
 
 setup(
-    name="hummingbird",
+    name="hummingbird-ml",
     version=version_str,
     description="Convert trained traditional machine learning models into tensor computations",
     license="MIT License",
@@ -36,10 +36,10 @@ setup(
     include_package_data=True,
     install_requires=requirements,
     classifiers=[
-        "Development Status :: 1 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
+        "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
     ],
     python_requires='>=3.6',
