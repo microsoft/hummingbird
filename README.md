@@ -31,7 +31,7 @@ In general, Hummingbird syntax is very intuitive and minimal. To run your tradit
 
 ```python
 import numpy as np
-import lightgbm as lgb
+from sklearn.ensemble import RandomForestClassifier
 import hummingbird.ml
 
 # Create some random data for binary classification
@@ -39,12 +39,12 @@ num_classes = 2
 X = np.array(np.random.rand(100000, 28), dtype=np.float32)
 y = np.random.randint(num_classes, size=100000)
 
-# Create and train a model (LightGBM in this case)
-lgb_model = lgb.LGBMClassifier()
-lgb_model.fit(X, y)
+# Create and train a model (scikit-learn RandomForestClassifier in this case)
+skl_model = RandomForestClassifier(n_estimators=10, max_depth=10)
+skl_model.fit(X, y)
 
 # Use Hummingbird to convert the model to PyTorch
-model = lgb_model.to('pytorch')
+model = skl_model.to('pytorch')
 
 # Run predictions on CPU
 model.predict(X)
