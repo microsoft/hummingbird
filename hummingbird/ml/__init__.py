@@ -20,15 +20,15 @@ constants = _Constants(hummingbird_constants)
 
 
 # Add the converters in the Hummingbird scope.
-from .convert import _to_sklearn  # noqa: F401
-from .convert import _to_lightgbm  # noqa: F401
-from .convert import _to_xgboost  # noqa: F401
+from .convert import _to_sklearn  # noqa: F401, E402
+from .convert import _to_lightgbm  # noqa: F401, E402
+from .convert import _to_xgboost  # noqa: F401, E402
 
 
 # Set up the converter dispatcher.
-from .supported import sklearn_operator_list  # noqa: F401
-from .supported import xgb_operator_list  # noqa: F401
-from .supported import lgbm_operator_list  # noqa: F401
+from .supported import sklearn_operator_list  # noqa: F401, E402
+from .supported import xgb_operator_list  # noqa: F401, E402
+from .supported import lgbm_operator_list  # noqa: F401, E402
 
 
 for operator in sklearn_operator_list:
