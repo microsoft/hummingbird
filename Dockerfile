@@ -8,7 +8,7 @@ RUN pip3 -q install pip --upgrade
 RUN pip3 install hummingbird-ml
 
 # Install HB dev tools
-RUN pip3 install flake8 coverage autopep8 jupyter
+RUN pip3 install flake8 coverage autopep8 jupyter pre-commit
 
 # Jupyter
 EXPOSE 8888
@@ -21,6 +21,9 @@ USER jupyter
 
 # Pull repo to get notebooks
 RUN cd ~/ &&  git clone https://github.com/microsoft/hummingbird.git
+
+# Install precommit hooks
+RUN cd ~/hummingbird && pre-commit install
 
 # Set the container working directory to the user home folder
 WORKDIR /home/jupyter/hummingbird/notebooks
