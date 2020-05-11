@@ -38,7 +38,7 @@ git clone https://github.com/microsoft/hummingbird.git .
 pip install -e .
 ```
 
-We also provide a simple [Dockerfile](https://github.com/microsoft/hummingbird/blob/master/Dockerfile) that you can customize to your preferred development environment. This Dockerfile will create a Jupyter notebook environment and also install development tools such as `flake8` and `coverage`.
+We also provide a simple [Dockerfile](https://github.com/microsoft/hummingbird/blob/master/Dockerfile) that you can customize to your preferred development environment. This Dockerfile will create a Jupyter notebook environment and also install development tools such as `pre-commit`, `flake8` and `coverage`.
 ```
 docker build git://github.com/microsoft/hummingbird -t hb-jupy
 docker run -p 8888:8888 -it hb-jupy
