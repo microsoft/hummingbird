@@ -1,0 +1,4 @@
+{
+    "extensions": ["ms-python.python", "visualstudioexptteam.vscodeintellicode"],
+    "dockerFile": "Dockerfile"
+}
