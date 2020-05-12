@@ -11,12 +11,12 @@ from copy import deepcopy
 import numpy as np
 
 from onnxconverter_common.registration import get_converter
+from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 
-from ._container import PyTorchBackendModel
-from .exceptions import MissingConverter, MissingBackend
+from .exceptions import MissingBackend
 from ._parse import parse_sklearn_api_model
 from .supported import backend_map
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed, onnx_installed
 from . import constants
 
 # Invoke the registration of all our converters.
@@ -69,7 +69,7 @@ def convert_sklearn(model, test_input=None, extra_config={}):
         model: A scikit-learn model
         test_input: some input data used to trace the model execution
         extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
 
     Examples:
         >>> pytorch_model = convert_sklearn(sklearn_model)
@@ -80,13 +80,15 @@ def convert_sklearn(model, test_input=None, extra_config={}):
     assert model is not None
     assert torch_installed(), "To use Hummingbird you need to install torch."
 
+    from .ir_converters.topology import convert as topology_converter
+
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
     # We modify the scikit learn model during optimizations.
     model = deepcopy(model)
     topology = parse_sklearn_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = _convert_topology(topology, extra_config=extra_config)
+    hb_model = topology_converter(topology, extra_config=extra_config)
     return hb_model
 
 
@@ -100,7 +102,7 @@ def convert_lightgbm(model, test_input=None, extra_config={}):
         model: A LightGBM model (trained using the scikit-learn API)
         test_input: Some input data that will be used to trace the model execution
         extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
 
     Examples:
         >>> pytorch_model = convert_lightgbm(lgbm_model)
@@ -123,7 +125,7 @@ def convert_xgboost(model, test_input, extra_config={}):
         model: A XGBoost model (trained using the scikit-learn API)
         test_input: Some input data used to trace the model execution
         extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
 
     Examples:
         >>> pytorch_model = convert_xgboost(xgb_model, [], extra_config={"n_features":200})
@@ -155,39 +157,75 @@ def convert_xgboost(model, test_input, extra_config={}):
     return convert_sklearn(model, test_input, extra_config)
 
 
-def _convert_topology(topology, device=None, extra_config={}):
+def convert_onnxml(model, initial_types=None, input_names=None, output_names=None, test_data=None, extra_config={}):
     """
-    This function is used to convert a `onnxconverter_common.topology.Topology` object into a *PyTorch* model.
+    This function converts the specified [ONNX-ML] model into its [ONNX] counterpart.
+    The supported operators can be found at `hummingbird._supported_operators`.
+    [ONNX-ML]: https://scikit-learn.org/
+    [ONNX]: https://pytorch.org/
 
     Args:
-        topology: The `onnxconverter_common.topology.Topology` object that will be converted into Pytorch
-        device: Which device the translated model will be run on
-        extra_config: Extra configurations to be used by individual operator converters
+        model: A model containing ONNX-ML operators
+        initial_types: a python list where each element is a tuple of a input name and a `onnxmltools.convert.common.data_types`
+        input_names: a python list containig input names. Should be a subset of the input variables in the input ONNX-ML model.
+        output_names: a python list containing the output names expected from the translated model.
+                      Should be a subset of the output variables in the input ONNX-ML model.
+        test_data: some input data used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
+
+    Examples:
+        >>> onnx_model = convert_onnxml(onnx_ml_model, initial_types=[('input', FloatTensorType([1, 20])])
 
     Returns:
-        A *PyTorch* model
+        A model containing only *ONNX* operators. The mode is equivalent to the input *ONNX-ML* model
     """
-    assert topology is not None, "Cannot convert a Topology object of type None."
+    assert model is not None
+    assert torch_installed(), "To use Hummingbird you need to install torch."
+    assert onnx_installed(), "To use the onnxml converter you need to install onnx and onnxruntime."
+    assert (
+        test_data is not None or initial_types is not None
+    ), "Cannot generate test input data. Either pass some input data or the initial_types"
 
-    operator_map = {}
+    from .ir_converters.linked_node import convert as linked_node_converter
 
-    for operator in topology.topological_operator_iterator():
-        try:
-            converter = get_converter(operator.type)
-            operator_map[operator.full_name] = converter(operator, device, extra_config)
-        except ValueError:
-            raise MissingConverter(
-                "Unable to find converter for {} type {} with extra config: {}.".format(
-                    operator.type, type(getattr(operator, "raw_model", None)), extra_config
+    # Parse an ONNX-ML model into our internal data structure (i.e., LinkedNode)
+    input_names = input_names if input_names is not None else [in_.name for in_ in model.input]
+    inputs = [in_ for in_ in model.input if in_.name in input_names]
+
+    assert len(inputs) > 0, "Provided input name does not match with any model's input."
+    assert len(inputs) == 1, "Hummingbird currently do not support models with more than 1 input."
+    assert initial_types is None or len(initial_types) == 1, "len(initial_types) {} differs from len(inputs) {}.".format(
+        len(initial_types), len(inputs)
+    )
+
+    if output_names is None:
+        output_names = [] if model.output is None else [o_.name for o_ in model.output]
+
+    if test_data is None:
+        assert (
+            not initial_types[0][1].shape is None
+        ), "Cannot generate test input data. Initial_types do not contain shape information."
+        assert len(initial_types[0][1].shape) == 2, "Hummingbird currently support only inputs with len(shape) == 2."
+
+        from onnxmltools.convert.common.data_types import FloatTensorType, Int32TensorType
+
+        test_data = np.random.rand(initial_types[0][1].shape[0], initial_types[0][1].shape[1])
+        if type(initial_types[0][1]) is FloatTensorType:
+            test_data = np.array(test_data, dtype=np.float32)
+        elif type(initial_types[0][1]) is Int32TensorType:
+            test_data = np.array(test_data, dtype=np.int32)
+        else:
+            raise RuntimeError(
+                "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
+                    type(initial_types[0][1])
                 )
             )
-        except Exception as e:
-            raise e
 
-    pytorch_model = PyTorchBackendModel(
-        topology.raw_model.input_names, topology.raw_model.output_names, operator_map, topology, extra_config
-    ).eval()
+    onnx_ir = LinkedNode.build_from_onnx(
+        model.node, [], [in_.name for in_ in model.input], output_names, [init_ for init_ in model.initializer]
+    )
 
-    if device is not None:
-        pytorch_model = pytorch_model.to(device)
-    return pytorch_model
+    # Convert the input onnx_ir object into ONNX. The outcome is a model containing only ONNX operators.
+    onnx_model = linked_node_converter(onnx_ir, inputs, model.initializer, output_names, test_data, extra_config)
+    return onnx_model
