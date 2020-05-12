@@ -38,11 +38,13 @@ git clone https://github.com/microsoft/hummingbird.git .
 pip install -e .
 ```
 
-We also provide a simple [Dockerfile](https://github.com/microsoft/hummingbird/blob/master/Dockerfile) that you can customize to your preferred development environment. This Dockerfile will create a Jupyter notebook environment and also install development tools such as `pre-commit`, `flake8` and `coverage`.
+We also provide a simple [Dockerfile](https://github.com/microsoft/hummingbird/blob/master/Dockerfile) that you can customize to your preferred development environment. This Dockerfile will create a Jupyter notebook environment and also install development tools such as `pre-commit`, `flake8`, and `coverage`.
 ```
 docker build git://github.com/microsoft/hummingbird -t hb-jupy
 docker run -p 8888:8888 -it hb-jupy
 ```
+
+Alternatively, for a light-weight, web-based experience, we provide the configuration ([.devcontainer](https://github.com/microsoft/hummingbird/tree/master/.devcontainer)) for [Codespaces](https://online.visualstudio.com/environments).  You can read about that setup [here]( https://docs.microsoft.com/en-us/visualstudio/online/reference/configuring).
 
 #### Pre-commit
 This project uses [pre-commit](https://pre-commit.com/) hooks. Run  `pip install pre-commit` if you don't already have this in your machine. Afterward, run `pre-commit install` to install pre-commit into your git hooks.
