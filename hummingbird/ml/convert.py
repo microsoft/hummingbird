@@ -157,20 +157,31 @@ def convert_xgboost(model, test_input, extra_config={}):
     return convert_sklearn(model, test_input, extra_config)
 
 
-def convert_onnxml(model, initial_types=None, input_names=None, output_names=None, test_data=None, extra_config={}):
+def convert_onnxml(
+    model,
+    output_model_name=None,
+    initial_types=None,
+    input_names=None,
+    output_names=None,
+    test_data=None,
+    target_opset=9,
+    extra_config={},
+):
     """
     This function converts the specified [ONNX-ML] model into its [ONNX] counterpart.
-    The supported operators can be found at `hummingbird._supported_operators`.
+    The supported operators can be found at `hummingbird.ml.supported`.
     [ONNX-ML]: https://scikit-learn.org/
     [ONNX]: https://pytorch.org/
 
     Args:
         model: A model containing ONNX-ML operators
-        initial_types: a python list where each element is a tuple of a input name and a `onnxmltools.convert.common.data_types`
-        input_names: a python list containig input names. Should be a subset of the input variables in the input ONNX-ML model.
-        output_names: a python list containing the output names expected from the translated model.
+        output_model_name: The name of the ONNX model returned as output
+        initial_types: A python list where each element is a tuple of a input name and a `onnxmltools.convert.common.data_types`
+        input_names: A python list containig input names. Should be a subset of the input variables in the input ONNX-ML model.
+        output_names: A python list containing the output names expected from the translated model.
                       Should be a subset of the output variables in the input ONNX-ML model.
-        test_data: some input data used to trace the model execution
+        test_data: Some input data used to trace the model execution
+        target_opset: The opset to use for the generated ONNX model
         extra_config: Extra configurations to be used by the individual operator converters.
                       The set of supported extra configurations can be found at `hummingbird.ml.supported`
 

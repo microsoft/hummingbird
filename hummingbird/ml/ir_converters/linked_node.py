@@ -20,19 +20,28 @@ from ..supported import get_onnxml_api_operator_name
 from ..exceptions import MissingConverter
 
 
-# TODO: add comment
 def convert(
-    node_list,
-    input_tensors,
-    initializers,
-    output_names,
-    test_inputs,
-    output_model_name=None,
-    doc_string="",
-    target_opset=9,
-    extra_config={},
+    node_list, input_tensors, initializers, output_names, test_data, output_model_name=None, target_opset=9, extra_config={},
 ):
+    """
+    This function converts an input list of `onnxconverter_common.optimizer.LinkedNode`s model into a ONNX model.
+    The supported operators can be found at `hummingbird.ml.supported`.
 
+    Args:
+        node_list: A list of `onnxconverter_common.optimizer.LinkedNode`s representing a ONNX-ML model
+        input_tensors: The input tensors of the model
+        initializers: The initializers of the model
+        output_names: A python list containing the output names expected from the translated model.
+                      Should be a subset of the output variables in the input ONNX-ML model.
+        test_data: Some input data used to trace the model execution
+        output_model_name: The name of the ONNX model returned as output
+        target_opset: The opset to use for the generated ONNX model
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
+
+    Returns:
+        A model containing only *ONNX* operators.
+    """
     if output_model_name is None:
         output_model_name = "hummingbird-generated.onnx"
     onnx_model_name = output_model_name
@@ -76,7 +85,7 @@ def convert(
                 test_output_names = {node_.get_input_by_idx(i) for i in range(len(node_.input))}
                 if len(test_output_names) == 1 and next(iter(test_output_names)) == input_tensors[0].name:
                     # This is the first operator: use the input parameter.
-                    inputs = torch.from_numpy(test_inputs)
+                    inputs = torch.from_numpy(test_data)
                 else:
                     # We are in the middle of a graph: generate inputs using the part of the graph converted so far.
                     graph = helper.make_graph(
@@ -87,7 +96,7 @@ def convert(
                     assert len(session.get_inputs()) == 1
 
                     test_input_name = session.get_inputs()[0].name
-                    onnx_pred = session.run(list(test_output_names), {test_input_name: test_inputs})[0]
+                    onnx_pred = session.run(list(test_output_names), {test_input_name: test_data})[0]
                     inputs = torch.from_numpy(onnx_pred)
 
                 # Do tracing and export the ONNX model for the current operator.
@@ -116,62 +125,7 @@ def convert(
                 # Since each operator is exported into ONNX separately, we need to do some check about the naming
                 # since variable names can overlap across models.
                 # We start with the initializers
-                # TODO move in its own function
-                initializers = {}
-                for i in range(len(onnx_model.graph.initializer)):
-                    initializer_name = onnx_model.graph.initializer[i].name
-                    replace = False
-                    if initializer_name.isnumeric():
-                        if int(initializer_name) in variable_check:
-                            new_var_name = max(variable_check) + 1
-                            variable_check.add(new_var_name)
-                            new_var_name = str(new_var_name)
-                            replace = True
-                        else:
-                            variable_check.add(int(initializer_name))
-                    else:
-                        new_var_name = onnx_model.graph.initializer[i].name + node_.unique_name
-                        replace = True
-
-                    if replace:
-                        # Initializers are part of the input in our IR, rename those as well
-                        for converted_node in converted_model_nodes:
-                            if initializer_name in converted_node.input:
-                                converted_node.input[new_var_name] = new_var_name
-                                del converted_node.input[initializer_name]
-
-                                # Also origin can have initializers as input
-                                for j in range(len(converted_node.origin.input)):
-                                    if converted_node.origin.input[j] == initializer_name:
-                                        converted_node.origin.input[j] = new_var_name
-                                        initializers[new_var_name] = (alias + converted_node.unique_name, j)
-                        onnx_model.graph.initializer[i].name = new_var_name
-
-                # Then numeric variables.
-                # Non-numeric are ok since we explicitly set those.
-                for converted_node in _topological_sort(converted_model_nodes):
-                    for i in range(len(converted_node.output)):
-                        if converted_node.get_output_by_idx(i).isnumeric():
-                            # Only track numeric variables
-                            if int(converted_node.get_output_by_idx(i)) in variable_check:
-                                new_var_name = max(variable_check) + 1
-                                variable_check.add(new_var_name)
-
-                                # Make sure that successor operators get the updated variable name
-                                for succ_ in converted_node.successor:
-                                    for j in range(len(succ_.origin.input)):
-                                        if succ_.get_input_by_idx(j) == converted_node.get_output_by_idx(i) and not (
-                                            succ_.get_input_by_idx(j) in initializers
-                                            and initializers[succ_.get_input_by_idx(j)] == (alias + succ_.unique_name, j)
-                                        ):
-                                            del succ_.input[succ_.origin.input[j]]
-                                            succ_.input[str(new_var_name)] = str(new_var_name)
-                                            succ_.origin.input[j] = str(new_var_name)
-                                del converted_node.output[converted_node.origin.output[i]]
-                                converted_node.output[str(new_var_name)] = str(new_var_name)
-                                converted_node.origin.output[i] = str(new_var_name)
-                            else:
-                                variable_check.add(int(converted_node.origin.output[i]))
+                _check_and_rename_variables(onnx_model, converted_model_nodes, alias, variable_check)
 
                 # Add the newly generated nodes to the output.
                 for converted_node in _topological_sort(converted_model_nodes):
@@ -278,3 +232,65 @@ def _check_and_prepare_ir_graph_for_conversion(node_list, input_tensors, extra_c
                 input_names.add(out_)
 
     return output_node_list
+
+
+def _check_and_rename_variables(onnx_model, converted_model_nodes, alias, variable_check):
+    """
+    Method used to check that variable naming is consistent, i.e., two variables do not have the same name.
+    In case there is some clash, rename the latested added variable.
+    """
+    initializers = {}
+    for i in range(len(onnx_model.graph.initializer)):
+        initializer_name = onnx_model.graph.initializer[i].name
+        replace = False
+        if initializer_name.isnumeric():
+            if int(initializer_name) in variable_check:
+                new_var_name = max(variable_check) + 1
+                variable_check.add(new_var_name)
+                new_var_name = str(new_var_name)
+                replace = True
+            else:
+                variable_check.add(int(initializer_name))
+        else:
+            new_var_name = onnx_model.graph.initializer[i].name + alias
+            replace = True
+
+        if replace:
+            # Initializers are part of the input in our IR, rename those as well
+            for converted_node in converted_model_nodes:
+                if initializer_name in converted_node.input:
+                    converted_node.input[new_var_name] = new_var_name
+                    del converted_node.input[initializer_name]
+
+                    # Also origin can have initializers as input
+                    for j in range(len(converted_node.origin.input)):
+                        if converted_node.origin.input[j] == initializer_name:
+                            converted_node.origin.input[j] = new_var_name
+                            initializers[new_var_name] = (alias + converted_node.unique_name, j)
+            onnx_model.graph.initializer[i].name = new_var_name
+
+    # Then numeric variables.
+    # Non-numeric are ok since we explicitly set those.
+    for converted_node in _topological_sort(converted_model_nodes):
+        for i in range(len(converted_node.output)):
+            if converted_node.get_output_by_idx(i).isnumeric():
+                # Only track numeric variables
+                if int(converted_node.get_output_by_idx(i)) in variable_check:
+                    new_var_name = max(variable_check) + 1
+                    variable_check.add(new_var_name)
+
+                    # Make sure that successor operators get the updated variable name
+                    for succ_ in converted_node.successor:
+                        for j in range(len(succ_.origin.input)):
+                            if succ_.get_input_by_idx(j) == converted_node.get_output_by_idx(i) and not (
+                                succ_.get_input_by_idx(j) in initializers
+                                and initializers[succ_.get_input_by_idx(j)] == (alias + succ_.unique_name, j)
+                            ):
+                                del succ_.input[succ_.origin.input[j]]
+                                succ_.input[str(new_var_name)] = str(new_var_name)
+                                succ_.origin.input[j] = str(new_var_name)
+                    del converted_node.output[converted_node.origin.output[i]]
+                    converted_node.output[str(new_var_name)] = str(new_var_name)
+                    converted_node.origin.output[i] = str(new_var_name)
+                else:
+                    variable_check.add(int(converted_node.origin.output[i]))
