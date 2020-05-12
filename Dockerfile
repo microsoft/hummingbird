@@ -1,7 +1,14 @@
 # basic setup
-FROM ubuntu:latest
+FROM ubuntu:18.04
 RUN apt-get update && apt-get -y update
-RUN apt-get install -y build-essential python3.6 python3-pip python3-dev git
+RUN apt-get install -y build-essential python3.7 python3-pip git
+
+# Register the version in alternatives
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
+
+# Set python 3 as the default python
+RUN update-alternatives --set python /usr/bin/python3.7
+
 RUN pip3 -q install pip --upgrade
 
 # Install HB
