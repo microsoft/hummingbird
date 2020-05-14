@@ -1,4 +1,7 @@
 {
     "extensions": ["ms-python.python", "visualstudioexptteam.vscodeintellicode"],
-    "dockerFile": "Dockerfile"
+    "dockerFile": "Dockerfile",
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    }
 }
