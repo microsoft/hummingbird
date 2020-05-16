@@ -201,8 +201,9 @@ def convert_onnxml(
     from .ir_converters.linked_node import convert as linked_node_converter
 
     # Parse an ONNX-ML model into our internal data structure (i.e., LinkedNode)
-    input_names = input_names if input_names is not None else [in_.name for in_ in model.input]
-    inputs = [in_ for in_ in model.input if in_.name in input_names]
+    graph = model.graph
+    input_names = input_names if input_names is not None else [in_.name for in_ in graph.input]
+    inputs = [in_ for in_ in graph.input if in_.name in input_names]
 
     assert len(inputs) > 0, "Provided input name does not match with any model's input."
     assert len(inputs) == 1, "Hummingbird currently do not support models with more than 1 input."
@@ -211,7 +212,7 @@ def convert_onnxml(
     )
 
     if output_names is None:
-        output_names = [] if model.output is None else [o_.name for o_ in model.output]
+        output_names = [] if graph.output is None else [o_.name for o_ in graph.output]
 
     if test_data is None:
         assert (
@@ -219,7 +220,7 @@ def convert_onnxml(
         ), "Cannot generate test input data. Initial_types do not contain shape information."
         assert len(initial_types[0][1].shape) == 2, "Hummingbird currently support only inputs with len(shape) == 2."
 
-        from onnxmltools.convert.common.data_types import FloatTensorType, Int32TensorType
+        from onnxconverter_common.data_types import FloatTensorType, Int32TensorType
 
         test_data = np.random.rand(initial_types[0][1].shape[0], initial_types[0][1].shape[1])
         if type(initial_types[0][1]) is FloatTensorType:
@@ -234,9 +235,9 @@ def convert_onnxml(
             )
 
     onnx_ir = LinkedNode.build_from_onnx(
-        model.node, [], [in_.name for in_ in model.input], output_names, [init_ for init_ in model.initializer]
+        graph.node, [], [in_.name for in_ in graph.input], output_names, [init_ for init_ in graph.initializer]
     )
 
     # Convert the input onnx_ir object into ONNX. The outcome is a model containing only ONNX operators.
-    onnx_model = linked_node_converter(onnx_ir, inputs, model.initializer, output_names, test_data, extra_config)
+    onnx_model = linked_node_converter(onnx_ir, inputs, graph.initializer, output_names, test_data, extra_config)
     return onnx_model

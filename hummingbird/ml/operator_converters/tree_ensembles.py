@@ -13,7 +13,7 @@ from onnxconverter_common.registration import register_converter
 
 from . import constants
 from ._gbdt_commons import convert_gbdt_classifier_common
-from ._tree_commons import TreeParameters, get_parameters_for_tree_trav, convert_decision_ensemble_tree_common
+from ._tree_commons import TreeParameters, get_parameters_for_tree_trav_common, convert_decision_ensemble_tree_common
 
 
 def _get_tree_infos_from_onnx_ml_operator(model):
@@ -41,9 +41,9 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             threshold = attr.floats
         elif attr.name == "class_weights":
             values = attr.floats
-        elif attr.name == "class_nodeids" or "target_nodeids":
+        elif attr.name == "class_nodeids" or attr.name == "target_nodeids":
             target_node_ids = attr.ints
-        elif attr.name == "class_treeids" or "target_treeids":
+        elif attr.name == "class_treeids" or attr.name == "target_treeids":
             target_tree_ids = attr.ints
         elif attr.name == "nodes_treeids":
             tree_ids = attr.ints
@@ -97,7 +97,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
                 if t_features[j] == -1 and l_count < len(values):
                     t_values[j] = values[l_count]
                     l_count += 1
-            tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values)))
+            tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, 1)))
             prev_id = count
             i += 1
         count += 1
@@ -113,7 +113,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             l_count += 1
         else:
             t_values[i] = 0
-    tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values)))
+    tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, 1)))
     return tree_infos, classes, post_transform
 
 
@@ -121,7 +121,7 @@ def _dummy_get_parameter(tree_info):
     return tree_info
 
 
-def convert_onnx_tree_enseble_classifier(operator, device, extra_config):
+def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={}):
     assert operator is not None
 
     inputs = extra_config["inputs"]
@@ -142,7 +142,12 @@ def convert_onnx_tree_enseble_classifier(operator, device, extra_config):
     # Generate the model.
     if post_transform is None:
         return convert_decision_ensemble_tree_common(
-            tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav, n_features, classes, extra_config=extra_config
+            tree_infos,
+            _dummy_get_parameter,
+            get_parameters_for_tree_trav_common,
+            n_features,
+            classes,
+            extra_config=extra_config,
         )
     else:
         return convert_gbdt_classifier_common(
@@ -150,7 +155,7 @@ def convert_onnx_tree_enseble_classifier(operator, device, extra_config):
         )
 
 
-def convert_onnx_tree_enseble_regressor(operator, device, extra_config):
+def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     assert operator is not None
 
     n_features = classes = None
@@ -166,7 +171,7 @@ def convert_onnx_tree_enseble_regressor(operator, device, extra_config):
 
     # Generate the model.
     return convert_decision_ensemble_tree_common(
-        tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav, n_features, classes, extra_config=extra_config
+        tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, classes, extra_config=extra_config
     )
 
 
