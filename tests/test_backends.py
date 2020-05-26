@@ -9,7 +9,6 @@ from sklearn.ensemble import GradientBoostingClassifier
 
 import hummingbird.ml
 from hummingbird.ml.exceptions import MissingBackend
-from tree_utils import gbdt_implementation_map
 
 
 class TestBackends(unittest.TestCase):
@@ -25,11 +24,9 @@ class TestBackends(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = model.to('pYtOrCh')
+        hb_model = hummingbird.ml.convert(model, "pYtOrCh")
         self.assertTrue(hb_model is not None)
-        np.testing.assert_allclose(
-            model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06
-        )
+        np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Test not supported backends
     def test_unsupported_backend(self):
@@ -44,7 +41,7 @@ class TestBackends(unittest.TestCase):
         model.fit(X, y)
 
         # Test backends are not case sensitive
-        self.assertRaises(MissingBackend, model.to, 'scala')
+        self.assertRaises(MissingBackend, hummingbird.ml.convert, model, "scala")
 
 
 if __name__ == "__main__":
