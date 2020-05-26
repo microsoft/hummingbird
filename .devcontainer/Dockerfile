@@ -20,4 +20,4 @@ ENV DEBIAN_FRONTEND=dialog
 #
 # Install dependencies
 #
-RUN pip3 --disable-pip-version-check --no-cache-dir install flake8 coverage autopep8 pre-commit pylint
+RUN pip3 --disable-pip-version-check --no-cache-dir install flake8 coverage autopep8 pre-commit pylint pytest

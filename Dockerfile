@@ -15,7 +15,7 @@ RUN pip3 -q install pip --upgrade
 RUN pip3 install hummingbird-ml
 
 # Install HB dev tools
-RUN pip3 install flake8 coverage autopep8 jupyter pre-commit
+RUN pip3 install flake8 coverage autopep8 jupyter pre-commit pytest
 
 # Jupyter
 EXPOSE 8888
