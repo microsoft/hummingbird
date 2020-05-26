@@ -135,10 +135,11 @@ def get_onnxml_api_operator_name(model_type):
         model_type: A ONNX-ML model object (e.g., TreeEnsembleClassifier)
 
     Returns:
-        A string which stands for the type of the input model in the Hummingbird conversion framework
+        A string which stands for the type of the input model in the Hummingbird conversion framework.
+        None if the model_type is not supported
     """
     if model_type not in onnxml_api_operator_name_map:
-        raise MissingConverter("Unable to find converter for model type {}.".format(model_type))
+        return None
     return onnxml_api_operator_name_map[model_type]
 
 

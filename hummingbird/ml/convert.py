@@ -239,5 +239,7 @@ def convert_onnxml(
     )
 
     # Convert the input onnx_ir object into ONNX. The outcome is a model containing only ONNX operators.
-    onnx_model = linked_node_converter(onnx_ir, inputs, graph.initializer, output_names, test_data, extra_config)
+    onnx_model = linked_node_converter(
+        onnx_ir, inputs, graph.initializer, output_names, test_data, output_model_name, target_opset, extra_config
+    )
     return onnx_model

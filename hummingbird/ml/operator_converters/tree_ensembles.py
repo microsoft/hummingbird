@@ -18,17 +18,9 @@ from ._tree_commons import TreeParameters, get_parameters_for_tree_trav_common, 
 
 def _get_tree_infos_from_onnx_ml_operator(model):
     tree_infos = []
-    left = []
-    right = []
-    features = []
-    values = []
-    threshold = []
-    tree_ids = []
-    classes = []
-    modes = []
-    target_node_ids = []
-    target_tree_ids = []
-    post_transform = ""
+    left = right = features = values = threshold = None
+    tree_ids = target_node_ids = target_tree_ids = modes = None
+    classes = post_transform = None
 
     for attr in model.origin.attribute:
         if attr.name == "nodes_falsenodeids":
@@ -39,7 +31,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             features = attr.ints
         elif attr.name == "nodes_values":
             threshold = attr.floats
-        elif attr.name == "class_weights":
+        elif attr.name == "class_weights" or attr.name == "target_weights":
             values = attr.floats
         elif attr.name == "class_nodeids" or attr.name == "target_nodeids":
             target_node_ids = attr.ints
@@ -85,7 +77,6 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             if modes[n] == b"LEAF":
                 left[n] = -1
                 right[n] = -1
-                features[n] = -1
                 threshold[n] = -1
         else:
             t_left = left[prev_id:count]
@@ -94,7 +85,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             t_threshold = threshold[prev_id:count]
             t_values = [0] * len(t_left)
             for j in range(len(t_left)):
-                if t_features[j] == -1 and l_count < len(values):
+                if t_threshold[j] == -1 and l_count < len(values):
                     t_values[j] = values[l_count]
                     l_count += 1
             tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, 1)))
@@ -108,7 +99,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
     t_threshold = threshold[prev_id:count]
     t_values = [0] * len(t_left)
     for i in range(len(t_left)):
-        if t_features[i] == -1 and l_count < len(values):
+        if t_threshold[i] == -1 and l_count < len(values):
             t_values[i] = values[l_count]
             l_count += 1
         else:
@@ -158,7 +149,7 @@ def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={})
 def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     assert operator is not None
 
-    n_features = classes = None
+    n_features = None
     inputs = extra_config["inputs"]
 
     assert operator.get_input_by_idx(0) in inputs
@@ -167,11 +158,11 @@ def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     n_features = inputs[operator.get_input_by_idx(0)].type.tensor_type.shape.dim[1].dim_value
 
     # Get tree informations from the operator.
-    tree_infos, classes, post_transform = _get_tree_infos_from_onnx_ml_operator(operator)
+    tree_infos, _, _ = _get_tree_infos_from_onnx_ml_operator(operator)
 
     # Generate the model.
     return convert_decision_ensemble_tree_common(
-        tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, classes, extra_config=extra_config
+        tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, extra_config=extra_config
     )
 
 
