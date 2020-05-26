@@ -23,7 +23,9 @@ class TestXGBoostConverter(unittest.TestCase):
             for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
                 model.fit(X, y)
 
-                pytorch_model = model.to('pytorch', X[0:1], extra_config={"tree_implementation": extra_config_param})
+                pytorch_model = hummingbird.ml.convert(
+                    model, "pytorch", X[0:1], extra_config={"tree_implementation": extra_config_param}
+                )
                 self.assertTrue(pytorch_model is not None)
                 self.assertTrue(
                     str(type(list(pytorch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
@@ -39,11 +41,9 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            pytorch_model = model.to('pytorch', [], extra_config=extra_config)
+            pytorch_model = hummingbird.ml.convert(model, "pytorch", [], extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(
-                model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06
-            )
+            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Binary classifier
     def test_xgb_binary_classifier_converter(self):
@@ -86,11 +86,9 @@ class TestXGBoostConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            pytorch_model = model.to('pytorch', X[0:1], extra_config=extra_config)
+            pytorch_model = hummingbird.ml.convert(model, "pytorch", X[0:1], extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(
-                model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06
-            )
+            np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Regressor
     def test_xgb_binary_regressor_converter(self):
@@ -119,11 +117,11 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            pytorch_model = model.to('pytorch', [], extra_config={"tree_implementation": extra_config_param})
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(
-                model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06
+            pytorch_model = hummingbird.ml.convert(
+                model, "pytorch", [], extra_config={"tree_implementation": extra_config_param}
             )
+            self.assertTrue(pytorch_model is not None)
+            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":
