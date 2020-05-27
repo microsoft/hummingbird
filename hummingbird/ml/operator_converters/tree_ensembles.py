@@ -12,7 +12,7 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 
 from . import constants
-from ._gbdt_commons import convert_gbdt_classifier_common
+from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
 from ._tree_commons import TreeParameters, get_parameters_for_tree_trav_common, convert_decision_ensemble_tree_common
 
 
@@ -128,8 +128,6 @@ def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={})
     # if(n_classes > 2 and post_transform is not None):
     #     trees = [trees[i * n_classes + j] for j in range(n_classes) for i in range(len(trees)//n_classes)]
 
-    # extra_config['compute_proba'] = False
-
     # Generate the model.
     if post_transform is None:
         return convert_decision_ensemble_tree_common(
@@ -161,9 +159,7 @@ def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     tree_infos, _, _ = _get_tree_infos_from_onnx_ml_operator(operator)
 
     # Generate the model.
-    return convert_decision_ensemble_tree_common(
-        tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, extra_config=extra_config
-    )
+    return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)
 
 
 register_converter("ONNXMLTreeEnsembleClassifier", convert_onnx_tree_enseble_classifier)

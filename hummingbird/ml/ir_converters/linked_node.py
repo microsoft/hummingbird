@@ -9,6 +9,7 @@ Converters for LinkedNode IR are stored in this file.
 """
 
 import os
+from uuid import uuid4
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 from onnxconverter_common.registration import get_converter
 import onnxruntime as ort
@@ -43,7 +44,7 @@ def convert(
         A model containing only *ONNX* operators.
     """
     if output_model_name is None:
-        output_model_name = "hummingbird-generated.onnx"
+        output_model_name = str(uuid4().hex) + ".onnx"
     onnx_model_name = output_model_name
     # Container for the output IR operators. We will be using this to generate the final ONNX model.
     output_onnx_ir = []
