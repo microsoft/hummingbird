@@ -48,7 +48,7 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
                       The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
     Examples:
-        >>> pytorch_model = convert_sklearn(sklearn_model)
+        >>> pytorch_model = _convert_sklearn(sklearn_model)
 
     Returns:
         A model implemented in *PyTorch*, which is equivalent to the input *scikit-learn* model
@@ -79,7 +79,7 @@ def _convert_lightgbm(model, test_input=None, extra_config={}):
                       The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
     Examples:
-        >>> pytorch_model = convert_lightgbm(lgbm_model)
+        >>> pytorch_model = _convert_lightgbm(lgbm_model)
 
     Returns:
         A *PyTorch* model which is equivalent to the input *LightGBM* model
@@ -102,7 +102,7 @@ def _convert_xgboost(model, test_input, extra_config={}):
                       The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
     Examples:
-        >>> pytorch_model = convert_xgboost(xgb_model, [], extra_config={"n_features":200})
+        >>> pytorch_model = _convert_xgboost(xgb_model, [], extra_config={"n_features":200})
 
     Returns:
         A *PyTorch* model which is equivalent to the input *XGBoost* model
@@ -170,6 +170,28 @@ def _convert_topology(topology, device=None, extra_config={}):
 
 
 def convert(model, backend, test_input=None, extra_config={}):
+    """
+    This function converts the specified input *model* into an implementation targeting *backend*.
+    *Convert* supports [Sklearn], [LightGBM] and [XGBoost] models.
+    For *LightGBM* and *XGBoost currently only the Sklarn API is supported.
+    The detailed list of models and backends can be found at `hummingbird.supported`.
+    [Sklearn]: https://scikit-learn.org/
+    [LightGBM]: https://lightgbm.readthedocs.io/
+    [XGBoost]: https://xgboost.readthedocs.io/
+
+    Args:
+        model: An input model
+        backend: The target for the conversion
+        test_input: some input data used to trace the model execution
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
+
+    Examples:
+        >>> pytorch_model = convert(sklearn_model,`pytorch`)
+
+    Returns:
+        A model implemented in *backend*, which is equivalent to the input model
+    """
     _supported_backend_check(backend)
 
     if type(model) in xgb_operator_list:
