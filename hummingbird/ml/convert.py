@@ -31,7 +31,7 @@ def _supported_backend_check(backend):
     """
     Function used to check whether the specified backend is supported or not.
     """
-    if not backend.lower() in backends:
+    if backend not in backends:
         raise MissingBackend("Backend: {}".format(backend))
 
 
@@ -236,9 +236,10 @@ def convert(model, backend, test_input=None, extra_config={}):
     Returns:
         A model implemented in *backend*, which is equivalent to the input model
     """
-    _supported_backend_check(backend)
+    assert model is not None
 
-    import onnx
+    backend = backend.lower()
+    _supported_backend_check(backend)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, test_input, extra_config)
@@ -247,6 +248,11 @@ def convert(model, backend, test_input=None, extra_config={}):
         return _convert_lightgbm(model, test_input, extra_config)
 
     if "onnx" in model.__module__ and "graph" in dir(model):
+        assert onnx_installed()
+        import onnx
+
+        if not backend == onnx.__name__:
+            raise RuntimeError("Hummingbird currently support conversion of ONNX(-ML) models onyl into ONNX.")
         return _convert_onnxml(model, test_input, extra_config)
 
     return _convert_sklearn(model, test_input, extra_config)
