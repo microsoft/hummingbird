@@ -142,25 +142,25 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         )
         self._test_regressor(X, model)
 
-    # def _test_lgbm_onnxml_model_binary(self):
-    #     self.n_features = 28
-    #     self.n_total = 1000
-    #     self.X = np.random.rand(self.n_total,self.n_features)
-    #     self.X = np.array(self.X, dtype=np.float32)
-    #     self.y = np.random.randint(2, size=self.n_total)
+    def _test_lgbm_onnxml_model_binary(self):
+        self.n_features = 28
+        self.n_total = 1000
+        self.X = np.random.rand(self.n_total, self.n_features)
+        self.X = np.array(self.X, dtype=np.float32)
+        self.y = np.random.randint(2, size=self.n_total)
 
-    #     # Create LightGBM model
-    #     model = lgb.LGBMClassifier()
-    #     model.fit(self.X, self.y)
-    #     _test_classifier(self.X, model)
+        # Create LightGBM model
+        model = lgb.LGBMClassifier()
+        model.fit(self.X, self.y)
+        self._test_classifier(self.X, model)
 
-    # def test_lightgbm_classifier(self):
-    #     model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
-    #     X = [[0, 1], [1, 1], [2, 0]]
-    #     X = np.array(X, dtype=np.float32)
-    #     y = [0, 1, 0]
-    #     model.fit(X, y)
-    #     _test_classifier(X, model)
+    def test_lightgbm_classifier(self):
+        model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = [0, 1, 0]
+        model.fit(X, y)
+        self._test_classifier(X, model)
 
     # def test_lightgbm_classifier_zipmap(self):
     #     X = [[0, 1], [1, 1], [2, 0], [1, 2]]
@@ -168,7 +168,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     #     y = [0, 1, 0, 1]
     #     model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
     #     model.fit(X, y)
-    #     _test_classifier(X, model)
+    #     self._test_classifier(X, model)
 
     # def test_lightgbm_booster_classifier(self):
     #     X = [[0, 1], [1, 1], [2, 0], [1, 2]]
@@ -178,7 +178,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     #     model = lgb.train({'boosting_type': 'gbdt', 'objective': 'binary',
     #                             'n_estimators': 3, 'min_child_samples': 1},
     #                            data)
-    #     _test_classifier(X, model)
+    #     self._test_classifier(X, model)
 
     # def test_lightgbm_booster_classifier_zipmap(self):
     #     X = [[0, 1], [1, 1], [2, 0], [1, 2]]
@@ -188,7 +188,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     #     model = lgb.train({'boosting_type': 'gbdt', 'objective': 'binary',
     #                             'n_estimators': 3, 'min_child_samples': 1},
     #                            data)
-    #     _test_classifier(X, model)
+    #     self._test_classifier(X, model)
 
     # def _test_lgbm_onnxml_model_multi(self):
     #     self.n_features = 28
@@ -200,7 +200,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     #     # Create LightGBM model
     #     model = lgb.LGBMClassifier()
     #     model.fit(self.X, self.y)
-    #     _test_classifier(self.X, model)
+    #     self._test_classifier(self.X, model)
 
     # def test_lightgbm_classifier_multi(self):
     #     model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
@@ -208,7 +208,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     #     X = np.array(X, dtype=np.float32)
     #     y = [0, 1, 2, 1, 1, 2]
     #     model.fit(X, y)
-    #     _test_classifier(X, model)
+    #     self._test_classifier(X, model)
 
     # def test_lightgbm_booster_multi_classifier(self):
     #     X = [[0, 1], [1, 1], [2, 0], [1, 2], [-1, 2], [1, -2]]
@@ -218,7 +218,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     #     model = lgb.train({'boosting_type': 'gbdt', 'objective': 'multiclass',
     #                             'n_estimators': 3, 'min_child_samples': 1, 'num_class': 3},
     #                            data)
-    #     _test_classifier(X, model)
+    #     self._test_classifier(X, model)
 
 
 if __name__ == "__main__":

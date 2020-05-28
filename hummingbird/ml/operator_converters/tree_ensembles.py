@@ -125,23 +125,9 @@ def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={})
 
     # Get tree informations from the operator
     tree_infos, classes, post_transform = _get_tree_infos_from_onnx_ml_operator(operator)
-    # if(n_classes > 2 and post_transform is not None):
-    #     trees = [trees[i * n_classes + j] for j in range(n_classes) for i in range(len(trees)//n_classes)]
 
     # Generate the model.
-    if post_transform is None:
-        return convert_decision_ensemble_tree_common(
-            tree_infos,
-            _dummy_get_parameter,
-            get_parameters_for_tree_trav_common,
-            n_features,
-            classes,
-            extra_config=extra_config,
-        )
-    else:
-        return convert_gbdt_classifier_common(
-            tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config
-        )
+    return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)
 
 
 def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):

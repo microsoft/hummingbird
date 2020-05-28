@@ -27,12 +27,39 @@ from .supported import xgb_operator_list  # noqa
 from .supported import lgbm_operator_list  # noqa
 
 
+def _is_onnx_model(model):
+    """
+    Function returning whether the input model is an ONNX model or not.
+    """
+    return "onnx" in model.__module__ and "graph" in dir(model)
+
+
 def _supported_backend_check(backend):
     """
     Function used to check whether the specified backend is supported or not.
     """
     if backend not in backends:
         raise MissingBackend("Backend: {}".format(backend))
+
+
+def _supported_model_format_backend_mapping_check(model, backend):
+    """
+    Function used to check whether the specified backend/input model format is supported or not.
+    """
+    if _is_onnx_model(model):
+        assert onnx_installed()
+        import onnx
+
+        if not backend == onnx.__name__:
+            raise RuntimeError("Hummingbird currently support conversion of ONNX(-ML) models only into ONNX.")
+    else:
+        assert torch_installed()
+        import torch
+
+        if not backend == torch.__name__:
+            raise RuntimeError(
+                "Hummingbird currently support conversion of XGBoost / LighGBM / Sklearn models only into PyTorch."
+            )
 
 
 def _convert_sklearn(model, test_input=None, extra_config={}):
@@ -231,7 +258,7 @@ def convert(model, backend, test_input=None, extra_config={}):
                       The set of supported extra configurations can be found at `hummingbird.supported_configurations`
 
     Examples:
-        >>> pytorch_model = convert(sklearn_model,`pytorch`)
+        >>> pytorch_model = convert(sklearn_model,`torch`)
 
     Returns:
         A model implemented in *backend*, which is equivalent to the input model
@@ -240,6 +267,7 @@ def convert(model, backend, test_input=None, extra_config={}):
 
     backend = backend.lower()
     _supported_backend_check(backend)
+    _supported_model_format_backend_mapping_check(model, backend)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, test_input, extra_config)
@@ -247,12 +275,7 @@ def convert(model, backend, test_input=None, extra_config={}):
     if type(model) in lgbm_operator_list:
         return _convert_lightgbm(model, test_input, extra_config)
 
-    if "onnx" in model.__module__ and "graph" in dir(model):
-        assert onnx_installed()
-        import onnx
-
-        if not backend == onnx.__name__:
-            raise RuntimeError("Hummingbird currently support conversion of ONNX(-ML) models onyl into ONNX.")
+    if _is_onnx_model:
         return _convert_onnxml(model, test_input, extra_config)
 
     return _convert_sklearn(model, test_input, extra_config)
