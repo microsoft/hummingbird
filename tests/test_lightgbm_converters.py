@@ -23,10 +23,10 @@ class TestLGBMConverter(unittest.TestCase):
             for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
                 model.fit(X, y)
 
-                pytorch_model = model.to('pytorch', extra_config={"tree_implementation": extra_config_param})
-                self.assertTrue(pytorch_model is not None)
+                torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
+                self.assertTrue(torch_model is not None)
                 self.assertTrue(
-                    str(type(list(pytorch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
+                    str(type(list(torch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
                 )
 
     def _run_lgbm_classifier_converter(self, num_classes, extra_config={}):
@@ -39,11 +39,9 @@ class TestLGBMConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            pytorch_model = model.to('pytorch', extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(
-                model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06
-            )
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Binary classifier
     def test_lgbm_binary_classifier_converter(self):
@@ -86,11 +84,9 @@ class TestLGBMConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            pytorch_model = model.to('pytorch', extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(
-                model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06
-            )
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Regressor
     def test_lgbm_binary_regressor_converter(self):

@@ -53,28 +53,7 @@ constants = _Constants(hummingbird_constants)
 
 
 # Add the converters in the Hummingbird scope.
-from .convert import _to_sklearn  # noqa: F401
-from .convert import _to_lightgbm  # noqa: F401
-from .convert import _to_xgboost  # noqa: F401
-
-
-# Set up the converter dispatcher.
-from .supported import sklearn_operator_list  # noqa: F401
-from .supported import xgb_operator_list  # noqa: F401
-from .supported import lgbm_operator_list  # noqa: F401
-
-
-for operator in sklearn_operator_list:
-    if operator is not None:
-        operator.to = _to_sklearn
-
-for operator in xgb_operator_list:
-    if operator is not None:
-        operator.to = _to_xgboost
-
-for operator in lgbm_operator_list:
-    if operator is not None:
-        operator.to = _to_lightgbm
+from .convert import convert  # noqa: F401, E402
 
 
 # Pdoc stuff.
@@ -115,8 +94,7 @@ __pdoc__[&#34;hummingbird._utils&#34;] = True</code></pre>
 </article>
 <nav id="sidebar">
 <header>
-<a class="homelink" rel="home" title="Hummingbird Home" href="https://github.com/microsoft/hummingbird">
-<img src="https://i.imgur.com/0pp9lMS.png?1" alt=""> Hummingbird
+<a class="homelink" rel="home" title="Hummingbird Home" href="https://github.com/microsoft/hummingbird"> Hummingbird
 </a>
 </header>
 <h1>Index</h1>

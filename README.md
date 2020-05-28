@@ -1,9 +1,7 @@
-[![](https://i.imgur.com/0pp9lMS.png?1)](https://github.com/microsoft/hummingbird/)
-
 # Hummingbird
 
 ![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
-![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/master/graph/badge.svg)
+[![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/master/graph/badge.svg)](https://codecov.io/github/microsoft/hummingbird?branch=master)
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Introduction
@@ -14,12 +12,9 @@ Currently, you can use *Hummingbird* to convert your trained traditional ML mode
 
 ## Installation
 
-Hummingbird was tested on Python 3.6. and 3.7 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
+Hummingbird was tested on Python >= 3.6 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
 ```
-mkdir hummingbird
-cd hummingbird
-git clone https://github.com/microsoft/hummingbird.git .
-python setup.py install
+pip install hummingbird-ml
 ```
 
 
@@ -34,7 +29,7 @@ In general, Hummingbird syntax is very intuitive and minimal. To run your tradit
 
 ```python
 import numpy as np
-import lightgbm as lgb
+from sklearn.ensemble import RandomForestClassifier
 import hummingbird.ml
 
 # Create some random data for binary classification
@@ -42,12 +37,12 @@ num_classes = 2
 X = np.array(np.random.rand(100000, 28), dtype=np.float32)
 y = np.random.randint(num_classes, size=100000)
 
-# Create and train a model (LightGBM in this case)
-lgb_model = lgb.LGBMClassifier()
-lgb_model.fit(X, y)
+# Create and train a model (scikit-learn RandomForestClassifier in this case)
+skl_model = RandomForestClassifier(n_estimators=10, max_depth=10)
+skl_model.fit(X, y)
 
 # Use Hummingbird to convert the model to PyTorch
-model = lgb_model.to('pytorch')
+model = skl_model.to('pytorch')
 
 # Run predictions on CPU
 model.predict(X)

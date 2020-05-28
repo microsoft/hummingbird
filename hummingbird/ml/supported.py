@@ -9,6 +9,7 @@ All operators, backends, and configurations settings supported in Hummingbird ar
 
 **Supported Backends**
 PyTorch
+ONNX
 
 **Supported Operators**
 DecisionTreeClassifier,
@@ -19,14 +20,13 @@ ExtraTreesClassifier,
 LGBMClassifier,
 LGBMRegressor,
 XGBClassifier,
-XGBRegressor
+XGBRegressor,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor
 
 """
 from .exceptions import MissingConverter
-from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed, onnx_installed
-
-from xgboost import XGBClassifier, XGBRegressor
-from lightgbm import LGBMClassifier, LGBMRegressor
+from ._utils import torch_installed, sklearn_installed, lightgbm_installed, xgboost_installed, onnx_installed
 
 
 def _build_sklearn_operator_list():
@@ -60,6 +60,8 @@ def _build_xgboost_operator_list():
     List all suported XGBoost (Sklearn API) operators.
     """
     if xgboost_installed():
+        from xgboost import XGBClassifier, XGBRegressor
+
         return [XGBClassifier, XGBRegressor]
 
     return None
@@ -70,6 +72,8 @@ def _build_lightgbm_operator_list():
     List all suported LightGBM (Sklearn API) operators.
     """
     if lightgbm_installed():
+        from lightgbm import LGBMClassifier, LGBMRegressor
+
         return [LGBMClassifier, LGBMRegressor]
 
     return None
@@ -92,7 +96,19 @@ def _build_backend_map():
     """
     The set of supported backends is defined here.
     """
-    return {"pytorch"}
+    backends = set()
+
+    if torch_installed():
+        import torch
+
+        backends.add(torch.__name__)
+
+    if onnx_installed():
+        import onnx
+
+        backends.add(onnx.__name__)
+
+    return backends
 
 
 def _build_sklearn_api_operator_name_map():
@@ -154,7 +170,7 @@ onnxml_api_operator_name_map = _build_onnxml_api_operator_name_map()
 
 
 # Supported backends.
-backend_map = _build_backend_map()
+backends = _build_backend_map()
 
 
 # Supported configurations settings accepted by Hummingbird are defined below.

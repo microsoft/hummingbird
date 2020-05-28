@@ -25,10 +25,10 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
                 model.fit(X, y)
 
-                pytorch_model = model.to("pytorch", extra_config={"tree_implementation": extra_config_param})
-                self.assertTrue(pytorch_model is not None)
+                torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
+                self.assertTrue(torch_model is not None)
                 self.assertTrue(
-                    str(type(list(pytorch_model.operator_map.values())[0])) == dt_implementation_map[extra_config_param]
+                    str(type(list(torch_model.operator_map.values())[0])) == dt_implementation_map[extra_config_param]
                 )
 
     def _run_random_forest_classifier_converter(self, num_classes, extra_config={}, labels_shift=0):
@@ -40,9 +40,9 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100) + labels_shift
 
             model.fit(X, y)
-            pytorch_model = model.to("pytorch", extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Binary classifier
     def test_random_forest_classifier_binary_converter(self):
@@ -91,9 +91,9 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            pytorch_model = model.to("pytorch", extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Regressor
     def test_random_forest_regressor_converter(self):
@@ -118,9 +118,9 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
         y = np.random.randint(3, size=100)
 
         model.fit(X, y)
-        pytorch_model = model.to("pytorch")
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     def test_decision_tree_classifier_converter(self):
         for max_depth in [1, 3, 8, 10, 12, None]:
@@ -141,9 +141,9 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(1, size=1)
             model = RandomForestClassifier(n_estimators=1).fit(X, y)
-            pytorch_model = model.to("pytorch", extra_config={"tree_implementation": extra_config_param})
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Failure Cases
     def test_random_forest_classifier_raises_wrong_type(self):
@@ -152,14 +152,16 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error
         model = RandomForestClassifier(n_estimators=10).fit(X, y)
-        self.assertRaises(RuntimeError, model.to, "pytorch")
+        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "torch")
 
     def test_random_forest_classifier_raises_wrong_extra_config(self):
         warnings.filterwarnings("ignore")
         X = np.array(np.random.rand(100, 200), dtype=np.float32)
         y = np.random.randint(3, size=100)
         model = RandomForestClassifier(n_estimators=10).fit(X, y)
-        self.assertRaises(MissingConverter, model.to, "pytorch", extra_config={"tree_implementation": "nonsense"})
+        self.assertRaises(
+            MissingConverter, hummingbird.ml.convert, model, "torch", extra_config={"tree_implementation": "nonsense"}
+        )
 
 
 if __name__ == "__main__":

@@ -14,7 +14,8 @@ import onnxruntime as ort
 
 from onnxconverter_common.data_types import FloatTensorType
 from onnxmltools.convert import convert_lightgbm
-from hummingbird.ml.convert import convert_onnxml
+from hummingbird.ml import convert
+from hummingbird.ml import constants
 from hummingbird.ml._utils import onnx_ml_tools_installed
 
 
@@ -27,7 +28,9 @@ def test_lgbm(X, model):
     )
 
     # Create ONNX model
-    onnx_model = convert_onnxml(onnx_ml_model, test_data=X[0:1])
+    extra_config = {}
+    extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
+    onnx_model = convert(onnx_ml_model, "onnx", X[0:1], extra_config)
 
     # Get the predictions for the ONNX-ML model
     session = ort.InferenceSession(onnx_ml_model.SerializeToString())
