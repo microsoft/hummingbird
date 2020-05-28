@@ -58,7 +58,7 @@ def _supported_model_format_backend_mapping_check(model, backend):
 
         if not backend == torch.__name__:
             raise RuntimeError(
-                "Hummingbird currently support conversion of XGBoost / LighGBM / Sklearn models only into PyTorch."
+                "Hummingbird currently support conversion of XGBoost / LightGBM / Sklearn models only into PyTorch."
             )
 
 
@@ -86,7 +86,7 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
     from .ir_converters.topology import convert as topology_converter
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
-    # We modify the scikit learn model during optimizations.
+    # We modify the scikit learn model during translation.
     model = deepcopy(model)
     topology = parse_sklearn_api_model(model)
 
@@ -193,6 +193,9 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
     ), "Cannot generate test input data. Either pass some input data or the initial_types"
 
     from .ir_converters.linked_node import convert as linked_node_converter
+
+    # We modify the model during translation.
+    model = deepcopy(model)
 
     # Parse an ONNX-ML model into our internal data structure (i.e., LinkedNode)
     graph = model.graph

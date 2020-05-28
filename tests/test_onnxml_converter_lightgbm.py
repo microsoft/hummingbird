@@ -88,16 +88,16 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     # Basic regression test.
     @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
     def _test_lgbm_onnxml_model_regressor(self):
-        self.n_features = 28
-        self.n_total = 1000
-        self.X = np.random.rand(self.n_total, self.n_features)
-        self.X = np.array(self.X, dtype=np.float32)
-        self.y = np.random.randint(1000, size=self.n_total)
+        n_features = 28
+        n_total = 1000
+        X = np.random.rand(n_total, n_features)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(1000, size=n_total)
 
         # Create LightGBM model
         model = lgb.LGBMRegressor()
-        model.fit(self.X, self.y)
-        self._test_regressor(self.X, model)
+        model.fit(X, y)
+        self._test_regressor(X, model)
 
     # Regression test with 3 estimators.
     @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
@@ -142,18 +142,20 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         )
         self._test_regressor(X, model)
 
+    @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
     def _test_lgbm_onnxml_model_binary(self):
-        self.n_features = 28
-        self.n_total = 1000
-        self.X = np.random.rand(self.n_total, self.n_features)
-        self.X = np.array(self.X, dtype=np.float32)
-        self.y = np.random.randint(2, size=self.n_total)
+        n_features = 28
+        n_total = 1000
+        X = np.random.rand(n_total, n_features)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=n_total)
 
         # Create LightGBM model
         model = lgb.LGBMClassifier()
-        model.fit(self.X, self.y)
-        self._test_classifier(self.X, model)
+        model.fit(X, y)
+        self._test_classifier(X, model)
 
+    @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
     def test_lightgbm_classifier(self):
         model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
         X = [[0, 1], [1, 1], [2, 0]]
@@ -162,63 +164,60 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         model.fit(X, y)
         self._test_classifier(X, model)
 
-    # def test_lightgbm_classifier_zipmap(self):
-    #     X = [[0, 1], [1, 1], [2, 0], [1, 2]]
-    #     X = np.array(X, dtype=np.float32)
-    #     y = [0, 1, 0, 1]
-    #     model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
-    #     model.fit(X, y)
-    #     self._test_classifier(X, model)
+    def test_lightgbm_classifier_zipmap(self):
+        X = [[0, 1], [1, 1], [2, 0], [1, 2]]
+        X = np.array(X, dtype=np.float32)
+        y = [0, 1, 0, 1]
+        model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
+        model.fit(X, y)
+        self._test_classifier(X, model)
 
-    # def test_lightgbm_booster_classifier(self):
-    #     X = [[0, 1], [1, 1], [2, 0], [1, 2]]
-    #     X = np.array(X, dtype=np.float32)
-    #     y = [0, 1, 0, 1]
-    #     data = lgb.Dataset(X, label=y)
-    #     model = lgb.train({'boosting_type': 'gbdt', 'objective': 'binary',
-    #                             'n_estimators': 3, 'min_child_samples': 1},
-    #                            data)
-    #     self._test_classifier(X, model)
+    def test_lightgbm_booster_classifier(self):
+        X = [[0, 1], [1, 1], [2, 0], [1, 2]]
+        X = np.array(X, dtype=np.float32)
+        y = [0, 1, 0, 1]
+        data = lgb.Dataset(X, label=y)
+        model = lgb.train({"boosting_type": "gbdt", "objective": "binary", "n_estimators": 3, "min_child_samples": 1}, data)
+        self._test_classifier(X, model)
 
-    # def test_lightgbm_booster_classifier_zipmap(self):
-    #     X = [[0, 1], [1, 1], [2, 0], [1, 2]]
-    #     X = np.array(X, dtype=np.float32)
-    #     y = [0, 1, 0, 1]
-    #     data = lgb.Dataset(X, label=y)
-    #     model = lgb.train({'boosting_type': 'gbdt', 'objective': 'binary',
-    #                             'n_estimators': 3, 'min_child_samples': 1},
-    #                            data)
-    #     self._test_classifier(X, model)
+    def test_lightgbm_booster_classifier_zipmap(self):
+        X = [[0, 1], [1, 1], [2, 0], [1, 2]]
+        X = np.array(X, dtype=np.float32)
+        y = [0, 1, 0, 1]
+        data = lgb.Dataset(X, label=y)
+        model = lgb.train({"boosting_type": "gbdt", "objective": "binary", "n_estimators": 3, "min_child_samples": 1}, data)
+        self._test_classifier(X, model)
 
-    # def _test_lgbm_onnxml_model_multi(self):
-    #     self.n_features = 28
-    #     self.n_total = 1000
-    #     self.X = np.random.rand(self.n_total,self.n_features)
-    #     self.X = np.array(self.X, dtype=np.float32)
-    #     self.y = np.random.randint(3, size=self.n_total)
+    def _test_lgbm_onnxml_model_multi(self):
+        n_features = 28
+        n_total = 1000
+        X = np.random.rand(n_total, n_features)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(3, size=n_total)
 
-    #     # Create LightGBM model
-    #     model = lgb.LGBMClassifier()
-    #     model.fit(self.X, self.y)
-    #     self._test_classifier(self.X, model)
+        # Create LightGBM model
+        model = lgb.LGBMClassifier()
+        model.fit(X, y)
+        self._test_classifier(X, model)
 
-    # def test_lightgbm_classifier_multi(self):
-    #     model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
-    #     X = [[0, 1], [1, 1], [2, 0], [0.5, 0.5], [1.1, 1.1], [2.1, 0.1]]
-    #     X = np.array(X, dtype=np.float32)
-    #     y = [0, 1, 2, 1, 1, 2]
-    #     model.fit(X, y)
-    #     self._test_classifier(X, model)
+    def test_lightgbm_classifier_multi(self):
+        model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
+        X = [[0, 1], [1, 1], [2, 0], [0.5, 0.5], [1.1, 1.1], [2.1, 0.1]]
+        X = np.array(X, dtype=np.float32)
+        y = [0, 1, 2, 1, 1, 2]
+        model.fit(X, y)
+        self._test_classifier(X, model)
 
-    # def test_lightgbm_booster_multi_classifier(self):
-    #     X = [[0, 1], [1, 1], [2, 0], [1, 2], [-1, 2], [1, -2]]
-    #     X = np.array(X, dtype=np.float32)
-    #     y = [0, 1, 0, 1, 2, 2]
-    #     data = lgb.Dataset(X, label=y)
-    #     model = lgb.train({'boosting_type': 'gbdt', 'objective': 'multiclass',
-    #                             'n_estimators': 3, 'min_child_samples': 1, 'num_class': 3},
-    #                            data)
-    #     self._test_classifier(X, model)
+    def test_lightgbm_booster_multi_classifier(self):
+        X = [[0, 1], [1, 1], [2, 0], [1, 2], [-1, 2], [1, -2]]
+        X = np.array(X, dtype=np.float32)
+        y = [0, 1, 0, 1, 2, 2]
+        data = lgb.Dataset(X, label=y)
+        model = lgb.train(
+            {"boosting_type": "gbdt", "objective": "multiclass", "n_estimators": 3, "min_child_samples": 1, "num_class": 3},
+            data,
+        )
+        self._test_classifier(X, model)
 
 
 if __name__ == "__main__":
