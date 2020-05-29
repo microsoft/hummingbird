@@ -123,7 +123,7 @@ def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={})
     # Get the number of features.
     n_features = inputs[operator.get_input_by_idx(0)].type.tensor_type.shape.dim[1].dim_value
 
-    # Get tree informations from the operator
+    # Get tree informations from the operator.
     tree_infos, classes, post_transform = _get_tree_infos_from_onnx_ml_operator(operator)
 
     # Generate the model.

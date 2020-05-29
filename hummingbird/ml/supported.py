@@ -8,7 +8,7 @@
 All operators, backends, and configurations settings supported in Hummingbird are registered here.
 
 **Supported Backends**
-PyTorch
+PyTorch,
 ONNX
 
 **Supported Operators**
