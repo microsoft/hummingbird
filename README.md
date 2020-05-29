@@ -25,7 +25,7 @@ See also [Troubleshooting](TROUBLESHOOTING.md) for common problems.
 
 See the [notebooks](notebooks) section for examples that demonstrate use and speedups.
 
-In general, Hummingbird syntax is very intuitive and minimal. To run your traditional ML model on DNN frameworks, you only need to `import hummingbird.ml` and add `to('dnn_framework')` to your code. Below is an example using a [LightGBM](https://lightgbm.readthedocs.io/en/latest/) model and [PyTorch](https://pytorch.org/) as target framework.
+In general, Hummingbird syntax is very intuitive and minimal. To run your traditional ML model on DNN frameworks, you only need to `import hummingbird.ml` and add `to('dnn_framework')` to your code. Below is an example using a [scikit-learn random forest](https://scikit-learn.org/stable/modules/ensemble.html#forest) model and [PyTorch](https://pytorch.org/) as target framework.
 
 ```python
 import numpy as np
