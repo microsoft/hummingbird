@@ -20,10 +20,10 @@ from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for
 
 def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     """
-    Converter for `sklearn.ensemble.GradientBoostingClassifier`.
+    Converter for `sklearn.ensemble.GradientBoostingClassifier` or `sklearn.ensemble.HistGradientBoostingClassifier`
 
     Args:
-        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingClassifier` model
+        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingClassifier` or `sklearn.ensemble.HistGradientBoostingClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -33,7 +33,12 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     assert operator is not None
 
     # Get tree information out of the operator.
-    tree_infos = operator.raw_operator.estimators_
+    if hasattr(operator.raw_operator, "estimators_"):
+        # SklearnGradientBoostingClassifier
+        tree_infos = operator.raw_operator.estimators_
+    elif hasattr(operator.raw_operator, "_predictors"):
+        # SklearnHistGradientBoostingClassifier
+        tree_infos = operator.raw_operator._predictors
     n_features = operator.raw_operator.n_features_
     learning_rate = operator.raw_operator.learning_rate
     classes = operator.raw_operator.classes_.tolist()

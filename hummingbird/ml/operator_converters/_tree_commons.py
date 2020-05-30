@@ -172,17 +172,39 @@ def get_parameters_for_sklearn_common(tree_infos):
     SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier/Regressor
 
     Args:
-        tree_infos: The information representaing a tree (ensemble)
+        tree_infos: The information representing a tree (ensemble)
 
     Returns: The tree parameters wrapped into an instance of
              `operator_converters._tree_commons_TreeParameters`
     """
     trees = tree_infos
-    lefts = trees.tree_.children_left
-    rights = trees.tree_.children_right
-    features = trees.tree_.feature
-    thresholds = trees.tree_.threshold
-    values = trees.tree_.value
+    if hasattr(trees, "nodes"):
+        # SklearnHistGradientBoostingClassifier
+
+        lefts = [trees.nodes[x]["left"] for x in range(len(trees.nodes))]
+        # Use -1 instead of 0 for nodes with no lefts
+        lefts = [idx if idx != 0 else -1 for idx in lefts]
+
+        rights = [trees.nodes[x]["right"] for x in range(len(trees.nodes))]
+        # Use -1 instead of 0 for nodes with no rights
+        rights = [idx if idx != 0 else -1 for idx in rights]
+
+        features = [trees.nodes[x]["feature_idx"] for x in range(len(trees.nodes))]
+        thresholds = [trees.nodes[x]["threshold"] for x in range(len(trees.nodes))]
+
+        values = [trees.nodes[x]["value"] for x in range(len(trees.nodes))]
+        # Convert to numpy.ndarray with shape (s, 1, 1)
+        values = np.array(values)
+        values = values.reshape((values.shape[0], 1, 1))
+
+    elif hasattr(trees, "tree_"):
+        # SklearnGradientBoostingClassifier
+
+        lefts = trees.tree_.children_left
+        rights = trees.tree_.children_right
+        features = trees.tree_.feature
+        thresholds = trees.tree_.threshold
+        values = trees.tree_.value
 
     return TreeParameters(lefts, rights, features, thresholds, values)
 
@@ -255,7 +277,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
 def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values):
     """
     This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
-    Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+    Includes SklearnRandomForestClassifier/Regressor, SklearnGradientBoostingClassifier and SklearnHistGradientBoostingClassifier
 
     Args:
         left: The left nodes
