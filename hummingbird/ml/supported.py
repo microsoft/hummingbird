@@ -15,6 +15,7 @@ DecisionTreeClassifier,
 RandomForestClassifier,
 RandomForestRegressor,
 GradientBoostingClassifier,
+HistGradientBoostingClassifier,
 ExtraTreesClassifier,
 LGBMClassifier,
 LGBMRegressor,
@@ -34,11 +35,15 @@ def _build_sklearn_operator_list():
     Put all suported Sklearn operators on a list.
     """
     if sklearn_installed():
+        # Enable experimental to import HistGradientBoostingClassifier
+        from sklearn.experimental import enable_hist_gradient_boosting
+
         # Tree-based models
         from sklearn.ensemble import (
             RandomForestClassifier,
             RandomForestRegressor,
             GradientBoostingClassifier,
+            HistGradientBoostingClassifier,
             ExtraTreesClassifier,
         )
         from sklearn.tree import DecisionTreeClassifier
@@ -49,6 +54,7 @@ def _build_sklearn_operator_list():
             RandomForestClassifier,
             RandomForestRegressor,
             GradientBoostingClassifier,
+            HistGradientBoostingClassifier,
             ExtraTreesClassifier,
         ]
 
