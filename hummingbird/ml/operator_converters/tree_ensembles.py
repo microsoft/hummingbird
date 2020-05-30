@@ -17,6 +17,9 @@ from ._tree_commons import TreeParameters, get_parameters_for_tree_trav_common, 
 
 
 def _get_tree_infos_from_onnx_ml_operator(model):
+    """
+    Function used to extract the parameters from a ONNXML TreeEnsemble model.
+    """
     tree_infos = []
     left = right = features = values = threshold = None
     tree_ids = target_node_ids = target_tree_ids = modes = None
@@ -109,10 +112,24 @@ def _get_tree_infos_from_onnx_ml_operator(model):
 
 
 def _dummy_get_parameter(tree_info):
+    """
+    Dummy function used to return parameters (TreeEnsemble converters already have parameters in the right format)
+    """
     return tree_info
 
 
 def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={}):
+    """
+    Converter for `onnxml.TreeEnsembleClassifier`.
+
+    Args:
+        operator: An operator wrapping a `onnxml.TreeEnsembleClassifier` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
     assert operator is not None
 
     inputs = extra_config["inputs"]
@@ -131,6 +148,17 @@ def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={})
 
 
 def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
+    """
+    Converter for `onnxml.TreeEnsembleRegressor`.
+
+    Args:
+        operator: An operator wrapping a `onnxml.TreeEnsembleRegressor` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
     assert operator is not None
 
     n_features = None
