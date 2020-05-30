@@ -278,7 +278,7 @@ def convert(model, backend, test_input=None, extra_config={}):
     if type(model) in lgbm_operator_list:
         return _convert_lightgbm(model, test_input, extra_config)
 
-    if _is_onnx_model:
+    if _is_onnx_model(model):
         return _convert_onnxml(model, test_input, extra_config)
 
     return _convert_sklearn(model, test_input, extra_config)

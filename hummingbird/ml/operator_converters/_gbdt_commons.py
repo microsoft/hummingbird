@@ -41,6 +41,10 @@ def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, 
         n_classes -= 1
     if classes is None:
         classes = [i for i in range(n_classes)]
+    reorder_trees = True
+    if constants.REORDER_TREES in extra_config:
+        reorder_trees = extra_config[constants.REORDER_TREES]
+    if reorder_trees and n_classes > 1:
         tree_infos = [tree_infos[i * n_classes + j] for j in range(n_classes) for i in range(len(tree_infos) // n_classes)]
 
     return convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes, extra_config)
