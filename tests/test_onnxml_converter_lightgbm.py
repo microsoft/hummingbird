@@ -8,8 +8,6 @@ import os
 import pickle
 import numpy as np
 import lightgbm as lgb
-import torch
-import onnx
 import onnxruntime as ort
 
 from onnxconverter_common.data_types import FloatTensorType
