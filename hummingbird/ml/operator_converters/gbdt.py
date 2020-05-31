@@ -84,7 +84,7 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
     assert operator is not None
 
     # Get tree information out of the operator.
-    tree_infos = operator.raw_operator.estimators_
+    tree_infos = operator.raw_operator.estimators_.ravel().tolist()
     n_features = operator.raw_operator.n_features_
     learning_rate = operator.raw_operator.learning_rate
 
