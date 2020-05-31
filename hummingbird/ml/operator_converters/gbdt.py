@@ -54,15 +54,23 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     tree_infos = [tree_infos[i][j] for j in range(n_classes) for i in range(len(tree_infos))]
 
     # Get the value for Alpha.
-    if operator.raw_operator.init == "zero":
-        alpha = [[0.0]]
-    elif operator.raw_operator.init is None:
-        if n_classes == 1:
-            alpha = [[np.log(operator.raw_operator.init_.class_prior_[1] / (1 - operator.raw_operator.init_.class_prior_[1]))]]
+    if hasattr(operator.raw_operator, "init"):
+        if operator.raw_operator.init == "zero":
+            alpha = [[0.0]]
+        elif operator.raw_operator.init is None:
+            if n_classes == 1:
+                alpha = [
+                    [np.log(operator.raw_operator.init_.class_prior_[1] / (1 - operator.raw_operator.init_.class_prior_[1]))]
+                ]
+            else:
+                alpha = [[np.log(operator.raw_operator.init_.class_prior_[i]) for i in range(n_classes)]]
         else:
-            alpha = [[np.log(operator.raw_operator.init_.class_prior_[i]) for i in range(n_classes)]]
-    else:
-        raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
+            raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
+    elif hasattr(operator.raw_operator, "_baseline_prediction"):
+        if n_classes == 1:
+            alpha = [[operator.raw_operator._baseline_prediction]]
+        else:
+            alpha = np.array([operator.raw_operator._baseline_prediction.flatten().tolist()])
 
     extra_config[constants.ALPHA] = alpha
     extra_config[constants.LEARNING_RATE] = learning_rate
