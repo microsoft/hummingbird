@@ -14,7 +14,7 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 
 from . import constants
-from ._gbdt_commons import convert_gbdt_classifier_common
+from ._gbdt_commons import convert_gbdt_common, convert_gbdt_classifier_common
 from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn
 
 
@@ -92,7 +92,7 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
     if operator.raw_operator.init == "zero":
         alpha = [[0.0]]
     elif operator.raw_operator.init is None:
-        alpha = None  # TODO
+        alpha = operator.raw_operator.init_.constant_.tolist()
     else:
         raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
 
@@ -101,7 +101,7 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
     # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
     extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
 
-    return convert_gbdt_common(tree_infos, get_parameters_for_sklearn_common, n_features, classes=None, extra_config)
+    return convert_gbdt_common(tree_infos, get_parameters_for_sklearn_common, n_features, None, extra_config)
 
 
 # Register the converters.
