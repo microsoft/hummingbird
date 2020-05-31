@@ -132,8 +132,7 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = GradientBoostingRegressor(n_estimators=10, max_depth=max_depth, init="zero")
-            X = np.random.rand(100, 200)
-            X = np.array(X, dtype=np.float32)
+            X = np.random.rand(100, 200).astype(np.float32)
             y = np.random.normal(size=100)
 
             model.fit(X, y)

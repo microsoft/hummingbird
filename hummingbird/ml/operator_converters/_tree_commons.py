@@ -178,7 +178,7 @@ def get_parameters_for_sklearn_common(tree_infos):
              `operator_converters._tree_commons_TreeParameters`
     """
     trees = tree_infos
-    lefts = trees.tree_.children_left  # AttributeError: 'numpy.ndarray' object has no attribute 'tree_'
+    lefts = trees.tree_.children_left
     rights = trees.tree_.children_right
     features = trees.tree_.feature
     thresholds = trees.tree_.threshold
