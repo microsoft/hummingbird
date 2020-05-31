@@ -87,26 +87,12 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
     tree_infos = operator.raw_operator.estimators_
     n_features = operator.raw_operator.n_features_
     learning_rate = operator.raw_operator.learning_rate
-    classes = operator.raw_operator.classes_.tolist()
-    n_classes = len(classes)
-
-    # Analyze classes.
-    if not all(isinstance(c, int) for c in classes):
-        raise RuntimeError("GBDT Classifier translation only supports integer class labels.")
-    if n_classes == 2:
-        n_classes -= 1
-
-    # Reshape the tree_infos to a more generic format.
-    tree_infos = [tree_infos[i][j] for j in range(n_classes) for i in range(len(tree_infos))]
 
     # Get the value for Alpha.
     if operator.raw_operator.init == "zero":
         alpha = [[0.0]]
     elif operator.raw_operator.init is None:
-        if n_classes == 1:
-            alpha = [[np.log(operator.raw_operator.init_.class_prior_[1] / (1 - operator.raw_operator.init_.class_prior_[1]))]]
-        else:
-            alpha = [[np.log(operator.raw_operator.init_.class_prior_[i]) for i in range(n_classes)]]
+        alpha = None  # TODO
     else:
         raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
 
@@ -115,9 +101,7 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
     # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
     extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
 
-    return convert_gbdt_classifier_common(
-        tree_infos, get_parameters_for_sklearn_common, n_features, n_classes, classes, extra_config
-    )
+    return convert_gbdt_common(tree_infos, get_parameters_for_sklearn_common, n_features, classes=None, extra_config)
 
 
 # Register the converters.
