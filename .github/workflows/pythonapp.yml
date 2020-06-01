@@ -38,11 +38,11 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pip install -r requirements.txt && pip install -e . && pip install pytest
+        pip install -e . && pip install pytest
         pytest
     - name: Coverage
       run: |
-        pip install -r requirements.txt && pip install -e . && pip install coverage
+        pip install -e . && pip install coverage
         coverage run -m pytest tests
         coverage xml
         MINIMUM=70
