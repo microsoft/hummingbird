@@ -38,11 +38,11 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pip install -r requirements.txt && pip install -e . && pip install pytest && pip install onnx && pip install onnxruntime && pip install pip install onnxconverter-common
+        pip install -r requirements.txt && pip install -e . && pip install pytest && pip install onnx && pip install onnxruntime && pip install onnxconverter-common
         pytest
     - name: Coverage
       run: |
-        pip install -r requirements.txt && pip install -e . && pip install coverage && pip install onnx && pip install onnxruntime && pip install pip install onnxconverter-common
+        pip install -r requirements.txt && pip install -e . && pip install coverage && pip install onnx && pip install onnxruntime && pip install onnxconverter-common
         coverage run -m pytest tests
         coverage xml
         MINIMUM=70
