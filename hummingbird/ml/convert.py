@@ -173,7 +173,7 @@ def convert(model, backend, test_input=None, extra_config={}):
     """
     This function converts the specified input *model* into an implementation targeting *backend*.
     *Convert* supports [Sklearn], [LightGBM] and [XGBoost] models.
-    For *LightGBM* and *XGBoost currently only the Sklarn API is supported.
+    For *LightGBM* and *XGBoost currently only the Sklearn API is supported.
     The detailed list of models and backends can be found at `hummingbird.supported`.
     [Sklearn]: https://scikit-learn.org/
     [LightGBM]: https://lightgbm.readthedocs.io/
