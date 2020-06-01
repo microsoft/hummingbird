@@ -115,12 +115,14 @@ def convert(
                 onnx_model = onnx.load(onnx_model_name)
 
                 # Generate the IR for the exported ONNX model.
+                initializers = [] if onnx_model.graph.initializer is None else [in_ for in_ in onnx_model.graph.initializer]
+                inputs = [in_.name for in_ in onnx_model.graph.input] + [init.name for init in initializers]
                 converted_model_nodes = LinkedNode.build_from_onnx(
                     onnx_model.graph.node,
                     [],
-                    [in_.name for in_ in onnx_model.graph.input],
+                    inputs,
                     [] if onnx_model.graph.output is None else [o_.name for o_ in onnx_model.graph.output],
-                    [] if onnx_model.graph.initializer is None else [in_ for in_ in onnx_model.graph.initializer],
+                    initializers,
                 )
 
                 # Since each operator is exported into ONNX separately, we need to do some check about the naming

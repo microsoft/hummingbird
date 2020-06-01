@@ -231,13 +231,14 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
                 )
             )
 
+    initializers = [] if graph.initializer is None else [in_ for in_ in graph.initializer]
     onnx_ir = LinkedNode.build_from_onnx(
-        graph.node, [], [in_.name for in_ in graph.input], output_names, [init_ for init_ in graph.initializer]
+        graph.node, [], [in_.name for in_ in inputs] + [in_.name for in_ in initializers], output_names, initializers
     )
 
     # Convert the input onnx_ir object into ONNX. The outcome is a model containing only ONNX operators.
     onnx_model = linked_node_converter(
-        onnx_ir, inputs, graph.initializer, output_names, test_input, output_model_name, target_opset, extra_config
+        onnx_ir, inputs, initializers, output_names, test_input, output_model_name, target_opset, extra_config
     )
     return onnx_model
 
