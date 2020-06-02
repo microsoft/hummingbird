@@ -145,10 +145,10 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
 
 def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     """
-    Converter for `sklearn.ensemble.RandomForestRegressor`
+    Converter for `sklearn.ensemble.RandomForestRegressor` and `sklearn.ensemble.ExtraTreesRegressor`
 
     Args:
-        operator: An operator wrapping the `sklearn.ensemble.RandomForestRegressor model
+        operator: An operator wrapping the RandomForestRegressor and ExtraTreesRegressor model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -210,3 +210,4 @@ register_converter("SklearnRandomForestClassifier", convert_sklearn_random_fores
 register_converter("SklearnRandomForestRegressor", convert_sklearn_random_forest_regressor)
 register_converter("SklearnDecisionTreeClassifier", convert_sklearn_decision_tree_classifier)
 register_converter("SklearnExtraTreesClassifier", convert_sklearn_random_forest_classifier)
+register_converter("SklearnExtraTreesRegressor", convert_sklearn_random_forest_regressor)
