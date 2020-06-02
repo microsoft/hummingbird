@@ -120,9 +120,9 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Regressor
     def test_extra_trees_regressor_converter(self):
