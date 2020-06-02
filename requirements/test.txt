@@ -1,0 +1,4 @@
+-r common.txt
+flake8
+pytest
+coverage
