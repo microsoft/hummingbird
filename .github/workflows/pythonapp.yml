@@ -40,7 +40,7 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics --exclude=src
     - name: Test with pytest
       run: |
-        pytest
+        pytest tests
     - name: Coverage
       run: |
         coverage run -m pytest tests

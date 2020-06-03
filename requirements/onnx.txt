@@ -1,5 +1,5 @@
-onnx>=1.4.1
-onnxruntime>=1.0.0
+onnx==1.4.1
+onnxruntime==1.0.0
 -e git+http://github.com/microsoft/onnxconverter-common.git@4eb43b0d1d0347bc18ef2f55e9598a87bfa90434#egg=onnxconverter-common
 -r common.txt
 onnxmltools>=1.6.0
