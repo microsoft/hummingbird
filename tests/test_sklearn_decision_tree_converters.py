@@ -113,40 +113,11 @@ class TestSklearnTreeConverter(unittest.TestCase):
     def test_random_forest_perf_tree_trav_regressor_converter(self):
         self._run_random_forest_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
-    def _run_extra_trees_regressor_converter(self, num_classes, extra_config={}):
-        warnings.filterwarnings("ignore")
-        for max_depth in [1, 3, 8, 10, 12, None]:
-            model = ExtraTreesRegressor(n_estimators=10, max_depth=max_depth)
-            X = np.random.rand(100, 200)
-            X = np.array(X, dtype=np.float32)
-            y = np.random.randint(num_classes, size=100)
-
-            model.fit(X, y)
-            pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
-
-    # Regressor
-    def test_extra_trees_regressor_converter(self):
-        self._run_extra_trees_regressor_converter(1000)
-
-    # Gemm regressor
-    def test_extra_trees_gemm_regressor_converter(self):
-        self._run_extra_trees_regressor_converter(1000, extra_config={"tree_implementation": "gemm"})
-
-    # Tree_trav regressor
-    def test_extra_trees_tree_trav_regressor_converter(self):
-        self._run_extra_trees_regressor_converter(1000, extra_config={"tree_implementation": "tree_trav"})
-
-    # Perf_tree_trav regressor
-    def test_extra_trees_perf_tree_trav_regressor_converter(self):
-        self._run_extra_trees_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
-
     # Used for regression tests
-    def _run_tree_regressor_converter(self, model_type, num_classes, extra_config={}):
+    def _run_tree_regressor_converter(self, model_type, num_classes, extra_config={}, **kwargs):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
-            model = model_type(max_depth=max_depth)
+            model = model_type(max_depth=max_depth, **kwargs)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
@@ -155,6 +126,22 @@ class TestSklearnTreeConverter(unittest.TestCase):
             pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Extra trees regressor
+    def test_extra_trees_regressor_converter(self):
+        self._run_tree_regressor_converter(ExtraTreesRegressor, 1000, n_estimators=10)
+
+    # Extra trees gemm regressor
+    def test_extra_trees_gemm_regressor_converter(self):
+        self._run_tree_regressor_converter(ExtraTreesRegressor, 1000, extra_config={"tree_implementation": "gemm"}, n_estimators=10)
+
+    # Extra trees tree_trav regressor
+    def test_extra_trees_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(ExtraTreesRegressor, 1000, extra_config={"tree_implementation": "tree_trav"}, n_estimators=10)
+
+    # Extra trees perf_tree_trav regressor
+    def test_extra_trees_perf_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(ExtraTreesRegressor, 1000, extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10)
 
     # Decision tree regressor
     def test_decision_tree_regressor_converter(self):
