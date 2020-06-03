@@ -169,7 +169,7 @@ def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
 def get_parameters_for_sklearn_common(tree_infos):
     """
     Parse sklearn-based trees, including
-    SklearnRandomForestClassifier/Regressor, SklearnGradientBoostingClassifier, and SklearnHistGradientBoostingClassifier
+    SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier/Regressor and SklearnHistGradientBoostingClassifier
 
     Args:
         tree_infos: The information representing a tree (ensemble)

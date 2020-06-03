@@ -16,7 +16,9 @@ RandomForestClassifier,
 RandomForestRegressor,
 GradientBoostingClassifier,
 HistGradientBoostingClassifier,
+GradientBoostingRegressor,
 ExtraTreesClassifier,
+ExtraTreesRegressor,
 LGBMClassifier,
 LGBMRegressor,
 XGBClassifier,
@@ -44,7 +46,9 @@ def _build_sklearn_operator_list():
             RandomForestRegressor,
             GradientBoostingClassifier,
             HistGradientBoostingClassifier,
+            GradientBoostingRegressor,
             ExtraTreesClassifier,
+            ExtraTreesRegressor,
         )
         from sklearn.tree import DecisionTreeClassifier
 
@@ -55,7 +59,9 @@ def _build_sklearn_operator_list():
             RandomForestRegressor,
             GradientBoostingClassifier,
             HistGradientBoostingClassifier,
+            GradientBoostingRegressor,
             ExtraTreesClassifier,
+            ExtraTreesRegressor,
         ]
 
     return None

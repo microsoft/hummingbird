@@ -1,6 +1,8 @@
 # Hummingbird
 
+[![PyPI version](https://badge.fury.io/py/hummingbird-ml.svg)](https://badge.fury.io/py/hummingbird-ml)
 ![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
+![](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7%20%7C%203.8-blue)
 [![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/master/graph/badge.svg)](https://codecov.io/github/microsoft/hummingbird?branch=master)
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
@@ -8,7 +10,7 @@
 *Hummingbird* is a library for compiling trained traditional ML models into tensor computations. *Hummingbird* allows users to seamlessly leverage neural network frameworks (such as [PyTorch](https://pytorch.org/)) to accelerate traditional ML models. Thanks to *Hummingbird*, users can benefit from: (1) all the current and future optimizations implemented in neural network frameworks; (2) native hardware acceleration; (3) having a unique platform to support for both traditional and neural network models; and have all of this (4) without having to re-engineer their models.
 
 Currently, you can use *Hummingbird* to convert your trained traditional ML models into [PyTorch](https://pytorch.org/). *Hummingbird* [supports](https://github.com/microsoft/hummingbird/wiki/Supported-Operators) a variety of tree-based classifiers and regressors.  These models include
-[scikit-learn](https://scikit-learn.org/stable/) Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors. Support for other neural network frameworks (e.g., [ONNX](https://onnx.ai/), [TVM](https://docs.tvm.ai/), and models is on our [roadmap](wiki/Roadmap-for-Upcoming-Features-and-Support).
+[scikit-learn](https://scikit-learn.org/stable/) Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors. Support for other neural network backends (e.g., [ONNX](https://onnx.ai/), [TVM](https://docs.tvm.ai/)) and models is on our [roadmap](https://github.com/microsoft/hummingbird/wiki/Roadmap-for-Upcoming-Features-and-Support).
 
 ## Installation
 
@@ -30,7 +32,7 @@ In general, Hummingbird syntax is very intuitive and minimal. To run your tradit
 ```python
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-import hummingbird.ml
+from hummingbird.ml import convert
 
 # Create some random data for binary classification
 num_classes = 2
@@ -42,7 +44,7 @@ skl_model = RandomForestClassifier(n_estimators=10, max_depth=10)
 skl_model.fit(X, y)
 
 # Use Hummingbird to convert the model to PyTorch
-model = skl_model.to('pytorch')
+model = convert(skl_model, 'pytorch')
 
 # Run predictions on CPU
 model.predict(X)
@@ -55,6 +57,8 @@ model.predict(X)
 # Documentation
 
 The API documentation is [here](https://microsoft.github.io/hummingbird/).
+
+You can also read about Hummingbird in our blog post [here](https://azuredata.microsoft.com/articles/ebd95ec0-1eae-44a3-90f5-c11f5c916d15).
 
 For more details on the vision and on the technical details related to Hummingbird, please check our papers:
 

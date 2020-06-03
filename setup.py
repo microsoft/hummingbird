@@ -4,7 +4,7 @@ import os
 
 this = os.path.dirname(__file__)
 
-with open(os.path.join(this, "requirements.txt"), "r") as f:
+with open(os.path.join(this, "requirements", "common.txt"), "r") as f:
     requirements = [_ for _ in [_.strip("\r\n ") for _ in f.readlines()] if _ is not None]
 
 packages = find_packages()
@@ -42,5 +42,5 @@ setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
     ],
-    python_requires='>=3.6',
+    python_requires=">=3.5",
 )
