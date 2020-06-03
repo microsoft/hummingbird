@@ -58,7 +58,7 @@ def _build_sklearn_operator_list():
             ExtraTreesRegressor,
         ]
 
-    return None
+    return [None]
 
 
 def _build_xgboost_operator_list():
@@ -70,7 +70,7 @@ def _build_xgboost_operator_list():
 
         return [XGBClassifier, XGBRegressor]
 
-    return None
+    return [None]
 
 
 def _build_lightgbm_operator_list():
@@ -82,7 +82,7 @@ def _build_lightgbm_operator_list():
 
         return [LGBMClassifier, LGBMRegressor]
 
-    return None
+    return [None]
 
 
 # Associate onnxml types with our operator names.
@@ -96,7 +96,7 @@ def _build_onnxml_operator_list():
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",
         ]
-    return None
+    return [None]
 
 
 def _build_backend_map():

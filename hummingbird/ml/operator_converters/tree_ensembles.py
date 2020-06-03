@@ -135,10 +135,10 @@ def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={})
     inputs = extra_config["inputs"]
     n_features = classes = None
 
-    assert operator.get_input_by_idx(0) in inputs
+    assert operator.origin.input[0] in inputs
 
     # Get the number of features.
-    n_features = inputs[operator.get_input_by_idx(0)].type.tensor_type.shape.dim[1].dim_value
+    n_features = inputs[operator.origin.input[0]].type.tensor_type.shape.dim[1].dim_value
 
     # Get tree informations from the operator.
     tree_infos, classes, post_transform = _get_tree_infos_from_onnx_ml_operator(operator)
@@ -164,10 +164,10 @@ def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     n_features = None
     inputs = extra_config["inputs"]
 
-    assert operator.get_input_by_idx(0) in inputs
+    assert operator.origin.input[0] in inputs
 
     # Get the number of features.
-    n_features = inputs[operator.get_input_by_idx(0)].type.tensor_type.shape.dim[1].dim_value
+    n_features = inputs[operator.origin.input[0]].type.tensor_type.shape.dim[1].dim_value
 
     # Get tree informations from the operator.
     tree_infos, _, _ = _get_tree_infos_from_onnx_ml_operator(operator)

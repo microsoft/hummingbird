@@ -233,7 +233,7 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
 
     initializers = [] if graph.initializer is None else [in_ for in_ in graph.initializer]
     onnx_ir = LinkedNode.build_from_onnx(
-        graph.node, [], [in_.name for in_ in inputs] + [in_.name for in_ in initializers], output_names, initializers
+        graph.node, [], [in_.name for in_ in inputs] + [in_.name for in_ in initializers], output_names
     )
 
     # Convert the input onnx_ir object into ONNX. The outcome is a model containing only ONNX operators.

@@ -83,7 +83,7 @@ def convert(
                 pytorch_model = converter(node_, extra_config=extra_config)
 
                 # Generate the inputs for the tracing.
-                test_output_names = {node_.get_input_by_idx(i) for i in range(len(node_.input))}
+                test_output_names = {node_.origin.input[i] for i in range(len(node_.input))}
                 if len(test_output_names) == 1 and next(iter(test_output_names)) == input_tensors[0].name:
                     # This is the first operator: use the input parameter.
                     inputs = torch.from_numpy(test_data)
@@ -122,7 +122,6 @@ def convert(
                     [],
                     inputs,
                     [] if onnx_model.graph.output is None else [o_.name for o_ in onnx_model.graph.output],
-                    initializers,
                 )
 
                 # Since each operator is exported into ONNX separately, we need to do some check about the naming
@@ -207,7 +206,13 @@ def _check_and_prepare_ir_graph_for_conversion(node_list, input_tensors, extra_c
         if node_.op_type == "ZipMap":
             # We remove this map operator and just use an array.
             assert len(node_.input) == len(node_.output)
-            assert node_.in_single_path_to_output
+            # Check if in single path to output
+            assert (
+                len(node_.successor) == 1
+                and node_.successor[0].in_or_out
+                and len(node_.precedence) == 1
+                and not node_.precedence[0].in_or_out
+            )
 
             # We override the output names of the operator preceeding ZipMap with the output names of the ZipMap.
             # This will evenutally create problems if the outputs of the predecessor
@@ -216,11 +221,11 @@ def _check_and_prepare_ir_graph_for_conversion(node_list, input_tensors, extra_c
             input_keys = list(node_.input.keys())
             for i in range(len(input_keys)):
                 node_.precedence[0].output.pop(input_keys[i])
-                node_.precedence[0].output[node_.get_output_by_idx(i)] = node_.get_output_by_idx(i)
+                node_.precedence[0].output[node_.origin.output[i]] = node_.origin.output[i]
             node_.precedence[0].origin.output[:] = node_.output.values()
         elif node_.name in skip_list:
             continue
-        elif len(node_.input) == 1 and not node_.get_input_by_idx(0) in input_names:
+        elif len(node_.input) == 1 and not node_.origin.input[0] in input_names:
             # Remove sub-graphs for which we don't have an input.
             current_node = node_
             while len(current_node.successor) > 0:
@@ -276,18 +281,18 @@ def _check_and_rename_variables(onnx_model, converted_model_nodes, alias, variab
     # Non-numeric are ok since we explicitly set those.
     for converted_node in _topological_sort(converted_model_nodes):
         for i in range(len(converted_node.output)):
-            if converted_node.get_output_by_idx(i).isnumeric():
+            if converted_node.origin.output[i].isnumeric():
                 # Only track numeric variables
-                if int(converted_node.get_output_by_idx(i)) in variable_check:
+                if int(converted_node.origin.output[i]) in variable_check:
                     new_var_name = max(variable_check) + 1
                     variable_check.add(new_var_name)
 
                     # Make sure that successor operators get the updated variable name
                     for succ_ in converted_node.successor:
                         for j in range(len(succ_.origin.input)):
-                            if succ_.get_input_by_idx(j) == converted_node.get_output_by_idx(i) and not (
-                                succ_.get_input_by_idx(j) in initializers
-                                and initializers[succ_.get_input_by_idx(j)] == (alias + succ_.unique_name, j)
+                            if succ_.origin.input[j] == converted_node.origin.output[i] and not (
+                                succ_.origin.input[j] in initializers
+                                and initializers[succ_.origin.input[j]] == (alias + succ_.unique_name, j)
                             ):
                                 del succ_.input[succ_.origin.input[j]]
                                 succ_.input[str(new_var_name)] = str(new_var_name)
