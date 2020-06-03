@@ -12,6 +12,7 @@ PyTorch
 
 **Supported Operators**
 DecisionTreeClassifier,
+DecisionTreeRegressor,
 RandomForestClassifier,
 RandomForestRegressor,
 GradientBoostingClassifier,
@@ -45,11 +46,12 @@ def _build_sklearn_operator_list():
             ExtraTreesClassifier,
             ExtraTreesRegressor,
         )
-        from sklearn.tree import DecisionTreeClassifier
+        from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
         return [
             # Tree-methods
             DecisionTreeClassifier,
+            DecisionTreeRegressor,
             RandomForestClassifier,
             RandomForestRegressor,
             GradientBoostingClassifier,

@@ -204,10 +204,28 @@ def convert_sklearn_decision_tree_classifier(operator, device, extra_config):
     operator.raw_operator.estimators_ = [operator.raw_operator]
     return convert_sklearn_random_forest_classifier(operator, device, extra_config)
 
+def convert_sklearn_decision_tree_regressor(operator, device, extra_config):
+    """
+    Converter for `sklearn.tree.DecisionTreeRegressor`.
+
+    Args:
+        operator: An operator wrapping a `sklearn.tree.DecisionTreeRegressor` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    operator.raw_operator.estimators_ = [operator.raw_operator]
+    return convert_sklearn_random_forest_regressor(operator, device, extra_config)
+
 
 # Register the converters.
 register_converter("SklearnRandomForestClassifier", convert_sklearn_random_forest_classifier)
 register_converter("SklearnRandomForestRegressor", convert_sklearn_random_forest_regressor)
 register_converter("SklearnDecisionTreeClassifier", convert_sklearn_decision_tree_classifier)
+register_converter("SklearnDecisionTreeRegressor", convert_sklearn_decision_tree_regressor)
 register_converter("SklearnExtraTreesClassifier", convert_sklearn_random_forest_classifier)
 register_converter("SklearnExtraTreesRegressor", convert_sklearn_random_forest_regressor)
