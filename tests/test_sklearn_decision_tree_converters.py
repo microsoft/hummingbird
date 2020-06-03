@@ -142,12 +142,11 @@ class TestSklearnTreeConverter(unittest.TestCase):
     def test_extra_trees_perf_tree_trav_regressor_converter(self):
         self._run_extra_trees_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
-    # Used for DecisionTreeRegressor
-    def _run_decision_tree_regressor_converter(self, num_classes, extra_config={}):
-        # TODO: Extract method so that this can be reused across regressors.
+    # Used for regression tests
+    def _run_tree_regressor_converter(self, model_type, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
-            model = DecisionTreeRegressor(max_depth=max_depth)
+            model = model_type(max_depth=max_depth)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
@@ -157,21 +156,21 @@ class TestSklearnTreeConverter(unittest.TestCase):
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
 
-    # Regressor
+    # Decision tree regressor
     def test_decision_tree_regressor_converter(self):
-        self._run_decision_tree_regressor_converter(1000)
+        self._run_tree_regressor_converter(DecisionTreeRegressor, 1000)
 
-    # Gemm regressor
+    # Decision tree gemm regressor
     def test_decision_tree_gemm_regressor_converter(self):
-        self._run_decision_tree_regressor_converter(1000, extra_config={"tree_implementation": "gemm"})
+        self._run_tree_regressor_converter(DecisionTreeRegressor, 1000, extra_config={"tree_implementation": "gemm"})
 
-    # Tree_trav regressor
+    # Decision tree tree_trav regressor
     def test_decision_tree_tree_trav_regressor_converter(self):
-        self._run_decision_tree_regressor_converter(1000, extra_config={"tree_implementation": "tree_trav"})
+        self._run_tree_regressor_converter(DecisionTreeRegressor, 1000, extra_config={"tree_implementation": "tree_trav"})
 
-    # Perf_tree_trav regressor
+    # Decision tree perf_tree_trav regressor
     def test_decision_tree_perf_tree_trav_regressor_converter(self):
-        self._run_decision_tree_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
+        self._run_tree_regressor_converter(DecisionTreeRegressor, 1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # Used for DecisionTreeClassifier and ExtraTreesClassifier
     def _run_test_other_trees_classifier(self, model):
