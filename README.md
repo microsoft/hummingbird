@@ -58,6 +58,8 @@ model.predict(X)
 
 The API documentation is [here](https://microsoft.github.io/hummingbird/).
 
+You can also read about Hummingbird in our blog post [here](https://azuredata.microsoft.com/articles/ebd95ec0-1eae-44a3-90f5-c11f5c916d15).
+
 For more details on the vision and on the technical details related to Hummingbird, please check our papers:
 
 * [Taming Model Serving Complexity, Performance and Cost: A Compilation to Tensor Computations Approach](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf). Supun Nakandalam, Karla Saur, Gyeong-In Yu, Konstantinos Karanasos, Carlo Curino, Markus Weimer, Matteo Interlandi. Technical Report
