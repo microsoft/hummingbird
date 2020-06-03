@@ -1,7 +1,7 @@
 numpy>=1.15
-Cython
+Cython>=0.29.19
 scikit-learn==0.21.3
 torch>=1.4.0
 xgboost==0.90
 lightgbm>=2.2
-onnxconverter-common
+-e git+http://github.com/microsoft/onnxconverter-common.git@4eb43b0d1d0347bc18ef2f55e9598a87bfa90434#egg=onnxconverter-common
