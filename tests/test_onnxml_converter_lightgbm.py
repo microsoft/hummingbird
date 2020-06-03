@@ -63,13 +63,19 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         onnx_ml_pred, onnx_pred, output_names = self._test_lgbm(X, model)
 
         # Check that predicted values match
+        labels = []
+        probabilities = []
         for i in range(len(output_names)):
-            print(output_names[i])
-            if output_names[i] == "probabilities":
-                onnx_ml_prob = list(map(lambda x: list(x.values()), onnx_ml_pred[i]))
-                np.testing.assert_allclose(onnx_ml_prob, onnx_pred[i], rtol=rtol, atol=atol)
+            if type(onnx_ml_pred[i][0]) == np.int64:
+                labels.append(onnx_ml_pred[i])
             else:
-                np.testing.assert_allclose(onnx_ml_pred[i], onnx_pred[i], rtol=rtol, atol=atol)
+                probabilities.append(list(map(lambda x: list(x.values()), onnx_ml_pred[i])))
+            if onnx_pred[i][0].dtype == np.dtype("int64"):
+                labels.append(onnx_pred[i])
+            else:
+                probabilities.append(onnx_pred[i])
+        np.testing.assert_allclose(labels[0], labels[1], rtol=rtol, atol=atol)
+        np.testing.assert_allclose(probabilities[0], probabilities[1], rtol=rtol, atol=atol)
 
     # Check that ONNXML models can only target the ONNX backend.
     @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
