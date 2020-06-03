@@ -64,6 +64,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
 
         # Check that predicted values match
         for i in range(len(output_names)):
+            print(output_names[i])
             if output_names[i] == "probabilities":
                 onnx_ml_prob = list(map(lambda x: list(x.values()), onnx_ml_pred[i]))
                 np.testing.assert_allclose(onnx_ml_prob, onnx_pred[i], rtol=rtol, atol=atol)
