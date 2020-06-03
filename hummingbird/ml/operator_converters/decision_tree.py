@@ -204,6 +204,7 @@ def convert_sklearn_decision_tree_classifier(operator, device, extra_config):
     operator.raw_operator.estimators_ = [operator.raw_operator]
     return convert_sklearn_random_forest_classifier(operator, device, extra_config)
 
+
 def convert_sklearn_decision_tree_regressor(operator, device, extra_config):
     """
     Converter for `sklearn.tree.DecisionTreeRegressor`.
