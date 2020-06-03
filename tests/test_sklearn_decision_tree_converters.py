@@ -147,7 +147,7 @@ class TestSklearnRandomForestConverter(unittest.TestCase):
         # TODO: Extract method so that this can be reused across regressors.
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
-            model = DecisionTreeRegressor(n_estimators=10, max_depth=max_depth)
+            model = DecisionTreeRegressor(max_depth=max_depth)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
