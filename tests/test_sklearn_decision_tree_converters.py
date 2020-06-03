@@ -5,7 +5,7 @@ import unittest
 import warnings
 
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, ExtraTreesClassifier, ExtraTreesRegressor
+from sklearn.ensemble import ExtraTreesClassifier, ExtraTreesRegressor, RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 import hummingbird.ml
@@ -13,7 +13,7 @@ from hummingbird.ml.exceptions import MissingConverter
 from tree_utils import dt_implementation_map
 
 
-class TestSklearnRandomForestConverter(unittest.TestCase):
+class TestSklearnTreeConverter(unittest.TestCase):
     # Check tree implementation
     def test_random_forest_implementation(self):
         warnings.filterwarnings("ignore")
