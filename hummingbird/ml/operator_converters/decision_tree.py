@@ -224,9 +224,9 @@ def convert_sklearn_decision_tree_regressor(operator, device, extra_config):
 
 
 # Register the converters.
-register_converter("SklearnRandomForestClassifier", convert_sklearn_random_forest_classifier)
-register_converter("SklearnRandomForestRegressor", convert_sklearn_random_forest_regressor)
 register_converter("SklearnDecisionTreeClassifier", convert_sklearn_decision_tree_classifier)
 register_converter("SklearnDecisionTreeRegressor", convert_sklearn_decision_tree_regressor)
 register_converter("SklearnExtraTreesClassifier", convert_sklearn_random_forest_classifier)
 register_converter("SklearnExtraTreesRegressor", convert_sklearn_random_forest_regressor)
+register_converter("SklearnRandomForestClassifier", convert_sklearn_random_forest_classifier)
+register_converter("SklearnRandomForestRegressor", convert_sklearn_random_forest_regressor)
