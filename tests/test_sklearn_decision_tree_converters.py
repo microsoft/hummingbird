@@ -47,56 +47,43 @@ class TestSklearnTreeConverter(unittest.TestCase):
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
-    def _run_random_forest_classifier_converter(self, num_classes, extra_config={}, labels_shift=0):
-        warnings.filterwarnings("ignore")
-        for max_depth in [1, 3, 8, 10, 12, None]:
-            model = RandomForestClassifier(n_estimators=10, max_depth=max_depth)
-            X = np.random.rand(100, 200)
-            X = np.array(X, dtype=np.float32)
-            y = np.random.randint(num_classes, size=100) + labels_shift
-
-            model.fit(X, y)
-            pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
-
     # Binary classifier
     def test_random_forest_classifier_binary_converter(self):
-        self._run_random_forest_classifier_converter(2)
+        self._run_tree_classification_converter(RandomForestClassifier, 2, n_estimators=10)
 
     # Gemm classifier
     def test_random_forest_gemm_classifier_converter(self):
-        self._run_random_forest_classifier_converter(2, extra_config={"tree_implementation": "gemm"})
+        self._run_tree_classification_converter(RandomForestClassifier, 2, extra_config={"tree_implementation": "gemm"}, n_estimators=10)
 
     # Tree_trav classifier
     def test_random_forest_tree_trav_classifier_converter(self):
-        self._run_random_forest_classifier_converter(2, extra_config={"tree_implementation": "tree_trav"})
+        self._run_tree_classification_converter(RandomForestClassifier, 2, extra_config={"tree_implementation": "tree_trav"}, n_estimators=10)
 
     # Perf_tree_trav classifier
     def test_random_forest_perf_tree_trav_classifier_converter(self):
-        self._run_random_forest_classifier_converter(2, extra_config={"tree_implementation": "perf_tree_trav"})
+        self._run_tree_classification_converter(RandomForestClassifier, 2, extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10)
 
     # Multi classifier
     def test_random_forest_multi_classifier_converter(self):
-        self._run_random_forest_classifier_converter(3)
+        self._run_tree_classification_converter(RandomForestClassifier, 3, n_estimators=10)
 
     # Gemm multi classifier
     def test_random_forest_gemm_multi_classifier_converter(self):
-        self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
+        self._run_tree_classification_converter(RandomForestClassifier, 3, extra_config={"tree_implementation": "gemm"}, n_estimators=10)
 
     # Tree_trav multi classifier
     def test_random_forest_tree_trav_multi_classifier_converter(self):
-        self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
+        self._run_tree_classification_converter(RandomForestClassifier, 3, extra_config={"tree_implementation": "tree_trav"}, n_estimators=10)
 
     # Perf_tree_trav multi classifier
     def test_random_forest_perf_tree_trav_multi_classifier_converter(self):
-        self._run_random_forest_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
+        self._run_tree_classification_converter(RandomForestClassifier, 3, extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10)
 
     # Shifted classes
     def test_random_forest_classifier_shifted_labels_converter(self):
-        self._run_random_forest_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "gemm"})
-        self._run_random_forest_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "tree_trav"})
-        self._run_random_forest_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "perf_tree_trav"})
+        self._run_tree_classification_converter(RandomForestClassifier, 3, labels_shift=2, extra_config={"tree_implementation": "gemm"}, n_estimators=10)
+        self._run_tree_classification_converter(RandomForestClassifier, 3, labels_shift=2, extra_config={"tree_implementation": "tree_trav"}, n_estimators=10)
+        self._run_tree_classification_converter(RandomForestClassifier, 3, labels_shift=2, extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10)
 
     # Used for regression tests
     def _run_tree_regressor_converter(self, model_type, num_classes, extra_config={}, **kwargs):
