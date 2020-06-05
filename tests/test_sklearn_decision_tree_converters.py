@@ -79,10 +79,16 @@ class TestSklearnTreeConverter(unittest.TestCase):
     def test_random_forest_perf_tree_trav_multi_classifier_converter(self):
         self._run_tree_classification_converter(RandomForestClassifier, 3, extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10)
 
-    # Random forest shifted classes
-    def test_random_forest_classifier_shifted_labels_converter(self):
+    # Random forest gemm classifier shifted classes
+    def test_random_forest_gemm_classifier_shifted_labels_converter(self):
         self._run_tree_classification_converter(RandomForestClassifier, 3, labels_shift=2, extra_config={"tree_implementation": "gemm"}, n_estimators=10)
+
+    # Random forest tree_trav classifier shifted classes
+    def test_random_forest_tree_trav_classifier_shifted_labels_converter(self):
         self._run_tree_classification_converter(RandomForestClassifier, 3, labels_shift=2, extra_config={"tree_implementation": "tree_trav"}, n_estimators=10)
+
+    # Random forest perf_tree_trav classifier shifted classes
+    def test_random_forest_perf_tree_trav_classifier_shifted_labels_converter(self):
         self._run_tree_classification_converter(RandomForestClassifier, 3, labels_shift=2, extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10)
 
     # Used for regression tests
