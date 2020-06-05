@@ -27,8 +27,8 @@ class TestLGBMConverter(unittest.TestCase):
                     model, "pytorch", extra_config={"tree_implementation": extra_config_param}
                 )
                 self.assertIsNotNone(pytorch_model)
-                self.assertTrue(
-                    str(type(list(pytorch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
+                self.assertEqual(
+                    str(type(list(pytorch_model.operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
                 )
 
     def _run_lgbm_classifier_converter(self, num_classes, extra_config={}):
