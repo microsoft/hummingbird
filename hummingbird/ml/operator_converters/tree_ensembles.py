@@ -118,6 +118,28 @@ def _dummy_get_parameter(tree_info):
     return tree_info
 
 
+def _get_tree_infos_from_onnx_tree_enseble(operator, device=None, extra_config={}):
+    """
+    Base method for extracting parameters from `onnxml.TreeEnsemble`s.
+    """
+    assert constants.ONNX_INPUTS in extra_config or constants.N_FEATURES in extra_config
+
+    # Get the number of features.
+    if constants.ONNX_INPUTS in extra_config:
+        inputs = extra_config[constants.ONNX_INPUTS]
+
+        assert operator.origin.input[0] in inputs
+
+        n_features = inputs[operator.origin.input[0]].type.tensor_type.shape.dim[1].dim_value
+    else:
+        n_features = extra_config[constants.N_FEATURES]
+
+    tree_infos, classes, post_transform = _get_tree_infos_from_onnx_ml_operator(operator)
+
+    # Get tree informations from the operator.
+    return n_features, tree_infos, classes, post_transform
+
+
 def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={}):
     """
     Converter for `onnxml.TreeEnsembleClassifier`.
@@ -132,16 +154,8 @@ def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={})
     """
     assert operator is not None
 
-    inputs = extra_config["inputs"]
-    n_features = classes = None
-
-    assert operator.origin.input[0] in inputs
-
-    # Get the number of features.
-    n_features = inputs[operator.origin.input[0]].type.tensor_type.shape.dim[1].dim_value
-
     # Get tree informations from the operator.
-    tree_infos, classes, post_transform = _get_tree_infos_from_onnx_ml_operator(operator)
+    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
 
     # Generate the model.
     return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)
@@ -161,16 +175,8 @@ def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     """
     assert operator is not None
 
-    n_features = None
-    inputs = extra_config["inputs"]
-
-    assert operator.origin.input[0] in inputs
-
-    # Get the number of features.
-    n_features = inputs[operator.origin.input[0]].type.tensor_type.shape.dim[1].dim_value
-
     # Get tree informations from the operator.
-    tree_infos, _, _ = _get_tree_infos_from_onnx_ml_operator(operator)
+    n_features, tree_infos, _, _ = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
 
     # Generate the model.
     return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)

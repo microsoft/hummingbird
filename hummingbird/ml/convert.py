@@ -164,18 +164,20 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
     """
     This function converts the specified [ONNX-ML] model into its [ONNX] counterpart.
     The supported operators can be found at `hummingbird.ml.supported`.
+    The ONNX-ML converter requires either a test_input of a the initial types set through the exta_config parameter.
     [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
     [ONNX]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
 
     Args:
         model: A model containing ONNX-ML operators
-        test_input: Some input data used to trace the model execution
+        test_input: Some input data used to trace the model execution.
+                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
         extra_config: Extra configurations to be used by the individual operator converters.
                       The set of supported extra configurations can be found at `hummingbird.ml.supported`
 
     Examples:
         extra_config = {}
-        extra_config["initial_types"] =[('input', FloatTensorType([1, 20])]
+        extra_config[constans.ONNX_INITIAL_TYPES] =[('input', FloatTensorType([1, 20])]
         >>> onnx_model = _convert_onnxml(onnx_ml_model, None, extra_config)
 
     Returns:
@@ -188,9 +190,21 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
     output_model_name = initial_types = input_names = output_names = None
     target_opset = 9
 
+    # Set optional configuration options if any.
+    if constants.ONNX_OUTPUT_MODEL_NAME in extra_config:
+        output_model_name = extra_config[constants.ONNX_OUTPUT_MODEL_NAME]
+    if constants.ONNX_INITIAL_TYPES in extra_config:
+        initial_types = extra_config[constants.ONNX_INITIAL_TYPES]
+    if constants.ONNX_INPUT_NAMES in extra_config:
+        input_names = extra_config[constants.ONNX_INPUT_NAMES]
+    if constants.ONNX_OUTPUT_NAMES in extra_config:
+        output_names = extra_config[constants.ONNX_OUTPUT_NAMES]
+    if constants.ONNX_TARGET_OPSET in extra_config:
+        target_opset = extra_config[constants.ONNX_TARGET_OPSET]
+
     assert (
-        test_input is not None or initial_types is not None
-    ), "Cannot generate test input data. Either pass some input data or the initial_types"
+        test_input is not None and len(test_input) > 0
+    ) or initial_types is not None, "Cannot generate test input data. Either pass some input data or the initial_types"
 
     from .ir_converters.linked_node import convert as linked_node_converter
 
@@ -220,6 +234,7 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
         from onnxconverter_common.data_types import FloatTensorType, Int32TensorType
 
         test_input = np.random.rand(initial_types[0][1].shape[0], initial_types[0][1].shape[1])
+        extra_config[constants.N_FEATURES] = initial_types[0][1].shape[1]
         if type(initial_types[0][1]) is FloatTensorType:
             test_input = np.array(test_input, dtype=np.float32)
         elif type(initial_types[0][1]) is Int32TensorType:
@@ -257,7 +272,8 @@ def convert(model, backend, test_input=None, extra_config={}):
     Args:
         model: An input model
         backend: The target for the conversion
-        test_input: some input data used to trace the model execution
+        test_input: some input data used to trace the model execution.
+                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
         extra_config: Extra configurations to be used by the individual operator converters.
                       The set of supported extra configurations can be found at `hummingbird.ml.supported`
 

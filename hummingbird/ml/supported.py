@@ -188,3 +188,18 @@ N_FEATURES = "n_features"
 
 TREE_IMPLEMENTATION = "tree_implementation"
 """Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav."""
+
+ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
+"""For ONNX models we can set the name of the output model."""
+
+ONNX_INITIAL_TYPES = "onnx_initial_types"
+"""For ONNX models we can explicitly set the input types and shapes."""
+
+ONNX_INPUT_NAMES = "onnx_input_names"
+"""For ONNX models we can explicitly select the input columns to use."""
+
+ONNX_OUTPUT_NAMES = "onnx_output_names"
+"""For ONNX models we can explicitly select the output columns to return."""
+
+ONNX_TARGET_OPSET = "onnx_target_opset"
+"""For ONNX models we can set the target opset to use. 9 by default."""

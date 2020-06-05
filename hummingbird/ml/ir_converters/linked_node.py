@@ -10,6 +10,8 @@ Converters for LinkedNode IR are stored in this file.
 
 import os
 from uuid import uuid4
+from distutils.version import LooseVersion
+
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 from onnxconverter_common.registration import get_converter
 import onnxruntime as ort
@@ -17,6 +19,7 @@ import onnx
 from onnx import helper, shape_inference
 import torch
 
+from ..operator_converters import constants
 from ..supported import get_onnxml_api_operator_name
 from ..exceptions import MissingConverter
 
@@ -79,7 +82,13 @@ def convert(
                 converter = get_converter(alias)
 
                 # Convert the model from PyTorch to ONNX.
-                extra_config["inputs"] = all_tensors
+                if constants.N_FEATURES not in extra_config:
+                    extra_config[constants.ONNX_INPUTS] = all_tensors
+                # Early version of pytorch have a bug with exporting gemm into ONNX.
+                torch_version = LooseVersion(torch.__version__)
+                gemm_min = LooseVersion("1.5.0")
+                if torch_version < gemm_min:
+                    extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
                 pytorch_model = converter(node_, extra_config=extra_config)
 
                 # Generate the inputs for the tracing.

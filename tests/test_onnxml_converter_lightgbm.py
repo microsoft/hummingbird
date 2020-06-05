@@ -22,15 +22,13 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         super(TestONNXConverterLightGBM, self).__init__(*args, **kwargs)
 
     # Base test implementation comparing ONNXML and ONNX models.
-    def _test_lgbm(self, X, model):
+    def _test_lgbm(self, X, model, extra_config={}):
         # Create ONNX-ML model
         onnx_ml_model = convert_lightgbm(
             model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
         )
 
         # Create ONNX model
-        extra_config = {}
-        extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
         onnx_model = convert(onnx_ml_model, "onnx", X, extra_config)
 
         # Get the predictions for the ONNX-ML model
@@ -52,15 +50,15 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         return onnx_ml_pred, onnx_pred, output_names
 
     # Utility function for testing regression models.
-    def _test_regressor(self, X, model, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred, output_names = self._test_lgbm(X, model)
+    def _test_regressor(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
+        onnx_ml_pred, onnx_pred, output_names = self._test_lgbm(X, model, extra_config)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred[0], rtol=rtol, atol=atol)
 
     # Utility function for testing classification models.
-    def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred, output_names = self._test_lgbm(X, model)
+    def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
+        onnx_ml_pred, onnx_pred, output_names = self._test_lgbm(X, model, extra_config)
 
         # Check that predicted values match
         labels = []
@@ -92,6 +90,29 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         )
 
         self.assertRaises(RuntimeError, convert, onnx_ml_model, "torch")
+
+    # Check conveter with extra configs.
+    @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
+    def test_lightgbm_pytorch_extra_config(self):
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = np.array([100, -10, 50], dtype=np.float32)
+        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
+        model.fit(X, y)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_lightgbm(
+            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+        )
+
+        # Create ONNX model
+        model_name = "hummingbird.ml.test.lightgbm"
+        extra_config = {}
+        extra_config[constants.ONNX_OUTPUT_MODEL_NAME] = model_name
+        extra_config[constants.ONNX_INITIAL_TYPES] = [("input", FloatTensorType([X.shape[0], X.shape[1]]))]
+        onnx_model = convert(onnx_ml_model, "onnx", extra_config=extra_config)
+
+        assert onnx_model.graph.name == model_name
 
     # Basic regression test.
     @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
