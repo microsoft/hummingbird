@@ -161,17 +161,28 @@ class TestSklearnTreeConverter(unittest.TestCase):
     def test_extra_trees_classifier_converter(self):
         self._run_tree_classification_converter(ExtraTreesClassifier, 3, n_estimators=10)
 
-    # Small tree
-    def test_random_forest_classifier_single_node_tree_converter(self):
+    # Used for small tree tests
+    def _run_random_forest_classifier_single_node_tree_converter(self, extra_config={}):
         warnings.filterwarnings("ignore")
-        for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
-            X = np.random.rand(1, 1)
-            X = np.array(X, dtype=np.float32)
-            y = np.random.randint(1, size=1)
-            model = RandomForestClassifier(n_estimators=1).fit(X, y)
-            pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config={"tree_implementation": extra_config_param})
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+        X = np.random.rand(1, 1)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(1, size=1)
+        model = RandomForestClassifier(n_estimators=1).fit(X, y)
+        pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
+        self.assertTrue(pytorch_model is not None)
+        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+    # Small tree gemm implementation
+    def test_random_forest_gemm_classifier_single_node_tree_converter(self):
+        self._run_random_forest_classifier_single_node_tree_converter(extra_config={"tree_implementation": "gemm"})
+
+    # Small tree tree_trav implementation
+    def test_random_forest_tree_trav_classifier_single_node_tree_converter(self):
+        self._run_random_forest_classifier_single_node_tree_converter(extra_config={"tree_implementation": "tree_trav"})
+
+    # Small tree perf_tree_trav implementation
+    def test_random_forest_perf_tree_trav_classifier_single_node_tree_converter(self):
+        self._run_random_forest_classifier_single_node_tree_converter(extra_config={"tree_implementation": "perf_tree_trav"})
 
     # Failure Cases
     def test_random_forest_classifier_raises_wrong_type(self):
