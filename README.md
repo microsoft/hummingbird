@@ -14,7 +14,7 @@ Currently, you can use *Hummingbird* to convert your trained traditional ML mode
 
 ## Installation
 
-Hummingbird was tested on Python >= 3.6 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
+Hummingbird was tested on Python >= 3.5 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
 ```
 pip install hummingbird-ml
 ```
@@ -57,6 +57,8 @@ model.predict(X)
 # Documentation
 
 The API documentation is [here](https://microsoft.github.io/hummingbird/).
+
+You can also read about Hummingbird in our blog post [here](https://azuredata.microsoft.com/articles/ebd95ec0-1eae-44a3-90f5-c11f5c916d15).
 
 For more details on the vision and on the technical details related to Hummingbird, please check our papers:
 

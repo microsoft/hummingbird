@@ -120,12 +120,31 @@ def convert_sklearn_decision_tree_classifier(operator, device, extra_config):
     return convert_sklearn_random_forest_classifier(operator, device, extra_config)
 
 
+def convert_sklearn_decision_tree_regressor(operator, device, extra_config):
+    &#34;&#34;&#34;
+    Converter for `sklearn.tree.DecisionTreeRegressor`.
+
+    Args:
+        operator: An operator wrapping a `sklearn.tree.DecisionTreeRegressor` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+    assert operator is not None
+
+    operator.raw_operator.estimators_ = [operator.raw_operator]
+    return convert_sklearn_random_forest_regressor(operator, device, extra_config)
+
+
 # Register the converters.
-register_converter(&#34;SklearnRandomForestClassifier&#34;, convert_sklearn_random_forest_classifier)
-register_converter(&#34;SklearnRandomForestRegressor&#34;, convert_sklearn_random_forest_regressor)
 register_converter(&#34;SklearnDecisionTreeClassifier&#34;, convert_sklearn_decision_tree_classifier)
+register_converter(&#34;SklearnDecisionTreeRegressor&#34;, convert_sklearn_decision_tree_regressor)
 register_converter(&#34;SklearnExtraTreesClassifier&#34;, convert_sklearn_random_forest_classifier)
-register_converter(&#34;SklearnExtraTreesRegressor&#34;, convert_sklearn_random_forest_regressor)</code></pre>
+register_converter(&#34;SklearnExtraTreesRegressor&#34;, convert_sklearn_random_forest_regressor)
+register_converter(&#34;SklearnRandomForestClassifier&#34;, convert_sklearn_random_forest_classifier)
+register_converter(&#34;SklearnRandomForestRegressor&#34;, convert_sklearn_random_forest_regressor)</code></pre>
 </details>
 </section>
 <section>
@@ -174,6 +193,47 @@ register_converter(&#34;SklearnExtraTreesRegressor&#34;, convert_sklearn_random_
 
     operator.raw_operator.estimators_ = [operator.raw_operator]
     return convert_sklearn_random_forest_classifier(operator, device, extra_config)</code></pre>
+</details>
+</dd>
+<dt id="hummingbird.ml.operator_converters.decision_tree.convert_sklearn_decision_tree_regressor"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_decision_tree_regressor</span></span>(<span>operator, device, extra_config)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Converter for <code>sklearn.tree.DecisionTreeRegressor</code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>operator</code></strong></dt>
+<dd>An operator wrapping a <code>sklearn.tree.DecisionTreeRegressor</code> model</dd>
+<dt><strong><code>device</code></strong></dt>
+<dd>String defining the type of device the converted operator should be run on</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to select the best conversion strategy</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A PyTorch model</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def convert_sklearn_decision_tree_regressor(operator, device, extra_config):
+    &#34;&#34;&#34;
+    Converter for `sklearn.tree.DecisionTreeRegressor`.
+
+    Args:
+        operator: An operator wrapping a `sklearn.tree.DecisionTreeRegressor` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+    assert operator is not None
+
+    operator.raw_operator.estimators_ = [operator.raw_operator]
+    return convert_sklearn_random_forest_regressor(operator, device, extra_config)</code></pre>
 </details>
 </dd>
 <dt id="hummingbird.ml.operator_converters.decision_tree.convert_sklearn_random_forest_classifier"><code class="name flex">
@@ -300,6 +360,7 @@ register_converter(&#34;SklearnExtraTreesRegressor&#34;, convert_sklearn_random_
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="hummingbird.ml.operator_converters.decision_tree.convert_sklearn_decision_tree_classifier" href="#hummingbird.ml.operator_converters.decision_tree.convert_sklearn_decision_tree_classifier">convert_sklearn_decision_tree_classifier</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.decision_tree.convert_sklearn_decision_tree_regressor" href="#hummingbird.ml.operator_converters.decision_tree.convert_sklearn_decision_tree_regressor">convert_sklearn_decision_tree_regressor</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.decision_tree.convert_sklearn_random_forest_classifier" href="#hummingbird.ml.operator_converters.decision_tree.convert_sklearn_random_forest_classifier">convert_sklearn_random_forest_classifier</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.decision_tree.convert_sklearn_random_forest_regressor" href="#hummingbird.ml.operator_converters.decision_tree.convert_sklearn_random_forest_regressor">convert_sklearn_random_forest_regressor</a></code></li>
 </ul>

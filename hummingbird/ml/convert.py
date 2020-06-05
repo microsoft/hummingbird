@@ -65,7 +65,7 @@ def _supported_model_format_backend_mapping_check(model, backend):
 def _convert_sklearn(model, test_input=None, extra_config={}):
     """
     This function converts the specified *scikit-learn* (API) model into its [PyTorch] counterpart.
-    The supported operators can be found at `hummingbird.supported`.
+    The supported operators can be found at `hummingbird.ml.supported`.
     [PyTorch]: https://pytorch.org/
 
     Args:
@@ -247,8 +247,8 @@ def convert(model, backend, test_input=None, extra_config={}):
     """
     This function converts the specified input *model* into an implementation targeting *backend*.
     *Convert* supports [Sklearn], [LightGBM], [XGBoost] and [ONNX] models.
-    For *LightGBM* and *XGBoost currently only the Sklearn API is supported.
-    The detailed list of models and backends can be found at `hummingbird.supported`.
+    For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
+    The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     [Sklearn]: https://scikit-learn.org/
     [LightGBM]: https://lightgbm.readthedocs.io/
     [XGBoost]: https://xgboost.readthedocs.io/
@@ -259,7 +259,7 @@ def convert(model, backend, test_input=None, extra_config={}):
         backend: The target for the conversion
         test_input: some input data used to trace the model execution
         extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.supported_configurations`
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
 
     Examples:
         >>> pytorch_model = convert(sklearn_model,`torch`)
