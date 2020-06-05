@@ -26,7 +26,7 @@ class TestXGBoostConverter(unittest.TestCase):
                 pytorch_model = hummingbird.ml.convert(
                     model, "pytorch", X[0:1], extra_config={"tree_implementation": extra_config_param}
                 )
-                self.assertTrue(pytorch_model is not None)
+                self.assertIsNotNone(pytorch_model)
                 self.assertTrue(
                     str(type(list(pytorch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
                 )
@@ -42,7 +42,7 @@ class TestXGBoostConverter(unittest.TestCase):
             model.fit(X, y)
 
             pytorch_model = hummingbird.ml.convert(model, "pytorch", [], extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
+            self.assertIsNotNone(pytorch_model)
             np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Binary classifier
@@ -87,7 +87,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
             pytorch_model = hummingbird.ml.convert(model, "pytorch", X[0:1], extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
+            self.assertIsNotNone(pytorch_model)
             np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Regressor
@@ -120,7 +120,7 @@ class TestXGBoostConverter(unittest.TestCase):
             pytorch_model = hummingbird.ml.convert(
                 model, "pytorch", [], extra_config={"tree_implementation": extra_config_param}
             )
-            self.assertTrue(pytorch_model is not None)
+            self.assertIsNotNone(pytorch_model)
             np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
 
