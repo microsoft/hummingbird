@@ -33,6 +33,20 @@ class TestSklearnTreeConverter(unittest.TestCase):
                     str(type(list(pytorch_model.operator_map.values())[0])) == dt_implementation_map[extra_config_param]
                 )
 
+    # Used for classification tests
+    def _run_tree_classification_converter(self, model_type, num_classes, extra_config={}, labels_shift=0, **kwargs):
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(num_classes, size=100) + labels_shift
+
+            model = model_type(max_depth=max_depth, **kwargs)
+            model.fit(X, y)
+            pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
+            self.assertTrue(pytorch_model is not None)
+            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
     def _run_random_forest_classifier_converter(self, num_classes, extra_config={}, labels_shift=0):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
@@ -146,27 +160,11 @@ class TestSklearnTreeConverter(unittest.TestCase):
     def test_decision_tree_perf_tree_trav_regressor_converter(self):
         self._run_tree_regressor_converter(DecisionTreeRegressor, 1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
-    # Used for DecisionTreeClassifier and ExtraTreesClassifier
-    def _run_test_other_trees_classifier(self, model):
-        X = np.random.rand(100, 200)
-        X = np.array(X, dtype=np.float32)
-        y = np.random.randint(3, size=100)
-
-        model.fit(X, y)
-        pytorch_model = hummingbird.ml.convert(model, "pytorch")
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
-
     def test_decision_tree_classifier_converter(self):
-        for max_depth in [1, 3, 8, 10, 12, None]:
-            model = DecisionTreeClassifier(max_depth=max_depth)
-            self._run_test_other_trees_classifier(model)
+        self._run_tree_classification_converter(DecisionTreeClassifier, 3)
 
     def test_extra_trees_classifier_converter(self):
-        warnings.filterwarnings("ignore")
-        for max_depth in [1, 3, 8, 10, 12, None]:
-            model = ExtraTreesClassifier(n_estimators=10, max_depth=max_depth)
-            self._run_test_other_trees_classifier(model)
+        self._run_tree_classification_converter(ExtraTreesClassifier, 3, n_estimators=10)
 
     # Small tree
     def test_random_forest_classifier_single_node_tree_converter(self):
