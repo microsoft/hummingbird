@@ -28,7 +28,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
                 pytorch_model = hummingbird.ml.convert(
                     model, "pytorch", extra_config={"tree_implementation": extra_config_param}
                 )
-                self.assertTrue(pytorch_model is not None)
+                self.assertIsNotNone(pytorch_model)
                 self.assertTrue(
                     str(type(list(pytorch_model.operator_map.values())[0])) == dt_implementation_map[extra_config_param]
                 )
@@ -44,7 +44,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
             model = model_type(max_depth=max_depth, **kwargs)
             model.fit(X, y)
             pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
+            self.assertIsNotNone(pytorch_model)
             np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Random forest binary classifier
@@ -102,7 +102,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
             model.fit(X, y)
             pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
+            self.assertIsNotNone(pytorch_model)
             np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Random forest regressor
@@ -169,7 +169,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
         y = np.random.randint(1, size=1)
         model = RandomForestClassifier(n_estimators=1).fit(X, y)
         pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
-        self.assertTrue(pytorch_model is not None)
+        self.assertIsNotNone(pytorch_model)
         np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Small tree gemm implementation

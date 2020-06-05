@@ -25,7 +25,7 @@ class TestBackends(unittest.TestCase):
         model.fit(X, y)
 
         hb_model = hummingbird.ml.convert(model, "pYtOrCh")
-        self.assertTrue(hb_model is not None)
+        self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Test not supported backends
