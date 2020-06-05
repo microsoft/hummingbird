@@ -118,10 +118,10 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
     def test_lgbm_onnxml_model_regressor(self):
         n_features = 28
-        n_total = 1000
+        n_total = 100
         X = np.random.rand(n_total, n_features)
         X = np.array(X, dtype=np.float32)
-        y = np.random.randint(1000, size=n_total)
+        y = np.random.randint(n_total, size=n_total)
 
         # Create LightGBM model
         model = lgb.LGBMRegressor()
@@ -175,7 +175,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
     def test_lgbm_onnxml_model_binary(self):
         n_features = 28
-        n_total = 1000
+        n_total = 100
         X = np.random.rand(n_total, n_features)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(2, size=n_total)
@@ -229,7 +229,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     @unittest.skipIf(not (onnx_ml_tools_installed and onnx_installed), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
     def test_lgbm_onnxml_model_multi(self):
         n_features = 28
-        n_total = 1000
+        n_total = 100
         X = np.random.rand(n_total, n_features)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=n_total)
