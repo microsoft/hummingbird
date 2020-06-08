@@ -180,22 +180,11 @@ def get_parameters_for_sklearn_common(tree_infos):
     trees = tree_infos
     if hasattr(trees, "nodes"):
         # SklearnHistGradientBoostingClassifier
-
-        lefts = [trees.nodes[x]["left"] for x in range(len(trees.nodes))]
-        # Use -1 instead of 0 for nodes with no lefts
-        lefts = [idx if idx != 0 else -1 for idx in lefts]
-
-        rights = [trees.nodes[x]["right"] for x in range(len(trees.nodes))]
-        # Use -1 instead of 0 for nodes with no rights
-        rights = [idx if idx != 0 else -1 for idx in rights]
-
-        features = [trees.nodes[x]["feature_idx"] for x in range(len(trees.nodes))]
-        thresholds = [trees.nodes[x]["threshold"] for x in range(len(trees.nodes))]
-
-        values = [trees.nodes[x]["value"] for x in range(len(trees.nodes))]
-        # Convert to numpy.ndarray with shape (s, 1, 1)
-        values = np.array(values)
-        values = values.reshape((values.shape[0], 1, 1))
+        features = [n[2] if n[2]!=0 else 0 for n in trees.nodes]
+        thresholds = [n[3] if n[3]!=0 else -1 for n in trees.nodes]
+        lefts = [n[4] if n[4]!=0 else -1 for n in trees.nodes]
+        rights = [n[5] if n[5]!=0 else -1 for n in trees.nodes]
+        values = [[n[0]] if n[0]!=0 else [-1] for n in trees.nodes]
 
     elif hasattr(trees, "tree_"):
         # SklearnGradientBoostingClassifier
@@ -276,8 +265,8 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
 
 def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values):
     """
-    This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
-    Includes SklearnRandomForestClassifier/Regressor, SklearnGradientBoostingClassifier and SklearnHistGradientBoostingClassifier
+    This function is used to generate tree parameters for sklearn trees.
+    Includes SklearnRandomForestClassifier/Regressor, and SklearnGradientBoostingClassifier.
 
     Args:
         left: The left nodes

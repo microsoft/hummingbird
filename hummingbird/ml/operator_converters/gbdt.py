@@ -23,7 +23,8 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     Converter for `sklearn.ensemble.GradientBoostingClassifier` or `sklearn.ensemble.HistGradientBoostingClassifier`
 
     Args:
-        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingClassifier` or `sklearn.ensemble.HistGradientBoostingClassifier` model
+        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingClassifier` 
+                  or `sklearn.ensemble.HistGradientBoostingClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -36,11 +37,14 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     if hasattr(operator.raw_operator, "estimators_"):
         # SklearnGradientBoostingClassifier
         tree_infos = operator.raw_operator.estimators_
+        # GBDT does not scale the value using the learning rate upfront, we have to do it.
+        extra_config[constants.LEARNING_RATE] = operator.raw_operator.learning_rate
+        # GBDT does not normalize values upfront, we have to do it.
+        extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
     elif hasattr(operator.raw_operator, "_predictors"):
         # SklearnHistGradientBoostingClassifier
         tree_infos = operator.raw_operator._predictors
     n_features = operator.raw_operator.n_features_
-    learning_rate = operator.raw_operator.learning_rate
     classes = operator.raw_operator.classes_.tolist()
     n_classes = len(classes)
 
@@ -73,9 +77,6 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
             alpha = np.array([operator.raw_operator._baseline_prediction.flatten().tolist()])
 
     extra_config[constants.ALPHA] = alpha
-    extra_config[constants.LEARNING_RATE] = learning_rate
-    # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
-    extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
 
     return convert_gbdt_classifier_common(
         tree_infos, get_parameters_for_sklearn_common, n_features, n_classes, classes, extra_config
@@ -119,5 +120,5 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
 
 # Register the converters.
 register_converter("SklearnGradientBoostingClassifier", convert_sklearn_gbdt_classifier)
-register_converter("SklearnHistGradientBoostingClassifier", convert_sklearn_gbdt_classifier)
 register_converter("SklearnGradientBoostingRegressor", convert_sklearn_gbdt_regressor)
+register_converter("SklearnHistGradientBoostingClassifier", convert_sklearn_gbdt_classifier)
