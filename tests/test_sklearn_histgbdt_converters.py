@@ -13,13 +13,6 @@ from tree_utils import gbdt_implementation_map
 
 
 class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
-    # Check tree implementation
-    def test_gbdt_implementation(self):
-        warnings.filterwarnings("ignore")
-        X = np.random.rand(10, 1)
-        X = np.array(X, dtype=np.float32)
-        # y = np.random.randint(2, size=10)
-
     def _run_GB_trees_classifier_converter(self, num_classes, extra_config={}, labels_shift=0):
         warnings.filterwarnings("ignore")
         for max_depth in [2, 3, 8, 10, 12, None]:
