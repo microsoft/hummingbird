@@ -31,7 +31,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        xcode-select --install
         brew install libomp
         pip install -r requirements/test.txt .
     - name: Lint with flake8
