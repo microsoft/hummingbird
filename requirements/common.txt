@@ -1,7 +1,7 @@
 numpy>=1.15
 Cython
 scikit-learn==0.21.3
-torch>=1.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+torch>=1.4.0
 xgboost==0.90
 lightgbm>=2.2
 onnxconverter-common>=1.6.0
