@@ -54,7 +54,7 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
         A model implemented in *PyTorch*, which is equivalent to the input *scikit-learn* model
     """
     assert model is not None
-    assert torch_installed(), "To use Hummingbird you need to install torch."
+    assert torch_installed(), "To use Hummingbird you need to install torch (or `pip install hummingbird-ml[extra]`)."
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
     # We modify the scikit learn model during optimizations.
@@ -84,7 +84,9 @@ def _convert_lightgbm(model, test_input=None, extra_config={}):
     Returns:
         A *PyTorch* model which is equivalent to the input *LightGBM* model
     """
-    assert lightgbm_installed(), "To convert LightGBM models you need to instal LightGBM."
+    assert (
+        lightgbm_installed()
+    ), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
 
     return _convert_sklearn(model, test_input, extra_config)
 
@@ -107,7 +109,9 @@ def _convert_xgboost(model, test_input, extra_config={}):
     Returns:
         A *PyTorch* model which is equivalent to the input *XGBoost* model
     """
-    assert xgboost_installed(), "To convert XGboost models you need to instal XGBoost."
+    assert (
+        xgboost_installed()
+    ), "To convert XGboost models you need to instal XGBoost (or `pip install hummingbird-ml[extra]`)."
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
