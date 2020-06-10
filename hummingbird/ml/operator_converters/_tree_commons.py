@@ -168,32 +168,16 @@ def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
 
 def get_parameters_for_sklearn_common(tree_infos):
     """
-    Parse sklearn-based trees, including
-    SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier/Regressor and SklearnHistGradientBoostingClassifier
-
+    Parse sklearn-based trees, including SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier/Regressor
     Args:
         tree_infos: The information representing a tree (ensemble)
-
-    Returns: The tree parameters wrapped into an instance of
-             `operator_converters._tree_commons_TreeParameters`
+        Returns: The tree parameters wrapped into an instance of `operator_converters._tree_commons_TreeParameters`
     """
-    trees = tree_infos
-    if hasattr(trees, "nodes"):
-        # SklearnHistGradientBoostingClassifier
-        features = [n[2] if n[2]!=0 else 0 for n in trees.nodes]
-        thresholds = [n[3] if n[3]!=0 else -1 for n in trees.nodes]
-        lefts = [n[4] if n[4]!=0 else -1 for n in trees.nodes]
-        rights = [n[5] if n[5]!=0 else -1 for n in trees.nodes]
-        values = [[n[0]] if n[0]!=0 else [-1] for n in trees.nodes]
-
-    elif hasattr(trees, "tree_"):
-        # SklearnGradientBoostingClassifier
-
-        lefts = trees.tree_.children_left
-        rights = trees.tree_.children_right
-        features = trees.tree_.feature
-        thresholds = trees.tree_.threshold
-        values = trees.tree_.value
+    lefts = tree_infos.tree_.children_left
+    rights = tree_infos.tree_.children_right
+    features = tree_infos.tree_.feature
+    thresholds = tree_infos.tree_.threshold
+    values = tree_infos.tree_.value
 
     return TreeParameters(lefts, rights, features, thresholds, values)
 

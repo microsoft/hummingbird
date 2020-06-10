@@ -1,7 +1,7 @@
 # Hummingbird
 
 [![PyPI version](https://badge.fury.io/py/hummingbird-ml.svg)](https://badge.fury.io/py/hummingbird-ml)
-![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=develop)
+![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=master)
 ![](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7%20%7C%203.8-blue)
 [![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/master/graph/badge.svg)](https://codecov.io/github/microsoft/hummingbird?branch=master)
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
@@ -14,7 +14,7 @@ Currently, you can use *Hummingbird* to convert your trained traditional ML mode
 
 ## Installation
 
-Hummingbird was tested on Python >= 3.6 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
+Hummingbird was tested on Python >= 3.5 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
 ```
 pip install hummingbird-ml
 ```

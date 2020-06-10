@@ -24,7 +24,7 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
             model.fit(X, y)
             pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
             self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-03, atol=1e-03)
 
     # Binary classifier
     def test_HistGBDT_classifier_binary_converter(self):

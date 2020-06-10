@@ -12,13 +12,14 @@ PyTorch
 
 **Supported Operators**
 DecisionTreeClassifier,
-RandomForestClassifier,
-RandomForestRegressor,
-GradientBoostingClassifier,
-HistGradientBoostingClassifier,
-GradientBoostingRegressor,
+DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
+GradientBoostingClassifier,
+GradientBoostingRegressor,
+HistGradientBoostingClassifier,
+RandomForestClassifier,
+RandomForestRegressor,
 LGBMClassifier,
 LGBMRegressor,
 XGBClassifier,
@@ -42,26 +43,27 @@ def _build_sklearn_operator_list():
 
         # Tree-based models
         from sklearn.ensemble import (
-            RandomForestClassifier,
-            RandomForestRegressor,
-            GradientBoostingClassifier,
-            HistGradientBoostingClassifier,
-            GradientBoostingRegressor,
             ExtraTreesClassifier,
             ExtraTreesRegressor,
+            GradientBoostingClassifier,
+            GradientBoostingRegressor,
+            HistGradientBoostingClassifier,
+            RandomForestClassifier,
+            RandomForestRegressor,
         )
-        from sklearn.tree import DecisionTreeClassifier
+        from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
         return [
             # Tree-methods
             DecisionTreeClassifier,
-            RandomForestClassifier,
-            RandomForestRegressor,
-            GradientBoostingClassifier,
-            HistGradientBoostingClassifier,
-            GradientBoostingRegressor,
+            DecisionTreeRegressor,
             ExtraTreesClassifier,
             ExtraTreesRegressor,
+            GradientBoostingClassifier,
+            GradientBoostingRegressor,
+            HistGradientBoostingClassifier,
+            RandomForestClassifier,
+            RandomForestRegressor,
         ]
 
     return None
