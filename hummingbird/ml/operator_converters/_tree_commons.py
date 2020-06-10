@@ -168,21 +168,16 @@ def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
 
 def get_parameters_for_sklearn_common(tree_infos):
     """
-    Parse sklearn-based trees, including
-    SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier/Regressor
-
+    Parse sklearn-based trees, including SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier/Regressor
     Args:
-        tree_infos: The information representaing a tree (ensemble)
-
-    Returns: The tree parameters wrapped into an instance of
-             `operator_converters._tree_commons_TreeParameters`
+        tree_infos: The information representing a tree (ensemble)
+        Returns: The tree parameters wrapped into an instance of `operator_converters._tree_commons_TreeParameters`
     """
-    trees = tree_infos
-    lefts = trees.tree_.children_left
-    rights = trees.tree_.children_right
-    features = trees.tree_.feature
-    thresholds = trees.tree_.threshold
-    values = trees.tree_.value
+    lefts = tree_infos.tree_.children_left
+    rights = tree_infos.tree_.children_right
+    features = tree_infos.tree_.feature
+    thresholds = tree_infos.tree_.threshold
+    values = tree_infos.tree_.value
 
     return TreeParameters(lefts, rights, features, thresholds, values)
 
@@ -254,8 +249,8 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
 
 def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values):
     """
-    This function is used to generate tree parameters for sklearn trees accordingy to the tree_trav strategy.
-    Includes SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier
+    This function is used to generate tree parameters for sklearn trees.
+    Includes SklearnRandomForestClassifier/Regressor, and SklearnGradientBoostingClassifier.
 
     Args:
         left: The left nodes
