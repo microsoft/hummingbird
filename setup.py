@@ -32,6 +32,7 @@ setup(
     author="Microsoft Corporation",
     author_email="hummingbird-dev@microsoft.com",
     url="https://github.com/microsoft/hummingbird",
+    dependency_links=["https://download.pytorch.org/whl/torch_stable.html"],
     packages=packages,
     include_package_data=True,
     install_requires=requirements,
