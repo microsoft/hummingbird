@@ -1,11 +1,7 @@
 numpy>=1.15
 Cython
 scikit-learn==0.21.3
-torch==1.5.0 -e https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl  ; python_version == '3.5' and sys_platform == 'win32'
-torch==1.5.0 -e https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl  ; python_version == '3.6' and sys_platform == 'win32'
-torch==1.5.0 -e https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl  ; python_version == '3.7' and sys_platform == 'win32'
-torch==1.5.0 -e https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38m-win_amd64.whl  ; python_version == '3.8' and sys_platform == 'win32'
-torch>=1.4.0 ; sys_platform == 'linux' or sys_platform == 'darwin'
+torch>=1.4.0
 xgboost==0.90
 lightgbm>=2.2
 onnxconverter-common>=1.6.0
