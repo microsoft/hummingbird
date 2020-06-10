@@ -12,7 +12,7 @@ RUN update-alternatives --set python /usr/bin/python3.6
 RUN pip3 -q install pip --upgrade
 
 # Install HB
-RUN pip install hummingbird-ml[docs,tests,extra]
+RUN pip3 install hummingbird-ml[docs,tests,extra]
 
 # Install additional dev gools for notebook env
 RUN pip3 install autopep8 jupyter
