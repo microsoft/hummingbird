@@ -17,9 +17,9 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [2, 3, 8, 10, 12, None]:
             model = HistGradientBoostingClassifier(max_iter=10, max_depth=max_depth)
-            X = np.random.rand(100, 200)
+            X = [[0, 1], [1, 1], [2, 0]]
             X = np.array(X, dtype=np.float32)
-            y = np.random.randint(num_classes, size=100) + labels_shift
+            y = np.array([100, -10, 50]) + labels_shift
 
             model.fit(X, y)
             pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
