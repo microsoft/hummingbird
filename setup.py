@@ -32,6 +32,12 @@ setup(
     author="Microsoft Corporation",
     author_email="hummingbird-dev@microsoft.com",
     url="https://github.com/microsoft/hummingbird",
+    dependency_links=[
+        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl",
+        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl",
+        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl",
+        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38m-win_amd64.whl",
+    ],
     packages=packages,
     include_package_data=True,
     install_requires=requirements,
