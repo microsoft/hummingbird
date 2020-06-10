@@ -11,7 +11,7 @@ packages = find_packages()
 assert packages
 
 # read version from the package file.
-version_str = "0.0.1"
+version_str = "0.0.2"
 with (open(os.path.join(this, "hummingbird/__init__.py"), "r")) as f:
     line = [_ for _ in [_.strip("\r\n ") for _ in f.readlines()] if _.startswith("__version__")]
     if len(line) > 0:
