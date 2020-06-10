@@ -18,6 +18,6 @@ RUN apt-get update \
 ENV DEBIAN_FRONTEND=dialog
 
 #
-# Install dependencies
+# Install extras for development
 #
-RUN pip3 --disable-pip-version-check --no-cache-dir install flake8 coverage autopep8 pre-commit pylint pytest
+RUN pip3 --disable-pip-version-check --no-cache-dir install hummingbird-ml[docs,tests,extra] autopep8
