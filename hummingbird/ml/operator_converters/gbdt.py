@@ -39,7 +39,7 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     Converter for `sklearn.ensemble.GradientBoostingClassifier`
 
     Args:
-        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingClassifier` 
+        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingClassifier`
                   or `sklearn.ensemble.HistGradientBoostingClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
