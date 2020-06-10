@@ -35,7 +35,6 @@ def sklearn_installed():
 
         return True
     except ImportError:
-        warnings.warn("To use sklearn with Hummingbird, please install `sklearn`, or: `pip install hummingbird-ml[extra]`")
         return False
 
 
@@ -48,7 +47,6 @@ def lightgbm_installed():
 
         return True
     except ImportError:
-        warnings.warn("To use lightgbm with Hummingbird, please install `lightgbm` or: `pip install hummingbird-ml[extra]`")
         return False
 
 
@@ -59,7 +57,6 @@ def xgboost_installed():
     try:
         import xgboost
     except ImportError:
-        warnings.warn("To use xgboost with Hummingbird, please install `xgboost` or: `pip install hummingbird-ml[extra]`")
         return False
     from xgboost.core import _LIB
 
