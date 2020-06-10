@@ -35,7 +35,7 @@ The simplest setup is:
 mkdir hummingbird
 cd hummingbird
 git clone https://github.com/microsoft/hummingbird.git .
-pip install -e .
+pip install -e .[docs,tests,extra]
 ```
 
 ### Docker

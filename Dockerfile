@@ -12,10 +12,10 @@ RUN update-alternatives --set python /usr/bin/python3.6
 RUN pip3 -q install pip --upgrade
 
 # Install HB
-RUN pip3 install hummingbird-ml
+RUN pip install hummingbird-ml[docs,tests,extra]
 
-# Install HB dev tools
-RUN pip3 install flake8 coverage autopep8 jupyter pre-commit pytest
+# Install additional dev gools for notebook env
+RUN pip3 install autopep8 jupyter
 
 # Jupyter
 EXPOSE 8888

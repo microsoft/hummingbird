@@ -4,9 +4,6 @@ import os
 
 this = os.path.dirname(__file__)
 
-with open(os.path.join(this, "requirements", "common.txt"), "r") as f:
-    requirements = [_ for _ in [_.strip("\r\n ") for _ in f.readlines()] if _ is not None]
-
 packages = find_packages()
 assert packages
 
@@ -34,7 +31,17 @@ setup(
     url="https://github.com/microsoft/hummingbird",
     packages=packages,
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=["numpy>=1.15", "Cython", "torch>=1.4.0", "onnxconverter-common>=1.6.0"],
+    extras_require={
+        "tests": ["flake8", "pytest", "coverage", "pre-commit"],
+        "docs": ["pdoc"],
+        "extra": [
+            # The need each for these depends on which libraries you plan to convert from
+            "scikit-learn==0.21.3",
+            "xgboost==0.90",
+            "lightgbm>=2.2",
+        ],
+    },
     classifiers=[
         "Environment :: Console",
         "Intended Audience :: Developers",
