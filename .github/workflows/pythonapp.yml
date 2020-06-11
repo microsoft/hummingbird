@@ -33,6 +33,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install  --no-cache-dir .
     - name: Run basic tests without extra
+      run: |
         pytest tests/test_no_extra_install.py
         coverage run -a -m pytest tests/test_no_extra_install.py
     - name: Install extra dependencies
