@@ -17,9 +17,10 @@ on:
 jobs:
   build:
 
-    runs-on: [ubuntu-latest, windows-2019]
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-2019]
         python-version: [3.5, 3.6, 3.7, 3.8]
 
     steps:
