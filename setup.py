@@ -1,17 +1,15 @@
 from distutils.core import setup
 from setuptools import find_packages
 import os
+import sys
 
 this = os.path.dirname(__file__)
-
-with open(os.path.join(this, "requirements", "common.txt"), "r") as f:
-    requirements = [_ for _ in [_.strip("\r\n ") for _ in f.readlines()] if _ is not None]
 
 packages = find_packages()
 assert packages
 
 # read version from the package file.
-version_str = "0.0.1"
+version_str = "0.0.2"
 with (open(os.path.join(this, "hummingbird/__init__.py"), "r")) as f:
     line = [_ for _ in [_.strip("\r\n ") for _ in f.readlines()] if _.startswith("__version__")]
     if len(line) > 0:
@@ -24,6 +22,19 @@ with open(README) as f:
     if start_pos >= 0:
         long_description = long_description[start_pos:]
 
+common_requirements = ["numpy>=1.15", "Cython", "onnxconverter-common>=1.6.0", "torch>=1.4.0"]
+common_requirements.append("torch>=1.4.0")
+# if sys.platform == "darwin" or sys.platform == "ubuntu":
+#     common_requirements.append("torch>=1.4.0")
+# else:
+# import urllib.request
+
+# print('Getting PyTorc wheel from https://download.pytorch.org')
+
+# url = 'https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl'
+# urllib.request.urlretrieve(url, 'torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl')
+# common_requirements.append("https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl#egg=torch-1.5.0")
+
 setup(
     name="hummingbird-ml",
     version=version_str,
@@ -32,10 +43,19 @@ setup(
     author="Microsoft Corporation",
     author_email="hummingbird-dev@microsoft.com",
     url="https://github.com/microsoft/hummingbird",
-    dependency_links=["https://download.pytorch.org/whl/torch_stable.html"],
     packages=packages,
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=common_requirements,
+    extras_require={
+        "tests": ["flake8", "pytest", "coverage", "pre-commit"],
+        "docs": ["pdoc"],
+        "extra": [
+            # The need each for these depends on which libraries you plan to convert from
+            "scikit-learn==0.21.3",
+            "xgboost==0.90",
+            "lightgbm>=2.2",
+        ],
+    },
     classifiers=[
         "Environment :: Console",
         "Intended Audience :: Developers",
@@ -44,4 +64,10 @@ setup(
         "License :: OSI Approved :: MIT License",
     ],
     python_requires=">=3.5",
+    dependency_links=[
+        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl#egg=torch-1.5.0",
+        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl#egg=torch-1.5.0",
+        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl#egg=torch-1.5.0",
+        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38m-win_amd64.whl#egg=torch-1.5.0",
+    ],
 )
