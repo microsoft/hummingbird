@@ -23,12 +23,11 @@ with open(README) as f:
         long_description = long_description[start_pos:]
 
 common_requirements = ["numpy>=1.15", "Cython", "onnxconverter-common>=1.6.0"]
-common_requirements.append("torch==1.5.0")
-# if sys.platform == "darwin" or sys.platform == "ubuntu":
-#     common_requirements.append("torch>=1.4.0")
-# else:
-# import urllib.request
-
+common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl")
+if sys.platform == "darwin" or sys.platform == "ubuntu":
+    common_requirements.append("torch>=1.4.0")
+else:
+    common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl")
 # print('Getting PyTorc wheel from https://download.pytorch.org')
 
 # url = 'https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl'

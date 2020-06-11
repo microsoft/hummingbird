@@ -20,7 +20,7 @@ jobs:
     runs-on: windows-2019
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6]
 
     steps:
     - uses: actions/checkout@v2
