@@ -29,9 +29,6 @@ XGBRegressor
 from .exceptions import MissingConverter
 from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
 
-from xgboost import XGBClassifier, XGBRegressor
-from lightgbm import LGBMClassifier, LGBMRegressor
-
 
 def _build_sklearn_operator_list():
     """
@@ -74,6 +71,8 @@ def _build_xgboost_operator_list():
     List all suported XGBoost (Sklearn API) operators.
     """
     if xgboost_installed():
+        from xgboost import XGBClassifier, XGBRegressor
+
         return [XGBClassifier, XGBRegressor]
 
     return None
@@ -84,6 +83,8 @@ def _build_lightgbm_operator_list():
     List all suported LightGBM (Sklearn API) operators.
     """
     if lightgbm_installed:
+        from lightgbm import LGBMClassifier, LGBMRegressor
+
         return [LGBMClassifier, LGBMRegressor]
 
     return None
