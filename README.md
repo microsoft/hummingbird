@@ -22,7 +22,7 @@ Install the Hummingbird package:
 pip install hummingbird-ml[extra]
 ```
 
-This includes optional dependencies like scikit-learn, lightgbm, and xgboost. If you do not need those, you can use:
+This includes optional dependencies lightgbm and xgboost. If you do not need those, you can use:
 ```
 pip install hummingbird-ml
 ```
