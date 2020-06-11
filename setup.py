@@ -26,14 +26,28 @@ common_requirements = ["numpy>=1.15", "Cython", "onnxconverter-common>=1.6.0"]
 if sys.platform == "darwin" or sys.platform == "linux":
     common_requirements.append("torch>=1.4.0")
 else:
-    if sys.version_info == (3, 5):
-        common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl")
-    elif sys.version_info == (3, 6):
-        common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl")
-    elif sys.version_info == (3, 7):
-        common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl")
-    elif sys.version_info == (3, 8):
-        common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38m-win_amd64.whl")
+    if sys.version_info >= (3, 5, 0):
+        if sys.version_info >= (3, 6, 0):
+            if sys.version_info >= (3, 7, 0):
+                if sys.version_info >= (3, 8, 0):
+                    common_requirements.append(
+                        "torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38m-win_amd64.whl"
+                    )
+                else:
+                    common_requirements.append(
+                        "torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl"
+                    )
+            else:
+                common_requirements.append(
+                    "torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl"
+                )
+        else:
+            common_requirements.append(
+                "torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl"
+            )
+    else:
+        raise Exception("Python version not supported.")
+
 
 setup(
     name="hummingbird-ml",
