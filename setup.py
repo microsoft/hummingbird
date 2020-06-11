@@ -31,13 +31,7 @@ setup(
     url="https://github.com/microsoft/hummingbird",
     packages=packages,
     include_package_data=True,
-    install_requires=[
-        "numpy>=1.15",
-        "Cython;python_version>='3.8'",
-        "torch>=1.4.0",
-        "onnxconverter-common>=1.6.0",
-        "scikit-learn==0.21.3",
-    ],
+    install_requires=["numpy>=1.15", "torch>=1.4.0", "onnxconverter-common>=1.6.0", "scikit-learn==0.23.1"],
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
         "docs": ["pdoc"],
