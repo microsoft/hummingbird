@@ -11,6 +11,7 @@ from onnxconverter_common.container import CommonSklearnModelContainer
 from onnxconverter_common.topology import Topology
 
 from .supported import get_sklearn_api_operator_name
+from ._utils import sklearn_installed
 
 
 def parse_sklearn_api_model(model):
@@ -139,4 +140,5 @@ def _build_sklearn_api_parsers_map():
 
 
 # Registered API parsers.
-sklearn_api_parsers_map = _build_sklearn_api_parsers_map()
+if sklearn_installed():
+    sklearn_api_parsers_map = _build_sklearn_api_parsers_map()

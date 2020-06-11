@@ -15,10 +15,17 @@ Currently, you can use *Hummingbird* to convert your trained traditional ML mode
 ## Installation
 
 Hummingbird was tested on Python >= 3.5 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
+
+
+Install the Hummingbird package:
 ```
 pip install hummingbird-ml
 ```
 
+If you require the optional dependencies lightgbm and xgboost, you can use:
+```
+pip install hummingbird-ml[extra]
+```
 
 
 See also [Troubleshooting](TROUBLESHOOTING.md) for common problems.

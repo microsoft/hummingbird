@@ -29,9 +29,6 @@ XGBRegressor
 from .exceptions import MissingConverter
 from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
 
-from xgboost import XGBClassifier, XGBRegressor
-from lightgbm import LGBMClassifier, LGBMRegressor
-
 
 def _build_sklearn_operator_list():
     """
@@ -66,7 +63,7 @@ def _build_sklearn_operator_list():
             RandomForestRegressor,
         ]
 
-    return None
+    return []
 
 
 def _build_xgboost_operator_list():
@@ -74,19 +71,23 @@ def _build_xgboost_operator_list():
     List all suported XGBoost (Sklearn API) operators.
     """
     if xgboost_installed():
+        from xgboost import XGBClassifier, XGBRegressor
+
         return [XGBClassifier, XGBRegressor]
 
-    return None
+    return []
 
 
 def _build_lightgbm_operator_list():
     """
     List all suported LightGBM (Sklearn API) operators.
     """
-    if lightgbm_installed:
+    if lightgbm_installed():
+        from lightgbm import LGBMClassifier, LGBMRegressor
+
         return [LGBMClassifier, LGBMRegressor]
 
-    return None
+    return []
 
 
 def _build_backend_map():
@@ -101,7 +102,7 @@ def _build_sklearn_api_operator_name_map():
     Associate Sklearn with the operator class names.
     If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     """
-    return {k: "Sklearn" + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list if k is not None}
+    return {k: "Sklearn" + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list}
 
 
 def get_sklearn_api_operator_name(model_type):
