@@ -1,12 +1,12 @@
 """
-Tests Sklearn GradientBoostingClassifier converters.
+Test Hummingbird when no extra dependencies are installed.
 """
 import unittest
 import warnings
 
 import numpy as np
 
-from hummingbird.ml._utils import sklearn_installed, lightgbm_installed, xgboost_installed
+from hummingbird.ml._utils import lightgbm_installed, xgboost_installed
 
 
 class TestNoExtra(unittest.TestCase):
@@ -25,6 +25,7 @@ class TestNoExtra(unittest.TestCase):
         warnings.filterwarnings("ignore")
         assert not xgboost_installed()
 
+    # Test that we can import the converter successfully without installing [extra]
     def test_import_convert_no_extra(self):
         try:
             from hummingbird.ml import convert

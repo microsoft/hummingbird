@@ -36,6 +36,8 @@ jobs:
     - name: Run basic tests without extra
       run: |
         pytest tests/test_no_extra_install.py
+    - name: Coverage on basic tests without extra
+      run: |
         coverage run -a -m pytest tests/test_no_extra_install.py
     - name: If mac, install libomp to facilitate lgbm install
       if: matrix.os == 'macOS-latest'

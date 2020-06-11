@@ -54,7 +54,7 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
         A model implemented in *PyTorch*, which is equivalent to the input *scikit-learn* model
     """
     assert model is not None
-    assert torch_installed(), "To use Hummingbird you need to install torch (or `pip install hummingbird-ml[extra]`)."
+    assert torch_installed(), "To use Hummingbird you need to install torch."
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
     # We modify the scikit learn model during optimizations.

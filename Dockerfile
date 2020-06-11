@@ -14,7 +14,7 @@ RUN pip3 -q install pip --upgrade
 # Install HB
 RUN pip3 install hummingbird-ml[docs,tests,extra]
 
-# Install additional dev gools for notebook env
+# Install additional dev tools for notebook env
 RUN pip3 install autopep8 jupyter
 
 # Jupyter

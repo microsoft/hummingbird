@@ -19,12 +19,12 @@ Hummingbird was tested on Python >= 3.5 on Linux, Windows and MacOS machines.  I
 
 Install the Hummingbird package:
 ```
-pip install hummingbird-ml[extra]
+pip install hummingbird-ml
 ```
 
-This includes optional dependencies lightgbm and xgboost. If you do not need those, you can use:
+If you require the optional dependencies lightgbm and xgboost, you can use:
 ```
-pip install hummingbird-ml
+pip install hummingbird-ml[extra]
 ```
 
 
