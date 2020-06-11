@@ -23,16 +23,17 @@ with open(README) as f:
         long_description = long_description[start_pos:]
 
 common_requirements = ["numpy>=1.15", "Cython", "onnxconverter-common>=1.6.0"]
-common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl")
 if sys.platform == "darwin" or sys.platform == "ubuntu":
     common_requirements.append("torch>=1.4.0")
 else:
-    common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl")
-# print('Getting PyTorc wheel from https://download.pytorch.org')
-
-# url = 'https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl'
-# urllib.request.urlretrieve(url, 'torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl')
-# common_requirements.append("https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl#egg=torch-1.5.0")
+    if sys.version_info == (3, 5):
+        common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl")
+    elif sys.version_info == (3, 6):
+        common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl")
+    elif sys.version_info == (3, 7):
+        common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl")
+    elif sys.version_info == (3, 8):
+        common_requirements.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38m-win_amd64.whl")
 
 setup(
     name="hummingbird-ml",
@@ -63,10 +64,4 @@ setup(
         "License :: OSI Approved :: MIT License",
     ],
     python_requires=">=3.5",
-    dependency_links=[
-        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl#egg=torch-1.5.0",
-        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl#egg=torch-1.5.0",
-        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl#egg=torch-1.5.0",
-        "https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38m-win_amd64.whl#egg=torch-1.5.0",
-    ],
 )
