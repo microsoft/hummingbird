@@ -23,7 +23,7 @@ with open(README) as f:
         long_description = long_description[start_pos:]
 
 common_requirements = ["numpy>=1.15", "Cython", "onnxconverter-common>=1.6.0"]
-if sys.platform == "darwin" or sys.platform == "ubuntu":
+if sys.platform == "darwin" or sys.platform == "linux":
     common_requirements.append("torch>=1.4.0")
 else:
     if sys.version_info == (3, 5):
