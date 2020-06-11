@@ -15,11 +15,6 @@ class TestNoExtra(unittest.TestCase):
     `pip install hummingbird-ml` without any of the `extra` packages
     """
 
-    # Test no SKL returns false on sklearn_installed()
-    def test_sklearn_installed_false(self):
-        warnings.filterwarnings("ignore")
-        assert not sklearn_installed()
-
     # Test no LGBM returns false on lightgbm_installed()
     def test_lightgbm_installed_false(self):
         warnings.filterwarnings("ignore")
