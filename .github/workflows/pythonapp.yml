@@ -28,9 +28,15 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install basic dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install  --no-cache-dir .
+    - name: Run basic tests without extra
+        pytest tests/test_no_extra_install.py
+        coverage run -a -m pytest tests/test_no_extra_install.py
+    - name: Install extra dependencies
+      run: |
         pip install  --no-cache-dir .[extra,tests]
     - name: Lint with flake8
       run: |
@@ -40,10 +46,10 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest
+        pytest --ignore=tests/test_no_extra_install.py
     - name: Coverage
       run: |
-        coverage run -m pytest tests
+        coverage run -a -m pytest tests --ignore=tests/test_no_extra_install.py
         coverage xml
         MINIMUM=70
         SCORE=$(coverage report -m | tail -n 1 | awk '{print $NF}' | rev | cut -c2- | rev)
