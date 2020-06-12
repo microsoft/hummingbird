@@ -26,13 +26,13 @@ install_requires = ["numpy>=1.15", "onnxconverter-common>=1.6.0", "scikit-learn=
 dependecy_links = []
 if sys.platform == "win32":
     if sys.version_info[:2] == (3, 5):
-        DEPENDENCY_LINKS = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl"]
+        dependecy_links = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl"]
     elif sys.version_info[:2] == (3, 6):
-        DEPENDENCY_LINKS = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl"]
+        dependecy_links = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl"]
     elif sys.version_info[:2] >= (3, 7):
-        DEPENDENCY_LINKS = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl"]
+        dependecy_links = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl"]
     elif sys.version_info[:2] >= (3, 8):
-        DEPENDENCY_LINKS = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38-win_amd64.whl"]
+        dependecy_links = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38-win_amd64.whl"]
     else:
         print("Python version < 3.5 not supported.")
         exit(1)
