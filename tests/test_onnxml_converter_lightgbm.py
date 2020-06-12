@@ -198,6 +198,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     def test_lgbm_onnxml_model_binary(self):
         n_features = 28
         n_total = 100
+        np.random.seed(0)
         X = np.random.rand(n_total, n_features)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(2, size=n_total)
@@ -205,7 +206,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         # Create LightGBM model
         model = lgb.LGBMClassifier()
         model.fit(X, y)
-        self._test_classifier(X, model, rtol=1e-02, atol=1e-02)  # Lower tolerance to avoid random errors
+        self._test_classifier(X, model)
 
     # Binary classification test with 3 estimators (taken from ONNXMLTOOLS).
     @unittest.skipIf(
@@ -262,6 +263,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     def test_lgbm_onnxml_model_multi(self):
         n_features = 28
         n_total = 100
+        np.random.seed(0)
         X = np.random.rand(n_total, n_features)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=n_total)
@@ -269,7 +271,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         # Create LightGBM model
         model = lgb.LGBMClassifier()
         model.fit(X, y)
-        self._test_classifier(X, model, rtol=1e-02, atol=1e-02)  # Lower tolerance to avoid random errors
+        self._test_classifier(X, model)
 
     # Multiclass classification test with 3 estimators (taken from ONNXMLTOOLS).
     @unittest.skipIf(
