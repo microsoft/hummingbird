@@ -33,10 +33,7 @@ jobs:
         pip install .[tests]
     - name: Run basic tests without extra
       run: |
-        pytest tests/test_no_extra_install.py
-    - name: Coverage on basic tests without extra
-      run: |
-        coverage run -a -m pytest tests/test_no_extra_install.py
+        pytest --cov=tests/test_no_extra_install.py --cov-report=xml --cov-append
     - name: If mac, install libomp to facilitate lgbm install
       if: matrix.os == 'macOS-latest'
       run: |
@@ -58,7 +55,7 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics --exclude=src
     - name: Test with pytest
       run: |
-        pytest --cov=hummingbird --cov-report=xml
+        pytest --cov=./ --cov-report=xml --cov-append
     - name: Coverage
       run: |
         coverage xml
