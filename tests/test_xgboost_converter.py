@@ -10,13 +10,14 @@ import hummingbird.ml
 from hummingbird.ml._utils import xgboost_installed
 from tree_utils import gbdt_implementation_map
 
+if xgboost_installed():
+    import xgboost as xgb
+
 
 class TestXGBoostConverter(unittest.TestCase):
     # Check tree implementation
     @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
     def test_xgb_implementation(self):
-        import xgboost as xgb
-
         warnings.filterwarnings("ignore")
         X = np.random.rand(1, 1)
         X = np.array(X, dtype=np.float32)
@@ -35,8 +36,6 @@ class TestXGBoostConverter(unittest.TestCase):
                 )
 
     def _run_xgb_classifier_converter(self, num_classes, extra_config={}):
-        import xgboost as xgb
-
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth)
@@ -91,8 +90,6 @@ class TestXGBoostConverter(unittest.TestCase):
         self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     def _run_xgb_regressor_converter(self, num_classes, extra_config={}):
-        import xgboost as xgb
-
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth)
@@ -128,8 +125,6 @@ class TestXGBoostConverter(unittest.TestCase):
     # Small tree
     @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
     def test_run_xgb_classifier_converter(self):
-        import xgboost as xgb
-
         warnings.filterwarnings("ignore")
         for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
             model = xgb.XGBClassifier(n_estimators=1, max_depth=1)

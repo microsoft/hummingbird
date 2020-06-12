@@ -103,7 +103,7 @@ def _build_onnxml_operator_list():
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",
         ]
-    return [None]
+    return []
 
 
 def _build_backend_map():

@@ -7,14 +7,18 @@ import sys
 import os
 import pickle
 import numpy as np
-import lightgbm as lgb
-import onnxruntime as ort
-
 from onnxconverter_common.data_types import FloatTensorType
-from onnxmltools.convert import convert_lightgbm
+
 from hummingbird.ml import convert
 from hummingbird.ml import constants
-from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_installed
+from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_installed, lightgbm_installed
+
+if lightgbm_installed():
+    import lightgbm as lgb
+if onnx_installed():
+    import onnxruntime as ort
+if onnx_ml_tools_installed():
+    from onnxmltools.convert import convert_lightgbm
 
 
 class TestONNXConverterLightGBM(unittest.TestCase):
