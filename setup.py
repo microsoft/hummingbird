@@ -23,7 +23,7 @@ with open(README) as f:
         long_description = long_description[start_pos:]
 
 install_requires = ["numpy>=1.15", "torch>=1.4.0", "onnxconverter-common>=1.6.0", "scikit-learn==0.22.1"]
-if sys.platform == "win32" or sys.platform == "linux":
+if sys.platform == "win32":
     if sys.version_info >= (3, 5, 0):
         if sys.version_info >= (3, 6, 0):
             if sys.version_info >= (3, 7, 0):
