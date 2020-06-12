@@ -23,19 +23,19 @@ with open(README) as f:
         long_description = long_description[start_pos:]
 
 install_requires = ["numpy>=1.15", "onnxconverter-common>=1.6.0", "scikit-learn==0.22.1", "torch>=1.4.0"]
-dependecy_links = []
-if sys.platform == "win32":
-    if sys.version_info[:2] == (3, 5):
-        dependecy_links = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl"]
-    elif sys.version_info[:2] == (3, 6):
-        dependecy_links = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl"]
-    elif sys.version_info[:2] >= (3, 7):
-        dependecy_links = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl"]
-    elif sys.version_info[:2] >= (3, 8):
-        dependecy_links = ["https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38-win_amd64.whl"]
+if sys.platform == "darwin" or sys.platform == "linux":
+    install_requires.append("torch==1.5.0")
+else:
+    if sys.version_info >= (3, 5, 0):
+        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl")
+    elif sys.version_info >= (3, 6, 0):
+        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl")
+    elif sys.version_info >= (3, 7, 0):
+        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl")
+    elif sys.version_info >= (3, 8, 0):
+        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38-win_amd64.whl")
     else:
-        print("Python version < 3.5 not supported.")
-        exit(1)
+        raise Exception("Python version < 3.5 not supported.")
 setup(
     name="hummingbird-ml",
     version=version_str,
@@ -46,7 +46,6 @@ setup(
     url="https://github.com/microsoft/hummingbird",
     packages=packages,
     include_package_data=True,
-    dependecy_links=dependecy_links,
     install_requires=install_requires,
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
