@@ -86,5 +86,5 @@ For coverage, we use [coverage.py](https://coverage.readthedocs.io/en/coverage-5
 
 We strive to not let check-ins decrease coverage.  To run all unit tests:
 ```
-coverage run -m pytest tests --ignore=tests/test_no_extra_install.py
+coverage run -m pytest tests
 ```
