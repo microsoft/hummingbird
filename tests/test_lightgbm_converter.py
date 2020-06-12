@@ -5,7 +5,6 @@ import unittest
 import warnings
 
 import numpy as np
-import lightgbm as lgb
 
 import hummingbird.ml
 from hummingbird.ml._utils import lightgbm_installed
@@ -16,6 +15,8 @@ class TestLGBMConverter(unittest.TestCase):
     # Check tree implementation
     @unittest.skipIf(not lightgbm_installed, reason="LightGBM test require LightGBM installed")
     def test_lgbm_implementation(self):
+        import lightgbm as lgb
+
         warnings.filterwarnings("ignore")
         X = np.random.rand(10, 1)
         X = np.array(X, dtype=np.float32)
@@ -32,6 +33,8 @@ class TestLGBMConverter(unittest.TestCase):
                 )
 
     def _run_lgbm_classifier_converter(self, num_classes, extra_config={}):
+        import lightgbm as lgb
+
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = lgb.LGBMClassifier(n_estimators=10, max_depth=max_depth)
@@ -86,6 +89,8 @@ class TestLGBMConverter(unittest.TestCase):
         self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
     def _run_lgbm_regressor_converter(self, num_classes, extra_config={}):
+        import lightgbm as lgb
+
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = lgb.LGBMRegressor(n_estimators=10, max_depth=max_depth)
