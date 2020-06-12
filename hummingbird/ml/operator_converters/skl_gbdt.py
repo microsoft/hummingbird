@@ -165,6 +165,7 @@ def convert_sklearn_hist_gbdt_classifier(operator, device, extra_config):
         alpha = np.array([operator.raw_operator._baseline_prediction.flatten().tolist()])
 
     extra_config[constants.ALPHA] = alpha
+    extra_config[constants.REORDER_TREES] = False
 
     return convert_gbdt_classifier_common(tree_infos, _get_parameters_hist_gbdt, n_features, n_classes, classes, extra_config)
 

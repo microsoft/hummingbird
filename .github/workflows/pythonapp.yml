@@ -34,7 +34,7 @@ jobs:
     - name: Run basic tests without extra
       run: |
         pytest --cov=tests/test_no_extra_install.py --cov-report=xml --cov-append
-    - name: If mac, install libomp to facilitate lgbm install
+    - name: If mac, install libomp to facilitate sklearn install
       if: matrix.os == 'macOS-latest'
       run: |
         brew install libomp
