@@ -58,7 +58,7 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics --exclude=src
     - name: Test with pytest
       run: |
-        pytest --cov=hummingbird --cov-report=tests
+        pytest --cov=hummingbird --cov-report=xml
     - name: Coverage
       run: |
         coverage xml
