@@ -34,7 +34,7 @@ jobs:
         pip install torch==1.5.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
         pip install  --no-cache-dir .[tests]
 
-    - name: Install extra dependencies
+    - name: Install extra dependencie
       run: |
         pip install  --no-cache-dir .[extra]
     - name: Lint with flake8
