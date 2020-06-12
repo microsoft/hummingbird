@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-2019]
         python-version: [3.5, 3.6, 3.7, 3.8]
 
     steps:
@@ -29,10 +29,14 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    - name: If windows, install pytorch first from stable
+      if: matrix.os == 'windows-2019'
+      run: |
+        pip install torch===1.5.0 torchvision===0.6.0 -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install  --no-cache-dir .[tests]
+        pip install .[tests]
     - name: Run basic tests without extra
       run: |
         pytest tests/test_no_extra_install.py
@@ -51,7 +55,7 @@ jobs:
         export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
     - name: Install extra dependencies
       run: |
-        pip install  --no-cache-dir .[extra]
+        pip install .[extra]
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
