@@ -31,7 +31,7 @@ else:
             if sys.version_info >= (3, 7, 0):
                 if sys.version_info >= (3, 8, 0):
                     common_requirements.append(
-                        "torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38m-win_amd64.whl"
+                        "torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38-win_amd64.whl"
                     )
                 else:
                     common_requirements.append(
