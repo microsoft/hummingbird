@@ -58,10 +58,9 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics --exclude=src
     - name: Test with pytest
       run: |
-        pytest --ignore=tests/test_no_extra_install.py
+        pytest --cov=hummingbird --cov-report=tests
     - name: Coverage
       run: |
-        coverage run -a -m pytest tests --ignore=tests/test_no_extra_install.py
         coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
