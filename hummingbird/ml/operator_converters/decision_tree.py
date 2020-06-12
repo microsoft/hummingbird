@@ -16,82 +16,12 @@ from onnxconverter_common.registration import register_converter
 
 from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn
 from ._tree_commons import get_tree_params_and_type, get_parameters_for_gemm_common
-from ._tree_implementations import GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl, TreeImpl
-
-
-class GEMMDecisionTreeImpl(GEMMTreeImpl):
-    """
-    Class implementing the GEMM strategy in PyTorch for decision tree models.
-
-    """
-
-    def __init__(self, net_parameters, n_features, classes=None):
-        """
-        Args:
-            net_parameters: The parameters defining the tree structure
-            n_features: The number of features input to the model
-            classes: The classes used for classification. None if implementing a regression model
-        """
-        super(GEMMDecisionTreeImpl, self).__init__(net_parameters, n_features, classes)
-        self.final_probability_divider = len(net_parameters)
-
-    def aggregation(self, x):
-        output = x.sum(0).t()
-
-        if self.final_probability_divider > 1:
-            output = output / self.final_probability_divider
-
-        return output
-
-
-class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
-    """
-    Class implementing the Tree Traversal strategy in PyTorch for decision tree models.
-    """
-
-    def __init__(self, net_parameters, max_depth, n_features, classes=None):
-        """
-        Args:
-            net_parameters: The parameters defining the tree structure
-            max_depth: The maximum tree-depth in the model
-            n_features: The number of features input to the model
-            classes: The classes used for classification. None if implementing a regression model
-        """
-        super(TreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
-        self.final_probability_divider = len(net_parameters)
-
-    def aggregation(self, x):
-        output = x.sum(1)
-
-        if self.final_probability_divider > 1:
-            output = output / self.final_probability_divider
-
-        return output
-
-
-class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
-    """
-    Class implementing the Perfect Tree Traversal strategy in PyTorch for decision tree models.
-    """
-
-    def __init__(self, net_parameters, max_depth, n_features, classes=None):
-        """
-        Args:
-            net_parameters: The parameters defining the tree structure
-            max_depth: The maximum tree-depth in the model
-            n_features: The number of features input to the model
-            classes: The classes used for classification. None if implementing a regression model
-        """
-        super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
-        self.final_probability_divider = len(net_parameters)
-
-    def aggregation(self, x):
-        output = x.sum(1)
-
-        if self.final_probability_divider > 1:
-            output = output / self.final_probability_divider
-
-        return output
+from ._tree_implementations import (
+    GEMMDecisionTreeImpl,
+    TreeTraversalDecisionTreeImpl,
+    PerfectTreeTraversalDecisionTreeImpl,
+    TreeImpl,
+)
 
 
 def convert_sklearn_random_forest_classifier(operator, device, extra_config):

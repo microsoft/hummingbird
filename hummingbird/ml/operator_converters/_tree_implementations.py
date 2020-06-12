@@ -13,6 +13,8 @@ import numpy as np
 from enum import Enum
 from abc import ABC, abstractmethod
 
+from . import constants
+
 
 class TreeImpl(Enum):
     """
@@ -410,3 +412,197 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             return node_id, leaf_start_id
 
         depth_f_traversal(nodes_map[0], -1, 0, 0)
+
+
+class GEMMDecisionTreeImpl(GEMMTreeImpl):
+    """
+    Class implementing the GEMM strategy in PyTorch for decision tree models.
+
+    """
+
+    def __init__(self, net_parameters, n_features, classes=None):
+        """
+        Args:
+            net_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+        """
+        super(GEMMDecisionTreeImpl, self).__init__(net_parameters, n_features, classes)
+        self.final_probability_divider = len(net_parameters)
+
+    def aggregation(self, x):
+        output = x.sum(0).t()
+
+        if self.final_probability_divider > 1:
+            output = output / self.final_probability_divider
+
+        return output
+
+
+class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
+    """
+    Class implementing the Tree Traversal strategy in PyTorch for decision tree models.
+    """
+
+    def __init__(self, net_parameters, max_depth, n_features, classes=None):
+        """
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+        """
+        super(TreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
+        self.final_probability_divider = len(net_parameters)
+
+    def aggregation(self, x):
+        output = x.sum(1)
+
+        if self.final_probability_divider > 1:
+            output = output / self.final_probability_divider
+
+        return output
+
+
+class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
+    """
+    Class implementing the Perfect Tree Traversal strategy in PyTorch for decision tree models.
+    """
+
+    def __init__(self, net_parameters, max_depth, n_features, classes=None):
+        """
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+        """
+        super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
+        self.final_probability_divider = len(net_parameters)
+
+    def aggregation(self, x):
+        output = x.sum(1)
+
+        if self.final_probability_divider > 1:
+            output = output / self.final_probability_divider
+
+        return output
+
+
+class GEMMGBDTImpl(GEMMTreeImpl):
+    """
+    Class implementing the GEMM strategy (in PyTorch) for GBDT models.
+    """
+
+    def __init__(self, net_parameters, n_features, classes=None, extra_config={}):
+        """
+        Args:
+            net_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
+        """
+        super(GEMMGBDTImpl, self).__init__(net_parameters, n_features, classes, 1)
+        self.n_gbdt_classes = 1
+
+        if constants.LEARNING_RATE in extra_config:
+            self.learning_rate = extra_config[constants.LEARNING_RATE]
+        if constants.ALPHA in extra_config:
+            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
+
+        if classes is not None:
+            self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
+            if self.n_gbdt_classes == 1:
+                self.binary_classification = True
+
+        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
+
+    def aggregation(self, x):
+        return torch.squeeze(x).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+
+    def calibration(self, x):
+        if self.binary_classification:
+            output = torch.sigmoid(x)
+            return torch.cat([1 - output, output], dim=1)
+        else:
+            return torch.softmax(x, dim=1)
+
+
+class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
+    """
+    Class implementing the Tree Traversal strategy in PyTorch.
+    """
+
+    def __init__(self, net_parameters, max_detph, n_features, classes=None, extra_config={}):
+        """
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
+        """
+        super(TreeTraversalGBDTImpl, self).__init__(net_parameters, max_detph, n_features, classes, 1)
+        self.n_gbdt_classes = 1
+
+        if constants.LEARNING_RATE in extra_config:
+            self.learning_rate = extra_config[constants.LEARNING_RATE]
+        if constants.ALPHA in extra_config:
+            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
+
+        if classes is not None:
+            self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
+            if self.n_gbdt_classes == 1:
+                self.binary_classification = True
+
+        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
+
+    def aggregation(self, x):
+        return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+
+    def calibration(self, x):
+        if self.binary_classification:
+            output = torch.sigmoid(x)
+            return torch.cat([1 - output, output], dim=1)
+        else:
+            return torch.softmax(x, dim=1)
+
+
+class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
+    """
+    Class implementing the Perfect Tree Traversal strategy in PyTorch.
+    """
+
+    def __init__(self, net_parameters, max_depth, n_features, classes=None, extra_config={}):
+        """
+        Args:
+            net_parameters: The parameters defining the tree structure
+            max_depth: The maximum tree-depth in the model
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
+        """
+        super(PerfectTreeTraversalGBDTImpl, self).__init__(net_parameters, max_depth, n_features, classes, 1)
+        self.n_gbdt_classes = 1
+
+        if constants.LEARNING_RATE in extra_config:
+            self.learning_rate = extra_config[constants.LEARNING_RATE]
+        if constants.ALPHA in extra_config:
+            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
+
+        if classes is not None:
+            self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
+            if self.n_gbdt_classes == 1:
+                self.binary_classification = True
+
+        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
+
+    def aggregation(self, x):
+        return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+
+    def calibration(self, x):
+        if self.binary_classification:
+            output = torch.sigmoid(x)
+            return torch.cat([1 - output, output], dim=1)
+        else:
+            return torch.softmax(x, dim=1)
