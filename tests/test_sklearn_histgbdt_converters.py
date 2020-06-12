@@ -22,9 +22,9 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
             y = np.array([100, -10, 50]) + labels_shift
 
             model.fit(X, y)
-            pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
-            self.assertTrue(pytorch_model is not None)
-            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Binary classifier
     def test_HistGBDT_classifier_binary_converter(self):
@@ -71,7 +71,7 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error
         model = HistGradientBoostingClassifier(max_iter=10).fit(X, y)
-        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "pytorch")
+        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "torch")
 
 
 if __name__ == "__main__":
