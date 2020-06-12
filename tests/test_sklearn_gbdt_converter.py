@@ -16,6 +16,7 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
     # Check tree implementation
     def test_gbdt_implementation(self):
         warnings.filterwarnings("ignore")
+        np.random.seed(0)
         X = np.random.rand(10, 1)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(2, size=10)
@@ -38,6 +39,7 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100) + labels_shift
@@ -51,6 +53,7 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = GradientBoostingRegressor(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
             X = np.random.rand(100, 200).astype(np.float32)
             y = np.random.normal(size=100)
 
@@ -117,6 +120,7 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth, init="zero")
+            np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(3, size=100)
@@ -130,6 +134,7 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = GradientBoostingRegressor(n_estimators=10, max_depth=max_depth, init="zero")
+            np.random.seed(0)
             X = np.random.rand(100, 200).astype(np.float32)
             y = np.random.normal(size=100)
 
@@ -141,6 +146,7 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
     # Failure Cases
     def test_sklearn_GBDT_classifier_raises_wrong_type(self):
         warnings.filterwarnings("ignore")
+        np.random.seed(0)
         X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error

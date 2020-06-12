@@ -19,6 +19,7 @@ class TestXGBoostConverter(unittest.TestCase):
     @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
     def test_xgb_implementation(self):
         warnings.filterwarnings("ignore")
+        np.random.seed(0)
         X = np.random.rand(1, 1)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(2, size=1)
@@ -39,6 +40,7 @@ class TestXGBoostConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
@@ -93,6 +95,7 @@ class TestXGBoostConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
@@ -128,6 +131,7 @@ class TestXGBoostConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
             model = xgb.XGBClassifier(n_estimators=1, max_depth=1)
+            np.random.seed(0)
             X = np.random.rand(1, 1)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(2, size=1)

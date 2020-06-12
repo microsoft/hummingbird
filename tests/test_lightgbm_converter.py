@@ -19,6 +19,7 @@ class TestLGBMConverter(unittest.TestCase):
     @unittest.skipIf(not lightgbm_installed, reason="LightGBM test require LightGBM installed")
     def test_lgbm_implementation(self):
         warnings.filterwarnings("ignore")
+        np.random.seed(0)
         X = np.random.rand(10, 1)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(2, size=10)
@@ -37,6 +38,7 @@ class TestLGBMConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = lgb.LGBMClassifier(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
@@ -91,6 +93,7 @@ class TestLGBMConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = lgb.LGBMRegressor(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)

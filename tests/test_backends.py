@@ -23,6 +23,7 @@ class TestBackends(unittest.TestCase):
         max_depth = 10
         num_classes = 2
         model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
         X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(num_classes, size=100)
@@ -39,6 +40,7 @@ class TestBackends(unittest.TestCase):
         max_depth = 10
         num_classes = 2
         model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
         X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(num_classes, size=100)

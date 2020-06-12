@@ -17,6 +17,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
     # Check tree implementation
     def test_random_forest_implementation(self):
         warnings.filterwarnings("ignore")
+        np.random.seed(0)
         X = np.random.rand(1, 1)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(2, size=1)
@@ -35,6 +36,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
     def _run_tree_classification_converter(self, model_type, num_classes, extra_config={}, labels_shift=0, **kwargs):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
+            np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100) + labels_shift
@@ -112,6 +114,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = model_type(max_depth=max_depth, **kwargs)
+            np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
@@ -192,6 +195,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
     # Used for small tree tests
     def _run_random_forest_classifier_single_node_tree_converter(self, extra_config={}):
         warnings.filterwarnings("ignore")
+        np.random.seed(0)
         X = np.random.rand(1, 1)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(1, size=1)
@@ -215,6 +219,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
     # Failure Cases
     def test_random_forest_classifier_raises_wrong_type(self):
         warnings.filterwarnings("ignore")
+        np.random.seed(0)
         X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error
@@ -223,6 +228,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     def test_random_forest_classifier_raises_wrong_extra_config(self):
         warnings.filterwarnings("ignore")
+        np.random.seed(0)
         X = np.array(np.random.rand(100, 200), dtype=np.float32)
         y = np.random.randint(3, size=100)
         model = RandomForestClassifier(n_estimators=10).fit(X, y)
