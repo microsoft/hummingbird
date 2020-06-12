@@ -1,18 +1,16 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Python application
+name: Build
 
 on:
   push:
     branches:
       - master
-      - develop
 
   pull_request:
     branches:
       - master
-      - develop
 
 jobs:
   build:
@@ -20,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-2019]
         python-version: [3.5, 3.6, 3.7, 3.8]
 
     steps:
@@ -32,7 +30,7 @@ jobs:
     - name: Install basic dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install  --no-cache-dir .[tests]
+        pip install .[tests]
     - name: Run basic tests without extra
       run: |
         pytest tests/test_no_extra_install.py
@@ -51,7 +49,7 @@ jobs:
         export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
     - name: Install extra dependencies
       run: |
-        pip install  --no-cache-dir .[extra]
+        pip install .[extra]
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -65,9 +63,6 @@ jobs:
       run: |
         coverage run -a -m pytest tests --ignore=tests/test_no_extra_install.py
         coverage xml
-        MINIMUM=70
-        SCORE=$(coverage report -m | tail -n 1 | awk '{print $NF}' | rev | cut -c2- | rev)
-        if [ $SCORE -ge $MINIMUM ]; then echo "COVERAGE ($SCORE) OK"; else echo "WARNING: Coverage is $SCORE but should be at least $MINIMUM"; fi
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

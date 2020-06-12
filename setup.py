@@ -1,6 +1,7 @@
 from distutils.core import setup
 from setuptools import find_packages
 import os
+import sys
 
 this = os.path.dirname(__file__)
 
@@ -21,6 +22,20 @@ with open(README) as f:
     if start_pos >= 0:
         long_description = long_description[start_pos:]
 
+install_requires = ["numpy>=1.15", "onnxconverter-common>=1.6.0", "scikit-learn==0.22.1"]
+if sys.platform == "darwin" or sys.platform == "linux":
+    install_requires.append("torch>=1.4.0")
+else:
+    if sys.version_info[:2] == (3, 8):
+        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38-win_amd64.whl")
+    elif sys.version_info[:2] == (3, 7):
+        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl")
+    elif sys.version_info[:2] == (3, 6):
+        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl")
+    elif sys.version_info[:2] == (3, 5):
+        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl")
+    else:
+        raise Exception("Python version < 3.5 not supported.")
 setup(
     name="hummingbird-ml",
     version=version_str,
@@ -31,7 +46,7 @@ setup(
     url="https://github.com/microsoft/hummingbird",
     packages=packages,
     include_package_data=True,
-    install_requires=["numpy>=1.15", "torch>=1.4.0", "onnxconverter-common>=1.6.0", "scikit-learn==0.22.1"],
+    install_requires=install_requires,
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
         "docs": ["pdoc"],

@@ -1,7 +1,7 @@
 # Hummingbird
 
 [![PyPI version](https://badge.fury.io/py/hummingbird-ml.svg)](https://badge.fury.io/py/hummingbird-ml)
-![](https://github.com/microsoft/hummingbird/workflows/Python%20application/badge.svg?branch=master)
+[![](https://github.com/microsoft/hummingbird/workflows/Build/badge.svg?branch=master)](https://github.com/microsoft/hummingbird/actions)
 ![](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7%20%7C%203.8-blue)
 [![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/master/graph/badge.svg)](https://codecov.io/github/microsoft/hummingbird?branch=master)
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
