@@ -1,7 +1,0 @@
-numpy>=1.15
-Cython==0.29.19
-scikit-learn==0.21.3
-torch>=1.4.0
-xgboost==0.90
-lightgbm>=2.2
-onnxconverter-common>=1.6.0

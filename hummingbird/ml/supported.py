@@ -18,15 +18,15 @@ ExtraTreesClassifier,
 ExtraTreesRegressor,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
+HistGradientBoostingClassifier,
 RandomForestClassifier,
 RandomForestRegressor,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor,
 LGBMClassifier,
 LGBMRegressor,
 XGBClassifier,
-XGBRegressor,
-TreeEnsembleClassifier,
-TreeEnsembleRegressor
-
+XGBRegressor
 """
 from .exceptions import MissingConverter
 from ._utils import torch_installed, sklearn_installed, lightgbm_installed, xgboost_installed, onnx_installed
@@ -37,12 +37,16 @@ def _build_sklearn_operator_list():
     Put all suported Sklearn operators on a list.
     """
     if sklearn_installed():
-        # Tree-based models.
+        # Enable experimental to import HistGradientBoostingClassifier
+        from sklearn.experimental import enable_hist_gradient_boosting
+
+        # Tree-based models
         from sklearn.ensemble import (
             ExtraTreesClassifier,
             ExtraTreesRegressor,
             GradientBoostingClassifier,
             GradientBoostingRegressor,
+            HistGradientBoostingClassifier,
             RandomForestClassifier,
             RandomForestRegressor,
         )
@@ -56,11 +60,12 @@ def _build_sklearn_operator_list():
             ExtraTreesRegressor,
             GradientBoostingClassifier,
             GradientBoostingRegressor,
+            HistGradientBoostingClassifier,
             RandomForestClassifier,
             RandomForestRegressor,
         ]
 
-    return [None]
+    return []
 
 
 def _build_xgboost_operator_list():
@@ -72,7 +77,7 @@ def _build_xgboost_operator_list():
 
         return [XGBClassifier, XGBRegressor]
 
-    return [None]
+    return []
 
 
 def _build_lightgbm_operator_list():
@@ -84,7 +89,7 @@ def _build_lightgbm_operator_list():
 
         return [LGBMClassifier, LGBMRegressor]
 
-    return [None]
+    return []
 
 
 # Associate onnxml types with our operator names.
@@ -125,7 +130,7 @@ def _build_sklearn_api_operator_name_map():
     Associate Sklearn with the operator class names.
     If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     """
-    return {k: "Sklearn" + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list if k is not None}
+    return {k: "Sklearn" + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list}
 
 
 def _build_onnxml_api_operator_name_map():

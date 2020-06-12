@@ -1,25 +1,24 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Python application
+name: Build
 
 on:
   push:
     branches:
       - master
-      - develop
 
   pull_request:
     branches:
       - master
-      - develop
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest, windows-2019]
         python-version: [3.5, 3.6, 3.7, 3.8]
 
     steps:
@@ -28,10 +27,29 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install basic dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements/test.txt .
+        pip install .[tests]
+    - name: Run basic tests without extra
+      run: |
+        pytest tests/test_no_extra_install.py
+    - name: Coverage on basic tests without extra
+      run: |
+        coverage run -a -m pytest tests/test_no_extra_install.py
+    - name: If mac, install libomp to facilitate lgbm install
+      if: matrix.os == 'macOS-latest'
+      run: |
+        brew install libomp
+        export CC=/usr/bin/clang
+        export CXX=/usr/bin/clang++
+        export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
+        export CFLAGS="$CFLAGS -I/usr/local/opt/libomp/include"
+        export CXXFLAGS="$CXXFLAGS -I/usr/local/opt/libomp/include"
+        export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+    - name: Install extra dependencies
+      run: |
+        pip install .[extra]
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -40,14 +58,11 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics --exclude=src
     - name: Test with pytest
       run: |
-        pytest tests
+        pytest --ignore=tests/test_no_extra_install.py
     - name: Coverage
       run: |
-        coverage run -m pytest tests
+        coverage run -a -m pytest tests --ignore=tests/test_no_extra_install.py
         coverage xml
-        MINIMUM=70
-        SCORE=$(coverage report -m | tail -n 1 | awk '{print $NF}' | rev | cut -c2- | rev)
-        if [ $SCORE -ge $MINIMUM ]; then echo "COVERAGE ($SCORE) OK"; else echo "WARNING: Coverage is $SCORE but should be at least $MINIMUM"; fi
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

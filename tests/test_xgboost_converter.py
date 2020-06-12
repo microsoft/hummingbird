@@ -26,9 +26,9 @@ class TestXGBoostConverter(unittest.TestCase):
                 torch_model = hummingbird.ml.convert(
                     model, "torch", X[0:1], extra_config={"tree_implementation": extra_config_param}
                 )
-                self.assertTrue(torch_model is not None)
-                self.assertTrue(
-                    str(type(list(torch_model.operator_map.values())[0])) == gbdt_implementation_map[extra_config_param]
+                self.assertIsNotNone(torch_model)
+                self.assertEqual(
+                    str(type(list(torch_model.operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
                 )
 
     def _run_xgb_classifier_converter(self, num_classes, extra_config={}):
@@ -42,7 +42,7 @@ class TestXGBoostConverter(unittest.TestCase):
             model.fit(X, y)
 
             torch_model = hummingbird.ml.convert(model, "torch", [], extra_config=extra_config)
-            self.assertTrue(torch_model is not None)
+            self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Binary classifier
@@ -87,7 +87,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
             torch_model = hummingbird.ml.convert(model, "torch", X[0:1], extra_config=extra_config)
-            self.assertTrue(torch_model is not None)
+            self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Regressor
@@ -118,7 +118,7 @@ class TestXGBoostConverter(unittest.TestCase):
             model.fit(X, y)
 
             torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={"tree_implementation": extra_config_param})
-            self.assertTrue(torch_model is not None)
+            self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
 

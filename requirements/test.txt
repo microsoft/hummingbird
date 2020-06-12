@@ -1,4 +1,0 @@
--r onnx.txt
-flake8
-pytest
-coverage

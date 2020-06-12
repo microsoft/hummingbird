@@ -26,7 +26,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
                 model.fit(X, y)
 
                 torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
-                self.assertTrue(torch_model is not None)
+                self.assertIsNotNone(torch_model)
                 self.assertTrue(
                     str(type(list(torch_model.operator_map.values())[0])) == dt_implementation_map[extra_config_param]
                 )
@@ -42,7 +42,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
             model = model_type(max_depth=max_depth, **kwargs)
             model.fit(X, y)
             torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
-            self.assertTrue(torch_model is not None)
+            self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Random forest binary classifier
@@ -118,7 +118,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
             model.fit(X, y)
             torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
-            self.assertTrue(torch_model is not None)
+            self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Random forest regressor
@@ -196,9 +196,9 @@ class TestSklearnTreeConverter(unittest.TestCase):
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(1, size=1)
         model = RandomForestClassifier(n_estimators=1).fit(X, y)
-        pytorch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+        torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+        self.assertIsNotNone(torch_model)
+        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Small tree gemm implementation
     def test_random_forest_gemm_classifier_single_node_tree_converter(self):
