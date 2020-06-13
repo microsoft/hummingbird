@@ -68,13 +68,11 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         labels = []
         probabilities = []
         for i in range(len(output_names)):
-            print(type(onnx_ml_pred[i][0]))
             if type(onnx_ml_pred[i][0]) is dict:
                 probabilities.append(list(map(lambda x: list(x.values()), onnx_ml_pred[i])))
             else:
                 labels.append(onnx_ml_pred[i])
-            print(onnx_pred[i][0].dtype)
-            if onnx_pred[i][0].dtype == np.dtype("int64"):
+            if type(onnx_pred[i][0]) == np.int64:
                 labels.append(onnx_pred[i])
             else:
                 probabilities.append(onnx_pred[i])
