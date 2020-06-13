@@ -8,6 +8,8 @@
 Converters for Sklearn's GradientBoosting models.
 """
 
+import warnings
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
@@ -64,30 +66,29 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     if n_classes == 2:
         n_classes -= 1
 
-    # Reshape the tree_infos into hummingbird gbdt internal format.
+    # Reshape the tree_infos to a more generic format.
     tree_infos = [tree_infos[i][j] for j in range(n_classes) for i in range(len(tree_infos))]
 
     # Get the value for Alpha.
     if hasattr(operator.raw_operator, "init"):
         if operator.raw_operator.init == "zero":
-            base_prediction = [[0.0]]
+            alpha = [[0.0]]
         elif operator.raw_operator.init is None:
             if n_classes == 1:
-                base_prediction = [
+                alpha = [
                     [np.log(operator.raw_operator.init_.class_prior_[1] / (1 - operator.raw_operator.init_.class_prior_[1]))]
                 ]
             else:
-                base_prediction = [[np.log(operator.raw_operator.init_.class_prior_[i]) for i in range(n_classes)]]
+                alpha = [[np.log(operator.raw_operator.init_.class_prior_[i]) for i in range(n_classes)]]
         else:
             raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
     elif hasattr(operator.raw_operator, "_baseline_prediction"):
         if n_classes == 1:
-            base_prediction = [[operator.raw_operator._baseline_prediction]]
+            alpha = [[operator.raw_operator._baseline_prediction]]
         else:
-            base_prediction = np.array([operator.raw_operator._baseline_prediction.flatten().tolist()])
+            alpha = np.array([operator.raw_operator._baseline_prediction.flatten().tolist()])
 
-    extra_config[constants.BASE_PREDICTION] = base_prediction
-    extra_config[constants.REORDER_TREES] = False
+    extra_config[constants.ALPHA] = alpha
 
     return convert_gbdt_classifier_common(
         tree_infos, get_parameters_for_sklearn_common, n_features, n_classes, classes, extra_config
@@ -118,13 +119,13 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
 
     # Get the value for Alpha.
     if operator.raw_operator.init == "zero":
-        base_prediction = [[0.0]]
+        alpha = [[0.0]]
     elif operator.raw_operator.init is None:
-        base_prediction = operator.raw_operator.init_.constant_.tolist()
+        alpha = operator.raw_operator.init_.constant_.tolist()
     else:
         raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
 
-    extra_config[constants.BASE_PREDICTION] = base_prediction
+    extra_config[constants.ALPHA] = alpha
 
     return convert_gbdt_common(tree_infos, get_parameters_for_sklearn_common, n_features, None, extra_config)
 
@@ -160,14 +161,15 @@ def convert_sklearn_hist_gbdt_classifier(operator, device, extra_config):
 
     # Get the value for Alpha.
     if n_classes == 1:
-        base_prediction = [[operator.raw_operator._baseline_prediction]]
+        alpha = [[operator.raw_operator._baseline_prediction]]
     else:
-        base_prediction = np.array([operator.raw_operator._baseline_prediction.flatten().tolist()])
+        alpha = np.array([operator.raw_operator._baseline_prediction.flatten().tolist()])
 
-    extra_config[constants.BASE_PREDICTION] = base_prediction
-    extra_config[constants.REORDER_TREES] = False
+    extra_config[constants.ALPHA] = alpha
 
-    return convert_gbdt_classifier_common(tree_infos, _get_parameters_hist_gbdt, n_features, n_classes, classes, extra_config)
+    return convert_gbdt_classifier_common(
+        tree_infos, _get_parameters_hist_gbdt, n_features, n_classes, classes, extra_config
+    )
 
 
 def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
@@ -186,9 +188,20 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator._predictors
-    tree_infos = [tree_infos[i][0] for i in range(len(tree_infos))]
     n_features = operator.raw_operator.n_features_
-    extra_config[constants.BASE_PREDICTION] = [[operator.raw_operator._baseline_prediction]]
+    extra_config[constants.LEARNING_RATE] = operator.raw_operator.learning_rate
+    # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
+    extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
+
+    # Get the value for Alpha.
+    if operator.raw_operator.init == "zero":
+        alpha = [[0.0]]
+    elif operator.raw_operator.init is None:
+        alpha = operator.raw_operator.init_.constant_.tolist()
+    else:
+        raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
+
+    extra_config[constants.ALPHA] = alpha
 
     return convert_gbdt_common(tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)
 
@@ -197,4 +210,4 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
 register_converter("SklearnGradientBoostingClassifier", convert_sklearn_gbdt_classifier)
 register_converter("SklearnGradientBoostingRegressor", convert_sklearn_gbdt_regressor)
 register_converter("SklearnHistGradientBoostingClassifier", convert_sklearn_hist_gbdt_classifier)
-register_converter("SklearnHistGradientBoostingRegressor", convert_sklearn_hist_gbdt_regressor)
+register_converter("SklearnHistGradientBoostingRegressor", convert_sklearn_hist_gbdt_classifier)
