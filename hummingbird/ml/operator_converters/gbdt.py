@@ -187,7 +187,7 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
     assert operator is not None
 
     # Get tree information out of the operator.
-    tree_infos = operator.raw_operator._predictors
+    tree_infos = operator.raw_operator._predictors.ravel().tolist()
     n_features = operator.raw_operator.n_features_
     extra_config[constants.LEARNING_RATE] = operator.raw_operator.learning_rate
     # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
