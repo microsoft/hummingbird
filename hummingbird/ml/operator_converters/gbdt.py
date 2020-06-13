@@ -210,4 +210,4 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
 register_converter("SklearnGradientBoostingClassifier", convert_sklearn_gbdt_classifier)
 register_converter("SklearnGradientBoostingRegressor", convert_sklearn_gbdt_regressor)
 register_converter("SklearnHistGradientBoostingClassifier", convert_sklearn_hist_gbdt_classifier)
-register_converter("SklearnHistGradientBoostingRegressor", convert_sklearn_hist_gbdt_classifier)
+register_converter("SklearnHistGradientBoostingRegressor", convert_sklearn_hist_gbdt_regressor)
