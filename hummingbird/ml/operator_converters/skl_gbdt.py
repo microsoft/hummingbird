@@ -192,16 +192,8 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
     extra_config[constants.LEARNING_RATE] = operator.raw_operator.learning_rate
     # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
     extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
-
     # Get the value for Alpha.
-    if operator.raw_operator.init == "zero":
-        alpha = [[0.0]]
-    elif operator.raw_operator.init is None:
-        alpha = operator.raw_operator.init_.constant_.tolist()
-    else:
-        raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
-
-    extra_config[constants.ALPHA] = alpha
+    extra_config[constants.ALPHA] = [[operator.raw_operator._baseline_prediction]]
 
     return convert_gbdt_common(tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)
 
