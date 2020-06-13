@@ -27,7 +27,6 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
-
     def _run_GB_trees_regressor_converter(self, extra_config=None):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
