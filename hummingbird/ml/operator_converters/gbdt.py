@@ -100,7 +100,7 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
     Converter for `sklearn.ensemble.GradientBoostingRegressor`.
 
     Args:
-        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingRegressor` or 
+        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingRegressor` or
         `sklearn.ensemble.HistGradientBoostingRegressor` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
@@ -126,7 +126,7 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
         raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
 
     extra_config[constants.ALPHA] = alpha
-    
+
     return convert_gbdt_common(tree_infos, get_parameters_for_sklearn_common, n_features, None, extra_config)
 
 
