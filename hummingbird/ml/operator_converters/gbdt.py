@@ -205,6 +205,7 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
 
     return convert_gbdt_common(tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)
 
+
 # Register the converters.
 register_converter("SklearnGradientBoostingClassifier", convert_sklearn_gbdt_classifier)
 register_converter("SklearnGradientBoostingRegressor", convert_sklearn_gbdt_regressor)
