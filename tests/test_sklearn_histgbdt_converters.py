@@ -6,6 +6,7 @@ import warnings
 
 import numpy as np
 import torch
+
 from sklearn.ensemble._hist_gradient_boosting.gradient_boosting import (
     HistGradientBoostingClassifier,
     HistGradientBoostingRegressor,
@@ -42,6 +43,20 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
             torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+
+    def _run_GB_trees_regressor_converter(self, extra_config=None):
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            model = HistGradientBoostingRegressor(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200).astype(np.float32)
+            y = np.random.normal(size=100)
+
+            model.fit(X, y)
+            pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config or {})
+            self.assertIsNotNone(pytorch_model)
+            np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Binary classifier
     def test_HistGBDT_classifier_binary_converter(self):
@@ -107,6 +122,22 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
     def test_GBDT_perf_tree_trav_regressor_converter(self):
         self._run_GB_trees_regressor_converter(extra_config={"tree_implementation": "perf_tree_trav"})
 
+
+    # Regressor
+    def test_GBDT_regressor_converter(self):
+        self._run_GB_trees_regressor_converter()
+
+    # Gemm regressor
+    def test_GBDT_gemm_regressor_converter(self):
+        self._run_GB_trees_regressor_converter(extra_config={"tree_implementation": "gemm"})
+
+    # Tree_trav regressor
+    def test_GBDT_tree_trav_regressor_converter(self):
+        self._run_GB_trees_regressor_converter(extra_config={"tree_implementation": "tree_trav"})
+
+    # Perf_tree_trav regressor
+    def test_GBDT_perf_tree_trav_regressor_converter(self):
+        self._run_GB_trees_regressor_converter(extra_config={"tree_implementation": "perf_tree_trav"})
 
 if __name__ == "__main__":
     unittest.main()
