@@ -16,13 +16,13 @@ class TestNoExtra(unittest.TestCase):
     """
 
     # Test no LGBM returns false on lightgbm_installed()
-    @unittest.skipIf(lightgbm_installed, reason="Test when LightGBM is not installed")
+    @unittest.skipIf(lightgbm_installed(), reason="Test when LightGBM is not installed")
     def test_lightgbm_installed_false(self):
         warnings.filterwarnings("ignore")
         assert not lightgbm_installed()
 
     # Test no XGB returns false on xgboost_installed()
-    @unittest.skipIf(xgboost_installed, reason="Test when XGBoost is not installed")
+    @unittest.skipIf(xgboost_installed(), reason="Test when XGBoost is not installed")
     def test_xgboost_installed_false(self):
         warnings.filterwarnings("ignore")
         assert not xgboost_installed()
