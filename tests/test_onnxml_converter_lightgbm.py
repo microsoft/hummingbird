@@ -70,18 +70,6 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
         onnx_ml_pred, onnx_pred, output_names = self._test_lgbm(X, model, extra_config)
 
-        # Check that predicted values match
-        # labels = []
-        # probabilities = []
-        # for i in range(len(output_names)):
-        #     if type(onnx_ml_pred[i][0]) is dict:
-        #         probabilities.append(list(map(lambda x: list(x.values()), onnx_ml_pred[i])))
-        #     else:
-        #         labels.append(onnx_ml_pred[i])
-        #     if type(onnx_pred[i][0]) == np.int64:
-        #         labels.append(onnx_pred[i])
-        #     else:
-        #         probabilities.append(onnx_pred[i])
         np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
         np.testing.assert_allclose(
             list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
