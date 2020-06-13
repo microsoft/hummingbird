@@ -42,14 +42,20 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         inputs = {session.get_inputs()[0].name: X}
         pred = session.run(output_names, inputs)
         for i in range(len(output_names)):
-            onnx_ml_pred[i].extend(pred[i])
+            if output_names[i] == "label":
+                onnx_ml_pred[1] = pred[i]
+            else:
+                onnx_ml_pred[0] = pred[i]
 
         # Get the predictions for the ONNX model
         session = ort.InferenceSession(onnx_model.SerializeToString())
         onnx_pred = [[] for i in range(len(output_names))]
         pred = session.run(output_names, inputs)
         for i in range(len(output_names)):
-            onnx_pred[i].extend(pred[i])
+            if output_names[i] == "label":
+                onnx_pred[1] = pred[i]
+            else:
+                onnx_pred[0] = pred[i]
 
         return onnx_ml_pred, onnx_pred, output_names
 
@@ -65,19 +71,21 @@ class TestONNXConverterLightGBM(unittest.TestCase):
         onnx_ml_pred, onnx_pred, output_names = self._test_lgbm(X, model, extra_config)
 
         # Check that predicted values match
-        labels = []
-        probabilities = []
-        for i in range(len(output_names)):
-            if type(onnx_ml_pred[i][0]) is dict:
-                probabilities.append(list(map(lambda x: list(x.values()), onnx_ml_pred[i])))
-            else:
-                labels.append(onnx_ml_pred[i])
-            if type(onnx_pred[i][0]) == np.int64:
-                labels.append(onnx_pred[i])
-            else:
-                probabilities.append(onnx_pred[i])
-        np.testing.assert_allclose(labels[0], labels[1], rtol=rtol, atol=atol)
-        np.testing.assert_allclose(probabilities[0], probabilities[1], rtol=rtol, atol=atol)
+        # labels = []
+        # probabilities = []
+        # for i in range(len(output_names)):
+        #     if type(onnx_ml_pred[i][0]) is dict:
+        #         probabilities.append(list(map(lambda x: list(x.values()), onnx_ml_pred[i])))
+        #     else:
+        #         labels.append(onnx_ml_pred[i])
+        #     if type(onnx_pred[i][0]) == np.int64:
+        #         labels.append(onnx_pred[i])
+        #     else:
+        #         probabilities.append(onnx_pred[i])
+        np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
+        np.testing.assert_allclose(
+            list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
+        )  # probs
 
     # Check that ONNXML models can only target the ONNX backend.
     @unittest.skipIf(
