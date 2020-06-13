@@ -94,6 +94,7 @@ def _build_sklearn_operator_list():
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
             HistGradientBoostingRegressor,
+            OneHotEncoder,
             RandomForestClassifier,
             RandomForestRegressor,
             # Linear-methods
