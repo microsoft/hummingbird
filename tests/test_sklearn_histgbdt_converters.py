@@ -89,7 +89,6 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
         model = HistGradientBoostingClassifier(max_iter=10).fit(X, y)
         self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "pytorch")
 
-
     # Regressor
     def test_GBDT_regressor_converter(self):
         self._run_GB_trees_regressor_converter()
