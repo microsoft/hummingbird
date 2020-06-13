@@ -104,5 +104,6 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
     def test_GBDT_perf_tree_trav_regressor_converter(self):
         self._run_GB_trees_regressor_converter(extra_config={"tree_implementation": "perf_tree_trav"})
 
+
 if __name__ == "__main__":
     unittest.main()
