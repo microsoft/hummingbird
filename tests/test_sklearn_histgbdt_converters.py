@@ -27,7 +27,7 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
             self.assertTrue(pytorch_model is not None)
             np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
-    
+
     def _run_GB_trees_regressor_converter(self, extra_config=None):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
@@ -105,6 +105,6 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
     # Perf_tree_trav regressor
     def test_GBDT_perf_tree_trav_regressor_converter(self):
         self._run_GB_trees_regressor_converter(extra_config={"tree_implementation": "perf_tree_trav"})
-        
+
 if __name__ == "__main__":
     unittest.main()
