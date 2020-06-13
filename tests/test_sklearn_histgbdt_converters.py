@@ -29,7 +29,7 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
 
     def _run_GB_trees_regressor_converter(self, extra_config={}):
         warnings.filterwarnings("ignore")
-        for max_depth in [1, 3, 8, 10, 12, None]:
+        for max_depth in [2, 3, 8, 10, 12, None]:
             model = HistGradientBoostingRegressor(max_iter=10, max_depth=max_depth)
             np.random.seed(0)
             X = np.random.rand(100, 200).astype(np.float32)
