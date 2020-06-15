@@ -115,7 +115,6 @@ def convert(
                 # We will find a better approach when we unify the IRs.
                 conversion_output = list(node_.output.values())
                 conversion_output.sort
-                print(conversion_output)
 
                 # Export the ONNX model for the current operator.
                 torch.onnx.export(
@@ -123,7 +122,7 @@ def convert(
                     inputs,
                     onnx_model_name,
                     input_names=node_.input.values(),
-                    output_names=node_.output.values(),
+                    output_names=conversion_output,
                     keep_initializers_as_inputs=False,
                     opset_version=target_opset,
                     do_constant_folding=True,
