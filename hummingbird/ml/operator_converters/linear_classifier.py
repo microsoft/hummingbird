@@ -35,11 +35,7 @@ class SklearnLinearModel(torch.nn.Module):
             output = torch.softmax(torch.addmm(self.intercepts, x, self.coefficients), dim=1)
         elif self.regression:
             output = torch.addmm(self.intercepts, x, self.coefficients)
-            if self.multi_class == "ovr":
-                output = torch.sigmoid(output)
-                if not self.binary_classification:
-                    output /= torch.sum(output, dim=1, keepdim=True)
-            elif not self.binary_classification:
+            if not self.binary_classification:
                 return output
         else:
             output = torch.sigmoid(torch.addmm(self.intercepts, x, self.coefficients))
@@ -57,7 +53,7 @@ class SklearnLinearModel(torch.nn.Module):
 
 def convert_sklearn_linear_model(operator, device, extra_config):
     classes = [0] if not hasattr(operator.raw_operator, "classes_") else operator.raw_operator.classes_
-    # classes = [0] if len(classes) < 3 else classes
+
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
         raise RuntimeError("hummingbird supports only integer labels for class labels.")
     if operator.type == "SklearnLinearRegression":
