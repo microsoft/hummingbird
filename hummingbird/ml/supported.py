@@ -18,13 +18,17 @@ ExtraTreesRegressor,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
+LinearRegression,
+LinearSVC,
+LogisticRegression,
+LogisticRegressionCV,
 RandomForestClassifier,
 RandomForestRegressor,
+SGDClassifier,
 LGBMClassifier,
 LGBMRegressor,
 XGBClassifier,
 XGBRegressor
-
 """
 from .exceptions import MissingConverter
 from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
@@ -50,6 +54,15 @@ def _build_sklearn_operator_list():
         )
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
+        from sklearn.linear_model import (
+            LinearRegression,
+            LogisticRegression,
+            LogisticRegressionCV,
+            SGDClassifier,
+        )
+
+        from sklearn.svm import LinearSVC, SVC, NuSVC
+
         return [
             # Tree-methods
             DecisionTreeClassifier,
@@ -61,6 +74,14 @@ def _build_sklearn_operator_list():
             HistGradientBoostingClassifier,
             RandomForestClassifier,
             RandomForestRegressor,
+            # Linear-methods
+            LinearRegression,
+            LinearSVC,
+            LogisticRegression,
+            LogisticRegressionCV,
+            NuSVC,
+            SGDClassifier,
+            SVC,
         ]
 
     return []

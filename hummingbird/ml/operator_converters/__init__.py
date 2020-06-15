@@ -17,9 +17,12 @@ from .._utils import _Constants
 constants = _Constants(converter_constants, hummingbird_constants)
 
 # To register a converter for scikit-learn API operators, import associated modules here.
+from . import decision_tree  # noqa: E402
 from . import gbdt  # noqa: E402
 from . import lightgbm  # noqa: E402
-from . import decision_tree  # noqa: E402
+from . import linear_classifier  # noqa: E402
+
+# from . import svc # noqa: E402
 from . import xgb  # noqa: E402
 
 __pdoc__ = {}
