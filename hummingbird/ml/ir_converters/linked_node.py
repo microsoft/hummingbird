@@ -110,8 +110,13 @@ def convert(
                     onnx_pred = session.run(list(test_output_names), {test_input_name: test_data})[0]
                     inputs = torch.from_numpy(onnx_pred)
 
-                # Do tracing and export the ONNX model for the current operator.
-                output = pytorch_model(inputs)
+                # LinkedNode uses dictionaries and with Python 3.5 the order is not deterministic.
+                # Here we sort as an hack: label will always go before probabilities.
+                # We will find a better approach when we unify the IRs.
+                conversion_output = list(node_.output.values())
+                conversion_output.sort
+
+                # Export the ONNX model for the current operator.
                 torch.onnx.export(
                     pytorch_model,
                     inputs,
