@@ -122,6 +122,16 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     def test_sgd_classifier_multi(self):
         self._test_sgd_classifier(3)
 
+    # Failure Cases
+    def test_sklearn_linear_model_raises_wrong_type(self):
+        warnings.filterwarnings("ignore")
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error
+        model = LogisticRegression().fit(X, y)
+        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "pytorch")
+
 
 if __name__ == "__main__":
     unittest.main()
