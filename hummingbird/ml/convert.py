@@ -267,11 +267,16 @@ def convert(model, backend, test_input=None, extra_config={}):
     This function converts the specified input *model* into an implementation targeting *backend*.
     *Convert* supports [Sklearn], [LightGBM], [XGBoost] and [ONNX] models.
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
+    For *Sklearn*, *LightGBM* and *XGBoost* currently only the *torch* backend is supported.
+    For *ONNX* currently only the *onnx* backend is supported. For ONNX models, Hummingbird behave as a model
+    rewriter converting [ONNX-ML] operators into [ONNX ones].
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     [Sklearn]: https://scikit-learn.org/
     [LightGBM]: https://lightgbm.readthedocs.io/
     [XGBoost]: https://xgboost.readthedocs.io/
     [ONNX]: https://onnx.ai/
+    [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
+    [ONNX ones]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
 
     Args:
         model: An input model

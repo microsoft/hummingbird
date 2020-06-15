@@ -87,10 +87,8 @@ def convert(
                 # Early version of pytorch have a bug with exporting gemm into ONNX.
                 trimmed_version = torch.__version__.split("+")[0]  # For Win pytorch has a +cpu or +gpu postfix
                 torch_version = LooseVersion(trimmed_version)
-                print(torch_version)
                 gemm_min = LooseVersion("1.5.0")
                 if torch_version <= gemm_min:
-                    print("extra_config")
                     extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
                 pytorch_model = converter(node_, extra_config=extra_config)
 

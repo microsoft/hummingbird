@@ -116,6 +116,7 @@ def _build_backend_map():
         import torch
 
         backends.add(torch.__name__)
+        backends.add("py" + torch.__name__)  # For compatibility with earlier versions.
 
     if onnx_installed():
         import onnx
