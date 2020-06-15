@@ -114,7 +114,7 @@ def convert(
                 # Here we sort as an hack: label will always go before probabilities.
                 # We will find a better approach when we unify the IRs.
                 conversion_output = list(node_.output.values())
-                conversion_output.sort
+                conversion_output.sort()
 
                 # Export the ONNX model for the current operator.
                 torch.onnx.export(
