@@ -85,7 +85,8 @@ def convert(
                 if constants.N_FEATURES not in extra_config:
                     extra_config[constants.ONNX_INPUTS] = all_tensors
                 # Early version of pytorch have a bug with exporting gemm into ONNX.
-                torch_version = LooseVersion(torch.__version__)
+                trimmed_version = torch.__version__.split("+")[0]  # For Win pytorch has a +cpu or +gpu postfix
+                torch_version = LooseVersion(trimmed_version)
                 print(torch_version)
                 gemm_min = LooseVersion("1.5.0")
                 if torch_version <= gemm_min:
