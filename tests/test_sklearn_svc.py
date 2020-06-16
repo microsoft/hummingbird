@@ -107,9 +107,9 @@ class TestSklearnSVC(unittest.TestCase):
     def test_sklearn_linear_model_raises_wrong_type(self):
 
         np.random.seed(0)
-        X = np.random.rand(100, 200)
+        X = np.random.rand(10, 10)
         X = np.array(X, dtype=np.float32)
-        y = np.random.randint(3, size=100)
+        y = np.random.randint(2, size=10)
         model = SVC(kernel="precomputed").fit(X, y)
         self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "pytorch")
 
