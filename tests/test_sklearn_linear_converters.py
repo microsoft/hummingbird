@@ -30,6 +30,8 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         self.assertTrue(pytorch_model is not None)
         np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-5, atol=1e-6)
 
+    """ TODO ADD COMMENTS ON ALL"""
+
     def test_logistic_regression_bi(self):
         self._test_logistic_regression(2)
 

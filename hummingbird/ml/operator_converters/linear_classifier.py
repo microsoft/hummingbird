@@ -9,7 +9,7 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 
 """
-Converters for scikit-learn linear models: LinearRegression, LogisticRegression, LinearSVC, SGDClassifier,LogisticRegressionCV
+Converters for scikit-learn linear models: LinearRegression, LogisticRegression, LinearSVC, SGDClassifier, LogisticRegressionCV
 """
 
 
