@@ -56,7 +56,7 @@ def _supported_model_format_backend_mapping_check(model, backend):
         assert torch_installed()
         import torch
 
-        if not backend == torch.__name__ or not backend == "py" + torch.__name__:
+        if not backend == torch.__name__ and not backend == "py" + torch.__name__:
             raise RuntimeError(
                 "Hummingbird currently support conversion of XGBoost / LightGBM / Sklearn models only into PyTorch."
             )
