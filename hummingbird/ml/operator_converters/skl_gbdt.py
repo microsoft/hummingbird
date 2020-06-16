@@ -190,7 +190,6 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
     tree_infos = operator.raw_operator._predictors
     tree_infos = [tree_infos[i][0] for i in range(len(tree_infos))]
     n_features = operator.raw_operator.n_features_
-    extra_config[constants.LEARNING_RATE] = operator.raw_operator.learning_rate
     extra_config[constants.ALPHA] = [[operator.raw_operator._baseline_prediction]]
 
     return convert_gbdt_common(tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)
