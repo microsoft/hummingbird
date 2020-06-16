@@ -6,7 +6,10 @@ import warnings
 
 import numpy as np
 import torch
-from sklearn.ensemble._hist_gradient_boosting.gradient_boosting import HistGradientBoostingClassifier, HistGradientBoostingRegressor
+from sklearn.ensemble._hist_gradient_boosting.gradient_boosting import (
+    HistGradientBoostingClassifier,
+    HistGradientBoostingRegressor,
+)
 
 import hummingbird.ml
 from tree_utils import gbdt_implementation_map
@@ -36,9 +39,9 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
             y = np.random.normal(size=100)
 
             model.fit(X, y)
-            pytorch_model = hummingbird.ml.convert(model, "pytorch", extra_config=extra_config)
-            self.assertIsNotNone(pytorch_model)
-            np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Binary classifier
     def test_HistGBDT_classifier_binary_converter(self):
