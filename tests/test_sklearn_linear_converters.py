@@ -1,5 +1,5 @@
 """
-Tests sklearn linear classifiers converter.
+Tests sklearn linear classifiers (LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV) converters.
 """
 import unittest
 import warnings
