@@ -31,6 +31,7 @@ class OneHotEncoderString(torch.nn.Module):
             num_categories.append(num_categories[-1] + len(cats))
         self.condition_tensors = torch.nn.Parameter(torch.IntTensor(condition_tensors), requires_grad=False)
         self.num_categories = num_categories
+        self.regression = False
 
     def forward(self, x):
         encoded_tensors = []
