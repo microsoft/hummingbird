@@ -19,6 +19,7 @@ ExtraTreesRegressor,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
+HistGradientBoostingRegressor,
 RandomForestClassifier,
 RandomForestRegressor,
 TreeEnsembleClassifier,
@@ -37,7 +38,7 @@ def _build_sklearn_operator_list():
     Put all suported Sklearn operators on a list.
     """
     if sklearn_installed():
-        # Enable experimental to import HistGradientBoostingClassifier
+        # Enable experimental to import HistGradientBoostingClassifier and HistGradientBoostingRegressor
         from sklearn.experimental import enable_hist_gradient_boosting
 
         # Tree-based models
@@ -47,6 +48,7 @@ def _build_sklearn_operator_list():
             GradientBoostingClassifier,
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
+            HistGradientBoostingRegressor,
             RandomForestClassifier,
             RandomForestRegressor,
         )
@@ -61,6 +63,7 @@ def _build_sklearn_operator_list():
             GradientBoostingClassifier,
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
+            HistGradientBoostingRegressor,
             RandomForestClassifier,
             RandomForestRegressor,
         ]
