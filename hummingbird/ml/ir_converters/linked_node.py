@@ -99,16 +99,20 @@ def convert(
                     inputs = torch.from_numpy(test_data)
                 else:
                     # We are in the middle of a graph: generate inputs using the part of the graph converted so far.
-                    graph = helper.make_graph(
-                        output_onnx_ir, "hb-tmp", input_tensors, output_tensors.values(), initializer_tensors.values()
+                    # Need to be tested once we get more complex ONNX models.
+                    raise RuntimeError(
+                        "Inference of ONNX models with multiple ONNXML operators is not supported yet. Please fill an issue at https://github.com/microsoft/hummingbird."
                     )
-                    model = helper.make_model(graph, producer_name="Hummingbird")
-                    session = ort.InferenceSession(model.SerializeToString())
-                    assert len(session.get_inputs()) == 1
+                    # graph = helper.make_graph(
+                    #     output_onnx_ir, "hb-tmp", input_tensors, output_tensors.values(), initializer_tensors.values()
+                    # )
+                    # model = helper.make_model(graph, producer_name="Hummingbird")
+                    # session = ort.InferenceSession(model.SerializeToString())
+                    # assert len(session.get_inputs()) == 1
 
-                    test_input_name = session.get_inputs()[0].name
-                    onnx_pred = session.run(list(test_output_names), {test_input_name: test_data})[0]
-                    inputs = torch.from_numpy(onnx_pred)
+                    # test_input_name = session.get_inputs()[0].name
+                    # onnx_pred = session.run(list(test_output_names), {test_input_name: test_data})[0]
+                    # inputs = torch.from_numpy(onnx_pred)
 
                 # LinkedNode uses dictionaries and with Python 3.5 the order is not deterministic.
                 # Here we sort as an hack: label will always go before probabilities.
@@ -240,15 +244,6 @@ def _check_and_prepare_ir_graph_for_conversion(node_list, input_tensors, extra_c
             node_.precedence[0].origin.output[:] = node_.output.values()
         elif node_.name in skip_list:
             continue
-        elif len(node_.input) == 1 and not node_.origin.input[0] in input_names:
-            # Remove sub-graphs for which we don't have an input.
-            current_node = node_
-            while len(current_node.successor) > 0:
-                assert len(current_node.successor) == 1
-
-                if current_node.successor[0].op_type is not None:
-                    skip_list.append(current_node.successor[0].name)
-                current_node = current_node.successor[0]
         else:
             output_node_list.append(node_)
             for out_ in node_.output.keys():
@@ -267,13 +262,13 @@ def _check_and_rename_variables(onnx_model, converted_model_nodes, alias, variab
         initializer_name = onnx_model.graph.initializer[i].name
         replace = False
         if initializer_name.isnumeric():
-            if int(initializer_name) in variable_check:
-                new_var_name = max(variable_check) + 1
-                variable_check.add(new_var_name)
-                new_var_name = str(new_var_name)
-                replace = True
-            else:
-                variable_check.add(int(initializer_name))
+            # if int(initializer_name) in variable_check:
+            #     new_var_name = max(variable_check) + 1
+            #     variable_check.add(new_var_name)
+            #     new_var_name = str(new_var_name)
+            #     replace = True
+            # else:
+            variable_check.add(int(initializer_name))
         else:
             new_var_name = onnx_model.graph.initializer[i].name + alias
             replace = True
@@ -298,22 +293,22 @@ def _check_and_rename_variables(onnx_model, converted_model_nodes, alias, variab
         for i in range(len(converted_node.output)):
             if converted_node.origin.output[i].isnumeric():
                 # Only track numeric variables
-                if int(converted_node.origin.output[i]) in variable_check:
-                    new_var_name = max(variable_check) + 1
-                    variable_check.add(new_var_name)
+                # if int(converted_node.origin.output[i]) in variable_check:
+                #     new_var_name = max(variable_check) + 1
+                #     variable_check.add(new_var_name)
 
-                    # Make sure that successor operators get the updated variable name
-                    for succ_ in converted_node.successor:
-                        for j in range(len(succ_.origin.input)):
-                            if succ_.origin.input[j] == converted_node.origin.output[i] and not (
-                                succ_.origin.input[j] in initializers
-                                and initializers[succ_.origin.input[j]] == (alias + succ_.unique_name, j)
-                            ):
-                                del succ_.input[succ_.origin.input[j]]
-                                succ_.input[str(new_var_name)] = str(new_var_name)
-                                succ_.origin.input[j] = str(new_var_name)
-                    del converted_node.output[converted_node.origin.output[i]]
-                    converted_node.output[str(new_var_name)] = str(new_var_name)
-                    converted_node.origin.output[i] = str(new_var_name)
-                else:
-                    variable_check.add(int(converted_node.origin.output[i]))
+                #     # Make sure that successor operators get the updated variable name
+                #     for succ_ in converted_node.successor:
+                #         for j in range(len(succ_.origin.input)):
+                #             if succ_.origin.input[j] == converted_node.origin.output[i] and not (
+                #                 succ_.origin.input[j] in initializers
+                #                 and initializers[succ_.origin.input[j]] == (alias + succ_.unique_name, j)
+                #             ):
+                #                 del succ_.input[succ_.origin.input[j]]
+                #                 succ_.input[str(new_var_name)] = str(new_var_name)
+                #                 succ_.origin.input[j] = str(new_var_name)
+                #     del converted_node.output[converted_node.origin.output[i]]
+                #     converted_node.output[str(new_var_name)] = str(new_var_name)
+                #     converted_node.origin.output[i] = str(new_var_name)
+                # else:
+                variable_check.add(int(converted_node.origin.output[i]))
