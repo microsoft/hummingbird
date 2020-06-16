@@ -33,8 +33,11 @@ jobs:
         pip install .[tests]
     - name: Run basic tests without extra
       run: |
-        pytest --cov=tests/test_no_extra_install.py --cov-report=xml --cov-append
-    - name: If mac, install libomp to facilitate sklearn install
+        pytest
+    - name: Coverage on basic tests without extra
+      run: |
+        coverage run -a -m pytest tests/test_no_extra_install.py
+    - name: If mac, install libomp to facilitate lgbm install
       if: matrix.os == 'macOS-latest'
       run: |
         brew install libomp
@@ -46,18 +49,19 @@ jobs:
         export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
     - name: Install extra dependencies
       run: |
-        pip install .[extra,onnx]
+        pip install  --no-cache-dir .[extra]
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=src
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # The GitHub editor is 127 chars wide
-        flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics --exclude=src
+        flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest --cov=./ --cov-report=xml --cov-append
+        pytest
     - name: Coverage
       run: |
+        coverage run -a -m pytest tests --ignore=tests/test_no_extra_install.py
         coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
