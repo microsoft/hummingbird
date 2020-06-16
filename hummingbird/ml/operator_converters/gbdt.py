@@ -100,7 +100,8 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
     Converter for `sklearn.ensemble.GradientBoostingRegressor`.
 
     Args:
-        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingRegressor` model
+        operator: An operator wrapping a `sklearn.ensemble.GradientBoostingRegressor` or
+        `sklearn.ensemble.HistGradientBoostingRegressor` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -112,7 +113,9 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator.estimators_.ravel().tolist()
     n_features = operator.raw_operator.n_features_
-    learning_rate = operator.raw_operator.learning_rate
+    extra_config[constants.LEARNING_RATE] = operator.raw_operator.learning_rate
+    # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
+    extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
 
     # Get the value for Alpha.
     if operator.raw_operator.init == "zero":
@@ -123,9 +126,6 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
         raise RuntimeError("Custom initializers for GBDT are not yet supported in Hummingbird.")
 
     extra_config[constants.ALPHA] = alpha
-    extra_config[constants.LEARNING_RATE] = learning_rate
-    # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
-    extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
 
     return convert_gbdt_common(tree_infos, get_parameters_for_sklearn_common, n_features, None, extra_config)
 
@@ -172,7 +172,31 @@ def convert_sklearn_hist_gbdt_classifier(operator, device, extra_config):
     )
 
 
+def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
+    """
+    Converter for `sklearn.ensemble.HistGradientBoostingRegressor`
+
+    Args:
+        operator: An operator wrapping a `sklearn.ensemble.HistGradientBoostingRegressor` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    # Get tree information out of the operator.
+    tree_infos = operator.raw_operator._predictors
+    tree_infos = [tree_infos[i][0] for i in range(len(tree_infos))]
+    n_features = operator.raw_operator.n_features_
+    extra_config[constants.ALPHA] = [[operator.raw_operator._baseline_prediction]]
+
+    return convert_gbdt_common(tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)
+
+
 # Register the converters.
 register_converter("SklearnGradientBoostingClassifier", convert_sklearn_gbdt_classifier)
 register_converter("SklearnGradientBoostingRegressor", convert_sklearn_gbdt_regressor)
 register_converter("SklearnHistGradientBoostingClassifier", convert_sklearn_hist_gbdt_classifier)
+register_converter("SklearnHistGradientBoostingRegressor", convert_sklearn_hist_gbdt_regressor)
