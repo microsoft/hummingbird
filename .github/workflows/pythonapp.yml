@@ -36,7 +36,7 @@ jobs:
         pytest
     - name: Coverage on basic tests without extra
       run: |
-        coverage run -a -m pytest tests/test_no_extra_install.py
+        coverage run -a -m pytest tests
     - name: If mac, install libomp to facilitate lgbm install
       if: matrix.os == 'macOS-latest'
       run: |
@@ -61,7 +61,7 @@ jobs:
         pytest
     - name: Coverage
       run: |
-        coverage run -a -m pytest tests --ignore=tests/test_no_extra_install.py
+        coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
