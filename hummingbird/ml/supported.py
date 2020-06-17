@@ -82,8 +82,9 @@ def _build_sklearn_operator_list():
             LinearSVC,
             LogisticRegression,
             LogisticRegressionCV,
-            NuSVC,
             SGDClassifier,
+            # SV
+            NuSVC,
             SVC,
         ]
 

@@ -20,7 +20,7 @@ constants = _Constants(converter_constants, hummingbird_constants)
 from . import decision_tree  # noqa: E402
 from . import gbdt  # noqa: E402
 from . import lightgbm  # noqa: E402
-from . import linear_classifier  # noqa: E402
+from . import skl_linear  # noqa: E402
 from . import svc  # noqa: E402
 from . import xgb  # noqa: E402
 

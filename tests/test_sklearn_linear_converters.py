@@ -30,7 +30,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         pytorch_model = hummingbird.ml.convert(model, "pytorch")
 
         self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-5, atol=1e-6)
+        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-6, atol=1e-6)
 
     # LogisticRegression binary
     def test_logistic_regression_bi(self):
@@ -68,7 +68,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         pytorch_model = hummingbird.ml.convert(model, "pytorch")
 
         self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-5, atol=1e-6)
+        np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-6, atol=1e-6)
 
     # LinearRegression with 2 classes
     def test_linear_regression_bi(self):
@@ -93,7 +93,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         model.fit(X, y)
         pytorch_model = hummingbird.ml.convert(model, "pytorch")
         self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-5, atol=1e-6)
+        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-6, atol=1e-6)
 
     # LogisticRegressionCV with 2 classes
     def test_logistic_regression_cv_bi(self):
@@ -131,7 +131,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         pytorch_model = hummingbird.ml.convert(model, "pytorch")
         self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-5, atol=1e-6)
+        np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-6, atol=1e-6)
 
     # SGDClassifier with 2 classes
     def test_sgd_classifier_bi(self):
