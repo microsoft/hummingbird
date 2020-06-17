@@ -80,6 +80,17 @@ class SVC(torch.nn.Module):
 
 
 def convert_sklearn_svc_model(operator, device, extra_config):
+    """
+    Converter for `sklearn.svm.SVC` and `sklearn.svm.NuSVC`
+
+    Args:
+        operator: An operator wrapping a `sklearn.svm.SVC` or `sklearn.svm.NuSVC` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
     if operator.raw_operator.kernel in ["linear", "poly", "rbf", "sigmoid"]:
         # https://stackoverflow.com/questions/20113206/scikit-learn-svc-decision-function-and-predict
         kernel = operator.raw_operator.kernel

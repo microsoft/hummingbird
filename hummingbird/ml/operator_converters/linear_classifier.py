@@ -52,6 +52,22 @@ class SklearnLinearModel(torch.nn.Module):
 
 
 def convert_sklearn_linear_model(operator, device, extra_config):
+    """
+    Converter for `sklearn.svm.LinearSVC`, `sklearn.linear_model.LinearRegression`,
+        `sklearn.linear_model.LogisticRegression`, `sklearn.linear_model.SGDClassifier`, and
+        `sklearn.linear_model.LogisticRegressionCV`
+
+
+    Args:
+        operator: An operator wrapping a `sklearn.svm.LinearSVC`, `sklearn.linear_model.LinearRegression`,
+            `sklearn.linear_model.LogisticRegression`, `sklearn.linear_model.SGDClassifier`, or
+            `sklearn.linear_model.LogisticRegressionCV`
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
     classes = [0] if not hasattr(operator.raw_operator, "classes_") else operator.raw_operator.classes_
 
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
