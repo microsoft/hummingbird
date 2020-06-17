@@ -24,7 +24,8 @@ RandomForestRegressor,
 LGBMClassifier,
 LGBMRegressor,
 XGBClassifier,
-XGBRegressor
+XGBRegressor,
+OneHotEncoder
 
 """
 from .exceptions import MissingConverter
@@ -51,6 +52,7 @@ def _build_sklearn_operator_list():
             RandomForestRegressor,
         )
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+        from sklearn.preprocessing import OneHotEncoder
 
         return [
             # Tree-methods
@@ -62,6 +64,7 @@ def _build_sklearn_operator_list():
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
             HistGradientBoostingRegressor,
+            OneHotEncoder,
             RandomForestClassifier,
             RandomForestRegressor,
         ]
