@@ -56,7 +56,7 @@ def convert(
     initializer_tensors = {}
     output_tensors = {}
 
-    assert len(input_tensors) == 1, "Hummingbird ONNX converter currently support only graphs with a single input."
+    assert len(input_tensors) == 1, "Hummingbird ONNX converter currently supports only graphs with a single input."
 
     # Used to pass tensor shapes over the converters.
     all_tensors = {in_.name: in_ for in_ in input_tensors}

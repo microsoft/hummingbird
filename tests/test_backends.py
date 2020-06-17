@@ -34,6 +34,23 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
+    # Test pytorch is still a valid backend name
+    def test_backends_pytorch(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "pytOrCh")
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
     # Test not supported backends
     def test_unsupported_backend(self):
         warnings.filterwarnings("ignore")
