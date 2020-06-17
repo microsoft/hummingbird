@@ -38,7 +38,9 @@ class PyTorchBackendModel(torch.nn.Module):
         with torch.no_grad():
             inputs = [*inputs]
             variable_map = {}
-            device = next(self.parameters()).device  # Assuming we are using a single device for all parameters
+            device = None
+            if len(list(self.parameters())) > 0:
+                device = next(self.parameters()).device  # Assuming we are using a single device for all parameters
 
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self.input_names):
