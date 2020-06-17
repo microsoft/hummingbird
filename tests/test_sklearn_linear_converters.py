@@ -55,13 +55,13 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         self._test_logistic_regression(3, multi_class="multinomial", solver="sag")
 
     # LinearRegression test function to be parameterized
-    def _test_linear_regression(self, num_classes):
+    def _test_linear_regression(self, y_input):
         model = LinearRegression()
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)
-        y = np.random.randint(num_classes, size=100)
+        y = y_input
 
         model.fit(X, y)
 
@@ -70,13 +70,15 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         self.assertTrue(pytorch_model is not None)
         np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-6, atol=1e-6)
 
-    # LinearRegression with 2 classes
-    def test_linear_regression_bi(self):
-        self._test_linear_regression(2)
+    # LinearRegression with ints
+    def test_linear_regression_int(self):
+        np.random.seed(0)
+        self._test_linear_regression(np.random.randint(2, size=100))
 
-    # LinearRegression with 3 classes
-    def test_linear_regression_multi(self):
-        self._test_linear_regression(3)
+    # LinearRegression with floats
+    def test_linear_regression_float(self):
+        np.random.seed(0)
+        self._test_linear_regression(np.random.rand(100))
 
     # LogisticRegressionCV test function to be parameterized
     def _test_logistic_regression_cv(self, num_classes, solver="liblinear", multi_class="auto", labels_shift=0):
@@ -148,7 +150,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error
-        model = LogisticRegression().fit(X, y)
+        model = SGDClassifier().fit(X, y)
         self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "pytorch")
 
 

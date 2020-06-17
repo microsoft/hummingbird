@@ -53,15 +53,12 @@ class SklearnLinearModel(torch.nn.Module):
 
 def convert_sklearn_linear_model(operator, device, extra_config):
     """
-    Converter for `sklearn.svm.LinearSVC`, `sklearn.linear_model.LinearRegression`,
-        `sklearn.linear_model.LogisticRegression`, `sklearn.linear_model.SGDClassifier`, and
-        `sklearn.linear_model.LogisticRegressionCV`
-
+    Converter for `sklearn.svm.LinearSVC`, `sklearn.linear_model.LogisticRegression`,
+        `sklearn.linear_model.SGDClassifier`, and `sklearn.linear_model.LogisticRegressionCV`
 
     Args:
-        operator: An operator wrapping a `sklearn.svm.LinearSVC`, `sklearn.linear_model.LinearRegression`,
-            `sklearn.linear_model.LogisticRegression`, `sklearn.linear_model.SGDClassifier`, or
-            `sklearn.linear_model.LogisticRegressionCV`
+        operator: An operator wrapping a `sklearn.svm.LinearSVC`, `sklearn.linear_model.LogisticRegression`,
+            `sklearn.linear_model.SGDClassifier`, or `sklearn.linear_model.LogisticRegressionCV` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -72,12 +69,8 @@ def convert_sklearn_linear_model(operator, device, extra_config):
 
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
         raise RuntimeError("hummingbird supports only integer labels for class labels.")
-    if operator.type == "SklearnLinearRegression":
-        is_linear_regression = True
-        coefficients = operator.raw_operator.coef_.transpose().reshape(-1, len(classes)).astype("float32")
-    else:
-        is_linear_regression = False
-        coefficients = operator.raw_operator.coef_.transpose().astype("float32")
+
+    coefficients = operator.raw_operator.coef_.transpose().astype("float32")
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
 
     if hasattr(operator.raw_operator, "multi_class"):
@@ -88,10 +81,29 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     else:
         multi_class = None
 
-    return SklearnLinearModel(coefficients, intercepts, classes, multi_class, device, is_linear_regression)
+    return SklearnLinearModel(coefficients, intercepts, classes, multi_class, device)
 
 
-register_converter("SklearnLinearRegression", convert_sklearn_linear_model)
+def convert_sklearn_linear_regression_model(operator, device, extra_config):
+    """
+    Converter for `sklearn.linear_model.LinearRegression`
+
+    Args:
+        operator: An operator wrapping a `sklearn.linear_model.LinearRegression` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+
+    coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype("float32")
+    intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
+
+    return SklearnLinearModel(coefficients, intercepts, [0], None, device, is_linear_regression=True)
+
+
+register_converter("SklearnLinearRegression", convert_sklearn_linear_regression_model)
 register_converter("SklearnLogisticRegression", convert_sklearn_linear_model)
 register_converter("SklearnLinearSVC", convert_sklearn_linear_model)
 register_converter("SklearnSGDClassifier", convert_sklearn_linear_model)
