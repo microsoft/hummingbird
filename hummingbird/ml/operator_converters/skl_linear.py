@@ -31,14 +31,14 @@ class SklearnLinearModel(torch.nn.Module):
             self.binary_classification = True
 
     def forward(self, x):
+        output = torch.addmm(self.intercepts, x, self.coefficients)
         if self.multi_class == "multinomial":
-            output = torch.softmax(torch.addmm(self.intercepts, x, self.coefficients), dim=1)
+            output = torch.softmax(output, dim=1)
         elif self.regression:
-            output = torch.addmm(self.intercepts, x, self.coefficients)
             if not self.binary_classification:
                 return output
         else:
-            output = torch.sigmoid(torch.addmm(self.intercepts, x, self.coefficients))
+            output = torch.sigmoid(output)
             if not self.binary_classification:
                 output /= torch.sum(output, dim=1, keepdim=True)
 
