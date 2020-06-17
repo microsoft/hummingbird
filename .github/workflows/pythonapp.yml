@@ -49,7 +49,7 @@ jobs:
         export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
     - name: Install extra dependencies
       run: |
-        pip install  --no-cache-dir .[extra,onnx]
+        pip install .[extra,onnx]
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -61,7 +61,7 @@ jobs:
         pytest
     - name: Coverage
       run: |
-        coverage run -a -m pytest tests --ignore=tests/test_no_extra_install.py
+        coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

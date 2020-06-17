@@ -31,7 +31,7 @@ def _is_onnx_model(model):
     """
     Function returning whether the input model is an ONNX model or not.
     """
-    return "onnx" in model.__module__ and "graph" in dir(model)
+    return type(model).__name__ == "ModelProto"
 
 
 def _supported_backend_check(backend):
