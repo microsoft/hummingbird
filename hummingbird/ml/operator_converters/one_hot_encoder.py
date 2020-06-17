@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 import torch
 import numpy as np
-from ..common._registration import register_converter
+from onnxconverter_common.registration import register_converter
 
 
 class OneHotEncoderString(torch.nn.Module):
