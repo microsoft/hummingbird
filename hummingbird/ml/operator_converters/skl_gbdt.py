@@ -8,8 +8,6 @@
 Converters for Sklearn's GradientBoosting models.
 """
 
-import warnings
-
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
@@ -66,7 +64,7 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     if n_classes == 2:
         n_classes -= 1
 
-    # Reshape the tree_infos to a more generic format.
+    # Reshape the tree_infos into hummingbird gbdt internal format.
     tree_infos = [tree_infos[i][j] for j in range(n_classes) for i in range(len(tree_infos))]
 
     # Get the value for Alpha.
@@ -89,6 +87,7 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
             alpha = np.array([operator.raw_operator._baseline_prediction.flatten().tolist()])
 
     extra_config[constants.ALPHA] = alpha
+    extra_config[constants.REORDER_TREES] = False
 
     return convert_gbdt_classifier_common(
         tree_infos, get_parameters_for_sklearn_common, n_features, n_classes, classes, extra_config
@@ -166,10 +165,9 @@ def convert_sklearn_hist_gbdt_classifier(operator, device, extra_config):
         alpha = np.array([operator.raw_operator._baseline_prediction.flatten().tolist()])
 
     extra_config[constants.ALPHA] = alpha
+    extra_config[constants.REORDER_TREES] = False
 
-    return convert_gbdt_classifier_common(
-        tree_infos, _get_parameters_hist_gbdt, n_features, n_classes, classes, extra_config
-    )
+    return convert_gbdt_classifier_common(tree_infos, _get_parameters_hist_gbdt, n_features, n_classes, classes, extra_config)
 
 
 def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):

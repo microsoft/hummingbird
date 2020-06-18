@@ -5,23 +5,16 @@
 # --------------------------------------------------------------------------
 
 """
-Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees
+Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees.
 """
 
-import warnings
 import copy
 
 import torch
 from onnxconverter_common.registration import register_converter
 
 from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn
-from ._tree_commons import get_tree_params_and_type, get_parameters_for_gemm_common
-from ._tree_implementations import (
-    GEMMDecisionTreeImpl,
-    TreeTraversalDecisionTreeImpl,
-    PerfectTreeTraversalDecisionTreeImpl,
-    TreeImpl,
-)
+from ._tree_commons import convert_decision_ensemble_tree_common
 
 
 def convert_sklearn_random_forest_classifier(operator, device, extra_config):
@@ -47,30 +40,9 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
     if not all(isinstance(c, int) for c in classes):
         raise RuntimeError("Random Forest Classifier translation only supports integer class labels")
 
-    tree_parameters, max_depth, tree_type = get_tree_params_and_type(
-        tree_infos, get_parameters_for_sklearn_common, extra_config
+    return convert_decision_ensemble_tree_common(
+        tree_infos, get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn, n_features, classes, extra_config
     )
-
-    # Generate the tree implementation based on the selected strategy.
-    if tree_type == TreeImpl.gemm:
-        net_parameters = [
-            get_parameters_for_gemm_common(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
-            )
-            for tree_param in tree_parameters
-        ]
-        return GEMMDecisionTreeImpl(net_parameters, n_features, classes)
-
-    net_parameters = [
-        get_parameters_for_tree_trav_sklearn(
-            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values
-        )
-        for tree_param in tree_parameters
-    ]
-    if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)
-    else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
-        return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)
 
 
 def convert_sklearn_random_forest_regressor(operator, device, extra_config):
@@ -91,30 +63,13 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     tree_infos = operator.raw_operator.estimators_
     n_features = operator.raw_operator.n_features_
 
-    tree_parameters, max_depth, tree_type = get_tree_params_and_type(
-        tree_infos, get_parameters_for_sklearn_common, extra_config
+    return convert_decision_ensemble_tree_common(
+        tree_infos,
+        get_parameters_for_sklearn_common,
+        get_parameters_for_tree_trav_sklearn,
+        n_features,
+        extra_config=extra_config,
     )
-
-    # Generate the tree implementation based on the selected strategy.
-    if tree_type == TreeImpl.gemm:
-        net_parameters = [
-            get_parameters_for_gemm_common(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
-            )
-            for tree_param in tree_parameters
-        ]
-        return GEMMDecisionTreeImpl(net_parameters, n_features)
-
-    net_parameters = [
-        get_parameters_for_tree_trav_sklearn(
-            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values
-        )
-        for tree_param in tree_parameters
-    ]
-    if tree_type == TreeImpl.perf_tree_trav:
-        return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features)
-    else:  # Remaining possible case: tree_type == TreeImpl.tree_trav
-        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features)
 
 
 def convert_sklearn_decision_tree_classifier(operator, device, extra_config):

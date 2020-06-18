@@ -27,10 +27,10 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         model.fit(X, y)
 
-        pytorch_model = hummingbird.ml.convert(model, "pytorch")
+        torch_model = hummingbird.ml.convert(model, "torch")
 
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-6, atol=1e-6)
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-6, atol=1e-6)
 
     # LogisticRegression binary
     def test_logistic_regression_bi(self):
@@ -65,10 +65,10 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         model.fit(X, y)
 
-        pytorch_model = hummingbird.ml.convert(model, "pytorch")
+        torch_model = hummingbird.ml.convert(model, "torch")
 
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-6, atol=1e-6)
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
     # LinearRegression with ints
     def test_linear_regression_int(self):
@@ -93,9 +93,9 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         y = np.random.randint(num_classes, size=100) + labels_shift
 
         model.fit(X, y)
-        pytorch_model = hummingbird.ml.convert(model, "pytorch")
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-6, atol=1e-6)
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-6, atol=1e-6)
 
     # LogisticRegressionCV with 2 classes
     def test_logistic_regression_cv_bi(self):
@@ -131,9 +131,9 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         model.fit(X, y)
 
-        pytorch_model = hummingbird.ml.convert(model, "pytorch")
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-6, atol=1e-6)
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
     # SGDClassifier with 2 classes
     def test_sgd_classifier_bi(self):
@@ -151,7 +151,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(3, size=100).astype(np.float32)  # y must be int, not float, should error
         model = SGDClassifier().fit(X, y)
-        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "pytorch")
+        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "torch")
 
 
 if __name__ == "__main__":
