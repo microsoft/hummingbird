@@ -23,11 +23,14 @@ LinearRegression,
 LinearSVC,
 LogisticRegression,
 LogisticRegressionCV,
+Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
 SGDClassifier,
+
 LGBMClassifier,
 LGBMRegressor,
+
 XGBClassifier,
 XGBRegressor
 """
@@ -40,7 +43,7 @@ def _build_sklearn_operator_list():
     Put all suported Sklearn operators on a list.
     """
     if sklearn_installed():
-        # Enable experimental to import HistGradientBoostingClassifier and HistGradientBoostingRegressor
+        # Enable experimental to import HistGradientBoosting*
         from sklearn.experimental import enable_hist_gradient_boosting
 
         # Tree-based models
@@ -54,8 +57,10 @@ def _build_sklearn_operator_list():
             RandomForestClassifier,
             RandomForestRegressor,
         )
+
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
+        # Linear-based models
         from sklearn.linear_model import (
             LinearRegression,
             LogisticRegression,
@@ -63,10 +68,14 @@ def _build_sklearn_operator_list():
             SGDClassifier,
         )
 
+        # SVM-based models
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
+        # Preprocessing
+        from sklearn.preprocessing import Normalizer
+
         return [
-            # Tree-methods
+            # Trees
             DecisionTreeClassifier,
             DecisionTreeRegressor,
             ExtraTreesClassifier,
@@ -86,6 +95,8 @@ def _build_sklearn_operator_list():
             # SVM
             NuSVC,
             SVC,
+            # Preprocessing
+            Normalizer,
         ]
 
     return []
