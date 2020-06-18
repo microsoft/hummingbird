@@ -27,6 +27,7 @@
 <p><strong>Supported Backends</strong>
 PyTorch</p>
 <p><strong>Supported Operators</strong>
+Normalizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
@@ -58,6 +59,7 @@ All operators, backends, and configurations settings supported in Hummingbird ar
 PyTorch
 
 **Supported Operators**
+Normalizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
@@ -100,10 +102,14 @@ def _build_sklearn_operator_list():
             RandomForestClassifier,
             RandomForestRegressor,
         )
+
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
+        from sklearn.preprocessing import Normalizer
+
         return [
-            # Tree-methods
+            # Return Sklearn models
+            Normalizer,
             DecisionTreeClassifier,
             DecisionTreeRegressor,
             ExtraTreesClassifier,
