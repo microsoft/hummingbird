@@ -21,9 +21,10 @@ from . import decision_tree  # noqa: E402
 from . import gbdt  # noqa: E402
 from . import lightgbm  # noqa: E402
 from . import skl_linear  # noqa: E402
+from . import skl_normalizer  # noqa: E402
 from . import skl_sv  # noqa: E402
 from . import xgb  # noqa: E402
-from . import normalizer  # noqa: E402
+
 
 __pdoc__ = {}
 __pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
