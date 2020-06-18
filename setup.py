@@ -48,7 +48,7 @@ setup(
     include_package_data=True,
     install_requires=install_requires,
     extras_require={
-        "tests": ["flake8", "pytest-cov", "coverage", "pre-commit"],
+        "tests": ["flake8", "pytest", "coverage", "pre-commit"],
         "docs": ["pdoc"],
         "onnx": ["onnxruntime>=1.0.0", "onnxmltools>=1.6.0"],
         "extra": [
