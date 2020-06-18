@@ -11,7 +11,6 @@ All operators, backends, and configurations settings supported in Hummingbird ar
 PyTorch
 
 **Supported Operators**
-Normalizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
@@ -20,13 +19,20 @@ GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
+LinearRegression,
+LinearSVC,
+LogisticRegression,
+LogisticRegressionCV,
+Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
+SGDClassifier,
+
 LGBMClassifier,
 LGBMRegressor,
+
 XGBClassifier,
 XGBRegressor
-
 """
 from .exceptions import MissingConverter
 from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
@@ -54,11 +60,22 @@ def _build_sklearn_operator_list():
 
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
+        # Linear-based models
+        from sklearn.linear_model import (
+            LinearRegression,
+            LogisticRegression,
+            LogisticRegressionCV,
+            SGDClassifier,
+        )
+
+        # SVM-based models
+        from sklearn.svm import LinearSVC, SVC, NuSVC
+
+        # Preprocessing
         from sklearn.preprocessing import Normalizer
 
         return [
-            # Return Sklearn models
-            Normalizer,
+            # Trees
             DecisionTreeClassifier,
             DecisionTreeRegressor,
             ExtraTreesClassifier,
@@ -69,6 +86,17 @@ def _build_sklearn_operator_list():
             HistGradientBoostingRegressor,
             RandomForestClassifier,
             RandomForestRegressor,
+            # Linear-methods
+            LinearRegression,
+            LinearSVC,
+            LogisticRegression,
+            LogisticRegressionCV,
+            SGDClassifier,
+            # SVM
+            NuSVC,
+            SVC,
+            # Preprocessing
+            Normalizer,
         ]
 
     return []

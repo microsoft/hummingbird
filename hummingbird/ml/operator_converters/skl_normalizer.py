@@ -25,6 +25,18 @@ class Normalizer(torch.nn.Module):
 
 
 def convert_sklearn_normalizer(operator, device, extra_config):
+    """
+    Converter for `sklearn.preprocessing.Normalizer`
+
+    Args:
+        operator: An operator wrapping a `sklearn.preprocessing.Normalizer` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+
     return Normalizer(operator.raw_operator.norm, device)
 
 
