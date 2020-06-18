@@ -3,7 +3,7 @@ from abc import ABC
 
 class BaseOperator(ABC):
     """
-    Abstract class definig the basic structure for operator implementations in Hummingbird.
+    Abstract class defining the basic structure for operator implementations in Hummingbird.
     """
 
     def __init__(self):
