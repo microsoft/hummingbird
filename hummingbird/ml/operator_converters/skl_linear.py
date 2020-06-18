@@ -14,7 +14,7 @@ Converters for scikit-learn linear models: LinearRegression, LogisticRegression,
 
 
 class SklearnLinearModel(torch.nn.Module):
-    def __init__(self, coefficients, intercepts, classes, multi_class, device, is_linear_regression=False):
+    def __init__(self, coefficients, intercepts, device, classes=[0], multi_class=None, is_linear_regression=False):
         super(SklearnLinearModel, self).__init__()
         self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients), requires_grad=False)
         self.intercepts = torch.nn.Parameter(torch.from_numpy(intercepts), requires_grad=False)
@@ -35,8 +35,7 @@ class SklearnLinearModel(torch.nn.Module):
         if self.multi_class == "multinomial":
             output = torch.softmax(output, dim=1)
         elif self.regression:
-            if not self.binary_classification:
-                return output
+            return output
         else:
             output = torch.sigmoid(output)
             if not self.binary_classification:
@@ -54,7 +53,7 @@ class SklearnLinearModel(torch.nn.Module):
 def convert_sklearn_linear_model(operator, device, extra_config):
     """
     Converter for `sklearn.svm.LinearSVC`, `sklearn.linear_model.LogisticRegression`,
-        `sklearn.linear_model.SGDClassifier`, and `sklearn.linear_model.LogisticRegressionCV`
+    `sklearn.linear_model.SGDClassifier`, and `sklearn.linear_model.LogisticRegressionCV`
 
     Args:
         operator: An operator wrapping a `sklearn.svm.LinearSVC`, `sklearn.linear_model.LogisticRegression`,
@@ -68,20 +67,21 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     classes = [0] if not hasattr(operator.raw_operator, "classes_") else operator.raw_operator.classes_
 
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
-        raise RuntimeError("hummingbird supports only integer labels for class labels.")
+        raise RuntimeError(
+            "Hummingbird currently supports only integer labels for class labels. Please file an issue at https://github.com/microsoft/hummingbird."
+        )
 
     coefficients = operator.raw_operator.coef_.transpose().astype("float32")
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
 
+    multi_class = None
     if hasattr(operator.raw_operator, "multi_class"):
         if operator.raw_operator.multi_class == "ovr" or operator.raw_operator.solver in ["warn", "liblinear"]:
             multi_class = "ovr"
         else:
             multi_class = "multinomial"
-    else:
-        multi_class = None
 
-    return SklearnLinearModel(coefficients, intercepts, classes, multi_class, device)
+    return SklearnLinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)
 
 
 def convert_sklearn_linear_regression_model(operator, device, extra_config):
@@ -100,7 +100,7 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
     coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype("float32")
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
 
-    return SklearnLinearModel(coefficients, intercepts, [0], None, device, is_linear_regression=True)
+    return SklearnLinearModel(coefficients, intercepts, device, is_linear_regression=True)
 
 
 register_converter("SklearnLinearRegression", convert_sklearn_linear_regression_model)
