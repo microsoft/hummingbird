@@ -13,7 +13,7 @@ import numpy as np
 from onnxconverter_common.registration import get_converter
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 
-from .exceptions import MissingBackend
+from .exceptions import MissingConverter, MissingBackend
 from ._parse import parse_sklearn_api_model
 from .supported import backends
 from ._utils import torch_installed, lightgbm_installed, xgboost_installed, onnx_installed

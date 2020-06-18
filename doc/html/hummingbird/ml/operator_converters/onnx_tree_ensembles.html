@@ -43,7 +43,7 @@ from onnxconverter_common.registration import register_converter
 
 from . import constants
 from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
-from ._tree_commons import TreeParameters, get_parameters_for_tree_trav_common, convert_decision_ensemble_tree_common
+from ._tree_commons import TreeParameters
 
 
 def _get_tree_infos_from_onnx_ml_operator(model):
@@ -55,6 +55,10 @@ def _get_tree_infos_from_onnx_ml_operator(model):
     tree_ids = target_node_ids = target_tree_ids = modes = None
     classes = post_transform = None
 
+    # The list of attributes is a merge between the classifier and regression operators.
+    # The operators descriptions can be found here
+    # https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md#aionnxmltreeensembleclassifier and
+    # here https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md#aionnxmltreeensembleregressor
     for attr in model.origin.attribute:
         if attr.name == &#34;nodes_falsenodeids&#34;:
             right = attr.ints

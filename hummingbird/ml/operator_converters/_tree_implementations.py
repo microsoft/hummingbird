@@ -11,9 +11,10 @@ Base classes for tree algorithm implementations.
 import torch
 import numpy as np
 from enum import Enum
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from . import constants
+from ._base_operator import BaseOperator
 
 
 class TreeImpl(Enum):
@@ -26,7 +27,7 @@ class TreeImpl(Enum):
     perf_tree_trav = 3
 
 
-class AbstracTreeImpl(ABC):
+class AbstracTreeImpl(BaseOperator):
     """
     Abstract class definig the basic structure for tree-base models.
     """
@@ -82,7 +83,6 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
         self.binary_classification = False
         self.classes = classes
         self.learning_rate = None
-        self.regression = False
         self.alpha = None
 
         # Are we doing regression or classification?

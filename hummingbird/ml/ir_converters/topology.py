@@ -10,7 +10,7 @@ Converters for topology IR are stored in this file.
 from onnxconverter_common.registration import get_converter
 
 from ..exceptions import MissingConverter
-from .._container import PyTorchBackendModel
+from .._container import PyTorchBackendModelRegression, PyTorchBackendModelClassification, PyTorchBackendModelTransformer
 
 
 def convert(topology, device=None, extra_config={}):
@@ -42,8 +42,19 @@ def convert(topology, device=None, extra_config={}):
         except Exception as e:
             raise e
 
-    pytorch_model = PyTorchBackendModel(
-        topology.raw_model.input_names, topology.raw_model.output_names, operator_map, topology, extra_config
+    operators = list(topology.topological_operator_iterator())
+    if operator_map[operators[-1].full_name].regression:
+        # We are doing a regression task.
+        pytorch_container = PyTorchBackendModelRegression
+    elif operator_map[operators[-1].full_name].transformer:
+        # We are just transforming the input data.
+        pytorch_container = PyTorchBackendModelTransformer
+    else:
+        # We are doing a classification task.
+        pytorch_container = PyTorchBackendModelClassification
+
+    pytorch_model = pytorch_container(
+        topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
 
     if device is not None:

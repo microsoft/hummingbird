@@ -47,11 +47,15 @@ from .._utils import _Constants
 constants = _Constants(converter_constants, hummingbird_constants)
 
 # To register a converter for scikit-learn API operators, import associated modules here.
-from . import skl_gbdt  # noqa: E402
-from . import skl_decision_tree  # noqa: E402
-from . import onnx_tree_ensembles  # noqa: E402
 from . import lightgbm  # noqa: E402
+from . import onnx_tree_ensembles  # noqa: E402
+from . import skl_decision_tree  # noqa: E402
+from . import skl_gbdt  # noqa: E402
+from . import skl_linear  # noqa: E402
+from . import skl_normalizer  # noqa: E402
+from . import skl_sv  # noqa: E402
 from . import xgb  # noqa: E402
+
 
 __pdoc__ = {}
 __pdoc__[&#34;hummingbird.operator_converters._gbdt_commons&#34;] = True
@@ -81,6 +85,18 @@ __pdoc__[&#34;hummingbird.operator_converters._tree_implementations&#34;] = True
 <dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_gbdt" href="skl_gbdt.html">hummingbird.ml.operator_converters.skl_gbdt</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for Sklearn's GradientBoosting models.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_linear" href="skl_linear.html">hummingbird.ml.operator_converters.skl_linear</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_normalizer" href="skl_normalizer.html">hummingbird.ml.operator_converters.skl_normalizer</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_sv" href="skl_sv.html">hummingbird.ml.operator_converters.skl_sv</a></code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 <dt><code class="name"><a title="hummingbird.ml.operator_converters.xgb" href="xgb.html">hummingbird.ml.operator_converters.xgb</a></code></dt>
 <dd>
@@ -117,6 +133,9 @@ __pdoc__[&#34;hummingbird.operator_converters._tree_implementations&#34;] = True
 <li><code><a title="hummingbird.ml.operator_converters.onnx_tree_ensembles" href="onnx_tree_ensembles.html">hummingbird.ml.operator_converters.onnx_tree_ensembles</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.skl_decision_tree" href="skl_decision_tree.html">hummingbird.ml.operator_converters.skl_decision_tree</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.skl_gbdt" href="skl_gbdt.html">hummingbird.ml.operator_converters.skl_gbdt</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.skl_linear" href="skl_linear.html">hummingbird.ml.operator_converters.skl_linear</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.skl_normalizer" href="skl_normalizer.html">hummingbird.ml.operator_converters.skl_normalizer</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.skl_sv" href="skl_sv.html">hummingbird.ml.operator_converters.skl_sv</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.xgb" href="xgb.html">hummingbird.ml.operator_converters.xgb</a></code></li>
 </ul>
 </li>
