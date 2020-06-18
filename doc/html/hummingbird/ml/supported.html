@@ -27,7 +27,6 @@
 <p><strong>Supported Backends</strong>
 PyTorch</p>
 <p><strong>Supported Operators</strong>
-Normalizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
@@ -36,11 +35,17 @@ GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
+LinearRegression,
+LinearSVC,
+LogisticRegression,
+LogisticRegressionCV,
+Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
-LGBMClassifier,
-LGBMRegressor,
-XGBClassifier,
+SGDClassifier,</p>
+<p>LGBMClassifier,
+LGBMRegressor,</p>
+<p>XGBClassifier,
 XGBRegressor</p>
 <details class="source">
 <summary>
@@ -59,7 +64,6 @@ All operators, backends, and configurations settings supported in Hummingbird ar
 PyTorch
 
 **Supported Operators**
-Normalizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
@@ -68,19 +72,23 @@ GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
+LinearRegression,
+LinearSVC,
+LogisticRegression,
+LogisticRegressionCV,
+Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
+SGDClassifier,
+
 LGBMClassifier,
 LGBMRegressor,
+
 XGBClassifier,
 XGBRegressor
-
 &#34;&#34;&#34;
 from .exceptions import MissingConverter
 from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
-
-from xgboost import XGBClassifier, XGBRegressor
-from lightgbm import LGBMClassifier, LGBMRegressor
 
 
 def _build_sklearn_operator_list():
@@ -88,7 +96,7 @@ def _build_sklearn_operator_list():
     Put all suported Sklearn operators on a list.
     &#34;&#34;&#34;
     if sklearn_installed():
-        # Enable experimental to import HistGradientBoostingClassifier
+        # Enable experimental to import HistGradientBoosting*
         from sklearn.experimental import enable_hist_gradient_boosting
 
         # Tree-based models
@@ -105,11 +113,22 @@ def _build_sklearn_operator_list():
 
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
+        # Linear-based models
+        from sklearn.linear_model import (
+            LinearRegression,
+            LogisticRegression,
+            LogisticRegressionCV,
+            SGDClassifier,
+        )
+
+        # SVM-based models
+        from sklearn.svm import LinearSVC, SVC, NuSVC
+
+        # Preprocessing
         from sklearn.preprocessing import Normalizer
 
         return [
-            # Return Sklearn models
-            Normalizer,
+            # Trees
             DecisionTreeClassifier,
             DecisionTreeRegressor,
             ExtraTreesClassifier,
@@ -120,9 +139,20 @@ def _build_sklearn_operator_list():
             HistGradientBoostingRegressor,
             RandomForestClassifier,
             RandomForestRegressor,
+            # Linear-methods
+            LinearRegression,
+            LinearSVC,
+            LogisticRegression,
+            LogisticRegressionCV,
+            SGDClassifier,
+            # SVM
+            NuSVC,
+            SVC,
+            # Preprocessing
+            Normalizer,
         ]
 
-    return None
+    return []
 
 
 def _build_xgboost_operator_list():
@@ -130,19 +160,23 @@ def _build_xgboost_operator_list():
     List all suported XGBoost (Sklearn API) operators.
     &#34;&#34;&#34;
     if xgboost_installed():
+        from xgboost import XGBClassifier, XGBRegressor
+
         return [XGBClassifier, XGBRegressor]
 
-    return None
+    return []
 
 
 def _build_lightgbm_operator_list():
     &#34;&#34;&#34;
     List all suported LightGBM (Sklearn API) operators.
     &#34;&#34;&#34;
-    if lightgbm_installed:
+    if lightgbm_installed():
+        from lightgbm import LGBMClassifier, LGBMRegressor
+
         return [LGBMClassifier, LGBMRegressor]
 
-    return None
+    return []
 
 
 def _build_backend_map():
@@ -157,7 +191,7 @@ def _build_sklearn_api_operator_name_map():
     Associate Sklearn with the operator class names.
     If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     &#34;&#34;&#34;
-    return {k: &#34;Sklearn&#34; + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list if k is not None}
+    return {k: &#34;Sklearn&#34; + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list}
 
 
 def get_sklearn_api_operator_name(model_type):
