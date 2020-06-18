@@ -19,9 +19,9 @@ class TestSklearnSVC(unittest.TestCase):
         y = np.random.randint(num_classes, size=100) + labels_shift
 
         model.fit(X, y)
-        pytorch_model = hummingbird.ml.convert(model, "pytorch")
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-6, atol=1e-6)
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
     # LinearSVC binary
     def test_linear_svc_bi(self):
@@ -48,10 +48,10 @@ class TestSklearnSVC(unittest.TestCase):
         y = np.random.randint(num_classes, size=100) + labels_shift
 
         model.fit(X, y)
-        pytorch_model = hummingbird.ml.convert(model, "pytorch")
+        torch_model = hummingbird.ml.convert(model, "torch")
 
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-6, atol=1e-6)
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
     # SVC binary
     def test_svc_bi(self):
@@ -90,10 +90,10 @@ class TestSklearnSVC(unittest.TestCase):
         y = np.random.randint(num_classes, size=100)
 
         model.fit(X, y)
-        pytorch_model = hummingbird.ml.convert(model, "pytorch")
+        torch_model = hummingbird.ml.convert(model, "torch")
 
-        self.assertTrue(pytorch_model is not None)
-        np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-6, atol=1e-6)
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
     # NuSVC binary
     def test_nu_svc_bi(self):
@@ -111,7 +111,7 @@ class TestSklearnSVC(unittest.TestCase):
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(2, size=10)
         model = SVC(kernel="precomputed").fit(X, y)
-        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "pytorch")
+        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "torch")
 
 
 if __name__ == "__main__":

@@ -23,11 +23,11 @@ class TestSklearnNormalizer(unittest.TestCase):
             model = Normalizer(norm=norm)
             model.fit(data)
 
-            pytorch_model = hummingbird.ml.convert(model, "pytorch")
+            torch_model = hummingbird.ml.convert(model, "torch")
 
-            self.assertIsNotNone(pytorch_model)
+            self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(
-                model.transform(data), pytorch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+                model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
     def test_normalizer_converter_raises_wrong_type(self):
@@ -39,9 +39,9 @@ class TestSklearnNormalizer(unittest.TestCase):
         model = Normalizer(norm="invalid")
         model.fit(data)
 
-        pytorch_model = hummingbird.ml.convert(model, "pytorch")
+        torch_model = hummingbird.ml.convert(model, "torch")
 
-        self.assertRaises(RuntimeError, pytorch_model.operator_map.SklearnNormalizer, torch.from_numpy(data))
+        self.assertRaises(RuntimeError, torch_model.operator_map.SklearnNormalizer, torch.from_numpy(data))
 
 
 if __name__ == "__main__":
