@@ -27,10 +27,7 @@ class TestSklearnNormalizer(unittest.TestCase):
 
             self.assertIsNotNone(pytorch_model)
             np.testing.assert_allclose(
-                model.transform(data),
-                pytorch_model.operator_map.SklearnNormalizer(data_tensor).cpu().numpy(),
-                rtol=1e-06,
-                atol=1e-06,
+                model.transform(data), pytorch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
     def test_normalizer_converter_raises_wrong_type(self):

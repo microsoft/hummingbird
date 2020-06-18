@@ -6,12 +6,14 @@
 import torch
 from onnxconverter_common.registration import register_converter
 
+from ._base_operator import BaseOperator
 
-class Normalizer(torch.nn.Module):
+
+class Normalizer(BaseOperator, torch.nn.Module):
     def __init__(self, norm, device):
         super(Normalizer, self).__init__()
         self.norm = norm
-        self.regression = False
+        self.transformer = True
 
     def forward(self, x):
         if self.norm == "l1":

@@ -8,12 +8,14 @@ import torch
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
+from ._base_operator import BaseOperator
+
 """
 Converters for scikit-learn linear models: LinearRegression, LogisticRegression, LinearSVC, SGDClassifier, LogisticRegressionCV
 """
 
 
-class SklearnLinearModel(torch.nn.Module):
+class SklearnLinearModel(BaseOperator, torch.nn.Module):
     def __init__(self, coefficients, intercepts, device, classes=[0], multi_class=None, is_linear_regression=False):
         super(SklearnLinearModel, self).__init__()
         self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients), requires_grad=False)
