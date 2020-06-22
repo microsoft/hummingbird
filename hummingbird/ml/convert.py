@@ -10,13 +10,12 @@ Hummingbird main (converters) API.
 from copy import deepcopy
 import numpy as np
 
-from onnxconverter_common.registration import get_converter
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 
 from .exceptions import MissingConverter, MissingBackend
 from ._parse import parse_sklearn_api_model
 from .supported import backends
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed, onnx_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
 from . import constants
 
 # Invoke the registration of all our converters.
@@ -47,7 +46,7 @@ def _supported_model_format_backend_mapping_check(model, backend):
     Function used to check whether the specified backend/input model format is supported or not.
     """
     if _is_onnx_model(model):
-        assert onnx_installed()
+        assert onnx_runtime_installed()
         import onnx
 
         if not backend == onnx.__name__:
@@ -189,7 +188,9 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
     """
     assert model is not None
     assert torch_installed(), "To use Hummingbird you need to install torch."
-    assert onnx_installed(), "To use the onnxml converter you need to install onnx and onnxruntime."
+    assert (
+        onnx_runtime_installed()
+    ), "To use the onnxml converter you need to install onnxruntime (or `pip install hummingbird-ml[onnx]`)."
 
     output_model_name = initial_types = input_names = output_names = None
     target_opset = 9

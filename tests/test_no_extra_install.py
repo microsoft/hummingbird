@@ -6,7 +6,7 @@ import warnings
 
 import numpy as np
 
-from hummingbird.ml._utils import lightgbm_installed, xgboost_installed, onnx_installed, onnx_ml_tools_installed
+from hummingbird.ml._utils import lightgbm_installed, xgboost_installed, onnx_runtime_installed, onnx_ml_tools_installed
 
 
 class TestNoExtra(unittest.TestCase):
@@ -28,10 +28,10 @@ class TestNoExtra(unittest.TestCase):
         assert not xgboost_installed()
 
     # Test no ONNX returns false on onnx_installed()
-    @unittest.skipIf(onnx_installed(), reason="Test when ONNX is not installed")
+    @unittest.skipIf(onnx_runtime_installed(), reason="Test when ONNX is not installed")
     def test_onnx_installed_false(self):
         warnings.filterwarnings("ignore")
-        assert not onnx_installed()
+        assert not onnx_runtime_installed()
 
     # Test no ONNXMLTOOLS returns false on onnx_ml_tools_installed()
     @unittest.skipIf(onnx_ml_tools_installed(), reason="Test when ONNXMLTOOLS is not installed")
