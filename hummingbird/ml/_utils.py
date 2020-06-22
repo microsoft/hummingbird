@@ -28,7 +28,7 @@ def torch_installed():
 
 def onnx_ml_tools_installed():
     """
-    Checks that *ONNX* and *ONNX Runtime* are available.
+    Checks that *ONNXMLTools* is available.
     """
     try:
         import onnxmltools
@@ -39,25 +39,15 @@ def onnx_ml_tools_installed():
         return False
 
 
-def onnx_installed():
+def onnx_runtime_installed():
     """
-    Checks that *ONNX* and *ONNX Runtime* are available.
+    Checks that *ONNX Runtime* is available.
     """
-    try:
-        import onnx
-
-    except ImportError:
-        print("ONNX not installed. Please check https://github.com/onnx/onnx#installation for instructions.")
-        return False
-
     try:
         import onnxruntime
 
         return True
     except ImportError:
-        print(
-            "ONNX runtime not installed. Please check https://github.com/microsoft/onnxruntime#installation for instructions."
-        )
         return False
 
 
