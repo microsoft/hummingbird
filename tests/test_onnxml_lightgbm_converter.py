@@ -21,9 +21,9 @@ if onnx_ml_tools_installed():
     from onnxmltools.convert import convert_lightgbm
 
 
-class TestONNXConverterLightGBM(unittest.TestCase):
+class TestONNXLightGBMConverter(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestONNXConverterLightGBM, self).__init__(*args, **kwargs)
+        super(TestONNXLightGBMConverter, self).__init__(*args, **kwargs)
 
     # Base test implementation comparing ONNXML and ONNX models.
     def _test_lgbm(self, X, model, extra_config={}):
