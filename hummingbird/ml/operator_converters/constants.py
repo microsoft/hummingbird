@@ -8,7 +8,7 @@
 Constants used in the Hummingbird converters are defined here.
 """
 
-ALPHA = "alpha"
+BASE_PREDICTION = "base_prediction"
 """Alpha"""
 
 LEARNING_RATE = "learning_rate"
