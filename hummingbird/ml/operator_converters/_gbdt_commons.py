@@ -70,6 +70,11 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 
     tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config)
 
+    # Apply learning rate directly on the values rather then at runtime.
+    if constants.LEARNING_RATE in extra_config:
+        for parameter in tree_parameters:
+            parameter.values = parameter.values * extra_config[constants.LEARNING_RATE]
+
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
         net_parameters = [
