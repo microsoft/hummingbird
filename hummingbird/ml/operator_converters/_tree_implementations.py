@@ -82,7 +82,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
         self.perform_class_select = False
         self.binary_classification = False
         self.classes = classes
-        self.alpha = None
+        self.base_prediction = None
 
         # Are we doing regression or classification?
         if classes is None:
@@ -171,8 +171,9 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         x = self.aggregation(x)
 
-        if self.alpha is not None:
-            x += self.alpha
+        if self.base_prediction is not None:
+            x += self.base_prediction
+
         if self.regression:
             return x
 
@@ -258,8 +259,10 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         output = self.aggregation(output)
 
-        if self.alpha is not None:
-            output += self.alpha
+
+        if self.base_prediction is not None:
+            output += self.base_prediction
+
         if self.regression:
             return output
 
@@ -353,8 +356,9 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         output = self.aggregation(output)
 
-        if self.alpha is not None:
-            output += self.alpha
+        if self.base_prediction is not None:
+            output += self.base_prediction
+
         if self.regression:
             return output
 
@@ -500,8 +504,11 @@ class GEMMGBDTImpl(GEMMTreeImpl):
         super(GEMMGBDTImpl, self).__init__(tree_parameters, n_features, classes, 1)
         self.n_gbdt_classes = 1
 
-        if constants.ALPHA in extra_config:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = torch.nn.Parameter(
+                torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False
+            )
+
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
@@ -538,8 +545,10 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
         super(TreeTraversalGBDTImpl, self).__init__(tree_parameters, max_detph, n_features, classes, 1)
         self.n_gbdt_classes = 1
 
-        if constants.ALPHA in extra_config:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = torch.nn.Parameter(
+                torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False
+            )
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
@@ -576,8 +585,11 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
         super(PerfectTreeTraversalGBDTImpl, self).__init__(tree_parameters, max_depth, n_features, classes, 1)
         self.n_gbdt_classes = 1
 
-        if constants.ALPHA in extra_config:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
+
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = torch.nn.Parameter(
+                torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False
+            )
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
