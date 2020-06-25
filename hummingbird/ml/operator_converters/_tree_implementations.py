@@ -157,7 +157,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
     def forward(self, x):
         x = x.t()
-        x = torch.mm(self.weight_1, x) < self.bias_1
+        x = torch.mm(self.weight_1, x) <= self.bias_1
         x = x.view(self.n_trees, self.hidden_one_size, -1)
         x = x.float()
 
