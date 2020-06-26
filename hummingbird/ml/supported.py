@@ -24,12 +24,16 @@ LinearRegression,
 LinearSVC,
 LogisticRegression,
 LogisticRegressionCV,
+MaxAbsScaler,
+MinMaxScaler,
 Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
+RobustScaler,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,
 SGDClassifier,
+StandardScaler,
 
 LGBMClassifier,
 LGBMRegressor,
@@ -75,7 +79,7 @@ def _build_sklearn_operator_list():
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
         # Preprocessing
-        from sklearn.preprocessing import Normalizer
+        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, RobustScaler, StandardScaler
 
         return [
             # Trees
@@ -99,7 +103,11 @@ def _build_sklearn_operator_list():
             NuSVC,
             SVC,
             # Preprocessing
+            MaxAbsScaler,
+            MinMaxScaler,
             Normalizer,
+            RobustScaler,
+            StandardScaler,
         ]
 
     return []

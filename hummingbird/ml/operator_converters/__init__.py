@@ -23,6 +23,7 @@ from . import skl_decision_tree  # noqa: E402
 from . import skl_gbdt  # noqa: E402
 from . import skl_linear  # noqa: E402
 from . import skl_normalizer  # noqa: E402
+from . import skl_scaler  # noqa: E402
 from . import skl_sv  # noqa: E402
 from . import xgb  # noqa: E402
 
