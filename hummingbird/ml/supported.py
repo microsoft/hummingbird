@@ -151,7 +151,7 @@ def _build_onnxml_operator_list():
             # Preprocessing
             "Normalizer",
 
-            # Linear-based models.
+            # Linear-based models
             "LinearClassifier",
 
             # Tree-based models

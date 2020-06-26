@@ -11,7 +11,12 @@ Converters for ONNX-ML tree-ensemble models.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
+<<<<<<< HEAD
 from ._linear_implementations import LinearModel
+=======
+
+from .skl_linear import SklearnLinearModel
+>>>>>>> pausing for now
 
 
 def convert_onnx_linear_model(operator, device=None, extra_config={}):
@@ -67,7 +72,11 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
     else:
         raise RuntimeError("Error parsing LinearClassifier, length of classes {} unexpected:{}".format(len(classes), classes))
 
+<<<<<<< HEAD
     return LinearModel(coefficients, intercepts, classes, multi_class, device)
+=======
+    return SklearnLinearModel(coefficients, intercepts, classes, multi_class, device)
+>>>>>>> pausing for now
 
 
 register_converter("ONNXMLLinearClassifier", convert_onnx_linear_model)
