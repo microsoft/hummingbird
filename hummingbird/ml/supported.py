@@ -136,6 +136,8 @@ def _build_onnxml_operator_list():
     """
     if onnx_installed():
         return [
+            # Linear-based models.
+            "LinearClassifier",
             # Tree-based models.
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",

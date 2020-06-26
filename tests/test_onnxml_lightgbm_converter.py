@@ -93,7 +93,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
 
         self.assertRaises(RuntimeError, convert, onnx_ml_model, "torch")
 
-    # Check conveter with extra configs.
+    # Check converter with extra configs.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
