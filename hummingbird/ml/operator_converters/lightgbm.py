@@ -97,4 +97,5 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
 
 # Register the converters.
 register_converter("SklearnLGBMClassifier", convert_sklearn_lgbm_classifier)
+register_converter("SklearnLGBMRanker", convert_sklearn_lgbm_regressor)
 register_converter("SklearnLGBMRegressor", convert_sklearn_lgbm_regressor)

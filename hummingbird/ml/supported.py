@@ -130,9 +130,9 @@ def _build_lightgbm_operator_list():
     List all suported LightGBM (Sklearn API) operators.
     """
     if lightgbm_installed():
-        from lightgbm import LGBMClassifier, LGBMRegressor
+        from lightgbm import LGBMClassifier, LGBMRanker, LGBMRegressor
 
-        return [LGBMClassifier, LGBMRegressor]
+        return [LGBMClassifier, LGBMRanker, LGBMRegressor]
 
     return []
 
