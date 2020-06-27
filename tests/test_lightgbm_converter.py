@@ -91,8 +91,7 @@ class TestLGBMConverter(unittest.TestCase):
 
     def _run_lgbm_ranker_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
-        # for max_depth in [1, 3, 8, 10, 12, None]:
-        for max_depth in [3]:
+        for max_depth in [1, 3, 8, 10, 12, None]:
             model = lgb.LGBMRanker(n_estimators=10, max_depth=max_depth)
             np.random.seed(0)
             X = np.random.rand(100, 200)
