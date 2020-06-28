@@ -103,11 +103,7 @@ class OneHotEncoder(torch.nn.Module):
 
 
 def convert_sklearn_one_hot_encoder(operator, device, extra_config):
-    if all([np.array(c).dtype == object for c in operator.raw_operator.categories_]):
-        categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
-        return OneHotEncoderString(categories, device)
-    else:
-        return OneHotEncoder(operator.raw_operator.categorical_features, False, operator.raw_operator.categories_, device)
-
+    categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
+    return OneHotEncoderString(categories, device)
 
 register_converter("SklearnOneHotEncoder", convert_sklearn_one_hot_encoder)
