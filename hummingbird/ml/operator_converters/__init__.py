@@ -17,11 +17,17 @@ from .._utils import _Constants
 constants = _Constants(converter_constants, hummingbird_constants)
 
 # To register a converter for scikit-learn API operators, import associated modules here.
-from . import gbdt  # noqa: E402
 from . import lightgbm  # noqa: E402
-from . import decision_tree  # noqa: E402
+from . import onnx_tree_ensembles  # noqa: E402
+from . import skl_decision_tree  # noqa: E402
+from . import skl_gbdt  # noqa: E402
+from . import skl_linear  # noqa: E402
+from . import skl_normalizer  # noqa: E402
+from . import skl_scaler  # noqa: E402
+from . import skl_sv  # noqa: E402
 from . import xgb  # noqa: E402
 from . import one_hot_encoder  # noqa: E402
+
 
 __pdoc__ = {}
 __pdoc__["hummingbird.operator_converters._gbdt_commons"] = True

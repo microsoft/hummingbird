@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 """
-Collections of classes and functions shared among GBDT converters.
+Collections of functions shared among GBDT converters.
 """
 
 import torch
@@ -41,6 +41,10 @@ def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, 
         n_classes -= 1
     if classes is None:
         classes = [i for i in range(n_classes)]
+    reorder_trees = True
+    if constants.REORDER_TREES in extra_config:
+        reorder_trees = extra_config[constants.REORDER_TREES]
+    if reorder_trees and n_classes > 1:
         tree_infos = [tree_infos[i * n_classes + j] for j in range(n_classes) for i in range(len(tree_infos) // n_classes)]
 
     return convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes, extra_config)
@@ -65,6 +69,11 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
     assert n_features is not None
 
     tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config)
+
+    # Apply learning rate directly on the values rather then at runtime.
+    if constants.LEARNING_RATE in extra_config:
+        for parameter in tree_parameters:
+            parameter.values = parameter.values * extra_config[constants.LEARNING_RATE]
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:

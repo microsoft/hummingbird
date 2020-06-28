@@ -11,9 +11,10 @@ Base classes for tree algorithm implementations.
 import torch
 import numpy as np
 from enum import Enum
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from . import constants
+from ._base_operator import BaseOperator
 
 
 class TreeImpl(Enum):
@@ -26,7 +27,7 @@ class TreeImpl(Enum):
     perf_tree_trav = 3
 
 
-class AbstracTreeImpl(ABC):
+class AbstracTreeImpl(BaseOperator):
     """
     Abstract class definig the basic structure for tree-base models.
     """
@@ -66,10 +67,10 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
     Abstract class definig the basic structure for tree-base models implemented in PyTorch.
     """
 
-    def __init__(self, net_parameters, n_features, classes, n_classes):
+    def __init__(self, tree_parameters, n_features, classes, n_classes):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
@@ -81,9 +82,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
         self.perform_class_select = False
         self.binary_classification = False
         self.classes = classes
-        self.learning_rate = None
-        self.regression = False
-        self.alpha = None
+        self.base_prediction = None
 
         # Are we doing regression or classification?
         if classes is None:
@@ -101,33 +100,33 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the GEMM strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, net_parameters, n_features, classes, n_classes=None):
+    def __init__(self, tree_parameters, n_features, classes, n_classes=None):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
         """
-        super(GEMMTreeImpl, self).__init__(net_parameters, n_features, classes, n_classes)
+        super(GEMMTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
 
         # Initialize the actual model.
         hidden_one_size = 0
         hidden_two_size = 0
         hidden_three_size = self.n_classes
 
-        for weight, bias in net_parameters:
+        for weight, bias in tree_parameters:
             hidden_one_size = max(hidden_one_size, weight[0].shape[0])
             hidden_two_size = max(hidden_two_size, weight[1].shape[0])
 
-        n_trees = len(net_parameters)
+        n_trees = len(tree_parameters)
         weight_1 = np.zeros((n_trees, hidden_one_size, n_features))
         bias_1 = np.zeros((n_trees, hidden_one_size))
         weight_2 = np.zeros((n_trees, hidden_two_size, hidden_one_size))
         bias_2 = np.zeros((n_trees, hidden_two_size))
         weight_3 = np.zeros((n_trees, hidden_three_size, hidden_two_size))
 
-        for i, (weight, bias) in enumerate(net_parameters):
+        for i, (weight, bias) in enumerate(tree_parameters):
             if len(weight[0]) > 0:
                 weight_1[i, 0 : weight[0].shape[0], 0 : weight[0].shape[1]] = weight[0]
                 bias_1[i, 0 : bias[0].shape[0]] = bias[0]
@@ -172,10 +171,9 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         x = self.aggregation(x)
 
-        if self.learning_rate is not None:
-            x *= self.learning_rate
-        if self.alpha is not None:
-            x += self.alpha
+        if self.base_prediction is not None:
+            x += self.base_prediction
+
         if self.regression:
             return x
 
@@ -195,7 +193,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
@@ -261,10 +259,9 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         output = self.aggregation(output)
 
-        if self.learning_rate is not None:
-            output *= self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
+        if self.base_prediction is not None:
+            output += self.base_prediction
+
         if self.regression:
             return output
 
@@ -284,7 +281,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
@@ -358,10 +355,9 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         output = self.aggregation(output)
 
-        if self.learning_rate is not None:
-            output *= self.learning_rate
-        if self.alpha is not None:
-            output += self.alpha
+        if self.base_prediction is not None:
+            output += self.base_prediction
+
         if self.regression:
             return output
 
@@ -414,21 +410,22 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         depth_f_traversal(nodes_map[0], -1, 0, 0)
 
 
+# Desision \ ensemble tree implementations.
 class GEMMDecisionTreeImpl(GEMMTreeImpl):
     """
     Class implementing the GEMM strategy in PyTorch for decision tree models.
 
     """
 
-    def __init__(self, net_parameters, n_features, classes=None):
+    def __init__(self, tree_parameters, n_features, classes=None):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
         """
-        super(GEMMDecisionTreeImpl, self).__init__(net_parameters, n_features, classes)
-        self.final_probability_divider = len(net_parameters)
+        super(GEMMDecisionTreeImpl, self).__init__(tree_parameters, n_features, classes)
+        self.final_probability_divider = len(tree_parameters)
 
     def aggregation(self, x):
         output = x.sum(0).t()
@@ -444,16 +441,16 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, net_parameters, max_depth, n_features, classes=None):
+    def __init__(self, tree_parameters, max_depth, n_features, classes=None):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
         """
-        super(TreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
-        self.final_probability_divider = len(net_parameters)
+        super(TreeTraversalDecisionTreeImpl, self).__init__(tree_parameters, max_depth, n_features, classes)
+        self.final_probability_divider = len(tree_parameters)
 
     def aggregation(self, x):
         output = x.sum(1)
@@ -469,16 +466,16 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, net_parameters, max_depth, n_features, classes=None):
+    def __init__(self, tree_parameters, max_depth, n_features, classes=None):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
         """
-        super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(net_parameters, max_depth, n_features, classes)
-        self.final_probability_divider = len(net_parameters)
+        super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(tree_parameters, max_depth, n_features, classes)
+        self.final_probability_divider = len(tree_parameters)
 
     def aggregation(self, x):
         output = x.sum(1)
@@ -489,33 +486,34 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
         return output
 
 
+# GBDT implementations
 class GEMMGBDTImpl(GEMMTreeImpl):
     """
     Class implementing the GEMM strategy (in PyTorch) for GBDT models.
     """
 
-    def __init__(self, net_parameters, n_features, classes=None, extra_config={}):
+    def __init__(self, tree_parameters, n_features, classes=None, extra_config={}):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(GEMMGBDTImpl, self).__init__(net_parameters, n_features, classes, 1)
+        super(GEMMGBDTImpl, self).__init__(tree_parameters, n_features, classes, 1)
         self.n_gbdt_classes = 1
 
-        if constants.LEARNING_RATE in extra_config:
-            self.learning_rate = extra_config[constants.LEARNING_RATE]
-        if constants.ALPHA in extra_config:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = torch.nn.Parameter(
+                torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False
+            )
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
             if self.n_gbdt_classes == 1:
                 self.binary_classification = True
 
-        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
+        self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
 
     def aggregation(self, x):
         return torch.squeeze(x).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
@@ -533,29 +531,29 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch.
     """
 
-    def __init__(self, net_parameters, max_detph, n_features, classes=None, extra_config={}):
+    def __init__(self, tree_parameters, max_detph, n_features, classes=None, extra_config={}):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(TreeTraversalGBDTImpl, self).__init__(net_parameters, max_detph, n_features, classes, 1)
+        super(TreeTraversalGBDTImpl, self).__init__(tree_parameters, max_detph, n_features, classes, 1)
         self.n_gbdt_classes = 1
 
-        if constants.LEARNING_RATE in extra_config:
-            self.learning_rate = extra_config[constants.LEARNING_RATE]
-        if constants.ALPHA in extra_config:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = torch.nn.Parameter(
+                torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False
+            )
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
             if self.n_gbdt_classes == 1:
                 self.binary_classification = True
 
-        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
+        self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
 
     def aggregation(self, x):
         return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
@@ -573,29 +571,29 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch.
     """
 
-    def __init__(self, net_parameters, max_depth, n_features, classes=None, extra_config={}):
+    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
         """
         Args:
-            net_parameters: The parameters defining the tree structure
+            tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(PerfectTreeTraversalGBDTImpl, self).__init__(net_parameters, max_depth, n_features, classes, 1)
+        super(PerfectTreeTraversalGBDTImpl, self).__init__(tree_parameters, max_depth, n_features, classes, 1)
         self.n_gbdt_classes = 1
 
-        if constants.LEARNING_RATE in extra_config:
-            self.learning_rate = extra_config[constants.LEARNING_RATE]
-        if constants.ALPHA in extra_config:
-            self.alpha = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.ALPHA]), requires_grad=False)
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = torch.nn.Parameter(
+                torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False
+            )
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
             if self.n_gbdt_classes == 1:
                 self.binary_classification = True
 
-        self.n_trees_per_class = len(net_parameters) // self.n_gbdt_classes
+        self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
 
     def aggregation(self, x):
         return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)

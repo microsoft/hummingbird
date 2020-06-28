@@ -8,7 +8,7 @@
 Constants used in the Hummingbird converters are defined here.
 """
 
-ALPHA = "alpha"
+BASE_PREDICTION = "base_prediction"
 """Alpha"""
 
 LEARNING_RATE = "learning_rate"
@@ -16,3 +16,9 @@ LEARNING_RATE = "learning_rate"
 
 GET_PARAMETERS_FOR_TREE_TRAVERSAL = "get_parameters_for_tree_trav"
 """Which function to use to extract the parameters for the tree traversal strategy"""
+
+REORDER_TREES = "reorder_trees"
+"""Whether to reorder trees in multiclass tasks"""
+
+ONNX_INPUTS = "onnx_inputs"
+"""The inputs to the onnx model"""

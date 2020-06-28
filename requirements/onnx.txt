@@ -1,0 +1,3 @@
+-r common.txt
+onnxruntime>=1.0.0
+onnxmltools>=1.6.0

@@ -12,6 +12,7 @@ import copy
 import numpy as np
 
 from ._tree_implementations import TreeImpl
+from ._tree_implementations import GEMMDecisionTreeImpl, TreeTraversalDecisionTreeImpl, PerfectTreeTraversalDecisionTreeImpl
 from . import constants
 
 
@@ -366,3 +367,30 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
     biases.append(None)
 
     return weights, biases
+
+
+def convert_decision_ensemble_tree_common(
+    tree_infos, get_parameters, get_parameters_for_tree_trav, n_features, classes=None, extra_config={}
+):
+    tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, get_parameters, extra_config)
+
+    # Generate the tree implementation based on the selected strategy.
+    if tree_type == TreeImpl.gemm:
+        net_parameters = [
+            get_parameters_for_gemm_common(
+                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
+            )
+            for tree_param in tree_parameters
+        ]
+        return GEMMDecisionTreeImpl(net_parameters, n_features, classes)
+
+    net_parameters = [
+        get_parameters_for_tree_trav(
+            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values
+        )
+        for tree_param in tree_parameters
+    ]
+    if tree_type == TreeImpl.tree_trav:
+        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)
+    else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
+        return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)

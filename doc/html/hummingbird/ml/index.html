@@ -55,6 +55,9 @@ constants = _Constants(hummingbird_constants)
 # Add the converters in the Hummingbird scope.
 from .convert import convert  # noqa: F401, E402
 
+# Add the supported backends in scope.
+from .supported import backends  # noqa: F401, E402
+
 
 # Pdoc stuff.
 __pdoc__ = {}
@@ -74,6 +77,10 @@ __pdoc__[&#34;hummingbird._utils&#34;] = True</code></pre>
 <dt><code class="name"><a title="hummingbird.ml.exceptions" href="exceptions.html">hummingbird.ml.exceptions</a></code></dt>
 <dd>
 <div class="desc"><p>Common errors.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.ir_converters" href="ir_converters/index.html">hummingbird.ml.ir_converters</a></code></dt>
+<dd>
+<div class="desc"><p>All IRs converters are stored under this package.</p></div>
 </dd>
 <dt><code class="name"><a title="hummingbird.ml.operator_converters" href="operator_converters/index.html">hummingbird.ml.operator_converters</a></code></dt>
 <dd>
@@ -111,6 +118,7 @@ __pdoc__[&#34;hummingbird._utils&#34;] = True</code></pre>
 <ul>
 <li><code><a title="hummingbird.ml.convert" href="convert.html">hummingbird.ml.convert</a></code></li>
 <li><code><a title="hummingbird.ml.exceptions" href="exceptions.html">hummingbird.ml.exceptions</a></code></li>
+<li><code><a title="hummingbird.ml.ir_converters" href="ir_converters/index.html">hummingbird.ml.ir_converters</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters" href="operator_converters/index.html">hummingbird.ml.operator_converters</a></code></li>
 <li><code><a title="hummingbird.ml.supported" href="supported.html">hummingbird.ml.supported</a></code></li>
 </ul>

@@ -9,7 +9,6 @@ packages = find_packages()
 assert packages
 
 # read version from the package file.
-version_str = "0.0.2"
 with (open(os.path.join(this, "hummingbird/__init__.py"), "r")) as f:
     line = [_ for _ in [_.strip("\r\n ") for _ in f.readlines()] if _.startswith("__version__")]
     if len(line) > 0:
@@ -50,6 +49,7 @@ setup(
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
         "docs": ["pdoc"],
+        "onnx": ["onnxruntime>=1.0.0", "onnxmltools>=1.6.0"],
         "extra": [
             # The need each for these depends on which libraries you plan to convert from
             "xgboost==0.90",

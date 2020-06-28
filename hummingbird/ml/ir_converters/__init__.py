@@ -5,12 +5,5 @@
 # --------------------------------------------------------------------------
 
 """
-Entrypoint for Hummingbird modules.
+All IRs converters are stored under this package.
 """
-
-__version__ = "0.0.3"
-__author__ = "Microsoft"
-__producer__ = "hummingbird"
-__producer_version__ = __version__
-__domain__ = "microsoft.gsl"
-__model_version__ = 0

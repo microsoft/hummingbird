@@ -5,16 +5,18 @@ import unittest
 import warnings
 
 import numpy as np
-import xgboost as xgb
 
 import hummingbird.ml
 from hummingbird.ml._utils import xgboost_installed
 from tree_utils import gbdt_implementation_map
 
+if xgboost_installed():
+    import xgboost as xgb
+
 
 class TestXGBoostConverter(unittest.TestCase):
     # Check tree implementation
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_implementation(self):
         warnings.filterwarnings("ignore")
         np.random.seed(0)
@@ -26,12 +28,12 @@ class TestXGBoostConverter(unittest.TestCase):
             for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
                 model.fit(X, y)
 
-                pytorch_model = hummingbird.ml.convert(
-                    model, "pytorch", X[0:1], extra_config={"tree_implementation": extra_config_param}
+                torch_model = hummingbird.ml.convert(
+                    model, "torch", X[0:1], extra_config={"tree_implementation": extra_config_param}
                 )
-                self.assertIsNotNone(pytorch_model)
+                self.assertIsNotNone(torch_model)
                 self.assertEqual(
-                    str(type(list(pytorch_model.operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
+                    str(type(list(torch_model.operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
                 )
 
     def _run_xgb_classifier_converter(self, num_classes, extra_config={}):
@@ -45,47 +47,47 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            pytorch_model = hummingbird.ml.convert(model, "pytorch", [], extra_config=extra_config)
-            self.assertIsNotNone(pytorch_model)
-            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", [], extra_config=extra_config)
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Binary classifier
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_binary_classifier_converter(self):
         self._run_xgb_classifier_converter(2)
 
     # Gemm classifier
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_gemm_classifier_converter(self):
         self._run_xgb_classifier_converter(2, extra_config={"tree_implementation": "gemm"})
 
     # Tree_trav classifier
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_tree_trav_classifier_converter(self):
         self._run_xgb_classifier_converter(2, extra_config={"tree_implementation": "tree_trav"})
 
     # Perf_tree_trav classifier
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_perf_tree_trav_classifier_converter(self):
         self._run_xgb_classifier_converter(2, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # Multi classifier
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_multi_classifier_converter(self):
         self._run_xgb_classifier_converter(3)
 
     # Gemm multi classifier
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_gemm_multi_classifier_converter(self):
         self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "gemm"})
 
     # Tree_trav multi classifier
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_tree_trav_multi_classifier_converter(self):
         self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "tree_trav"})
 
     # Perf_tree_trav multi classifier
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_perf_tree_trav_multi_classifier_converter(self):
         self._run_xgb_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
@@ -99,32 +101,32 @@ class TestXGBoostConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            pytorch_model = hummingbird.ml.convert(model, "pytorch", X[0:1], extra_config=extra_config)
-            self.assertIsNotNone(pytorch_model)
-            np.testing.assert_allclose(model.predict(X), pytorch_model.predict(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", X[0:1], extra_config=extra_config)
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Regressor
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_binary_regressor_converter(self):
         self._run_xgb_regressor_converter(1000)
 
     # Gemm regressor
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_gemm_regressor_converter(self):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "gemm"})
 
     # Tree_trav regressor
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_tree_trav_regressor_converter(self):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "tree_trav"})
 
     # Perf_tree_trav regressor
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_xgb_perf_tree_trav_regressor_converter(self):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # Small tree
-    @unittest.skipIf(not xgboost_installed, reason="XGBoost test require XGBoost installed")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test require XGBoost installed")
     def test_run_xgb_classifier_converter(self):
         warnings.filterwarnings("ignore")
         for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
@@ -136,11 +138,9 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            pytorch_model = hummingbird.ml.convert(
-                model, "pytorch", [], extra_config={"tree_implementation": extra_config_param}
-            )
-            self.assertIsNotNone(pytorch_model)
-            np.testing.assert_allclose(model.predict_proba(X), pytorch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={"tree_implementation": extra_config_param})
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":

@@ -40,13 +40,12 @@ Hummingbird main (converters) API.
 from copy import deepcopy
 import numpy as np
 
-from onnxconverter_common.registration import get_converter
+from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 
-from ._container import PyTorchBackendModel
 from .exceptions import MissingConverter, MissingBackend
 from ._parse import parse_sklearn_api_model
-from .supported import backend_map
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed
+from .supported import backends
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
 from . import constants
 
 # Invoke the registration of all our converters.
@@ -57,12 +56,39 @@ from .supported import xgb_operator_list  # noqa
 from .supported import lgbm_operator_list  # noqa
 
 
+def _is_onnx_model(model):
+    &#34;&#34;&#34;
+    Function returning whether the input model is an ONNX model or not.
+    &#34;&#34;&#34;
+    return type(model).__name__ == &#34;ModelProto&#34;
+
+
 def _supported_backend_check(backend):
     &#34;&#34;&#34;
     Function used to check whether the specified backend is supported or not.
     &#34;&#34;&#34;
-    if not backend.lower() in backend_map:
+    if backend not in backends:
         raise MissingBackend(&#34;Backend: {}&#34;.format(backend))
+
+
+def _supported_model_format_backend_mapping_check(model, backend):
+    &#34;&#34;&#34;
+    Function used to check whether the specified backend/input model format is supported or not.
+    &#34;&#34;&#34;
+    if _is_onnx_model(model):
+        assert onnx_runtime_installed()
+        import onnx
+
+        if not backend == onnx.__name__:
+            raise RuntimeError(&#34;Hummingbird currently support conversion of ONNX(-ML) models only into ONNX.&#34;)
+    else:
+        assert torch_installed()
+        import torch
+
+        if not backend == torch.__name__ and not backend == &#34;py&#34; + torch.__name__:
+            raise RuntimeError(
+                &#34;Hummingbird currently support conversion of XGBoost / LightGBM / Sklearn models only into PyTorch.&#34;
+            )
 
 
 def _convert_sklearn(model, test_input=None, extra_config={}):
@@ -86,13 +112,15 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
     assert model is not None
     assert torch_installed(), &#34;To use Hummingbird you need to install torch.&#34;
 
+    from .ir_converters.topology import convert as topology_converter
+
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
-    # We modify the scikit learn model during optimizations.
+    # We modify the scikit learn model during translation.
     model = deepcopy(model)
     topology = parse_sklearn_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = _convert_topology(topology, extra_config=extra_config)
+    hb_model = topology_converter(topology, extra_config=extra_config)
     return hb_model
 
 
@@ -114,7 +142,9 @@ def _convert_lightgbm(model, test_input=None, extra_config={}):
     Returns:
         A *PyTorch* model which is equivalent to the input *LightGBM* model
     &#34;&#34;&#34;
-    assert lightgbm_installed(), &#34;To convert LightGBM models you need to instal LightGBM.&#34;
+    assert (
+        lightgbm_installed()
+    ), &#34;To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`).&#34;
 
     return _convert_sklearn(model, test_input, extra_config)
 
@@ -137,7 +167,9 @@ def _convert_xgboost(model, test_input, extra_config={}):
     Returns:
         A *PyTorch* model which is equivalent to the input *XGBoost* model
     &#34;&#34;&#34;
-    assert xgboost_installed(), &#34;To convert XGboost models you need to instal XGBoost.&#34;
+    assert (
+        xgboost_installed()
+    ), &#34;To convert XGboost models you need to instal XGBoost (or `pip install hummingbird-ml[extra]`).&#34;
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
@@ -161,74 +193,148 @@ def _convert_xgboost(model, test_input, extra_config={}):
     return _convert_sklearn(model, test_input, extra_config)
 
 
-def _convert_topology(topology, device=None, extra_config={}):
+def _convert_onnxml(model, test_input=None, extra_config={}):
     &#34;&#34;&#34;
-    This function is used to convert a `onnxconverter_common.topology.Topology` object into a *PyTorch* model.
+    This function converts the specified [ONNX-ML] model into its [ONNX] counterpart.
+    The supported operators can be found at `hummingbird.ml.supported`.
+    The ONNX-ML converter requires either a test_input of a the initial types set through the exta_config parameter.
+    [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
+    [ONNX]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
 
     Args:
-        topology: The `onnxconverter_common.topology.Topology` object that will be converted into Pytorch
-        device: Which device the translated model will be run on
-        extra_config: Extra configurations to be used by individual operator converters
+        model: A model containing ONNX-ML operators
+        test_input: Some input data used to trace the model execution.
+                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
+
+    Examples:
+        extra_config = {}
+        extra_config[constans.ONNX_INITIAL_TYPES] =[(&#39;input&#39;, FloatTensorType([1, 20])]
+        &gt;&gt;&gt; onnx_model = _convert_onnxml(onnx_ml_model, None, extra_config)
 
     Returns:
-        A *PyTorch* model
+        A model containing only *ONNX* operators. The mode is equivalent to the input *ONNX-ML* model
     &#34;&#34;&#34;
-    assert topology is not None, &#34;Cannot convert a Topology object of type None.&#34;
+    assert model is not None
+    assert torch_installed(), &#34;To use Hummingbird you need to install torch.&#34;
+    assert onnx_runtime_installed(), &#34;To use the onnxml converter you need to install onnxruntime (or `pip install hummingbird-ml[onnx]`).&#34;
 
-    operator_map = {}
+    output_model_name = initial_types = input_names = output_names = None
+    target_opset = 9
 
-    for operator in topology.topological_operator_iterator():
-        try:
-            converter = get_converter(operator.type)
-            operator_map[operator.full_name] = converter(operator, device, extra_config)
-        except ValueError:
-            raise MissingConverter(
-                &#34;Unable to find converter for {} type {} with extra config: {}.&#34;.format(
-                    operator.type, type(getattr(operator, &#34;raw_model&#34;, None)), extra_config
+    # Set optional configuration options if any.
+    if constants.ONNX_OUTPUT_MODEL_NAME in extra_config:
+        output_model_name = extra_config[constants.ONNX_OUTPUT_MODEL_NAME]
+    if constants.ONNX_INITIAL_TYPES in extra_config:
+        initial_types = extra_config[constants.ONNX_INITIAL_TYPES]
+    if constants.ONNX_INPUT_NAMES in extra_config:
+        input_names = extra_config[constants.ONNX_INPUT_NAMES]
+    if constants.ONNX_OUTPUT_NAMES in extra_config:
+        output_names = extra_config[constants.ONNX_OUTPUT_NAMES]
+    if constants.ONNX_TARGET_OPSET in extra_config:
+        target_opset = extra_config[constants.ONNX_TARGET_OPSET]
+
+    assert (
+        test_input is not None and len(test_input) &gt; 0
+    ) or initial_types is not None, &#34;Cannot generate test input data. Either pass some input data or the initial_types&#34;
+
+    from .ir_converters.linked_node import convert as linked_node_converter
+
+    # We modify the model during translation.
+    model = deepcopy(model)
+
+    # Parse an ONNX-ML model into our internal data structure (i.e., LinkedNode)
+    graph = model.graph
+    input_names = input_names if input_names is not None else [in_.name for in_ in graph.input]
+    inputs = [in_ for in_ in graph.input if in_.name in input_names]
+
+    assert len(inputs) &gt; 0, &#34;Provided input name does not match with any model&#39;s input.&#34;
+    assert len(inputs) == 1, &#34;Hummingbird currently do not support models with more than 1 input.&#34;
+    assert initial_types is None or len(initial_types) == 1, &#34;len(initial_types) {} differs from len(inputs) {}.&#34;.format(
+        len(initial_types), len(inputs)
+    )
+
+    if output_names is None:
+        output_names = [] if graph.output is None else [o_.name for o_ in graph.output]
+
+    if test_input is None:
+        assert (
+            not initial_types[0][1].shape is None
+        ), &#34;Cannot generate test input data. Initial_types do not contain shape information.&#34;
+        assert len(initial_types[0][1].shape) == 2, &#34;Hummingbird currently support only inputs with len(shape) == 2.&#34;
+
+        from onnxconverter_common.data_types import FloatTensorType, Int32TensorType
+
+        test_input = np.random.rand(initial_types[0][1].shape[0], initial_types[0][1].shape[1])
+        extra_config[constants.N_FEATURES] = initial_types[0][1].shape[1]
+        if type(initial_types[0][1]) is FloatTensorType:
+            test_input = np.array(test_input, dtype=np.float32)
+        elif type(initial_types[0][1]) is Int32TensorType:
+            test_input = np.array(test_input, dtype=np.int32)
+        else:
+            raise RuntimeError(
+                &#34;Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.&#34;.format(
+                    type(initial_types[0][1])
                 )
             )
-        except Exception as e:
-            raise e
 
-    pytorch_model = PyTorchBackendModel(
-        topology.raw_model.input_names, topology.raw_model.output_names, operator_map, topology, extra_config
-    ).eval()
+    initializers = [] if graph.initializer is None else [in_ for in_ in graph.initializer]
+    onnx_ir = LinkedNode.build_from_onnx(
+        graph.node, [], [in_.name for in_ in inputs] + [in_.name for in_ in initializers], output_names
+    )
 
-    if device is not None:
-        pytorch_model = pytorch_model.to(device)
-    return pytorch_model
+    # Convert the input onnx_ir object into ONNX. The outcome is a model containing only ONNX operators.
+    onnx_model = linked_node_converter(
+        onnx_ir, inputs, initializers, output_names, test_input, output_model_name, target_opset, extra_config
+    )
+    return onnx_model
 
 
 def convert(model, backend, test_input=None, extra_config={}):
     &#34;&#34;&#34;
     This function converts the specified input *model* into an implementation targeting *backend*.
-    *Convert* supports [Sklearn], [LightGBM] and [XGBoost] models.
+    *Convert* supports [Sklearn], [LightGBM], [XGBoost] and [ONNX] models.
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
+    For *Sklearn*, *LightGBM* and *XGBoost* currently only the *torch* backend is supported.
+    For *ONNX* currently only the *onnx* backend is supported. For ONNX models, Hummingbird behave as a model
+    rewriter converting [ONNX-ML] into [ONNX operators].
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     [Sklearn]: https://scikit-learn.org/
     [LightGBM]: https://lightgbm.readthedocs.io/
     [XGBoost]: https://xgboost.readthedocs.io/
+    [ONNX]: https://onnx.ai/
+    [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
+    [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
 
     Args:
         model: An input model
         backend: The target for the conversion
-        test_input: some input data used to trace the model execution
+        test_input: some input data used to trace the model execution.
+                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
         extra_config: Extra configurations to be used by the individual operator converters.
                       The set of supported extra configurations can be found at `hummingbird.ml.supported`
 
     Examples:
-        &gt;&gt;&gt; pytorch_model = convert(sklearn_model,`pytorch`)
+        &gt;&gt;&gt; pytorch_model = convert(sklearn_model,`torch`)
 
     Returns:
         A model implemented in *backend*, which is equivalent to the input model
     &#34;&#34;&#34;
+    assert model is not None
+
+    backend = backend.lower()
     _supported_backend_check(backend)
+    _supported_model_format_backend_mapping_check(model, backend)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, test_input, extra_config)
 
     if type(model) in lgbm_operator_list:
         return _convert_lightgbm(model, test_input, extra_config)
+
+    if _is_onnx_model(model):
+        return _convert_onnxml(model, test_input, extra_config)
 
     return _convert_sklearn(model, test_input, extra_config)</code></pre>
 </details>
@@ -245,8 +351,11 @@ def convert(model, backend, test_input=None, extra_config={}):
 </code></dt>
 <dd>
 <div class="desc"><p>This function converts the specified input <em>model</em> into an implementation targeting <em>backend</em>.
-<em>Convert</em> supports <a href="https://scikit-learn.org/">Sklearn</a>, <a href="https://lightgbm.readthedocs.io/">LightGBM</a> and <a href="https://xgboost.readthedocs.io/">XGBoost</a> models.
+<em>Convert</em> supports <a href="https://scikit-learn.org/">Sklearn</a>, <a href="https://lightgbm.readthedocs.io/">LightGBM</a>, <a href="https://xgboost.readthedocs.io/">XGBoost</a> and <a href="https://onnx.ai/">ONNX</a> models.
 For <em>LightGBM</em> and <em>XGBoost</em> currently only the Sklearn API is supported.
+For <em>Sklearn</em>, <em>LightGBM</em> and <em>XGBoost</em> currently only the <em>torch</em> backend is supported.
+For <em>ONNX</em> currently only the <em>onnx</em> backend is supported. For ONNX models, Hummingbird behave as a model
+rewriter converting <a href="https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md">ONNX-ML</a> into <a href="https://github.com/onnx/onnx/blob/master/docs/Operators.md">ONNX operators</a>.
 The detailed list of models and backends can be found at <code><a title="hummingbird.ml.supported" href="supported.html">hummingbird.ml.supported</a></code>.</p>
 <h2 id="args">Args</h2>
 <dl>
@@ -255,13 +364,14 @@ The detailed list of models and backends can be found at <code><a title="humming
 <dt><strong><code>backend</code></strong></dt>
 <dd>The target for the conversion</dd>
 <dt><strong><code>test_input</code></strong></dt>
-<dd>some input data used to trace the model execution</dd>
+<dd>some input data used to trace the model execution.
+For the ONNX backend the test_input size is supposed to be as large as the expected batch size.</dd>
 <dt><strong><code>extra_config</code></strong></dt>
 <dd>Extra configurations to be used by the individual operator converters.
 The set of supported extra configurations can be found at <code><a title="hummingbird.ml.supported" href="supported.html">hummingbird.ml.supported</a></code></dd>
 </dl>
 <h2 id="examples">Examples</h2>
-<pre><code class="python">&gt;&gt;&gt; pytorch_model = convert(sklearn_model,&lt;code&gt;pytorch&lt;/code&gt;)
+<pre><code class="python">&gt;&gt;&gt; pytorch_model = convert(sklearn_model,&lt;code&gt;torch&lt;/code&gt;)
 </code></pre>
 <h2 id="returns">Returns</h2>
 <p>A model implemented in <em>backend</em>, which is equivalent to the input model</p></div>
@@ -272,33 +382,47 @@ The set of supported extra configurations can be found at <code><a title="hummin
 <pre><code class="python">def convert(model, backend, test_input=None, extra_config={}):
     &#34;&#34;&#34;
     This function converts the specified input *model* into an implementation targeting *backend*.
-    *Convert* supports [Sklearn], [LightGBM] and [XGBoost] models.
+    *Convert* supports [Sklearn], [LightGBM], [XGBoost] and [ONNX] models.
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
+    For *Sklearn*, *LightGBM* and *XGBoost* currently only the *torch* backend is supported.
+    For *ONNX* currently only the *onnx* backend is supported. For ONNX models, Hummingbird behave as a model
+    rewriter converting [ONNX-ML] into [ONNX operators].
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     [Sklearn]: https://scikit-learn.org/
     [LightGBM]: https://lightgbm.readthedocs.io/
     [XGBoost]: https://xgboost.readthedocs.io/
+    [ONNX]: https://onnx.ai/
+    [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
+    [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
 
     Args:
         model: An input model
         backend: The target for the conversion
-        test_input: some input data used to trace the model execution
+        test_input: some input data used to trace the model execution.
+                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
         extra_config: Extra configurations to be used by the individual operator converters.
                       The set of supported extra configurations can be found at `hummingbird.ml.supported`
 
     Examples:
-        &gt;&gt;&gt; pytorch_model = convert(sklearn_model,`pytorch`)
+        &gt;&gt;&gt; pytorch_model = convert(sklearn_model,`torch`)
 
     Returns:
         A model implemented in *backend*, which is equivalent to the input model
     &#34;&#34;&#34;
+    assert model is not None
+
+    backend = backend.lower()
     _supported_backend_check(backend)
+    _supported_model_format_backend_mapping_check(model, backend)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, test_input, extra_config)
 
     if type(model) in lgbm_operator_list:
         return _convert_lightgbm(model, test_input, extra_config)
+
+    if _is_onnx_model(model):
+        return _convert_onnxml(model, test_input, extra_config)
 
     return _convert_sklearn(model, test_input, extra_config)</code></pre>
 </details>

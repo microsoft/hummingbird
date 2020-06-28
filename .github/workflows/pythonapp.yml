@@ -33,7 +33,7 @@ jobs:
         pip install .[tests]
     - name: Run basic tests without extra
       run: |
-        pytest tests/test_no_extra_install.py
+        pytest
     - name: Coverage on basic tests without extra
       run: |
         coverage run -a -m pytest tests/test_no_extra_install.py
@@ -49,7 +49,7 @@ jobs:
         export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
     - name: Install extra dependencies
       run: |
-        pip install .[extra]
+        pip install .[extra,onnx]
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.constants API documentation</title>
-<meta name="description" content="Constants used in the Hummingbird converters are defined here." />
+<title>hummingbird.ml.ir_converters API documentation</title>
+<meta name="description" content="All IRs converters are stored under this package." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,17 +13,17 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/constants.html">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/ir_converters/">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.constants</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.ir_converters</code></h1>
 </header>
 <section id="section-intro">
-<p>Constants used in the Hummingbird converters are defined here.</p>
+<p>All IRs converters are stored under this package.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -35,51 +35,24 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Constants used in the Hummingbird converters are defined here.
-&#34;&#34;&#34;
-
-BASE_PREDICTION = &#34;base_prediction&#34;
-&#34;&#34;&#34;Alpha&#34;&#34;&#34;
-
-LEARNING_RATE = &#34;learning_rate&#34;
-&#34;&#34;&#34;Learning Rate&#34;&#34;&#34;
-
-GET_PARAMETERS_FOR_TREE_TRAVERSAL = &#34;get_parameters_for_tree_trav&#34;
-&#34;&#34;&#34;Which function to use to extract the parameters for the tree traversal strategy&#34;&#34;&#34;
-
-REORDER_TREES = &#34;reorder_trees&#34;
-&#34;&#34;&#34;Whether to reorder trees in multiclass tasks&#34;&#34;&#34;
-
-ONNX_INPUTS = &#34;onnx_inputs&#34;
-&#34;&#34;&#34;The inputs to the onnx model&#34;&#34;&#34;</code></pre>
+All IRs converters are stored under this package.
+&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
-</section>
-<section>
-<h2 class="section-title" id="header-variables">Global variables</h2>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.constants.BASE_PREDICTION"><code class="name">var <span class="ident">BASE_PREDICTION</span></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.ir_converters.linked_node" href="linked_node.html">hummingbird.ml.ir_converters.linked_node</a></code></dt>
 <dd>
-<div class="desc"><p>Alpha</p></div>
+<div class="desc"><p>Converters for LinkedNode IR are stored in this file.</p></div>
 </dd>
-<dt id="hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL"><code class="name">var <span class="ident">GET_PARAMETERS_FOR_TREE_TRAVERSAL</span></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.ir_converters.topology" href="topology.html">hummingbird.ml.ir_converters.topology</a></code></dt>
 <dd>
-<div class="desc"><p>Which function to use to extract the parameters for the tree traversal strategy</p></div>
-</dd>
-<dt id="hummingbird.ml.operator_converters.constants.LEARNING_RATE"><code class="name">var <span class="ident">LEARNING_RATE</span></code></dt>
-<dd>
-<div class="desc"><p>Learning Rate</p></div>
-</dd>
-<dt id="hummingbird.ml.operator_converters.constants.ONNX_INPUTS"><code class="name">var <span class="ident">ONNX_INPUTS</span></code></dt>
-<dd>
-<div class="desc"><p>The inputs to the onnx model</p></div>
-</dd>
-<dt id="hummingbird.ml.operator_converters.constants.REORDER_TREES"><code class="name">var <span class="ident">REORDER_TREES</span></code></dt>
-<dd>
-<div class="desc"><p>Whether to reorder trees in multiclass tasks</p></div>
+<div class="desc"><p>Converters for topology IR are stored in this file.</p></div>
 </dd>
 </dl>
+</section>
+<section>
 </section>
 <section>
 </section>
@@ -98,16 +71,13 @@ ONNX_INPUTS = &#34;onnx_inputs&#34;
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.ml.operator_converters" href="index.html">hummingbird.ml.operator_converters</a></code></li>
+<li><code><a title="hummingbird.ml" href="../index.html">hummingbird.ml</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-variables">Global variables</a></h3>
-<ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.constants.BASE_PREDICTION" href="#hummingbird.ml.operator_converters.constants.BASE_PREDICTION">BASE_PREDICTION</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL" href="#hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL">GET_PARAMETERS_FOR_TREE_TRAVERSAL</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.constants.LEARNING_RATE" href="#hummingbird.ml.operator_converters.constants.LEARNING_RATE">LEARNING_RATE</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.constants.ONNX_INPUTS" href="#hummingbird.ml.operator_converters.constants.ONNX_INPUTS">ONNX_INPUTS</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.constants.REORDER_TREES" href="#hummingbird.ml.operator_converters.constants.REORDER_TREES">REORDER_TREES</a></code></li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="hummingbird.ml.ir_converters.linked_node" href="linked_node.html">hummingbird.ml.ir_converters.linked_node</a></code></li>
+<li><code><a title="hummingbird.ml.ir_converters.topology" href="topology.html">hummingbird.ml.ir_converters.topology</a></code></li>
 </ul>
 </li>
 </ul>

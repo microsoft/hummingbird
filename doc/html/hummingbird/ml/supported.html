@@ -25,7 +25,8 @@
 <section id="section-intro">
 <p>All operators, backends, and configurations settings supported in Hummingbird are registered here.</p>
 <p><strong>Supported Backends</strong>
-PyTorch</p>
+PyTorch,
+ONNX</p>
 <p><strong>Supported Operators</strong>
 DecisionTreeClassifier,
 DecisionTreeRegressor,
@@ -35,12 +36,23 @@ GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
+LinearRegression,
+LinearSVC,
+LogisticRegression,
+LogisticRegressionCV,
+Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
 LGBMClassifier,
 LGBMRegressor,
 OneHotEncoder,
 XGBClassifier,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor,
+SGDClassifier,</p>
+<p>LGBMClassifier,
+LGBMRegressor,</p>
+<p>XGBClassifier,
 XGBRegressor</p>
 <details class="source">
 <summary>
@@ -56,7 +68,8 @@ XGBRegressor</p>
 All operators, backends, and configurations settings supported in Hummingbird are registered here.
 
 **Supported Backends**
-PyTorch
+PyTorch,
+ONNX
 
 **Supported Operators**
 DecisionTreeClassifier,
@@ -67,20 +80,30 @@ GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
+LinearRegression,
+LinearSVC,
+LogisticRegression,
+LogisticRegressionCV,
+MaxAbsScaler,
+MinMaxScaler,
+Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
+RobustScaler,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor,
+SGDClassifier,
+StandardScaler,
+
 LGBMClassifier,
 LGBMRegressor,
 OneHotEncoder,
+
 XGBClassifier,
 XGBRegressor
-
 &#34;&#34;&#34;
 from .exceptions import MissingConverter
-from ._utils import sklearn_installed, lightgbm_installed, xgboost_installed
-
-from xgboost import XGBClassifier, XGBRegressor
-from lightgbm import LGBMClassifier, LGBMRegressor
+from ._utils import torch_installed, sklearn_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
 
 
 def _build_sklearn_operator_list():
@@ -88,7 +111,7 @@ def _build_sklearn_operator_list():
     Put all suported Sklearn operators on a list.
     &#34;&#34;&#34;
     if sklearn_installed():
-        # Enable experimental to import HistGradientBoostingClassifier
+        # Enable experimental to import HistGradientBoosting*
         from sklearn.experimental import enable_hist_gradient_boosting
 
         # Tree-based models
@@ -102,10 +125,25 @@ def _build_sklearn_operator_list():
             RandomForestClassifier,
             RandomForestRegressor,
         )
+
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
+        # Linear-based models
+        from sklearn.linear_model import (
+            LinearRegression,
+            LogisticRegression,
+            LogisticRegressionCV,
+            SGDClassifier,
+        )
+
+        # SVM-based models
+        from sklearn.svm import LinearSVC, SVC, NuSVC
+
+        # Preprocessing
+        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, RobustScaler, StandardScaler
+
         return [
-            # Tree-methods
+            # Trees
             DecisionTreeClassifier,
             DecisionTreeRegressor,
             ExtraTreesClassifier,
@@ -117,9 +155,24 @@ def _build_sklearn_operator_list():
             OneHotEncoder,
             RandomForestClassifier,
             RandomForestRegressor,
+            # Linear-methods
+            LinearRegression,
+            LinearSVC,
+            LogisticRegression,
+            LogisticRegressionCV,
+            SGDClassifier,
+            # SVM
+            NuSVC,
+            SVC,
+            # Preprocessing
+            MaxAbsScaler,
+            MinMaxScaler,
+            Normalizer,
+            RobustScaler,
+            StandardScaler,
         ]
 
-    return None
+    return []
 
 
 def _build_xgboost_operator_list():
@@ -127,26 +180,57 @@ def _build_xgboost_operator_list():
     List all suported XGBoost (Sklearn API) operators.
     &#34;&#34;&#34;
     if xgboost_installed():
+        from xgboost import XGBClassifier, XGBRegressor
+
         return [XGBClassifier, XGBRegressor]
 
-    return None
+    return []
 
 
 def _build_lightgbm_operator_list():
     &#34;&#34;&#34;
     List all suported LightGBM (Sklearn API) operators.
     &#34;&#34;&#34;
-    if lightgbm_installed:
+    if lightgbm_installed():
+        from lightgbm import LGBMClassifier, LGBMRegressor
+
         return [LGBMClassifier, LGBMRegressor]
 
-    return None
+    return []
+
+
+# Associate onnxml types with our operator names.
+def _build_onnxml_operator_list():
+    &#34;&#34;&#34;
+    List all suported ONNXML operators.
+    &#34;&#34;&#34;
+    if onnx_runtime_installed():
+        return [
+            # Tree-based models.
+            &#34;TreeEnsembleClassifier&#34;,
+            &#34;TreeEnsembleRegressor&#34;,
+        ]
+    return []
 
 
 def _build_backend_map():
     &#34;&#34;&#34;
     The set of supported backends is defined here.
     &#34;&#34;&#34;
-    return {&#34;pytorch&#34;}
+    backends = set()
+
+    if torch_installed():
+        import torch
+
+        backends.add(torch.__name__)
+        backends.add(&#34;py&#34; + torch.__name__)  # For compatibility with earlier versions.
+
+    if onnx_runtime_installed():
+        import onnx
+
+        backends.add(onnx.__name__)
+
+    return backends
 
 
 def _build_sklearn_api_operator_name_map():
@@ -154,7 +238,15 @@ def _build_sklearn_api_operator_name_map():
     Associate Sklearn with the operator class names.
     If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     &#34;&#34;&#34;
-    return {k: &#34;Sklearn&#34; + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list if k is not None}
+    return {k: &#34;Sklearn&#34; + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list}
+
+
+def _build_onnxml_api_operator_name_map():
+    &#34;&#34;&#34;
+    Associate ONNXML with the operator class names.
+    If two ONNXML models share a single name, it means they are equivalent in terms of conversion.
+    &#34;&#34;&#34;
+    return {k: &#34;ONNXML&#34; + k for k in onnxml_operator_list if k is not None}
 
 
 def get_sklearn_api_operator_name(model_type):
@@ -173,15 +265,34 @@ def get_sklearn_api_operator_name(model_type):
     return sklearn_api_operator_name_map[model_type]
 
 
+def get_onnxml_api_operator_name(model_type):
+    &#34;&#34;&#34;
+    Get the operator name for the input model type in *ONNX-ML API* format.
+
+    Args:
+        model_type: A ONNX-ML model object (e.g., TreeEnsembleClassifier)
+
+    Returns:
+        A string which stands for the type of the input model in the Hummingbird conversion framework.
+        None if the model_type is not supported
+    &#34;&#34;&#34;
+    if model_type not in onnxml_api_operator_name_map:
+        return None
+    return onnxml_api_operator_name_map[model_type]
+
+
 # Supported operators.
 sklearn_operator_list = _build_sklearn_operator_list()
 xgb_operator_list = _build_xgboost_operator_list()
 lgbm_operator_list = _build_lightgbm_operator_list()
+onnxml_operator_list = _build_onnxml_operator_list()
+
 sklearn_api_operator_name_map = _build_sklearn_api_operator_name_map()
+onnxml_api_operator_name_map = _build_onnxml_api_operator_name_map()
 
 
 # Supported backends.
-backend_map = _build_backend_map()
+backends = _build_backend_map()
 
 
 # Supported configurations settings accepted by Hummingbird are defined below.
@@ -189,7 +300,22 @@ N_FEATURES = &#34;n_features&#34;
 &#34;&#34;&#34;Number of features expected in the input data.&#34;&#34;&#34;
 
 TREE_IMPLEMENTATION = &#34;tree_implementation&#34;
-&#34;&#34;&#34;Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav.&#34;&#34;&#34;</code></pre>
+&#34;&#34;&#34;Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav.&#34;&#34;&#34;
+
+ONNX_OUTPUT_MODEL_NAME = &#34;onnx_model_name&#34;
+&#34;&#34;&#34;For ONNX models we can set the name of the output model.&#34;&#34;&#34;
+
+ONNX_INITIAL_TYPES = &#34;onnx_initial_types&#34;
+&#34;&#34;&#34;For ONNX models we can explicitly set the input types and shapes.&#34;&#34;&#34;
+
+ONNX_INPUT_NAMES = &#34;onnx_input_names&#34;
+&#34;&#34;&#34;For ONNX models we can explicitly select the input columns to use.&#34;&#34;&#34;
+
+ONNX_OUTPUT_NAMES = &#34;onnx_output_names&#34;
+&#34;&#34;&#34;For ONNX models we can explicitly select the output columns to return.&#34;&#34;&#34;
+
+ONNX_TARGET_OPSET = &#34;onnx_target_opset&#34;
+&#34;&#34;&#34;For ONNX models we can set the target opset to use. 9 by default.&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -201,6 +327,26 @@ TREE_IMPLEMENTATION = &#34;tree_implementation&#34;
 <dd>
 <div class="desc"><p>Number of features expected in the input data.</p></div>
 </dd>
+<dt id="hummingbird.ml.supported.ONNX_INITIAL_TYPES"><code class="name">var <span class="ident">ONNX_INITIAL_TYPES</span></code></dt>
+<dd>
+<div class="desc"><p>For ONNX models we can explicitly set the input types and shapes.</p></div>
+</dd>
+<dt id="hummingbird.ml.supported.ONNX_INPUT_NAMES"><code class="name">var <span class="ident">ONNX_INPUT_NAMES</span></code></dt>
+<dd>
+<div class="desc"><p>For ONNX models we can explicitly select the input columns to use.</p></div>
+</dd>
+<dt id="hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME"><code class="name">var <span class="ident">ONNX_OUTPUT_MODEL_NAME</span></code></dt>
+<dd>
+<div class="desc"><p>For ONNX models we can set the name of the output model.</p></div>
+</dd>
+<dt id="hummingbird.ml.supported.ONNX_OUTPUT_NAMES"><code class="name">var <span class="ident">ONNX_OUTPUT_NAMES</span></code></dt>
+<dd>
+<div class="desc"><p>For ONNX models we can explicitly select the output columns to return.</p></div>
+</dd>
+<dt id="hummingbird.ml.supported.ONNX_TARGET_OPSET"><code class="name">var <span class="ident">ONNX_TARGET_OPSET</span></code></dt>
+<dd>
+<div class="desc"><p>For ONNX models we can set the target opset to use. 9 by default.</p></div>
+</dd>
 <dt id="hummingbird.ml.supported.TREE_IMPLEMENTATION"><code class="name">var <span class="ident">TREE_IMPLEMENTATION</span></code></dt>
 <dd>
 <div class="desc"><p>Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav.</p></div>
@@ -210,6 +356,42 @@ TREE_IMPLEMENTATION = &#34;tree_implementation&#34;
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="hummingbird.ml.supported.get_onnxml_api_operator_name"><code class="name flex">
+<span>def <span class="ident">get_onnxml_api_operator_name</span></span>(<span>model_type)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the operator name for the input model type in <em>ONNX-ML API</em> format.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_type</code></strong></dt>
+<dd>A ONNX-ML model object (e.g., TreeEnsembleClassifier)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt>A string which stands for the type of the input model in the Hummingbird conversion framework.</dt>
+<dt><code>None if the model_type is not supported</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_onnxml_api_operator_name(model_type):
+    &#34;&#34;&#34;
+    Get the operator name for the input model type in *ONNX-ML API* format.
+
+    Args:
+        model_type: A ONNX-ML model object (e.g., TreeEnsembleClassifier)
+
+    Returns:
+        A string which stands for the type of the input model in the Hummingbird conversion framework.
+        None if the model_type is not supported
+    &#34;&#34;&#34;
+    if model_type not in onnxml_api_operator_name_map:
+        return None
+    return onnxml_api_operator_name_map[model_type]</code></pre>
+</details>
+</dd>
 <dt id="hummingbird.ml.supported.get_sklearn_api_operator_name"><code class="name flex">
 <span>def <span class="ident">get_sklearn_api_operator_name</span></span>(<span>model_type)</span>
 </code></dt>
@@ -269,11 +451,17 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
 <li><code><a title="hummingbird.ml.supported.N_FEATURES" href="#hummingbird.ml.supported.N_FEATURES">N_FEATURES</a></code></li>
+<li><code><a title="hummingbird.ml.supported.ONNX_INITIAL_TYPES" href="#hummingbird.ml.supported.ONNX_INITIAL_TYPES">ONNX_INITIAL_TYPES</a></code></li>
+<li><code><a title="hummingbird.ml.supported.ONNX_INPUT_NAMES" href="#hummingbird.ml.supported.ONNX_INPUT_NAMES">ONNX_INPUT_NAMES</a></code></li>
+<li><code><a title="hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME" href="#hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME">ONNX_OUTPUT_MODEL_NAME</a></code></li>
+<li><code><a title="hummingbird.ml.supported.ONNX_OUTPUT_NAMES" href="#hummingbird.ml.supported.ONNX_OUTPUT_NAMES">ONNX_OUTPUT_NAMES</a></code></li>
+<li><code><a title="hummingbird.ml.supported.ONNX_TARGET_OPSET" href="#hummingbird.ml.supported.ONNX_TARGET_OPSET">ONNX_TARGET_OPSET</a></code></li>
 <li><code><a title="hummingbird.ml.supported.TREE_IMPLEMENTATION" href="#hummingbird.ml.supported.TREE_IMPLEMENTATION">TREE_IMPLEMENTATION</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="hummingbird.ml.supported.get_onnxml_api_operator_name" href="#hummingbird.ml.supported.get_onnxml_api_operator_name">get_onnxml_api_operator_name</a></code></li>
 <li><code><a title="hummingbird.ml.supported.get_sklearn_api_operator_name" href="#hummingbird.ml.supported.get_sklearn_api_operator_name">get_sklearn_api_operator_name</a></code></li>
 </ul>
 </li>
