@@ -156,11 +156,11 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
 
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.get_booster().get_dump()
-    alpha = operator.raw_operator.base_score
-    if type(alpha) is float:
-        alpha = [alpha]
+    base_prediction = operator.raw_operator.base_score
+    if type(base_prediction) is float:
+        base_prediction = [base_prediction]
 
-    extra_config[constants.ALPHA] = alpha
+    extra_config[constants.BASE_PREDICTION] = base_prediction
 
     return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 
@@ -274,11 +274,11 @@ register_converter(&#34;SklearnXGBRegressor&#34;, convert_sklearn_xgb_regressor)
 
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.get_booster().get_dump()
-    alpha = operator.raw_operator.base_score
-    if type(alpha) is float:
-        alpha = [alpha]
+    base_prediction = operator.raw_operator.base_score
+    if type(base_prediction) is float:
+        base_prediction = [base_prediction]
 
-    extra_config[constants.ALPHA] = alpha
+    extra_config[constants.BASE_PREDICTION] = base_prediction
 
     return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)</code></pre>
 </details>

@@ -39,10 +39,10 @@ pip install -e .[docs,tests,extra]
 ```
 
 ### Docker
-We provide a simple [Dockerfile](https://github.com/microsoft/hummingbird/blob/master/Dockerfile) that you can customize to your preferred development environment. This Dockerfile will create a Jupyter notebook environment and also install all the required development tools (`pre-commit`, `flake8`, and `coverage`).
+We provide a simple [Dockerfile](https://github.com/microsoft/hummingbird/blob/master/Dockerfile) that you can customize to your preferred development environment.
 ```
 docker build git://github.com/microsoft/hummingbird -t hb-jupy
-docker run -p 8888:8888 -it hb-jupy
+docker run -it hb-dev
 ```
 ### Codespases
 For a light-weight, web-based experience, we provide the configuration ([.devcontainer](https://github.com/microsoft/hummingbird/tree/master/.devcontainer)) for [Codespaces](https://online.visualstudio.com/environments).  More information on this setup can be found [here]( https://docs.microsoft.com/en-us/visualstudio/online/reference/configuring).

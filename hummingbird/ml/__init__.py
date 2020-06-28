@@ -22,6 +22,9 @@ constants = _Constants(hummingbird_constants)
 # Add the converters in the Hummingbird scope.
 from .convert import convert  # noqa: F401, E402
 
+# Add the supported backends in scope.
+from .supported import backends  # noqa: F401, E402
+
 
 # Pdoc stuff.
 __pdoc__ = {}
