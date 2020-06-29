@@ -34,3 +34,4 @@ __pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
 __pdoc__["hummingbird.operator_converters._tree_commons"] = True
 __pdoc__["hummingbird.operator_converters._normalizer_implementations"] = True
 __pdoc__["hummingbird.operator_converters._tree_implementations"] = True
+__pdoc__["hummingbird.operator_converters._linear_implementations"] = True

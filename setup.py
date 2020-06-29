@@ -42,7 +42,7 @@ setup(
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
         "docs": ["pdoc"],
-        "onnx": ["onnxruntime>=1.0.0", "onnxmltools>=1.6.0"],
+        "onnx": ["onnxruntime>=1.0.0", "onnxmltools>=1.6.0", "skl2onnx>=1.7.0"],
         "extra": [
             # The need each for these depends on which libraries you plan to convert from
             "xgboost==0.90",
