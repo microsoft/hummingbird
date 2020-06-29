@@ -89,10 +89,10 @@ class TestLGBMConverter(unittest.TestCase):
     def test_lgbm_perf_tree_trav_multi_classifier_converter(self):
         self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
-    def _run_lgbm_ranker_converter(self, num_classes, extra_config={}):
+    def _run_lgbm_ranker_converter(self, num_classes, extra_config={}, label_gain=None):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
-            model = lgb.LGBMRanker(n_estimators=10, max_depth=max_depth)
+            model = lgb.LGBMRanker(n_estimators=10, max_depth=max_depth, label_gain=label_gain)
             np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
@@ -104,26 +104,32 @@ class TestLGBMConverter(unittest.TestCase):
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
+    # Ranker - small, no label gain
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_binary_ranker_converter_no_label(self):
+        self._run_lgbm_ranker_converter(30)
+
     # Ranker
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_binary_ranker_converter(self):
-        # Using 30 rather than 1000 to avoid "label (31) excel the max range" error
-        self._run_lgbm_ranker_converter(30)
+        self._run_lgbm_ranker_converter(1000, label_gain=list(range(1000)))
 
     # Gemm ranker
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_gemm_ranker_converter(self):
-        self._run_lgbm_ranker_converter(30, extra_config={"tree_implementation": "gemm"})
+        self._run_lgbm_ranker_converter(1000, extra_config={"tree_implementation": "gemm"}, label_gain=list(range(1000)))
 
     # Tree_trav ranker
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_tree_trav_ranker_converter(self):
-        self._run_lgbm_ranker_converter(30, extra_config={"tree_implementation": "tree_trav"})
+        self._run_lgbm_ranker_converter(1000, extra_config={"tree_implementation": "tree_trav"}, label_gain=list(range(1000)))
 
     # Perf_tree_trav ranker
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_perf_tree_trav_ranker_converter(self):
-        self._run_lgbm_ranker_converter(30, extra_config={"tree_implementation": "perf_tree_trav"})
+        self._run_lgbm_ranker_converter(
+            1000, extra_config={"tree_implementation": "perf_tree_trav"}, label_gain=list(range(1000))
+        )
 
     def _run_lgbm_regressor_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
