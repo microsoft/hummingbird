@@ -76,10 +76,10 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
 
 def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     """
-    Converter for `lightgbm.LGBMRegressor` (trained using the Sklearn API).
+    Converter for `lightgbm.LGBMRegressor` and `lightgbm.LGBMRanker` (trained using the Sklearn API).
 
     Args:
-        operator: An operator wrapping a `lightgbm.LGBMRegressor` model
+        operator: An operator wrapping a `lightgbm.LGBMRegressor` or `lightgbm.LGBMRanker` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -97,4 +97,5 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
 
 # Register the converters.
 register_converter("SklearnLGBMClassifier", convert_sklearn_lgbm_classifier)
+register_converter("SklearnLGBMRanker", convert_sklearn_lgbm_regressor)
 register_converter("SklearnLGBMRegressor", convert_sklearn_lgbm_regressor)
