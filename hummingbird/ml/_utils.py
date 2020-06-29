@@ -61,6 +61,19 @@ def onnx_installed():
         return False
 
 
+def skl2onnx_installed():
+    """
+    Checks that *skl2onnx* is available.
+    """
+    try:
+        import skl2onnx
+
+        return True
+    except ImportError:
+        print("skl2onnx not installed. Please check https://github.com/onnx/sklearn-onnx for instructions.")
+        return False
+
+
 def sklearn_installed():
     """
     Checks that *Sklearn* is available.
