@@ -12,13 +12,13 @@ from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassi
 from sklearn.svm import LinearSVC, SVC, NuSVC
 
 from hummingbird.ml import convert
-from hummingbird.ml._utils import onnx_installed, onnx_ml_tools_installed, skl2onnx_installed
+from hummingbird.ml._utils import onnx_runtime_installed, onnx_ml_tools_installed, skl2onnx_installed
 
 if skl2onnx_installed():
     # these 2 imports __must__ come before torch, or it will segfault
     from skl2onnx import convert_sklearn as convert_sklearn_onnx
     from skl2onnx.common.data_types import FloatTensorType as FloatTensorType_onnx
-if onnx_installed():
+if onnx_runtime_installed():
     import onnxruntime as ort
 if onnx_ml_tools_installed():
     from onnxmltools.convert import convert_sklearn
@@ -83,7 +83,7 @@ class TestOnnxmlLinearClassifiers(unittest.TestCase):
 
     # Check that ONNXML models can only target the ONNX backend.
     @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_installed() and skl2onnx_installed()),
+        not (onnx_ml_tools_installed() and onnx_runtime_installed() and skl2onnx_installed()),
         reason="ONNXML-linear tests require ONNX, ORT and SKL2ONNX",
     )
     def test_logistic_regression_onnxml_binary(self):
@@ -91,7 +91,7 @@ class TestOnnxmlLinearClassifiers(unittest.TestCase):
 
     # Check that ONNXML models can only target the ONNX backend.
     @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_installed() and skl2onnx_installed()),
+        not (onnx_ml_tools_installed() and onnx_runtime_installed() and skl2onnx_installed()),
         reason="ONNXML-linear tests require ONNX, ORT and SKL2ONNX",
     )
     def test_logistic_regression_onnxml_multi(self):
