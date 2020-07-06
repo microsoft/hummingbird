@@ -30,7 +30,7 @@ jobs:
     - name: Install basic dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install .[tests]
+        pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Run basic tests without extra
       run: |
         pytest
