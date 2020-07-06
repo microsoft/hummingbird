@@ -30,6 +30,7 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
     assert operator is not None
 
     coefficients = intercepts = classes = multi_class = None
+    is_linear_regression = False
     for attr in operator.origin.attribute:
 
         if attr.name == "coefficients":
@@ -47,6 +48,8 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
         raise RuntimeError("Error parsing LinearClassifier, found unexpected None")
     if multi_class is None:  # if 'multi_class' attr was not present
         multi_class = "none" if len(classes) < 3 else "ovr"
+    if operator.op_type == "LinearRegressor":
+        is_linear_regression = True
 
     # Now reshape the coefficients/intercepts
     if len(classes) == 2:
@@ -66,8 +69,9 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
         coefficients = np.array(list(zip(*tmp)))
     else:
         raise RuntimeError("Error parsing LinearClassifier, length of classes {} unexpected:{}".format(len(classes), classes))
-
-    return LinearModel(coefficients, intercepts, classes, multi_class, device)
+    return LinearModel(
+        coefficients, intercepts, device, classes=classes, multi_class=multi_class, is_linear_regression=is_linear_regression
+    )
 
 
 register_converter("ONNXMLLinearClassifier", convert_onnx_linear_model)
