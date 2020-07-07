@@ -187,10 +187,10 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
         A model containing only *ONNX* operators. The mode is equivalent to the input *ONNX-ML* model
     """
     assert model is not None
-    assert torch_installed(), "To use Hummingbird you need to install torch."
     assert (
         onnx_runtime_installed()
     ), "To use the onnxml converter you need to install onnxruntime (or `pip install hummingbird-ml[onnx]`)."
+    assert torch_installed(), "To use Hummingbird you need to install torch."
 
     output_model_name = initial_types = input_names = output_names = None
     target_opset = 9
