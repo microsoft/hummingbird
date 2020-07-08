@@ -218,7 +218,9 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
     &#34;&#34;&#34;
     assert model is not None
     assert torch_installed(), &#34;To use Hummingbird you need to install torch.&#34;
-    assert onnx_runtime_installed(), &#34;To use the onnxml converter you need to install onnxruntime (or `pip install hummingbird-ml[onnx]`).&#34;
+    assert (
+        onnx_runtime_installed()
+    ), &#34;To use the onnxml converter you need to install onnxruntime (or `pip install hummingbird-ml[onnx]`).&#34;
 
     output_model_name = initial_types = input_names = output_names = None
     target_opset = 9
