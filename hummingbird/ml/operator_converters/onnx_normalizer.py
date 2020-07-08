@@ -10,12 +10,12 @@ from ._base_operator import BaseOperator
 from ._normalizer_implementations import Normalizer
 
 
-def convert_sklearn_normalizer(operator, device, extra_config):
+def convert_onnx_normalizer(operator, device, extra_config):
     """
-    Converter for `sklearn.preprocessing.Normalizer`
+    Converter for `ai.onnx.ml.Normalizer`
 
     Args:
-        operator: An operator wrapping a `sklearn.preprocessing.Normalizer` model
+        operator: An operator wrapping a `ai.onnx.ml.Normalizer` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -26,4 +26,4 @@ def convert_sklearn_normalizer(operator, device, extra_config):
     return Normalizer(operator.raw_operator.norm, device)
 
 
-register_converter("SklearnNormalizer", convert_sklearn_normalizer)
+register_converter("ONNXMLNormalizer", convert_onnx_normalizer)
