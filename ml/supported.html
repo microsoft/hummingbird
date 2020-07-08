@@ -40,12 +40,16 @@ LinearRegression,
 LinearSVC,
 LogisticRegression,
 LogisticRegressionCV,
+MaxAbsScaler,
+MinMaxScaler,
 Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
+RobustScaler,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,
-SGDClassifier,</p>
+SGDClassifier,
+StandardScaler,</p>
 <p>LGBMClassifier,
 LGBMRegressor,</p>
 <p>XGBClassifier,
@@ -186,9 +190,9 @@ def _build_lightgbm_operator_list():
     List all suported LightGBM (Sklearn API) operators.
     &#34;&#34;&#34;
     if lightgbm_installed():
-        from lightgbm import LGBMClassifier, LGBMRegressor
+        from lightgbm import LGBMClassifier, LGBMRanker, LGBMRegressor
 
-        return [LGBMClassifier, LGBMRegressor]
+        return [LGBMClassifier, LGBMRanker, LGBMRegressor]
 
     return []
 
