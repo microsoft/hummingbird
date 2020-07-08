@@ -40,7 +40,7 @@ Hummingbird main (converters) API.
 from copy import deepcopy
 import numpy as np
 
-from onnxconverter_common.optimizer import LinkedNode, _topological_sort
+from onnxconverter_common.registration import get_converter
 
 from .exceptions import MissingConverter, MissingBackend
 from ._parse import parse_sklearn_api_model
@@ -77,6 +77,7 @@ def _supported_model_format_backend_mapping_check(model, backend):
     &#34;&#34;&#34;
     if _is_onnx_model(model):
         assert onnx_runtime_installed()
+
         import onnx
 
         if not backend == onnx.__name__:
