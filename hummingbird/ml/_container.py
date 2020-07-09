@@ -45,7 +45,7 @@ class PyTorchBackendModel(torch.nn.Module):
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self.input_names):
                 if type(inputs[i]) is np.ndarray:
-                    inputs[i] = torch.from_numpy(inputs[i])
+                    inputs[i] = torch.from_numpy(inputs[i]).float()
                 elif type(inputs[i]) is not torch.Tensor:
                     raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(inputs[i])))
                 if device is not None:
