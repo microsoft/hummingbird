@@ -216,6 +216,32 @@ class TestSklearnTreeConverter(unittest.TestCase):
     def test_random_forest_perf_tree_trav_classifier_single_node_tree_converter(self):
         self._run_random_forest_classifier_single_node_tree_converter(extra_config={"tree_implementation": "perf_tree_trav"})
 
+    # Float 64 classification test helper
+    def _run_float64_tree_classification_converter(self, model_type, num_classes, extra_config={}, labels_shift=0, **kwargs):
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.randint(num_classes, size=100) + labels_shift
+
+            model = model_type(max_depth=max_depth, **kwargs)
+            model.fit(X, y)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+    # Random forest binary classifier (float64 data)
+    def test_float64_random_forest_classifier_binary_converter(self):
+        self._run_float64_tree_classification_converter(RandomForestClassifier, 2, n_estimators=10)
+
+    # Decision tree classifier (float64 data)
+    def test_decision_tree_classifier_converter(self):
+        self._run_float64_tree_classification_converter(DecisionTreeClassifier, 3)
+
+    # Extra trees classifier (float64 data)
+    def test_extra_trees_classifier_converter(self):
+        self._run_float64_tree_classification_converter(ExtraTreesClassifier, 3, n_estimators=10)
+
     # Failure Cases
     def test_random_forest_classifier_raises_wrong_type(self):
         warnings.filterwarnings("ignore")
