@@ -93,14 +93,14 @@ class TestXGBoostConverter(unittest.TestCase):
 
     def _run_xgb_ranker_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
-        for max_depth in [1, 3, 8, 10, 12]:
+        for max_depth in [1, 3, 8, 10, 12, None]:
             model = xgb.XGBRanker(n_estimators=10, max_depth=max_depth)
             np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
 
-            model.fit(X, y, group=[X.shape[0]], eval_set=[(X, y)], eval_group=[X.shape[0]])
+            model.fit(X, y, group=[X.shape[0]])
 
             torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
             self.assertIsNotNone(torch_model)
