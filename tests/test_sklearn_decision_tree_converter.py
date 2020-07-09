@@ -235,12 +235,39 @@ class TestSklearnTreeConverter(unittest.TestCase):
         self._run_float64_tree_classification_converter(RandomForestClassifier, 2, n_estimators=10)
 
     # Decision tree classifier (float64 data)
-    def test_decision_tree_classifier_converter(self):
+    def test_float64_decision_tree_classifier_converter(self):
         self._run_float64_tree_classification_converter(DecisionTreeClassifier, 3)
 
     # Extra trees classifier (float64 data)
-    def test_extra_trees_classifier_converter(self):
+    def test_float64_extra_trees_classifier_converter(self):
         self._run_float64_tree_classification_converter(ExtraTreesClassifier, 3, n_estimators=10)
+
+    # Float 64 regression tests helper
+    def _run_float64_tree_regressor_converter(self, model_type, num_classes, extra_config={}, **kwargs):
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            model = model_type(max_depth=max_depth, **kwargs)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(num_classes, size=100)
+
+            model.fit(X, y)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Random forest regressor (float64 data)
+    def test_float64_random_forest_regressor_converter(self):
+        self._run_float64_tree_regressor_converter(RandomForestRegressor, 1000, n_estimators=10)
+
+    # Decision tree regressor (float64 data)
+    def test_float64_decision_tree_regressor_converter(self):
+        self._run_float64_tree_regressor_converter(DecisionTreeRegressor, 1000)
+
+    # Extra trees regressor (float64 data)
+    def test_float64_extra_trees_regressor_converter(self):
+        self._run_float64_tree_regressor_converter(ExtraTreesRegressor, 1000, n_estimators=10)
 
     # Failure Cases
     def test_random_forest_classifier_raises_wrong_type(self):
