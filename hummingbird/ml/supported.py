@@ -41,6 +41,7 @@ LGBMRegressor,
 
 
 XGBClassifier,
+XGBRanker,
 XGBRegressor
 """
 from .exceptions import MissingConverter
@@ -120,9 +121,9 @@ def _build_xgboost_operator_list():
     List all suported XGBoost (Sklearn API) operators.
     """
     if xgboost_installed():
-        from xgboost import XGBClassifier, XGBRegressor
+        from xgboost import XGBClassifier, XGBRanker, XGBRegressor
 
-        return [XGBClassifier, XGBRegressor]
+        return [XGBClassifier, XGBRanker, XGBRegressor]
 
     return []
 
