@@ -30,13 +30,15 @@ Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
 RobustScaler,
-TreeEnsembleClassifier,
-TreeEnsembleRegressor,
 SGDClassifier,
 StandardScaler,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor,
 
 LGBMClassifier,
+LGBMRanker,
 LGBMRegressor,
+
 
 XGBClassifier,
 XGBRegressor
