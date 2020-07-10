@@ -37,22 +37,12 @@ class TestSklearnNormalizer(unittest.TestCase):
         output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
         onnx_ml_pred = [[] for i in range(len(output_names))]
         inputs = {session.get_inputs()[0].name: X}
-        pred = session.run(output_names, inputs)
-        for i in range(len(output_names)):
-            if output_names[i] == "label":
-                onnx_ml_pred[1] = pred[i]
-            else:
-                onnx_ml_pred[0] = pred[i]
+        onnx_ml_pred = session.run(output_names, inputs)
 
         # Get the predictions for the ONNX model
         session = ort.InferenceSession(onnx_model.SerializeToString())
         onnx_pred = [[] for i in range(len(output_names))]
-        pred = session.run(output_names, inputs)
-        for i in range(len(output_names)):
-            if output_names[i] == "label":
-                onnx_pred[1] = pred[i]
-            else:
-                onnx_pred[0] = pred[i]
+        onnx_pred = session.run(output_names, inputs)
 
         return onnx_ml_pred, onnx_pred, output_names
 

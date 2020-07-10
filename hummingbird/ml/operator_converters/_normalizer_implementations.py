@@ -14,6 +14,10 @@ from ._base_operator import BaseOperator
 
 
 class Normalizer(BaseOperator, torch.nn.Module):
+    """
+    Class implementing Normalizer operators in PyTorch. Supported normalizers are L1, L2 and Max.
+    """
+
     def __init__(self, norm, device):
         super(Normalizer, self).__init__()
         self.norm = norm
