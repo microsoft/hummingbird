@@ -103,23 +103,6 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
     return convert_gbdt_classifier_common(tree_infos, _get_tree_parameters, n_features, n_classes, extra_config=extra_config)
 
 
-def convert_sklearn_xgb_ranker(operator, device, extra_config):
-    """
-    Converter for `xgboost.XGBRanker` (trained using the Sklearn API).
-
-    Args:
-        operator: An operator wrapping a `xgboost.XGBRanker` model
-        device: String defining the type of device the converted operator should be run on
-        extra_config: Extra configuration used to select the best conversion strategy
-
-    Returns:
-        A PyTorch model
-    """
-    assert operator is not None
-
-    return convert_sklearn_xgb_regressor(operator, device, extra_config)
-
-
 def convert_sklearn_xgb_regressor(operator, device, extra_config):
     """
     Converter for `xgboost.XGBRegressor` (trained using the Sklearn API).
@@ -154,5 +137,5 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
 
 # Register the converters.
 register_converter("SklearnXGBClassifier", convert_sklearn_xgb_classifier)
-register_converter("SklearnXGBRanker", convert_sklearn_xgb_ranker)
+register_converter("SklearnXGBRanker", convert_sklearn_xgb_regressor)
 register_converter("SklearnXGBRegressor", convert_sklearn_xgb_regressor)
