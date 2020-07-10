@@ -44,25 +44,34 @@ class TestSklearnNormalizer(unittest.TestCase):
         onnx_pred = [[] for i in range(len(output_names))]
         onnx_pred = session.run(output_names, inputs)
 
-        return onnx_ml_pred, onnx_pred, output_names
+        return onnx_ml_pred, onnx_pred
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    def test_onnx_normalizer_l1(self):
-        self._test_normalizer_converter("l1")
+    def test_onnx_normalizer_l1(self, rtol=1e-06, atol=1e-06):
+        onnx_ml_pred, onnx_pred = self._test_normalizer_converter("l1")
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    def test_onnx_normalizer_l2(self):
-        self._test_normalizer_converter("l2")
+    def test_onnx_normalizer_l2(self, rtol=1e-06, atol=1e-06):
+        onnx_ml_pred, onnx_pred = self._test_normalizer_converter("l2")
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    def test_onnx_normalizer_max(self):
-        self._test_normalizer_converter("max")
+    def test_onnx_normalizer_max(self, rtol=1e-06, atol=1e-06):
+        onnx_ml_pred, onnx_pred = self._test_normalizer_converter("max")
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
