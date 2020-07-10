@@ -74,6 +74,9 @@ class TestSklearnNormalizer(unittest.TestCase):
     def test_onnx_normalizer_max(self):
         self._test_normalizer_converter("max")
 
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_onnx_normalizer_converter_raises_rt(self):
         warnings.filterwarnings("ignore")
         X = np.array([[1, 2, 3], [4, 3, 0], [0, 1, 4], [0, 5, 6]], dtype=np.float32)
