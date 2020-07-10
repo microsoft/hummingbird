@@ -10,7 +10,7 @@ from ._base_operator import BaseOperator
 from ._normalizer_implementations import Normalizer
 
 
-def convert_onnx_normalizer(operator, device, extra_config):
+def convert_onnx_normalizer(operator, device=None, extra_config={}):
     """
     Converter for `ai.onnx.ml.Normalizer`
 
@@ -22,8 +22,10 @@ def convert_onnx_normalizer(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-
-    return Normalizer(operator.raw_operator.norm, device)
+    raw_operator = operator.origin.attribute[0].s.lower().decode("UTF-8")  # (ex: b'L1' to 'l1')
+    if raw_operator is None or raw_operator == "":
+        raise RuntimeError("Error parsing Normalizer, found unexpected None")
+    return Normalizer(raw_operator, device)
 
 
 register_converter("ONNXMLNormalizer", convert_onnx_normalizer)
