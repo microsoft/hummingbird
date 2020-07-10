@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 """
-Converters for ONNX-ML tree-ensemble models.
+Converters for ONNX-ML linear models.
 """
 
 import numpy as np
@@ -16,10 +16,10 @@ from ._linear_implementations import LinearModel
 
 def convert_onnx_linear_model(operator, device=None, extra_config={}):
     """
-    Converter for `onnxml.LinearClassifier`.
+    Converter for `ai.onnx.ml.LinearClassifier`.
 
     Args:
-        operator: An operator wrapping a `onnxml.LinearClassifier` model
+        operator: An operator wrapping a `ai.onnx.ml.LinearClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 

@@ -124,7 +124,7 @@ def _dummy_get_parameter(tree_info):
 
 def _get_tree_infos_from_onnx_tree_ensemble(operator, device=None, extra_config={}):
     """
-    Base method for extracting parameters from `onnxml.TreeEnsemble`s.
+    Base method for extracting parameters from `ai.onnx.ml.TreeEnsemble`s.
     """
     assert constants.ONNX_INPUTS in extra_config or constants.N_FEATURES in extra_config
 
@@ -146,10 +146,10 @@ def _get_tree_infos_from_onnx_tree_ensemble(operator, device=None, extra_config=
 
 def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}):
     """
-    Converter for `onnxml.TreeEnsembleClassifier`.
+    Converter for `ai.onnx.ml.TreeEnsembleClassifier`.
 
     Args:
-        operator: An operator wrapping a `onnxml.TreeEnsembleClassifier` model
+        operator: An operator wrapping a `ai.onnx.ml.TreeEnsembleClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -167,10 +167,10 @@ def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}
 
 def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={}):
     """
-    Converter for `onnxml.TreeEnsembleRegressor`.
+    Converter for `ai.onnx.ml.TreeEnsembleRegressor`.
 
     Args:
-        operator: An operator wrapping a `onnxml.TreeEnsembleRegressor` model
+        operator: An operator wrapping a `ai.onnx.ml.TreeEnsembleRegressor` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
