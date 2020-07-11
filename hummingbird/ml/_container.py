@@ -10,6 +10,7 @@ All custom model containers are listed here.
 
 import numpy as np
 import torch
+from hummingbird.ml.operator_converters import constants
 
 
 class PyTorchBackendModel(torch.nn.Module):
@@ -99,3 +100,26 @@ class PyTorchBackendModelClassification(PyTorchBackendModelRegression):
         On classification tasks returns the probability estimates.
         """
         return self.forward(*inputs)[1].cpu().numpy()
+
+
+class PyTorchBackendModelAnomalyDetection(PyTorchBackendModel):
+    def predict(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
+        """
+        return self.forward(*inputs)[0].cpu().numpy().flatten()
+
+    def decision_function(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision function scores.
+        """
+        return self.forward(*inputs)[1].cpu().numpy().flatten()
+
+    def score_samples(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
+        """
+        return self.decision_function(*inputs) + self.extra_config[constants.OFFSET]
