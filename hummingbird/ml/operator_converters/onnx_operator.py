@@ -32,10 +32,10 @@ class Cast(BaseOperator, torch.nn.Module):
 
 def convert_onnx_cast(operator, device=None, extra_config={}):
     """
-    Converter for `onnxml.TreeEnsembleClassifier`.
+    Converter for `ai.onnx.Cast`.
 
     Args:
-        operator: An operator wrapping a `onnxml.TreeEnsembleClassifier` model
+        operator: An operator wrapping a `ai.onnx.Cast` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 

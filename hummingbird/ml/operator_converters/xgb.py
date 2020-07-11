@@ -137,4 +137,5 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
 
 # Register the converters.
 register_converter("SklearnXGBClassifier", convert_sklearn_xgb_classifier)
+register_converter("SklearnXGBRanker", convert_sklearn_xgb_regressor)
 register_converter("SklearnXGBRegressor", convert_sklearn_xgb_regressor)
