@@ -20,6 +20,7 @@ GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
+IsolationForest,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -61,6 +62,7 @@ def _build_sklearn_operator_list():
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
             HistGradientBoostingRegressor,
+            IsolationForest,
             RandomForestClassifier,
             RandomForestRegressor,
         )
@@ -91,6 +93,7 @@ def _build_sklearn_operator_list():
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
             HistGradientBoostingRegressor,
+            IsolationForest,
             RandomForestClassifier,
             RandomForestRegressor,
             # Linear-methods
