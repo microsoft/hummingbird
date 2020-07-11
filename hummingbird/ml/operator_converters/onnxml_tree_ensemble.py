@@ -159,7 +159,9 @@ def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={})
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
+    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_onnx_tree_enseble(
+        operator.raw_operator, device, extra_config
+    )
 
     # Generate the model.
     return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)
@@ -180,7 +182,7 @@ def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, _, _ = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
+    n_features, tree_infos, _, _ = _get_tree_infos_from_onnx_tree_enseble(operator.raw_operator, device, extra_config)
 
     # Generate the model.
     return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)

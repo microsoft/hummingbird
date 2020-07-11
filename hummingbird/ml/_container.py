@@ -11,6 +11,17 @@ All custom model containers are listed here.
 import numpy as np
 import torch
 
+from onnxconverter_common.container import CommonSklearnModelContainer
+
+
+class CommonONNXModelContainer(CommonSklearnModelContainer):
+    """
+    Common container for input ONNX operators.
+    """
+
+    def __init__(self, onnx_model):
+        super(CommonONNXModelContainer, self).__init__(onnx_model)
+
 
 class PyTorchBackendModel(torch.nn.Module):
     """

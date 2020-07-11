@@ -10,13 +10,12 @@ Hummingbird main (converters) API.
 from copy import deepcopy
 import numpy as np
 
-from onnxconverter_common.optimizer import LinkedNode, _topological_sort
-
-from .exceptions import MissingConverter, MissingBackend
-from ._parse import parse_sklearn_api_model
-from .supported import backends
+from .operator_converters import constants
+from ._parse import parse_sklearn_api_model, parse_onnx_api_model
+from ._topology import convert as topology_converter
 from ._utils import torch_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
-from . import constants
+from .exceptions import MissingConverter, MissingBackend
+from .supported import backends
 
 # Invoke the registration of all our converters.
 from . import operator_converters  # noqa
@@ -82,7 +81,7 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
     assert model is not None
     assert torch_installed(), "To use Hummingbird you need to install torch."
 
-    from .ir_converters.topology import convert as topology_converter
+    import torch
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
     # We modify the scikit learn model during translation.
@@ -90,7 +89,7 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
     topology = parse_sklearn_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, extra_config=extra_config)
+    hb_model = topology_converter(topology, torch.__name__, extra_config=extra_config)
     return hb_model
 
 
@@ -192,44 +191,20 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
         onnx_runtime_installed()
     ), "To use the onnxml converter you need to install onnxruntime (or `pip install hummingbird-ml[onnx]`)."
 
-    output_model_name = initial_types = input_names = output_names = None
-    target_opset = 9
+    import onnx
 
-    # Set optional configuration options if any.
-    if constants.ONNX_OUTPUT_MODEL_NAME in extra_config:
-        output_model_name = extra_config[constants.ONNX_OUTPUT_MODEL_NAME]
+    # The conversion requires some test input for tracing.
+    # Test inputs can be either provided or generate from the inital types.
+    # Get the initial types if any.
+    initial_types = None
     if constants.ONNX_INITIAL_TYPES in extra_config:
         initial_types = extra_config[constants.ONNX_INITIAL_TYPES]
-    if constants.ONNX_INPUT_NAMES in extra_config:
-        input_names = extra_config[constants.ONNX_INPUT_NAMES]
-    if constants.ONNX_OUTPUT_NAMES in extra_config:
-        output_names = extra_config[constants.ONNX_OUTPUT_NAMES]
-    if constants.ONNX_TARGET_OPSET in extra_config:
-        target_opset = extra_config[constants.ONNX_TARGET_OPSET]
 
     assert (
         test_input is not None and len(test_input) > 0
     ) or initial_types is not None, "Cannot generate test input data. Either pass some input data or the initial_types"
 
-    from .ir_converters.linked_node import convert as linked_node_converter
-
-    # We modify the model during translation.
-    model = deepcopy(model)
-
-    # Parse an ONNX-ML model into our internal data structure (i.e., LinkedNode)
-    graph = model.graph
-    input_names = input_names if input_names is not None else [in_.name for in_ in graph.input]
-    inputs = [in_ for in_ in graph.input if in_.name in input_names]
-
-    assert len(inputs) > 0, "Provided input name does not match with any model's input."
-    assert len(inputs) == 1, "Hummingbird currently do not support models with more than 1 input."
-    assert initial_types is None or len(initial_types) == 1, "len(initial_types) {} differs from len(inputs) {}.".format(
-        len(initial_types), len(inputs)
-    )
-
-    if output_names is None:
-        output_names = [] if graph.output is None else [o_.name for o_ in graph.output]
-
+    # Generate some test input if necessary.
     if test_input is None:
         assert (
             not initial_types[0][1].shape is None
@@ -250,17 +225,16 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
                     type(initial_types[0][1])
                 )
             )
+    else:
+        extra_config[constants.N_FEATURES] = np.array(test_input).shape[1]
+    extra_config[constants.ONNX_TEST_INPUT] = test_input
 
-    initializers = [] if graph.initializer is None else [in_ for in_ in graph.initializer]
-    onnx_ir = LinkedNode.build_from_onnx(
-        graph.node, [], [in_.name for in_ in inputs] + [in_.name for in_ in initializers], output_names
-    )
+    # Parse ONNX model as our internal data structure (i.e., Topology).
+    topology = parse_onnx_api_model(model)
 
-    # Convert the input onnx_ir object into ONNX. The outcome is a model containing only ONNX operators.
-    onnx_model = linked_node_converter(
-        onnx_ir, inputs, initializers, output_names, test_input, output_model_name, target_opset, extra_config
-    )
-    return onnx_model
+    # Convert the Topology object into a PyTorch model.
+    hb_model = topology_converter(topology, onnx.__name__, extra_config=extra_config)
+    return hb_model
 
 
 def convert(model, backend, test_input=None, extra_config={}):
