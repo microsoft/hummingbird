@@ -37,6 +37,7 @@ cd hummingbird
 git clone https://github.com/microsoft/hummingbird.git .
 pip install -e .[docs,tests,extra]
 ```
+On Windows, the last line above must also contain `-f https://download.pytorch.org/whl/torch_stable.html`. (This is required because PyTorch version for Windows is not up to date.)
 
 ### Docker
 We provide a simple [Dockerfile](https://github.com/microsoft/hummingbird/blob/master/Dockerfile) that you can customize to your preferred development environment.

@@ -31,15 +31,18 @@ Normalizer,
 RandomForestClassifier,
 RandomForestRegressor,
 RobustScaler,
-TreeEnsembleClassifier,
-TreeEnsembleRegressor,
 SGDClassifier,
 StandardScaler,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor,
 
 LGBMClassifier,
+LGBMRanker,
 LGBMRegressor,
 
+
 XGBClassifier,
+XGBRanker,
 XGBRegressor
 """
 from .exceptions import MissingConverter
@@ -121,9 +124,9 @@ def _build_xgboost_operator_list():
     List all suported XGBoost (Sklearn API) operators.
     """
     if xgboost_installed():
-        from xgboost import XGBClassifier, XGBRegressor
+        from xgboost import XGBClassifier, XGBRanker, XGBRegressor
 
-        return [XGBClassifier, XGBRegressor]
+        return [XGBClassifier, XGBRanker, XGBRegressor]
 
     return []
 
@@ -147,7 +150,11 @@ def _build_onnxml_operator_list():
     """
     if onnx_runtime_installed():
         return [
-            # Tree-based models.
+            # Preprocessing
+            "Normalizer",
+            # Linear-based models
+            "LinearClassifier",
+            # Tree-based models
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",
         ]

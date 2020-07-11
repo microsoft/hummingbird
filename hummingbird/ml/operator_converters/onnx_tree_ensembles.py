@@ -122,9 +122,9 @@ def _dummy_get_parameter(tree_info):
     return tree_info
 
 
-def _get_tree_infos_from_onnx_tree_enseble(operator, device=None, extra_config={}):
+def _get_tree_infos_from_onnx_tree_ensemble(operator, device=None, extra_config={}):
     """
-    Base method for extracting parameters from `onnxml.TreeEnsemble`s.
+    Base method for extracting parameters from `ai.onnx.ml.TreeEnsemble`s.
     """
     assert constants.ONNX_INPUTS in extra_config or constants.N_FEATURES in extra_config
 
@@ -144,12 +144,12 @@ def _get_tree_infos_from_onnx_tree_enseble(operator, device=None, extra_config={
     return n_features, tree_infos, classes, post_transform
 
 
-def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={}):
+def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}):
     """
-    Converter for `onnxml.TreeEnsembleClassifier`.
+    Converter for `ai.onnx.ml.TreeEnsembleClassifier`.
 
     Args:
-        operator: An operator wrapping a `onnxml.TreeEnsembleClassifier` model
+        operator: An operator wrapping a `ai.onnx.ml.TreeEnsembleClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -159,18 +159,18 @@ def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={})
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
+    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_onnx_tree_ensemble(operator, device, extra_config)
 
     # Generate the model.
     return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)
 
 
-def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
+def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={}):
     """
-    Converter for `onnxml.TreeEnsembleRegressor`.
+    Converter for `ai.onnx.ml.TreeEnsembleRegressor`.
 
     Args:
-        operator: An operator wrapping a `onnxml.TreeEnsembleRegressor` model
+        operator: An operator wrapping a `ai.onnx.ml.TreeEnsembleRegressor` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -180,11 +180,11 @@ def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, _, _ = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
+    n_features, tree_infos, _, _ = _get_tree_infos_from_onnx_tree_ensemble(operator, device, extra_config)
 
     # Generate the model.
     return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)
 
 
-register_converter("ONNXMLTreeEnsembleClassifier", convert_onnx_tree_enseble_classifier)
-register_converter("ONNXMLTreeEnsembleRegressor", convert_onnx_tree_enseble_regressor)
+register_converter("ONNXMLTreeEnsembleClassifier", convert_onnx_tree_ensemble_classifier)
+register_converter("ONNXMLTreeEnsembleRegressor", convert_onnx_tree_ensemble_regressor)
