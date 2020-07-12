@@ -23,7 +23,7 @@ from . import onnx_normalizer  # noqa: E402
 from . import onnx_tree_ensembles  # noqa: E402
 from . import skl_decision_tree  # noqa: E402
 from . import skl_gbdt  # noqa: E402
-from . import skl_iforest
+from . import skl_iforest  # noqa: E402
 from . import skl_linear  # noqa: E402
 from . import skl_normalizer  # noqa: E402
 from . import skl_scaler  # noqa: E402
