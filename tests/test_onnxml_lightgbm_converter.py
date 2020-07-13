@@ -298,9 +298,6 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
-    @unittest.skipIf(
-        True, reason='ONNXMLTOOLS fails with "ValueError: unsupported LightGbm objective: multiclass num_class:3"'
-    )
     def test_lightgbm_booster_multi_classifier(self):
         warnings.filterwarnings("ignore")
         X = [[0, 1], [1, 1], [2, 0], [1, 2], [-1, 2], [1, -2]]
