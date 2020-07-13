@@ -122,7 +122,7 @@ def _dummy_get_parameter(tree_info):
     return tree_info
 
 
-def _get_tree_infos_from_onnx_tree_ensemble(operator, device=None, extra_config={}):
+def _get_tree_infos_from_tree_ensemble(operator, device=None, extra_config={}):
     """
     Base method for extracting parameters from `ai.onnx.ml.TreeEnsemble`s.
     """
@@ -159,7 +159,9 @@ def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_onnx_tree_ensemble(operator, device, extra_config)
+    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_tree_ensemble(
+        operator.raw_operator, device, extra_config
+    )
 
     # Generate the model.
     return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)
@@ -180,7 +182,7 @@ def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={})
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, _, _ = _get_tree_infos_from_onnx_tree_ensemble(operator, device, extra_config)
+    n_features, tree_infos, _, _ = _get_tree_infos_from_tree_ensemble(operator.raw_operator, device, extra_config)
 
     # Generate the model.
     return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)

@@ -22,3 +22,6 @@ REORDER_TREES = "reorder_trees"
 
 ONNX_INPUTS = "onnx_inputs"
 """The inputs to the onnx model"""
+
+ONNX_TEST_INPUT = "onnx_test_input"
+"""The test input data for the onnx model"""

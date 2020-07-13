@@ -18,9 +18,10 @@ constants = _Constants(converter_constants, hummingbird_constants)
 
 # To register a converter for scikit-learn API operators, import associated modules here.
 from . import lightgbm  # noqa: E402
-from . import onnx_linear  # noqa: E402
-from . import onnx_normalizer  # noqa: E402
-from . import onnx_tree_ensembles  # noqa: E402
+from . import onnx_operator  # noqa: E402
+from . import onnxml_linear  # noqa: E402
+from . import onnxml_normalizer  # noqa: E402
+from . import onnxml_tree_ensemble  # noqa: E402
 from . import skl_decision_tree  # noqa: E402
 from . import skl_gbdt  # noqa: E402
 from . import skl_linear  # noqa: E402

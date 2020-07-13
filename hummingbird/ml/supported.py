@@ -147,10 +147,12 @@ def _build_onnxml_operator_list():
     """
     if onnx_runtime_installed():
         return [
-            # Preprocessing
-            "Normalizer",
             # Linear-based models
             "LinearClassifier",
+            # ONNX operators.
+            "Cast",
+            # Preprocessing
+            "Normalizer",
             # Tree-based models
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",
@@ -252,12 +254,6 @@ ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
 
 ONNX_INITIAL_TYPES = "onnx_initial_types"
 """For ONNX models we can explicitly set the input types and shapes."""
-
-ONNX_INPUT_NAMES = "onnx_input_names"
-"""For ONNX models we can explicitly select the input columns to use."""
-
-ONNX_OUTPUT_NAMES = "onnx_output_names"
-"""For ONNX models we can explicitly select the output columns to return."""
 
 ONNX_TARGET_OPSET = "onnx_target_opset"
 """For ONNX models we can set the target opset to use. 9 by default."""
