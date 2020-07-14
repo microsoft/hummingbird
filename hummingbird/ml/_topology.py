@@ -68,7 +68,7 @@ def convert(topology, backend, device=None, extra_config={}):
         # We are doing a regression task.
         pytorch_container = PyTorchBackendModelRegression
     elif operator_map[operators[-1].full_name].anomaly_detection:
-        # we are doing anomaly detection
+        # We are doing anomaly detection.
         pytorch_container = PyTorchBackendModelAnomalyDetection
     elif operator_map[operators[-1].full_name].transformer:
         # We are just transforming the input data.

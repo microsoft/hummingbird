@@ -180,7 +180,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
             return x
 
         if self.anomaly_detection:
-            # select the class (-1 if negative) and return the score
+            # Select the class (-1 if negative) and return the score.
             return torch.where(x < 0, self.classes[0], self.classes[1]), x
 
         x = self.calibration(x)
@@ -272,7 +272,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             return output
 
         if self.anomaly_detection:
-            # select the class (-1 if negative) and return the score
+            # Select the class (-1 if negative) and return the score.
             return torch.where(output < 0, self.classes[0], self.classes[1]), output
 
         output = self.calibration(output)
@@ -372,7 +372,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             return output
 
         if self.anomaly_detection:
-            # select the class (-1 if negative) and return the score
+            # Select the class (-1 if negative) and return the score.
             return torch.where(output < 0, self.classes[0], self.classes[1]), output
 
         output = self.calibration(output)

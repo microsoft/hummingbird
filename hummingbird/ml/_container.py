@@ -9,10 +9,10 @@ All custom model containers are listed here.
 """
 
 import numpy as np
-import torch
-from hummingbird.ml.operator_converters import constants
-
 from onnxconverter_common.container import CommonSklearnModelContainer
+import torch
+
+from .operator_converters import constants
 
 
 class CommonONNXModelContainer(CommonSklearnModelContainer):
