@@ -7,8 +7,10 @@ import torch
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
+from ._base_operator import BaseOperator
 
-class OneHotEncoderString(torch.nn.Module):
+
+class OneHotEncoderString(BaseOperator, torch.nn.Module):
     def __init__(self, categories, device):
         super(OneHotEncoderString, self).__init__()
 
@@ -45,7 +47,7 @@ class OneHotEncoderString(torch.nn.Module):
         return torch.cat(encoded_tensors, dim=1).float()
 
 
-class OneHotEncoder(torch.nn.Module):
+class OneHotEncoder(BaseOperator, torch.nn.Module):
     def __init__(self, categories, device):
         super(OneHotEncoder, self).__init__()
 
