@@ -5,17 +5,15 @@
 # --------------------------------------------------------------------------
 
 """
-Converters for scikit-learn isolation forest
+Converters for scikit-learn isolation forest.
 """
-
-from . import constants
-from hummingbird.ml.operator_converters._tree_implementations import TreeImpl, GEMMTreeImpl, TreeTraversalTreeImpl, \
-    PerfectTreeTraversalTreeImpl
-
-from ._tree_commons import get_parameters_for_sklearn_common, \
-    get_parameters_for_tree_trav_sklearn, get_tree_params_and_type, get_parameters_for_gemm_common
 import numpy as np
 from onnxconverter_common.registration import register_converter
+
+from . import constants
+from ._tree_commons import get_parameters_for_sklearn_common, \
+    get_parameters_for_tree_trav_sklearn, get_tree_params_and_type, get_parameters_for_gemm_common
+from ._tree_implementations import TreeImpl, GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl
 
 
 def _average_path_length(n_samples_leaf):
@@ -24,9 +22,12 @@ def _average_path_length(n_samples_leaf):
     https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/ensemble/_iforest.py#L480
     For each given number of samples in the array n_samples_leaf, this calculates average path length of unsucceesful
     BST search.
+    
     Args:
         n_samples_leaf: array of number of samples (in leaf)
-    Returns: array of average path lengths
+    
+    Returns: 
+        array of average path lengths
     """
     n_samples_leaf_shape = n_samples_leaf.shape
     n_samples_leaf = n_samples_leaf.reshape((1, -1))
@@ -50,12 +51,13 @@ def _get_iforest_anomaly_score_per_node(children_left, children_right, n_node_sa
     """
     Get anomaly score per node in isolation forest, which is node depth + _average_path_length(n_node_samples). Will
     be used to replace "value" in each tree.
+    
     Args:
         children_left: left children
         children_right: right children
         n_node_samples: number of samples per node
     """
-    # get depth per node
+    # Get depth per node.
     node_depth = np.zeros(shape=n_node_samples.shape, dtype=np.int64)
     stack = [(0, -1)]  # seed is the root node id and its parent depth
     while len(stack) > 0:
@@ -71,9 +73,12 @@ def _get_parameters_for_sklearn_iforest(tree_infos):
     """
     Parse sklearn-based isolation forest, replace existing values of node with anomaly score calculated in
     _get_iforest_anomaly_score_per_node
+
     Args:
         tree_infos: The information representing a tree (ensemble)
-    Returns: The tree parameters wrapped into an instance of `operator_converters._tree_commons_TreeParameters`
+    
+    Returns: 
+        The tree parameters wrapped into an instance of `operator_converters._tree_commons_TreeParameters`
     """
     tree_parameters = get_parameters_for_sklearn_common(tree_infos)
     tree_parameters.values = (
@@ -85,7 +90,7 @@ def _get_parameters_for_sklearn_iforest(tree_infos):
     return tree_parameters
 
 
-# Isolation Forest implementations
+# Isolation Forest implementations.
 class GEMMIsolationForestImpl(GEMMTreeImpl):
     """
     Class implementing the GEMM strategy (in PyTorch) for isolation forest model.
@@ -100,7 +105,8 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
             extra_config: Extra configuration used to properly implement the source tree
         """
         super(GEMMIsolationForestImpl, self).__init__(tree_parameters, n_features, classes, None, anomaly_detection=True)
-        # assign the required constants
+        
+        # Assign the required constants.
         if constants.OFFSET in extra_config:
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
@@ -112,7 +118,7 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
         output = x.sum(0).t()
         if self.final_probability_divider > 1:
             output = output / self.final_probability_divider
-        # further normalize to match "decision_function" in sklearn implementation
+        # Further normalize to match "decision_function" in sklearn implementation.
         output = -1.0 * 2**(-output / self.average_path_length) - self.offset
         return output
 
@@ -131,11 +137,11 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        self.anomaly_detection = True
         super(TreeTraversalIsolationForestImpl, self).__init__(
             tree_parameters, max_depth, n_features, classes, n_classes=None, anomaly_detection=True
         )
-        # assign the required constants
+
+        # Assign the required constants.
         if constants.OFFSET in extra_config:
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
@@ -147,7 +153,7 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
         output = x.sum(1)
         if self.final_probability_divider > 1:
             output = output / self.final_probability_divider
-        # further normalize to match "decision_function" in sklearn implementation
+        # Further normalize to match "decision_function" in sklearn implementation.
         output = -1.0 * 2**(-output / self.average_path_length) - self.offset
         return output
 
@@ -166,11 +172,11 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        self.anomaly_detection = True
         super(PerfectTreeTraversalIsolationForestImpl, self).__init__(
             tree_parameters, max_depth, n_features, classes, None, anomaly_detection=True
         )
-        # assign the required constants
+
+        # Assign the required constants.
         if constants.OFFSET in extra_config:
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
@@ -182,7 +188,7 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
         output = x.sum(1)
         if self.final_probability_divider > 1:
             output = output / self.final_probability_divider
-        # further normalize to match "decision_function" in sklearn implementation
+        # Further normalize to match "decision_function" in sklearn implementation.
         output = -1.0 * 2**(-output / self.average_path_length) - self.offset
         return output
 
@@ -204,11 +210,11 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.estimators_
     n_features = operator.raw_operator.n_features_
-    # following constants will be passed in the tree implementation to normalize the anomaly score
+    # Following constants will be passed in the tree implementation to normalize the anomaly score.
     extra_config[constants.OFFSET] = operator.raw_operator.offset_
     extra_config[constants.MAX_SAMPLES] = operator.raw_operator.max_samples_
 
-    # predict in isolation forest sklearn implementation produce 2 classes: -1 (normal) & 1 (anomaly)
+    # Predict in isolation forest sklearn implementation produce 2 classes: -1 (normal) & 1 (anomaly).
     classes = [-1, 1]
 
     tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, _get_parameters_for_sklearn_iforest,

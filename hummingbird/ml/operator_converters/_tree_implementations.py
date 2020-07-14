@@ -85,7 +85,6 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
         self.base_prediction = None
         # Are we doing anomaly detection, regression or classification?
         if self.anomaly_detection:
-            self.regression = False
             self.n_classes = 1  # so that we follow the regression pattern and later do manual class selection
             self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
         elif classes is None:
