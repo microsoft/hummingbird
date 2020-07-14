@@ -29,10 +29,11 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
 
     assert operator is not None
 
+    operator = operator.raw_operator
     coefficients = intercepts = classes = multi_class = None
     is_linear_regression = False
-    for attr in operator.origin.attribute:
 
+    for attr in operator.origin.attribute:
         if attr.name == "coefficients":
             coefficients = np.array(attr.floats).astype("float32")
         elif attr.name == "intercepts":
