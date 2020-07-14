@@ -34,6 +34,7 @@ class PyTorchBackendModel(torch.nn.Module):
         self.operators = operators
         self.extra_config = extra_config
         self.is_regression = self.operator_map[self.operators[-1].full_name].regression
+        self.anomaly_detection = self.operator_map[self.operators[-1].full_name].anomaly_detection
 
     def forward(self, *inputs):
         with torch.no_grad():
@@ -86,9 +87,12 @@ class PyTorchBackendModelRegression(PyTorchBackendModel):
         Utility functions used to emulate the behavior of the Sklearn API.
         On regression returns the predicted values.
         On classification tasks returns the predicted class labels for the input data.
+        On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
         if self.is_regression:
             return self.forward(*inputs).cpu().numpy().flatten()
+        elif self.anomaly_detection:
+            return self.forward(*inputs)[0].cpu().numpy().flatten()
         else:
             return self.forward(*inputs)[0].cpu().numpy()
 
@@ -102,14 +106,7 @@ class PyTorchBackendModelClassification(PyTorchBackendModelRegression):
         return self.forward(*inputs)[1].cpu().numpy()
 
 
-class PyTorchBackendModelAnomalyDetection(PyTorchBackendModel):
-    def predict(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
-        """
-        return self.forward(*inputs)[0].cpu().numpy().flatten()
-
+class PyTorchBackendModelAnomalyDetection(PyTorchBackendModelRegression):
     def decision_function(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
