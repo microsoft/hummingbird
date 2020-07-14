@@ -22,11 +22,11 @@ def _average_path_length(n_samples_leaf):
     https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/ensemble/_iforest.py#L480
     For each given number of samples in the array n_samples_leaf, this calculates average path length of unsucceesful
     BST search.
-    
+
     Args:
         n_samples_leaf: array of number of samples (in leaf)
-    
-    Returns: 
+
+    Returns:
         array of average path lengths
     """
     n_samples_leaf_shape = n_samples_leaf.shape
@@ -51,7 +51,7 @@ def _get_iforest_anomaly_score_per_node(children_left, children_right, n_node_sa
     """
     Get anomaly score per node in isolation forest, which is node depth + _average_path_length(n_node_samples). Will
     be used to replace "value" in each tree.
-    
+
     Args:
         children_left: left children
         children_right: right children
@@ -76,8 +76,8 @@ def _get_parameters_for_sklearn_iforest(tree_infos):
 
     Args:
         tree_infos: The information representing a tree (ensemble)
-    
-    Returns: 
+
+    Returns:
         The tree parameters wrapped into an instance of `operator_converters._tree_commons_TreeParameters`
     """
     tree_parameters = get_parameters_for_sklearn_common(tree_infos)
@@ -105,7 +105,7 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
             extra_config: Extra configuration used to properly implement the source tree
         """
         super(GEMMIsolationForestImpl, self).__init__(tree_parameters, n_features, classes, None, anomaly_detection=True)
-        
+
         # Assign the required constants.
         if constants.OFFSET in extra_config:
             self.offset = extra_config[constants.OFFSET]
