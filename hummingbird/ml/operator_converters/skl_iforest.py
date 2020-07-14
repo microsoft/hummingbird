@@ -22,21 +22,12 @@ def _average_path_length(n_samples_leaf):
     """
     Taken from sklearn implementation of isolation forest:
     https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/ensemble/_iforest.py#L480
-    The average path length in a n_samples iTree, which is equal to
-    the average path length of an unsuccessful BST search since the
-    latter has the same structure as an isolation tree.
-    Parameters
-    ----------
-    n_samples_leaf : array-like of shape (n_samples,)
-        The number of training samples in each test sample leaf, for
-        each estimators.
-    Returns
-    -------
-    average_path_length : ndarray of shape (n_samples,)
+    For each given number of samples in the array n_samples_leaf, this calculates average path length of unsucceesful
+    BST search.
+    Args:
+        n_samples_leaf: array of number of samples (in leaf)
+    Returns: array of average path lengths
     """
-
-    #     n_samples_leaf = check_array(n_samples_leaf, ensure_2d=False)
-
     n_samples_leaf_shape = n_samples_leaf.shape
     n_samples_leaf = n_samples_leaf.reshape((1, -1))
     average_path_length = np.zeros(n_samples_leaf.shape)
@@ -100,16 +91,15 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
     Class implementing the GEMM strategy (in PyTorch) for isolation forest model.
     """
 
-    def __init__(self, tree_parameters, n_features, classes=None, is_anomaly_detection=True, extra_config={}):
+    def __init__(self, tree_parameters, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
-            is_anomaly_detection: bool flag, True if we are doing anomaly detection
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(GEMMIsolationForestImpl, self).__init__(tree_parameters, n_features, classes, None, is_anomaly_detection)
+        super(GEMMIsolationForestImpl, self).__init__(tree_parameters, n_features, classes, None, anomaly_detection=True)
         # assign the required constants
         if constants.OFFSET in extra_config:
             self.offset = extra_config[constants.OFFSET]
@@ -132,18 +122,18 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch for isolation forest model.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None, is_anomaly_detection=True, extra_config={}):
+    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
-            is_anomaly_detection: bool flag, True if we are doing anomaly detection
             extra_config: Extra configuration used to properly implement the source tree
         """
+        self.anomaly_detection = True
         super(TreeTraversalIsolationForestImpl, self).__init__(
-            tree_parameters, max_depth, n_features, classes, n_classes=None, is_anomaly_detection=is_anomaly_detection
+            tree_parameters, max_depth, n_features, classes, n_classes=None, anomaly_detection=True
         )
         # assign the required constants
         if constants.OFFSET in extra_config:
@@ -167,18 +157,18 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for isolation forest model.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None, is_anomaly_detection=True, extra_config={}):
+    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
-            is_anomaly_detection: bool flag, True if we are doing anomaly detection
             extra_config: Extra configuration used to properly implement the source tree
         """
+        self.anomaly_detection = True
         super(PerfectTreeTraversalIsolationForestImpl, self).__init__(
-            tree_parameters, max_depth, n_features, classes, None, is_anomaly_detection
+            tree_parameters, max_depth, n_features, classes, None, anomaly_detection=True
         )
         # assign the required constants
         if constants.OFFSET in extra_config:
