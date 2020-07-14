@@ -16,8 +16,9 @@ class TestSklearnOneHotEncoderConverter(unittest.TestCase):
         model.fit(data)
 
         pytorch_model = hummingbird.ml.convert(model, "pytorch", np.array([4, 3], dtype=np.int64))
-        self.assertTrue(pytorch_model is not None)
-        self.assertTrue(np.allclose(model.transform(data).todense(), pytorch_model(torch.from_numpy(data)).data.numpy()))
+
+        self.assertIsNotNone(pytorch_model)
+        np.testing.assert_allclose(model.transform(data).todense(), pytorch_model.transform(data), rtol=1e-06, atol=1e-06)
 
     def test_model_one_hot_encoder_string(self):
         model = OneHotEncoder()
