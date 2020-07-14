@@ -83,7 +83,7 @@ def _build_sklearn_operator_list():
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
         # Preprocessing
-        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, RobustScaler, StandardScaler
+        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, OneHotEncoder, RobustScaler, StandardScaler
 
         return [
             # Trees
