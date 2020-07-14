@@ -25,3 +25,9 @@ ONNX_INPUTS = "onnx_inputs"
 
 ONNX_TEST_INPUT = "onnx_test_input"
 """The test input data for the onnx model"""
+
+OFFSET = "offset_"
+"""offset of the sklearn anomaly detection implementation"""
+
+MAX_SAMPLES = "max_samples_"
+"""max_samples of sklearn isolation forest implementation"""

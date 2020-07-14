@@ -13,7 +13,8 @@ from uuid import uuid4
 
 from onnxconverter_common.registration import get_converter
 
-from ._container import PyTorchBackendModelRegression, PyTorchBackendModelClassification, PyTorchBackendModelTransformer
+from ._container import PyTorchBackendModelRegression, PyTorchBackendModelClassification, \
+    PyTorchBackendModelTransformer, PyTorchBackendModelAnomalyDetection
 from ._utils import onnx_runtime_installed
 from .exceptions import MissingConverter
 from .operator_converters import constants
@@ -66,6 +67,9 @@ def convert(topology, backend, device=None, extra_config={}):
     if operator_map[operators[-1].full_name].regression:
         # We are doing a regression task.
         pytorch_container = PyTorchBackendModelRegression
+    elif operator_map[operators[-1].full_name].anomaly_detection:
+        # We are doing anomaly detection.
+        pytorch_container = PyTorchBackendModelAnomalyDetection
     elif operator_map[operators[-1].full_name].transformer:
         # We are just transforming the input data.
         pytorch_container = PyTorchBackendModelTransformer
