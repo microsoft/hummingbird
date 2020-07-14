@@ -62,10 +62,6 @@ class OneHotEncoder(torch.nn.Module):
         if x.dtype != torch.int64:
             x = x.long()
 
-        if self.num_columns == 0:
-            # No features selected.
-            return x
-
         return self.transform(x)
 
     def transform(self, x):
