@@ -75,4 +75,25 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
     )
 
 
+# def convert_onnx_linear_regression_model(operator, device, extra_config):
+#     """
+#     Converter for `ai.onnx.ml.LinearRegression`
+#     Args:
+#         operator: An operator wrapping a `ai.onnx.ml.LinearRegression` model
+#         device: String defining the type of device the converted operator should be run on
+#         extra_config: Extra configuration used to select the best conversion strategy
+#     Returns:
+#         A PyTorch model
+#     """
+
+#     coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype("float32")
+#     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
+
+#     return LinearModel(coefficients, intercepts, device, is_linear_regression=True)
+
 register_converter("ONNXMLLinearClassifier", convert_onnx_linear_model)
+# register_converter("ONNXMLLinearRegression", convert_onnx_linear_regression_model)
+# register_converter("ONNXMLLogisticRegression", convert_onnx_linear_model)
+# register_converter("ONNXMLLinearSVC", convert_onnx_linear_model)
+# register_converter("ONNXMLSGDClassifier", convert_onnx_linear_model)
+# register_converter("ONNXMLLogisticRegressionCV", convert_onnx_linear_model)
