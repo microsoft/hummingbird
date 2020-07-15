@@ -156,6 +156,7 @@ def _build_onnxml_operator_list():
             "Cast",
             # Preprocessing
             "Normalizer",
+            "Scaler",
             # Tree-based models
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",
