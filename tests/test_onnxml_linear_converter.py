@@ -25,7 +25,6 @@ class TestONNXLinear(unittest.TestCase):
         This helper function tests conversion of `ai.onnx.ml.LinearClassifier`
         which is created from a scikit-learn LogisticRegression.
 
-        This tests `convert_onnx_linear_model` in `hummingbird.ml.operator_converters.onnxml_linear`
         """
         n_features = 20
         n_total = 100
@@ -95,7 +94,7 @@ class TestONNXLinear(unittest.TestCase):
             list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
         )  # probs
 
-    def _test_regressor(self, classes):
+    def _test_regressor(self, values):
         """
         This helper function tests conversion of `ai.onnx.ml.LinearRegressor`
         which is created from a scikit-learn LinearRegression.
@@ -108,7 +107,7 @@ class TestONNXLinear(unittest.TestCase):
         warnings.filterwarnings("ignore")
         X = np.random.rand(n_total, n_features)
         X = np.array(X, dtype=np.float32)
-        y = np.random.randint(classes, size=n_total)
+        y = np.random.randint(values, size=n_total)
 
         # Create SKL model for testing
         model = LinearRegression()
@@ -137,8 +136,8 @@ class TestONNXLinear(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    # test ai.onnx.ml.LinearRegressor with 2 classes
-    def test_linear_regression_onnxml_binary(self, rtol=1e-06, atol=1e-06):
+    # test ai.onnx.ml.LinearRegressor with 2 values
+    def test_linear_regression_onnxml_small(self, rtol=1e-06, atol=1e-06):
         onnx_ml_pred, onnx_pred = self._test_regressor(2)
 
         # Check that predicted values match
@@ -147,9 +146,9 @@ class TestONNXLinear(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    # test ai.onnx.ml.LinearRegressor with 2 classes
-    def test_linear_regression_onnxml_multi(self, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred = self._test_regressor(3)
+    # test ai.onnx.ml.LinearRegressor with 100 values
+    def test_linear_regression_onnxml_large(self, rtol=1e-06, atol=1e-06):
+        onnx_ml_pred, onnx_pred = self._test_regressor(100)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
