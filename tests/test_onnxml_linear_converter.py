@@ -154,6 +154,27 @@ class TestONNXLinear(unittest.TestCase):
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    # test for malformed model/problem with parsing
+    def test_onnx_linear_converter_raises_rt(self):
+        n_features = 20
+        n_total = 100
+        np.random.seed(0)
+        warnings.filterwarnings("ignore")
+        X = np.random.rand(n_total, n_features)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(3, size=n_total)
+        model = LinearRegression()
+        model.fit(X, y)
+
+        # generate test input
+        onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
+        onnx_ml_model.graph.node[0].attribute[0].name = "".encode()
+
+        self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
+
 
 if __name__ == "__main__":
     unittest.main()
