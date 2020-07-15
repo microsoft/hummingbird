@@ -20,7 +20,7 @@ if onnx_ml_tools_installed():
 
 
 class TestONNXLinear(unittest.TestCase):
-    def _test_regressor(self, classes):
+    def _test_linear(self, classes):
         """
         This helper function tests conversion of `ai.onnx.ml.LinearClassifier`
         which is created from a scikit-learn LogisticRegression.
@@ -74,7 +74,7 @@ class TestONNXLinear(unittest.TestCase):
     )
     # test ai.onnx.ml.LinearClassifier with 2 classes
     def test_logistic_regression_onnxml_binary(self, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred = self._test_regressor(2)
+        onnx_ml_pred, onnx_pred = self._test_linear(2)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
@@ -87,7 +87,7 @@ class TestONNXLinear(unittest.TestCase):
     )
     # test ai.onnx.ml.LinearClassifier with 3 classes
     def test_logistic_regression_onnxml_multi(self, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred = self._test_regressor(3)
+        onnx_ml_pred, onnx_pred = self._test_linear(3)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
@@ -95,7 +95,7 @@ class TestONNXLinear(unittest.TestCase):
             list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
         )  # probs
 
-    def _test_actualregressor(self, classes):
+    def _test_regressor(self, classes):
         """
         This helper function tests conversion of `ai.onnx.ml.LinearRegressor`
         which is created from a scikit-learn LinearRegression.
@@ -125,22 +125,12 @@ class TestONNXLinear(unittest.TestCase):
         output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
         onnx_ml_pred = [[] for i in range(len(output_names))]
         inputs = {session.get_inputs()[0].name: X}
-        pred = session.run(output_names, inputs)
-        for i in range(len(output_names)):
-            if output_names[i] == "output_label":
-                onnx_ml_pred[1] = pred[i]
-            else:
-                onnx_ml_pred[0] = pred[i]
+        onnx_ml_pred = session.run(output_names, inputs)
 
         # Get the predictions for the ONNX model
         session = ort.InferenceSession(onnx_model.SerializeToString())
         onnx_pred = [[] for i in range(len(output_names))]
-        pred = session.run(output_names, inputs)
-        for i in range(len(output_names)):
-            if output_names[i] == "output_label":
-                onnx_pred[1] = pred[i]
-            else:
-                onnx_pred[0] = pred[i]
+        onnx_pred = session.run(output_names, inputs)
 
         return onnx_ml_pred, onnx_pred
 
@@ -149,26 +139,20 @@ class TestONNXLinear(unittest.TestCase):
     )
     # test ai.onnx.ml.LinearRegressor with 2 classes
     def test_linear_regression_onnxml_binary(self, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred = self._test_actualregressor(2)
+        onnx_ml_pred, onnx_pred = self._test_regressor(2)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
-        np.testing.assert_allclose(
-            list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
-        )  # probs
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
     # test ai.onnx.ml.LinearRegressor with 2 classes
     def test_linear_regression_onnxml_multi(self, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred = self._test_actualregressor(3)
+        onnx_ml_pred, onnx_pred = self._test_regressor(3)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
-        np.testing.assert_allclose(
-            list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
-        )  # probs
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
 
 if __name__ == "__main__":

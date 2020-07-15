@@ -85,7 +85,9 @@ def convert_onnx_linear_regression_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None
 
+    operator = operator.raw_operator
     coefficients = intercepts = None
     for attr in operator.origin.attribute:
 
