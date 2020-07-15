@@ -33,7 +33,6 @@ class OneHotEncoderString(BaseOperator, torch.nn.Module):
             num_categories.append(num_categories[-1] + len(cats))
         self.condition_tensors = torch.nn.Parameter(torch.IntTensor(condition_tensors), requires_grad=False)
         self.num_categories = num_categories
-        self.regression = False
         self.transformer = True
 
     def forward(self, x):
@@ -57,7 +56,6 @@ class OneHotEncoder(BaseOperator, torch.nn.Module):
         for arr in categories:
             condition_tensors.append(torch.nn.Parameter(torch.LongTensor(arr), requires_grad=False))
         self.condition_tensors = torch.nn.ParameterList(condition_tensors)
-        self.regression = False
         self.transformer = True
 
     def forward(self, x):
