@@ -19,12 +19,9 @@ if onnx_ml_tools_installed():
 
 
 class TestONNXScaler(unittest.TestCase):
-    def _test_standar_scaler_converter(self, with_mean, with_std):
+    def _test_standar_scaler_converter(self, model):
         warnings.filterwarnings("ignore")
         X = np.array([[0.0, 0.0, 3.0], [1.0, -1.0, 0.0], [0.0, 2.0, 1.0], [1.0, 0.0, -2.0]], dtype=np.float32)
-
-        # Create SKL model for testing
-        model = StandardScaler(with_mean=with_mean, with_std=with_std)
         model.fit(X)
 
         # Create ONNX-ML model
@@ -51,7 +48,8 @@ class TestONNXScaler(unittest.TestCase):
     )
     # Test StandardScaler with_mean=True, with_std=True
     def test_standard_scaler_onnx_tt(self, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred = self._test_standar_scaler_converter(True, True)
+        model = StandardScaler(with_mean=True, with_std=True)
+        onnx_ml_pred, onnx_pred = self._test_standar_scaler_converter(model)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
@@ -61,7 +59,8 @@ class TestONNXScaler(unittest.TestCase):
     )
     # Test StandardScaler with_mean=True, with_std=False
     def test_standard_scaler_onnx_tf(self, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred = self._test_standar_scaler_converter(True, False)
+        model = StandardScaler(with_mean=True, with_std=False)
+        onnx_ml_pred, onnx_pred = self._test_standar_scaler_converter(model)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
@@ -71,7 +70,8 @@ class TestONNXScaler(unittest.TestCase):
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
     def test_standard_scaler_onnx_ff(self, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred = self._test_standar_scaler_converter(False, False)
+        model = StandardScaler(with_mean=False, with_std=False)
+        onnx_ml_pred, onnx_pred = self._test_standar_scaler_converter(model)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
