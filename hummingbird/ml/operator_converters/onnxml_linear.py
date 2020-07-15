@@ -75,25 +75,34 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
     )
 
 
-# def convert_onnx_linear_regression_model(operator, device, extra_config):
-#     """
-#     Converter for `ai.onnx.ml.LinearRegression`
-#     Args:
-#         operator: An operator wrapping a `ai.onnx.ml.LinearRegression` model
-#         device: String defining the type of device the converted operator should be run on
-#         extra_config: Extra configuration used to select the best conversion strategy
-#     Returns:
-#         A PyTorch model
-#     """
+def convert_onnx_linear_regression_model(operator, device, extra_config):
+    """
+    Converter for `ai.onnx.ml.LinearRegression`
+    Args:
+        operator: An operator wrapping a `ai.onnx.ml.LinearRegression` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+    Returns:
+        A PyTorch model
+    """
 
-#     coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype("float32")
-#     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
+    coefficients = intercepts = None
+    for attr in operator.origin.attribute:
 
-#     return LinearModel(coefficients, intercepts, device, is_linear_regression=True)
+        if attr.name == "coefficients":
+            coefficients = np.array([[np.array(val).astype("float32")] for val in attr.floats]).astype("float32")
+        elif attr.name == "intercepts":
+            intercepts = np.array(attr.floats).astype("float32")
+
+    if any(v is None for v in [coefficients, intercepts]):
+        raise RuntimeError(
+            "Error parsing LinearRegression, found unexpected None. coefficients{}, intercepts{}".format(
+                coefficients, intercepts
+            )
+        )
+
+    return LinearModel(coefficients, intercepts, device, is_linear_regression=True)
+
 
 register_converter("ONNXMLLinearClassifier", convert_onnx_linear_model)
-# register_converter("ONNXMLLinearRegression", convert_onnx_linear_regression_model)
-# register_converter("ONNXMLLogisticRegression", convert_onnx_linear_model)
-# register_converter("ONNXMLLinearSVC", convert_onnx_linear_model)
-# register_converter("ONNXMLSGDClassifier", convert_onnx_linear_model)
-# register_converter("ONNXMLLogisticRegressionCV", convert_onnx_linear_model)
+register_converter("ONNXMLLinearRegressor", convert_onnx_linear_regression_model)

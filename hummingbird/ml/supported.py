@@ -152,7 +152,7 @@ def _build_onnxml_operator_list():
         return [
             # Linear-based models
             "LinearClassifier",
-            "SVMClassifier",
+            "LinearRegressor",
             # ONNX operators.
             "Cast",
             # Preprocessing

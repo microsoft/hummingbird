@@ -1,5 +1,5 @@
 """
-Tests onnxml Normalizer converter
+Tests onnxml Linear converters
 """
 import unittest
 import warnings
@@ -19,8 +19,14 @@ if onnx_ml_tools_installed():
     from onnxmltools.convert.common.data_types import FloatTensorType as FloatTensorType_onnx
 
 
-class TestSklearnNormalizer(unittest.TestCase):
+class TestONNXLinear(unittest.TestCase):
     def _test_regressor(self, classes):
+        """
+        This helper function tests conversion of `ai.onnx.ml.LinearClassifier`
+        which is created from a scikit-learn LogisticRegression.
+
+        This tests `convert_onnx_linear_model` in `hummingbird.ml.operator_converters.onnxml_linear`
+        """
         n_features = 20
         n_total = 100
         np.random.seed(0)
@@ -66,6 +72,7 @@ class TestSklearnNormalizer(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
+    # test ai.onnx.ml.LinearClassifier with 2 classes
     def test_logistic_regression_onnxml_binary(self, rtol=1e-06, atol=1e-06):
         onnx_ml_pred, onnx_pred = self._test_regressor(2)
 
@@ -78,8 +85,84 @@ class TestSklearnNormalizer(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
+    # test ai.onnx.ml.LinearClassifier with 3 classes
     def test_logistic_regression_onnxml_multi(self, rtol=1e-06, atol=1e-06):
         onnx_ml_pred, onnx_pred = self._test_regressor(3)
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
+        np.testing.assert_allclose(
+            list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
+        )  # probs
+
+    def _test_actualregressor(self, classes):
+        """
+        This helper function tests conversion of `ai.onnx.ml.LinearRegressor`
+        which is created from a scikit-learn LinearRegression.
+
+        This tests `convert_onnx_linear_regression_model` in `hummingbird.ml.operator_converters.onnxml_linear`
+        """
+        n_features = 20
+        n_total = 100
+        np.random.seed(0)
+        warnings.filterwarnings("ignore")
+        X = np.random.rand(n_total, n_features)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(classes, size=n_total)
+
+        # Create SKL model for testing
+        model = LinearRegression()
+        model.fit(X, y)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
+
+        # Create ONNX model by calling converter
+        onnx_model = convert(onnx_ml_model, "onnx", X)
+
+        # Get the predictions for the ONNX-ML model
+        session = ort.InferenceSession(onnx_ml_model.SerializeToString())
+        output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
+        onnx_ml_pred = [[] for i in range(len(output_names))]
+        inputs = {session.get_inputs()[0].name: X}
+        pred = session.run(output_names, inputs)
+        for i in range(len(output_names)):
+            if output_names[i] == "output_label":
+                onnx_ml_pred[1] = pred[i]
+            else:
+                onnx_ml_pred[0] = pred[i]
+
+        # Get the predictions for the ONNX model
+        session = ort.InferenceSession(onnx_model.SerializeToString())
+        onnx_pred = [[] for i in range(len(output_names))]
+        pred = session.run(output_names, inputs)
+        for i in range(len(output_names)):
+            if output_names[i] == "output_label":
+                onnx_pred[1] = pred[i]
+            else:
+                onnx_pred[0] = pred[i]
+
+        return onnx_ml_pred, onnx_pred
+
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    # test ai.onnx.ml.LinearRegressor with 2 classes
+    def test_linear_regression_onnxml_binary(self, rtol=1e-06, atol=1e-06):
+        onnx_ml_pred, onnx_pred = self._test_actualregressor(2)
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
+        np.testing.assert_allclose(
+            list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
+        )  # probs
+
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    # test ai.onnx.ml.LinearRegressor with 2 classes
+    def test_linear_regression_onnxml_multi(self, rtol=1e-06, atol=1e-06):
+        onnx_ml_pred, onnx_pred = self._test_actualregressor(3)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels

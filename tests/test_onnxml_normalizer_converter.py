@@ -18,7 +18,7 @@ if onnx_ml_tools_installed():
     from onnxmltools.convert.common.data_types import FloatTensorType as FloatTensorType_onnx
 
 
-class TestSklearnNormalizer(unittest.TestCase):
+class TestONNXNormalizer(unittest.TestCase):
     def _test_normalizer_converter(self, norm):
         warnings.filterwarnings("ignore")
         X = np.array([[1, 2, 3], [4, 3, 0], [0, 1, 4], [0, 5, 6]], dtype=np.float32)
