@@ -5,7 +5,7 @@ import unittest
 import warnings
 
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, StandardScaler, RobustScaler
 import torch
 
 from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, lightgbm_installed
@@ -19,7 +19,7 @@ if onnx_ml_tools_installed():
 
 
 class TestONNXScaler(unittest.TestCase):
-    def _test_standar_scaler_converter(self, model):
+    def _test_scaler_converter(self, model):
         warnings.filterwarnings("ignore")
         X = np.array([[0.0, 0.0, 3.0], [1.0, -1.0, 0.0], [0.0, 2.0, 1.0], [1.0, 0.0, -2.0]], dtype=np.float32)
         model.fit(X)
@@ -43,24 +43,24 @@ class TestONNXScaler(unittest.TestCase):
 
         return onnx_ml_pred, onnx_pred
 
+    # Test StandardScaler with_mean=True, with_std=True
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    # Test StandardScaler with_mean=True, with_std=True
     def test_standard_scaler_onnx_tt(self, rtol=1e-06, atol=1e-06):
         model = StandardScaler(with_mean=True, with_std=True)
-        onnx_ml_pred, onnx_pred = self._test_standar_scaler_converter(model)
+        onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
+    # Test StandardScaler with_mean=True, with_std=False
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    # Test StandardScaler with_mean=True, with_std=False
     def test_standard_scaler_onnx_tf(self, rtol=1e-06, atol=1e-06):
         model = StandardScaler(with_mean=True, with_std=False)
-        onnx_ml_pred, onnx_pred = self._test_standar_scaler_converter(model)
+        onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
@@ -71,15 +71,60 @@ class TestONNXScaler(unittest.TestCase):
     )
     def test_standard_scaler_onnx_ff(self, rtol=1e-06, atol=1e-06):
         model = StandardScaler(with_mean=False, with_std=False)
-        onnx_ml_pred, onnx_pred = self._test_standar_scaler_converter(model)
+        onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
+    # Test RobustScaler with with_centering=True
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    def test_onnx_scaler_converter_raises_rt(self):
+    def test_robust_scaler_onnx_t(self, rtol=1e-06, atol=1e-06):
+        model = RobustScaler(with_centering=True)
+        onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+
+    # Test RobustScaler with with_centering=False
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_robust_scaler_onnx_f(self, rtol=1e-06, atol=1e-06):
+        model = RobustScaler(with_centering=False)
+        onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+
+    # Test MaxAbsScaler
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_max_abs_scaler_onnx(self, rtol=1e-06, atol=1e-06):
+        model = MaxAbsScaler()
+        onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+
+    # Test MinMaxScaler
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_min_max_scaler_onnx(self, rtol=1e-06, atol=1e-06):
+        model = MinMaxScaler()
+        onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+
+    # Test that malformed models throw an exception
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_scaler_converter_raises_rt_onnx(self):
         warnings.filterwarnings("ignore")
         X = np.array([[0.0, 0.0, 3.0], [1.0, -1.0, 0.0], [0.0, 2.0, 1.0], [1.0, 0.0, -2.0]], dtype=np.float32)
 
