@@ -34,7 +34,7 @@ class OneHotEncoderString(BaseOperator, torch.nn.Module):
         categories_idx = [0]
         for arr in categories:
             cats = (
-                np.array(arr, dtype="|S" + str(self.max_word_length)) # Encode objects into 4 byte strings.
+                np.array(arr, dtype="|S" + str(self.max_word_length))  # Encode objects into 4 byte strings.
                 .view("int32")
                 .reshape(-1, self.max_word_length // 4)
                 .tolist()
