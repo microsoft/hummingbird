@@ -14,6 +14,15 @@ BASE_PREDICTION = "base_prediction"
 LEARNING_RATE = "learning_rate"
 """Learning Rate"""
 
+POST_TRANSFORM = "post_transform"
+"""Post transform for tree inference"""
+
+SIGMOID = "post_transform_sigmoid"
+"""Sigmoid post transform"""
+
+SOFTMAX = "post_transform_softmax"
+"""Softmax post transform"""
+
 GET_PARAMETERS_FOR_TREE_TRAVERSAL = "get_parameters_for_tree_trav"
 """Which function to use to extract the parameters for the tree traversal strategy"""
 
