@@ -3,16 +3,23 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
-import torch
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
+import torch
 
 from ._base_operator import BaseOperator
 
 
 class OneHotEncoderString(BaseOperator, torch.nn.Module):
+    """
+    Class implementing OneHotEncoder operators for strings in PyTorch.
+
+    Because we are dealing with tensors, strings require additional length information for processing.
+    """
+
     def __init__(self, categories, device):
-        super(OneHotEncoderString, self).__init__()
+        super(OneHotEncoderString, self).__init__(transformer=True)
 
         self.num_columns = len(categories)
         self.max_word_length = max([max([len(c) for c in cat]) for cat in categories])
@@ -33,7 +40,6 @@ class OneHotEncoderString(BaseOperator, torch.nn.Module):
             num_categories.append(num_categories[-1] + len(cats))
         self.condition_tensors = torch.nn.Parameter(torch.IntTensor(condition_tensors), requires_grad=False)
         self.num_categories = num_categories
-        self.transformer = True
 
     def forward(self, x):
         encoded_tensors = []
@@ -47,8 +53,12 @@ class OneHotEncoderString(BaseOperator, torch.nn.Module):
 
 
 class OneHotEncoder(BaseOperator, torch.nn.Module):
+    """
+    Class implementing OneHotEncoder operators for ints in PyTorch.
+    """
+
     def __init__(self, categories, device):
-        super(OneHotEncoder, self).__init__()
+        super(OneHotEncoder, self).__init__(transformer=True)
 
         self.num_columns = len(categories)
 
@@ -56,15 +66,11 @@ class OneHotEncoder(BaseOperator, torch.nn.Module):
         for arr in categories:
             condition_tensors.append(torch.nn.Parameter(torch.LongTensor(arr), requires_grad=False))
         self.condition_tensors = torch.nn.ParameterList(condition_tensors)
-        self.transformer = True
 
     def forward(self, x):
         if x.dtype != torch.int64:
             x = x.long()
 
-        return self.transform(x)
-
-    def transform(self, x):
         encoded_tensors = []
         for i in range(self.num_columns):
             encoded_tensors.append(torch.eq(x[:, i : i + 1], self.condition_tensors[i]))
@@ -72,6 +78,17 @@ class OneHotEncoder(BaseOperator, torch.nn.Module):
 
 
 def convert_sklearn_one_hot_encoder(operator, device, extra_config):
+    """
+    Converter for `sklearn.preprocessing.OneHotEncoder`
+
+    Args:
+        operator: An operator wrapping a `sklearn.preprocessing.OneHotEncoder` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
     if all([np.array(c).dtype == object for c in operator.raw_operator.categories_]):
         categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
         return OneHotEncoderString(categories, device)
