@@ -34,10 +34,9 @@ def convert_onnx_scaler(operator, device=None, extra_config={}):
             scale = np.array(attr.floats).astype("float32")
 
     if any(v is None for v in [offset, scale]):
-        print("offset: {}, scale: {}".format(offset, scale))
         raise RuntimeError("Error parsing Scalar, found unexpected None")
 
-    return Scaler(operator, device)
+    return Scaler(offset, scale, device)
 
 
 register_converter("ONNXMLScaler", convert_onnx_scaler)
