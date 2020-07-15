@@ -25,6 +25,7 @@ class TestONNXLinear(unittest.TestCase):
         This helper function tests conversion of `ai.onnx.ml.LinearClassifier`
         which is created from a scikit-learn LogisticRegression.
 
+        This tests `convert_onnx_linear_model` in `hummingbird.ml.operator_converters.onnxml_linear`
         """
         n_features = 20
         n_total = 100
