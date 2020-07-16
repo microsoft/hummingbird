@@ -9,31 +9,7 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 
 from ._base_operator import BaseOperator
-
-
-class Scaler(BaseOperator, torch.nn.Module):
-    def __init__(self, offset, scale, device):
-        super(Scaler, self).__init__()
-        self.transformer = True
-
-        if offset is not None:
-            self.offset = torch.nn.Parameter(torch.FloatTensor([offset]), requires_grad=False)
-        else:
-            self.offset = None
-
-        if scale is not None:
-            self.scale = torch.nn.Parameter(torch.FloatTensor([scale]), requires_grad=False)
-        else:
-            self.scale = None
-
-    def forward(self, x):
-        if self.offset is not None:
-            x = x - self.offset
-
-        if self.scale is not None:
-            x = x * self.scale
-
-        return x
+from ._scaler_implementations import Scaler
 
 
 def convert_sklearn_robust_scaler(operator, device, extra_config):
