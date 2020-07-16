@@ -310,5 +310,6 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         )
         self._test_classifier(X, model)
 
+
 if __name__ == "__main__":
     unittest.main()

@@ -61,5 +61,6 @@ class TestSklearnNormalizer(unittest.TestCase):
                 model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
+
 if __name__ == "__main__":
     unittest.main()

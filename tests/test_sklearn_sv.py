@@ -126,5 +126,6 @@ class TestSklearnSVC(unittest.TestCase):
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
+
 if __name__ == "__main__":
     unittest.main()

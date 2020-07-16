@@ -226,5 +226,6 @@ class TestLGBMConverter(unittest.TestCase):
     def test_float64_lgbm_perf_tree_trav_regressor_converter(self):
         self._run_float64_lgbm_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
+
 if __name__ == "__main__":
     unittest.main()
