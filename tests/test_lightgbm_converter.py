@@ -168,18 +168,18 @@ class TestLGBMConverter(unittest.TestCase):
 
     # Float 64 classification test helper
     def _run_float64_lgbm_classifier_converter(self, num_classes, extra_config={}):
-    warnings.filterwarnings("ignore")
-    for max_depth in [1, 3, 8, 10, 12, None]:
-        model = lgb.LGBMClassifier(n_estimators=10, max_depth=max_depth)
-        np.random.seed(0)
-        X = np.random.rand(100, 200)
-        y = np.random.randint(num_classes, size=100)
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            model = lgb.LGBMClassifier(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.randint(num_classes, size=100)
 
-        model.fit(X, y)
+            model.fit(X, y)
 
-        torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
-        self.assertIsNotNone(torch_model)
-        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Gemm classifier (float64 data)
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
@@ -197,18 +197,18 @@ class TestLGBMConverter(unittest.TestCase):
         self._run_float64_lgbm_classifier_converter(2, extra_config={"tree_implementation": "perf_tree_trav"})
 
     def _run_float64_lgbm_regressor_converter(self, num_classes, extra_config={}):
-    warnings.filterwarnings("ignore")
-    for max_depth in [1, 3, 8, 10, 12, None]:
-        model = lgb.LGBMRegressor(n_estimators=10, max_depth=max_depth)
-        np.random.seed(0)
-        X = np.random.rand(100, 200)
-        y = np.random.randint(num_classes, size=100)
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            model = lgb.LGBMRegressor(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.randint(num_classes, size=100)
 
-        model.fit(X, y)
+            model.fit(X, y)
 
-        torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
-        self.assertIsNotNone(torch_model)
-        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Gemm regressor (float64 data)
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
