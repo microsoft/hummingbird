@@ -115,12 +115,12 @@ class TestSklearnSVC(unittest.TestCase):
 
     # Float 64 data tests
     def test_float64_linear_svc(self):
-        model = LinearSVC()
         np.random.seed(0)
         num_classes = 3
         X = np.random.rand(100, 200)
         y = np.random.randint(num_classes, size=100)
 
+        model = LinearSVC()
         model.fit(X, y)
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertTrue(torch_model is not None)
