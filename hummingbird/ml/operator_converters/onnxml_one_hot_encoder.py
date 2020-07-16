@@ -13,8 +13,7 @@ from ._one_hot_encoder_implementations import OneHotEncoderString, OneHotEncoder
 
 def convert_onnx_one_hot_encoder(operator, device=None, extra_config={}):
     """
-    Converter for `ai.onnx.ml.OneHotEncoder
-`
+    Converter for `ai.onnx.ml.OneHotEncoder`
 
     Args:
         operator: An operator wrapping a `ai.onnx.ml.OneHotEncoder` model
@@ -25,7 +24,24 @@ def convert_onnx_one_hot_encoder(operator, device=None, extra_config={}):
         A PyTorch model
     """
 
-    pass
+    categories = []
+    is_strings = False
+    operator = operator.raw_operator
+
+    for attr in operator.origin.attribute:
+        if attr.name == "cats_int64s":
+            categories.append(np.array(attr.ints))
+        elif attr.name == "cats_strings":
+            categories.append([x.decode("UTF-8") for x in attr.strings])
+            is_strings = True
+
+    if categories == []:
+        raise RuntimeError("Error parsing OneHotEncoder, no categories")
+
+    if is_strings:
+        return OneHotEncoderString(categories, device)
+    else:
+        return OneHotEncoder(categories, device)
 
 
 register_converter("ONNXMLOneHotEncoder", convert_onnx_one_hot_encoder)
