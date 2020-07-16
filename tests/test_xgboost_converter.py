@@ -161,6 +161,7 @@ class TestXGBoostConverter(unittest.TestCase):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # Float 64 data tests
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     def test_float64_xgb_classifier_converter(self):
         warnings.filterwarnings("ignore")
         num_classes = 3
@@ -176,6 +177,7 @@ class TestXGBoostConverter(unittest.TestCase):
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     def test_float64_xgb_ranker_converter(self):
         warnings.filterwarnings("ignore")
         num_classes = 3
@@ -191,6 +193,7 @@ class TestXGBoostConverter(unittest.TestCase):
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     def test_float64_xgb_regressor_converter(self):
         warnings.filterwarnings("ignore")
         num_classes = 3
