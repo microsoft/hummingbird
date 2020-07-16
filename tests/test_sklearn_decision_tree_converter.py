@@ -249,7 +249,6 @@ class TestSklearnTreeConverter(unittest.TestCase):
             model = model_type(max_depth=max_depth, **kwargs)
             np.random.seed(0)
             X = np.random.rand(100, 200)
-            X = np.array(X, dtype=np.float32)
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
