@@ -19,18 +19,16 @@ class Scaler(BaseOperator, torch.nn.Module):
     """
 
     def __init__(self, offset, scale, device):
-        super(Scaler, self).__init__()
-        self.transformer = True
+        super(Scaler, self).__init__(transformer=True)
+
+        self.offset = offset
+        self.scale = scale
 
         if offset is not None:
             self.offset = torch.nn.Parameter(torch.FloatTensor([offset]), requires_grad=False)
-        else:
-            self.offset = None
 
         if scale is not None:
             self.scale = torch.nn.Parameter(torch.FloatTensor([scale]), requires_grad=False)
-        else:
-            self.scale = None
 
     def forward(self, x):
         if self.offset is not None:
