@@ -48,7 +48,7 @@ from hummingbird.ml import convert
 
 # Create some random data for binary classification
 num_classes = 2
-X = np.array(np.random.rand(100000, 28), dtype=np.float32)
+X = np.random.rand(100000, 28)
 y = np.random.randint(num_classes, size=100000)
 
 # Create and train a model (scikit-learn RandomForestClassifier in this case)
