@@ -24,6 +24,7 @@ def convert_onnx_one_hot_encoder(operator, device=None, extra_config={}):
         A PyTorch model
     """
 
+
     categories = []
     is_strings = False
     operator = operator.raw_operator
