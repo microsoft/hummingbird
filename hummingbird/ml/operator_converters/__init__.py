@@ -21,6 +21,7 @@ from . import lightgbm  # noqa: E402
 from . import onnx_operator  # noqa: E402
 from . import onnxml_linear  # noqa: E402
 from . import onnxml_normalizer  # noqa: E402
+from . import onnxml_scaler  # noqa: E402
 from . import onnxml_tree_ensemble  # noqa: E402
 from . import skl_decision_tree  # noqa: E402
 from . import skl_gbdt  # noqa: E402
@@ -38,4 +39,5 @@ __pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
 __pdoc__["hummingbird.operator_converters._tree_commons"] = True
 __pdoc__["hummingbird.operator_converters._linear_implementations"] = True
 __pdoc__["hummingbird.operator_converters._normalizer_implementations"] = True
+__pdoc__["hummingbird.operator_converters._scaler_implementations"] = True
 __pdoc__["hummingbird.operator_converters._tree_implementations"] = True
