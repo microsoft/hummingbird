@@ -22,9 +22,9 @@ if onnx_ml_tools_installed():
     from onnxmltools.convert import convert_lightgbm
 
 
-class TestONNXConverterLightGBM(unittest.TestCase):
+class TestONNXLightGBMConverter(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestONNXConverterLightGBM, self).__init__(*args, **kwargs)
+        super(TestONNXLightGBMConverter, self).__init__(*args, **kwargs)
 
     # Base test implementation comparing ONNXML and ONNX models.
     def _test_lgbm(self, X, model, extra_config={}):
@@ -95,7 +95,7 @@ class TestONNXConverterLightGBM(unittest.TestCase):
 
         self.assertRaises(RuntimeError, convert, onnx_ml_model, "torch")
 
-    # Check conveter with extra configs.
+    # Check converter with extra configs.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
@@ -297,9 +297,6 @@ class TestONNXConverterLightGBM(unittest.TestCase):
     # Multiclass classification test with 3 estimators and selecting boosting type (taken from ONNXMLTOOLS).
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
-    @unittest.skipIf(
-        True, reason='ONNXMLTOOLS fails with "ValueError: unsupported LightGbm objective: multiclass num_class:3"'
     )
     def test_lightgbm_booster_multi_classifier(self):
         warnings.filterwarnings("ignore")

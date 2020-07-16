@@ -9,7 +9,19 @@ All custom model containers are listed here.
 """
 
 import numpy as np
+from onnxconverter_common.container import CommonSklearnModelContainer
 import torch
+
+from .operator_converters import constants
+
+
+class CommonONNXModelContainer(CommonSklearnModelContainer):
+    """
+    Common container for input ONNX operators.
+    """
+
+    def __init__(self, onnx_model):
+        super(CommonONNXModelContainer, self).__init__(onnx_model)
 
 
 class PyTorchBackendModel(torch.nn.Module):
@@ -33,6 +45,7 @@ class PyTorchBackendModel(torch.nn.Module):
         self.operators = operators
         self.extra_config = extra_config
         self.is_regression = self.operator_map[self.operators[-1].full_name].regression
+        self.anomaly_detection = self.operator_map[self.operators[-1].full_name].anomaly_detection
 
     def forward(self, *inputs):
         with torch.no_grad():
@@ -85,9 +98,12 @@ class PyTorchBackendModelRegression(PyTorchBackendModel):
         Utility functions used to emulate the behavior of the Sklearn API.
         On regression returns the predicted values.
         On classification tasks returns the predicted class labels for the input data.
+        On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
         if self.is_regression:
             return self.forward(*inputs).cpu().numpy().flatten()
+        elif self.anomaly_detection:
+            return self.forward(*inputs)[0].cpu().numpy().flatten()
         else:
             return self.forward(*inputs)[0].cpu().numpy()
 
@@ -99,3 +115,19 @@ class PyTorchBackendModelClassification(PyTorchBackendModelRegression):
         On classification tasks returns the probability estimates.
         """
         return self.forward(*inputs)[1].cpu().numpy()
+
+
+class PyTorchBackendModelAnomalyDetection(PyTorchBackendModelRegression):
+    def decision_function(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision function scores.
+        """
+        return self.forward(*inputs)[1].cpu().numpy().flatten()
+
+    def score_samples(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
+        """
+        return self.decision_function(*inputs) + self.extra_config[constants.OFFSET]

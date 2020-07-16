@@ -20,6 +20,7 @@ GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
+IsolationForest,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -27,18 +28,22 @@ LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
 Normalizer,
+OneHotEncoder,
 RandomForestClassifier,
 RandomForestRegressor,
 RobustScaler,
-TreeEnsembleClassifier,
-TreeEnsembleRegressor,
 SGDClassifier,
 StandardScaler,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor,
 
 LGBMClassifier,
+LGBMRanker,
 LGBMRegressor,
 
+
 XGBClassifier,
+XGBRanker,
 XGBRegressor
 """
 from .exceptions import MissingConverter
@@ -61,6 +66,7 @@ def _build_sklearn_operator_list():
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
             HistGradientBoostingRegressor,
+            IsolationForest,
             RandomForestClassifier,
             RandomForestRegressor,
         )
@@ -79,7 +85,7 @@ def _build_sklearn_operator_list():
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
         # Preprocessing
-        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, RobustScaler, StandardScaler
+        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, OneHotEncoder, RobustScaler, StandardScaler
 
         return [
             # Trees
@@ -91,6 +97,8 @@ def _build_sklearn_operator_list():
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
             HistGradientBoostingRegressor,
+            IsolationForest,
+            OneHotEncoder,
             RandomForestClassifier,
             RandomForestRegressor,
             # Linear-methods
@@ -118,9 +126,9 @@ def _build_xgboost_operator_list():
     List all suported XGBoost (Sklearn API) operators.
     """
     if xgboost_installed():
-        from xgboost import XGBClassifier, XGBRegressor
+        from xgboost import XGBClassifier, XGBRanker, XGBRegressor
 
-        return [XGBClassifier, XGBRegressor]
+        return [XGBClassifier, XGBRanker, XGBRegressor]
 
     return []
 
@@ -144,7 +152,14 @@ def _build_onnxml_operator_list():
     """
     if onnx_runtime_installed():
         return [
-            # Tree-based models.
+            # Linear-based models
+            "LinearClassifier",
+            "LinearRegressor",
+            # ONNX operators.
+            "Cast",
+            # Preprocessing
+            "Normalizer",
+            # Tree-based models
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",
         ]
@@ -245,12 +260,6 @@ ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
 
 ONNX_INITIAL_TYPES = "onnx_initial_types"
 """For ONNX models we can explicitly set the input types and shapes."""
-
-ONNX_INPUT_NAMES = "onnx_input_names"
-"""For ONNX models we can explicitly select the input columns to use."""
-
-ONNX_OUTPUT_NAMES = "onnx_output_names"
-"""For ONNX models we can explicitly select the output columns to return."""
 
 ONNX_TARGET_OPSET = "onnx_target_opset"
 """For ONNX models we can set the target opset to use. 9 by default."""

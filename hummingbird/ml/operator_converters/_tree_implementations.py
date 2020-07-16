@@ -32,8 +32,8 @@ class AbstracTreeImpl(BaseOperator):
     Abstract class definig the basic structure for tree-base models.
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @abstractmethod
     def aggregation(self, x):
@@ -67,7 +67,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
     Abstract class definig the basic structure for tree-base models implemented in PyTorch.
     """
 
-    def __init__(self, tree_parameters, n_features, classes, n_classes):
+    def __init__(self, tree_parameters, n_features, classes, n_classes, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -75,7 +75,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
         """
-        super(AbstractPyTorchTreeImpl, self).__init__()
+        super(AbstractPyTorchTreeImpl, self).__init__(**kwargs)
 
         # Set up the variables for the subclasses.
         # Each subclass will trigger different behaviours by properly setting these.
@@ -83,9 +83,11 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
         self.binary_classification = False
         self.classes = classes
         self.base_prediction = None
-
-        # Are we doing regression or classification?
-        if classes is None:
+        # Are we doing anomaly detection, regression or classification?
+        if self.anomaly_detection:
+            self.n_classes = 1  # so that we follow the regression pattern and later do manual class selection
+            self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
+        elif classes is None:
             self.regression = True
             self.n_classes = 1
         else:
@@ -100,7 +102,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the GEMM strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, n_features, classes, n_classes=None):
+    def __init__(self, tree_parameters, n_features, classes, n_classes=None, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -108,7 +110,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
         """
-        super(GEMMTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
+        super(GEMMTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
 
         # Initialize the actual model.
         hidden_one_size = 0
@@ -177,6 +179,10 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         if self.regression:
             return x
 
+        if self.anomaly_detection:
+            # Select the class (-1 if negative) and return the score.
+            return torch.where(x < 0, self.classes[0], self.classes[1]), x
+
         x = self.calibration(x)
 
         if self.perform_class_select:
@@ -190,7 +196,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
+    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -199,7 +205,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
         """
-        super(TreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
+        super(TreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
 
         # Initialize the actual model.
         self.n_features = n_features
@@ -265,6 +271,10 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         if self.regression:
             return output
 
+        if self.anomaly_detection:
+            # Select the class (-1 if negative) and return the score.
+            return torch.where(output < 0, self.classes[0], self.classes[1]), output
+
         output = self.calibration(output)
 
         if self.perform_class_select:
@@ -278,7 +288,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None):
+    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -287,7 +297,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
         """
-        super(PerfectTreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes)
+        super(PerfectTreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
 
         # Initialize the actual model.
         self.max_tree_depth = max_depth
@@ -360,6 +370,10 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         if self.regression:
             return output
+
+        if self.anomaly_detection:
+            # Select the class (-1 if negative) and return the score.
+            return torch.where(output < 0, self.classes[0], self.classes[1]), output
 
         output = self.calibration(output)
 
