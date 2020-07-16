@@ -153,6 +153,35 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         model = SGDClassifier().fit(X, y)
         self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "torch")
 
+    # Float 64 data tests
+    def test_float64_linear_regression(self):
+        model = LinearRegression()
+
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        y = np.random.randint(2, size=100)
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    def test_float64_sgd_classifier(self):
+
+        model = SGDClassifier(loss="log")
+
+        np.random.seed(0)
+        num_classes = 3
+        X = np.random.rand(100, 200)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
 if __name__ == "__main__":
     unittest.main()

@@ -196,6 +196,7 @@ class TestLGBMConverter(unittest.TestCase):
     def test_float64_lgbm_perf_tree_trav_classifier_converter(self):
         self._run_float64_lgbm_classifier_converter(2, extra_config={"tree_implementation": "perf_tree_trav"})
 
+    # Float 64 regression test helper
     def _run_float64_lgbm_regressor_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
