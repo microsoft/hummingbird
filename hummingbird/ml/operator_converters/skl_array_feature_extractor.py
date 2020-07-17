@@ -28,6 +28,9 @@ def convert_sklearn_select_k_best(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+
+    # TODO FIXME: This will fail with chi2 (Ex: SelectKBest(chi2, k=20))
+    # but pass with SelectKBest(mutual_info_classif, k=20)
     k = operator.raw_operator.k
     indices = np.sort(np.array(operator.raw_operator.scores_).argsort()[-k:])
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
@@ -51,25 +54,5 @@ def convert_sklearn_variance_threshold(operator, device, extra_config):
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
-def convert_sklearn_select_percentile(operator, device, extra_config):
-    """
-    Converter for `sklearn.feature_selection.SelectPercentile`.
-
-    Args:
-        operator: An operator wrapping a `sklearn.feature_selection.SelectPercentile` model
-        device: String defining the type of device the converted operator should be run on
-        extra_config: Extra configuration used to select the best conversion strategy
-
-    Returns:
-        A PyTorch model
-    """
-    model = operator.raw_operator
-    n = int(np.floor(len(model.scores_) * model.percentile / 100.0))
-    scores = np.array(model.scores_)
-    indices = scores.argsort()[-n:][::-1].copy()
-    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
-
-
-register_converter("SklearnVarianceThreshold", convert_sklearn_variance_threshold)
-register_converter("SklearnSelectPercentile", convert_sklearn_select_percentile)
 register_converter("SklearnSelectKBest", convert_sklearn_select_k_best)
+register_converter("SklearnVarianceThreshold", convert_sklearn_variance_threshold)

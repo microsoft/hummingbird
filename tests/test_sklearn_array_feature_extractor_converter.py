@@ -6,7 +6,7 @@ import warnings
 
 import numpy as np
 import torch
-from sklearn.feature_selection import chi2, SelectKBest, SelectPercentile, VarianceThreshold
+from sklearn.feature_selection import chi2, mutual_info_classif, SelectKBest, SelectPercentile, VarianceThreshold
 from sklearn.datasets import load_digits
 
 import hummingbird.ml
@@ -29,24 +29,24 @@ class TestSklearnArrayFeatureExtractor(unittest.TestCase):
             selector.transform(X), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
         )
 
-    # # tests convert_sklearn_select_percentile
-    # def test_select_percentile(self):
-    # #### This is failing
-    #     X, y = load_digits(return_X_y=True)
-    #     selector = SelectPercentile(chi2, percentile=10)
-    #     selector.fit_transform(X, y)
-    #     data_tensor = torch.from_numpy(X)
+    # tests SelectKBest converter (convert_sklearn_select_k_best) with mutual_info_classif
+    def test_k_best_mutual_info_classif(self):
 
-    #     torch_model = hummingbird.ml.convert(selector, "torch")
+        X, y = load_digits(return_X_y=True)
+        selector = SelectKBest(mutual_info_classif, k=20)
+        selector.fit_transform(X, y)
+        data_tensor = torch.from_numpy(X)
 
-    #     self.assertIsNotNone(torch_model)
-    #     np.testing.assert_allclose(
-    #         selector.transform(X), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
-    #     )
+        torch_model = hummingbird.ml.convert(selector, "torch")
 
-    # # tests SelectKBest converter (convert_sklearn_select_k_best)
-    # def test_k_best(self):
-    # ### This is failing
+        self.assertIsNotNone(torch_model)
+        np.testing.assert_allclose(
+            selector.transform(X), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+        )
+
+    # # tests SelectKBest converter (convert_sklearn_select_k_best) with chi2
+    # def test_k_best_chi2(self):
+    # ### TODO: This is failing, need to fixup convert_sklearn_select_k_best for chi2
 
     #     X, y = load_digits(return_X_y=True)
     #     selector = SelectKBest(chi2, k=20)
