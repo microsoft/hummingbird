@@ -89,8 +89,11 @@ def _build_sklearn_operator_list():
         # Preprocessing
         from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, OneHotEncoder, RobustScaler, StandardScaler
 
-        # Features
+
+         # Featurizers
         from sklearn.feature_selection import SelectKBest, VarianceThreshold
+        from sklearn.feature_extraction.text import CountVectorizer
+
 
         return [
             # Trees
@@ -122,8 +125,12 @@ def _build_sklearn_operator_list():
             RobustScaler,
             StandardScaler,
             # Feature selection
+<<<<<<< HEAD
             SelectKBest,
             VarianceThreshold,
+=======
+            CountVectorizer,
+>>>>>>> uploading Supun's countvect
         ]
 
     return []
