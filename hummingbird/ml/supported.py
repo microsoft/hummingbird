@@ -32,10 +32,13 @@ OneHotEncoder,
 RandomForestClassifier,
 RandomForestRegressor,
 RobustScaler,
+SelectKBest,
+SelectPercentile,
 SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,
+VarianceThreshold,
 
 LGBMClassifier,
 LGBMRanker,
@@ -87,6 +90,9 @@ def _build_sklearn_operator_list():
         # Preprocessing
         from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, OneHotEncoder, RobustScaler, StandardScaler
 
+        # Features
+        from sklearn.feature_selection import SelectKBest, SelectPercentile, VarianceThreshold
+
         return [
             # Trees
             DecisionTreeClassifier,
@@ -116,6 +122,10 @@ def _build_sklearn_operator_list():
             Normalizer,
             RobustScaler,
             StandardScaler,
+            # Feature selection
+            SelectKBest,
+            SelectPercentile,
+            VarianceThreshold,
         ]
 
     return []
