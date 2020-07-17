@@ -47,6 +47,7 @@ class TestSklearnArrayFeatureExtractor(unittest.TestCase):
     # # tests SelectKBest converter (convert_sklearn_select_k_best) with chi2
     # def test_k_best_chi2(self):
     # ### TODO: This is failing, need to fixup convert_sklearn_select_k_best for chi2
+    # ### See issue #200
 
     #     X, y = load_digits(return_X_y=True)
     #     selector = SelectKBest(chi2, k=20)

@@ -14,6 +14,12 @@ from ._base_operator import BaseOperator
 
 
 class ArrayFeatureExtractor(BaseOperator, torch.nn.Module):
+    """
+    Class implementing ArrayFeatureExtractor in PyTorch
+
+    This is used by SelectKBest, VarianceThreshold operators in scikit-learn
+    """
+
     def __init__(self, column_indices, device):
         super(ArrayFeatureExtractor, self).__init__(transformer=True)
         is_contiguous = False
