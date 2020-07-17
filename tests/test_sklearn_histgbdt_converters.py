@@ -81,6 +81,34 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
         self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "tree_trav"})
         self._run_GB_trees_classifier_converter(3, labels_shift=2, extra_config={"tree_implementation": "perf_tree_trav"})
 
+    # Float 64 data tests
+    def test_float64_GB_trees_classifier_converter(self):
+        warnings.filterwarnings("ignore")
+        num_classes = 3
+        for max_depth in [2, 3, 8, 10, 12, None]:
+            model = HistGradientBoostingClassifier(max_iter=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.randint(num_classes, size=100)
+
+            model.fit(X, y)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config={})
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+    def test_float64_GB_trees_regressor_converter(self):
+        warnings.filterwarnings("ignore")
+        for max_depth in [2, 3, 8, 10, 12, None]:
+            model = HistGradientBoostingRegressor(max_iter=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.normal(size=100)
+
+            model.fit(X, y)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config={})
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
     # Failure Cases
     def test_HistGBDT_raises_wrong_type(self):
         warnings.filterwarnings("ignore")

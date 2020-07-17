@@ -160,6 +160,54 @@ class TestXGBoostConverter(unittest.TestCase):
     def test_xgb_perf_tree_trav_regressor_converter(self):
         self._run_xgb_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
+    # Float 64 data tests
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
+    def test_float64_xgb_classifier_converter(self):
+        warnings.filterwarnings("ignore")
+        num_classes = 3
+        for max_depth in [1, 3, 8, 10, 12]:
+            model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.randint(num_classes, size=100)
+
+            model.fit(X, y)
+
+            torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={})
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
+    def test_float64_xgb_ranker_converter(self):
+        warnings.filterwarnings("ignore")
+        num_classes = 3
+        for max_depth in [1, 3, 8, 10, 12]:
+            model = xgb.XGBRanker(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.randint(num_classes, size=100)
+
+            model.fit(X, y, group=[X.shape[0]])
+
+            torch_model = hummingbird.ml.convert(model, "torch", X[0:1], extra_config={})
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
+    def test_float64_xgb_regressor_converter(self):
+        warnings.filterwarnings("ignore")
+        num_classes = 3
+        for max_depth in [1, 3, 8, 10, 12]:
+            model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.randint(num_classes, size=100)
+
+            model.fit(X, y)
+            torch_model = hummingbird.ml.convert(model, "torch", X[0:1], extra_config={})
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
     # Small tree
     @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     def test_run_xgb_classifier_converter(self):
