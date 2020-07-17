@@ -87,6 +87,9 @@ def _build_sklearn_operator_list():
         # Preprocessing
         from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, OneHotEncoder, RobustScaler, StandardScaler
 
+        # Featurizers
+        from sklearn.feature_extraction.text import CountVectorizer
+
         return [
             # Trees
             DecisionTreeClassifier,
@@ -116,6 +119,8 @@ def _build_sklearn_operator_list():
             Normalizer,
             RobustScaler,
             StandardScaler,
+            # Feature selection
+            CountVectorizer,
         ]
 
     return []
