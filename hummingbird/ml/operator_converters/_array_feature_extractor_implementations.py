@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 """
-Base class for linear algorithm implementations.
+Base class for array feature extractor
 """
 
 import torch
