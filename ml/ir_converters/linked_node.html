@@ -114,6 +114,7 @@ def convert(
                 # Convert the model from PyTorch to ONNX.
                 if constants.N_FEATURES not in extra_config:
                     extra_config[constants.ONNX_INPUTS] = all_tensors
+
                 # Pytorch has a bug with exporting gemm into ONNX.
                 # For the moment only tree_trav is enabled
                 # trimmed_version = torch.__version__.split(&#34;+&#34;)[0]  # For Win pytorch has a +cpu or +gpu postfix
@@ -445,6 +446,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
                 # Convert the model from PyTorch to ONNX.
                 if constants.N_FEATURES not in extra_config:
                     extra_config[constants.ONNX_INPUTS] = all_tensors
+
                 # Pytorch has a bug with exporting gemm into ONNX.
                 # For the moment only tree_trav is enabled
                 # trimmed_version = torch.__version__.split(&#34;+&#34;)[0]  # For Win pytorch has a +cpu or +gpu postfix

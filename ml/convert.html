@@ -40,12 +40,14 @@ Hummingbird main (converters) API.
 from copy import deepcopy
 import numpy as np
 
+
 from .operator_converters import constants
 from ._parse import parse_sklearn_api_model, parse_onnx_api_model
 from ._topology import convert as topology_converter
 from ._utils import torch_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
+
 
 # Invoke the registration of all our converters.
 from . import operator_converters  # noqa
@@ -76,6 +78,7 @@ def _supported_model_format_backend_mapping_check(model, backend):
     &#34;&#34;&#34;
     if _is_onnx_model(model):
         assert onnx_runtime_installed()
+
         import onnx
 
         if not backend == onnx.__name__:
@@ -111,6 +114,7 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
     assert model is not None
     assert torch_installed(), &#34;To use Hummingbird you need to install torch.&#34;
 
+
     import torch
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
@@ -119,7 +123,9 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
     topology = parse_sklearn_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
+
     hb_model = topology_converter(topology, torch.__name__, extra_config=extra_config)
+
     return hb_model
 
 
@@ -221,6 +227,7 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
         onnx_runtime_installed()
     ), &#34;To use the onnxml converter you need to install onnxruntime (or `pip install hummingbird-ml[onnx]`).&#34;
 
+
     import onnx
 
     # The conversion requires some test input for tracing.
@@ -230,11 +237,14 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
     if constants.ONNX_INITIAL_TYPES in extra_config:
         initial_types = extra_config[constants.ONNX_INITIAL_TYPES]
 
+
     assert (
         test_input is not None and len(test_input) &gt; 0
     ) or initial_types is not None, &#34;Cannot generate test input data. Either pass some input data or the initial_types&#34;
 
+
     # Generate some test input if necessary.
+
     if test_input is None:
         assert (
             not initial_types[0][1].shape is None
@@ -255,6 +265,7 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
                     type(initial_types[0][1])
                 )
             )
+
     else:
         extra_config[constants.N_FEATURES] = np.array(test_input).shape[1]
     extra_config[constants.ONNX_TEST_INPUT] = test_input
@@ -265,6 +276,7 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
     # Convert the Topology object into a PyTorch model.
     hb_model = topology_converter(topology, onnx.__name__, extra_config=extra_config)
     return hb_model
+
 
 
 def convert(model, backend, test_input=None, extra_config={}):

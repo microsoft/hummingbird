@@ -36,12 +36,16 @@
 import torch
 import numpy as np
 from onnxconverter_common.registration import register_converter
+
 from ._linear_implementations import LinearModel
+
 
 
 &#34;&#34;&#34;
 Converters for scikit-learn linear models: LinearRegression, LogisticRegression, LinearSVC, SGDClassifier, LogisticRegressionCV
 &#34;&#34;&#34;
+
+
 
 
 def convert_sklearn_linear_model(operator, device, extra_config):
@@ -75,7 +79,9 @@ def convert_sklearn_linear_model(operator, device, extra_config):
         else:
             multi_class = &#34;multinomial&#34;
 
+
     return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)
+
 
 
 def convert_sklearn_linear_regression_model(operator, device, extra_config):
@@ -94,7 +100,9 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
     coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype(&#34;float32&#34;)
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype(&#34;float32&#34;)
 
+
     return LinearModel(coefficients, intercepts, device, is_linear_regression=True)
+
 
 
 register_converter(&#34;SklearnLinearRegression&#34;, convert_sklearn_linear_regression_model)
@@ -167,7 +175,9 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
         else:
             multi_class = &#34;multinomial&#34;
 
+
     return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)</code></pre>
+
 </details>
 </dd>
 <dt id="hummingbird.ml.operator_converters.skl_linear.convert_sklearn_linear_regression_model"><code class="name flex">
@@ -209,12 +219,15 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
     coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype(&#34;float32&#34;)
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype(&#34;float32&#34;)
 
+
     return LinearModel(coefficients, intercepts, device, is_linear_regression=True)</code></pre>
+
 </details>
 </dd>
 </dl>
 </section>
 <section>
+
 </section>
 </article>
 <nav id="sidebar">
@@ -238,6 +251,7 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
 <li><code><a title="hummingbird.ml.operator_converters.skl_linear.convert_sklearn_linear_regression_model" href="#hummingbird.ml.operator_converters.skl_linear.convert_sklearn_linear_regression_model">convert_sklearn_linear_regression_model</a></code></li>
 </ul>
 </li>
+
 </ul>
 </nav>
 </main>

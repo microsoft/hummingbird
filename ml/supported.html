@@ -105,6 +105,7 @@ TreeEnsembleClassifier,
 TreeEnsembleRegressor,
 VarianceThreshold,
 
+
 LGBMClassifier,
 LGBMRanker,
 LGBMRegressor,
@@ -153,10 +154,12 @@ def _build_sklearn_operator_list():
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
         # Preprocessing
+
         from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, OneHotEncoder, RobustScaler, StandardScaler
 
         # Features
         from sklearn.feature_selection import SelectKBest, VarianceThreshold
+
 
         return [
             # Trees
@@ -190,6 +193,7 @@ def _build_sklearn_operator_list():
             # Feature selection
             SelectKBest,
             VarianceThreshold,
+
         ]
 
     return []
@@ -203,6 +207,7 @@ def _build_xgboost_operator_list():
         from xgboost import XGBClassifier, XGBRanker, XGBRegressor
 
         return [XGBClassifier, XGBRanker, XGBRegressor]
+
 
     return []
 
@@ -218,7 +223,6 @@ def _build_lightgbm_operator_list():
 
     return []
 
-
 # Associate onnxml types with our operator names.
 def _build_onnxml_operator_list():
     &#34;&#34;&#34;
@@ -226,6 +230,7 @@ def _build_onnxml_operator_list():
     &#34;&#34;&#34;
     if onnx_runtime_installed():
         return [
+
             # Linear-based models
             &#34;LinearClassifier&#34;,
             &#34;LinearRegressor&#34;,
@@ -235,6 +240,7 @@ def _build_onnxml_operator_list():
             &#34;Normalizer&#34;,
             &#34;Scaler&#34;,
             # Tree-based models
+
             &#34;TreeEnsembleClassifier&#34;,
             &#34;TreeEnsembleRegressor&#34;,
         ]
@@ -336,6 +342,7 @@ ONNX_OUTPUT_MODEL_NAME = &#34;onnx_model_name&#34;
 ONNX_INITIAL_TYPES = &#34;onnx_initial_types&#34;
 &#34;&#34;&#34;For ONNX models we can explicitly set the input types and shapes.&#34;&#34;&#34;
 
+
 ONNX_TARGET_OPSET = &#34;onnx_target_opset&#34;
 &#34;&#34;&#34;For ONNX models we can set the target opset to use. 9 by default.&#34;&#34;&#34;</code></pre>
 </details>
@@ -353,10 +360,12 @@ ONNX_TARGET_OPSET = &#34;onnx_target_opset&#34;
 <dd>
 <div class="desc"><p>For ONNX models we can explicitly set the input types and shapes.</p></div>
 </dd>
+
 <dt id="hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME"><code class="name">var <span class="ident">ONNX_OUTPUT_MODEL_NAME</span></code></dt>
 <dd>
 <div class="desc"><p>For ONNX models we can set the name of the output model.</p></div>
 </dd>
+
 <dt id="hummingbird.ml.supported.ONNX_TARGET_OPSET"><code class="name">var <span class="ident">ONNX_TARGET_OPSET</span></code></dt>
 <dd>
 <div class="desc"><p>For ONNX models we can set the target opset to use. 9 by default.</p></div>
@@ -466,7 +475,9 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <ul class="">
 <li><code><a title="hummingbird.ml.supported.N_FEATURES" href="#hummingbird.ml.supported.N_FEATURES">N_FEATURES</a></code></li>
 <li><code><a title="hummingbird.ml.supported.ONNX_INITIAL_TYPES" href="#hummingbird.ml.supported.ONNX_INITIAL_TYPES">ONNX_INITIAL_TYPES</a></code></li>
+
 <li><code><a title="hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME" href="#hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME">ONNX_OUTPUT_MODEL_NAME</a></code></li>
+
 <li><code><a title="hummingbird.ml.supported.ONNX_TARGET_OPSET" href="#hummingbird.ml.supported.ONNX_TARGET_OPSET">ONNX_TARGET_OPSET</a></code></li>
 <li><code><a title="hummingbird.ml.supported.TREE_IMPLEMENTATION" href="#hummingbird.ml.supported.TREE_IMPLEMENTATION">TREE_IMPLEMENTATION</a></code></li>
 </ul>

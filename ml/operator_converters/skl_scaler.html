@@ -38,7 +38,9 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 
 from ._base_operator import BaseOperator
+
 from ._scaler_implementations import Scaler
+
 
 
 def convert_sklearn_robust_scaler(operator, device, extra_config):
@@ -147,6 +149,7 @@ register_converter(&#34;SklearnStandardScaler&#34;, convert_sklearn_standard_sca
 </dl>
 </section>
 <section>
+
 </section>
 </article>
 <nav id="sidebar">
@@ -172,6 +175,7 @@ register_converter(&#34;SklearnStandardScaler&#34;, convert_sklearn_standard_sca
 <li><code><a title="hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_standard_scaler" href="#hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_standard_scaler">convert_sklearn_standard_scaler</a></code></li>
 </ul>
 </li>
+
 </ul>
 </nav>
 </main>
