@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.xgb API documentation</title>
-<meta name="description" content="Converters for XGBoost models." />
+<title>hummingbird.ml.operator_converters.onnxml_linear API documentation</title>
+<meta name="description" content="Converters for ONNX-ML linear models." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,17 +13,17 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/xgb.html">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/onnxml_linear.html">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.xgb</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.onnxml_linear</code></h1>
 </header>
 <section id="section-intro">
-<p>Converters for XGBoost models.</p>
+<p>Converters for ONNX-ML linear models.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -35,140 +35,99 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Converters for XGBoost models.
+Converters for ONNX-ML linear models.
 &#34;&#34;&#34;
 
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from . import constants
-from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
-from ._tree_commons import TreeParameters
+from ._linear_implementations import LinearModel
 
 
-def _tree_traversal(tree_info, lefts, rights, features, thresholds, values):
+def convert_onnx_linear_model(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Recursive function for parsing a tree and filling the input data structures.
-    &#34;&#34;&#34;
-    count = 0
-    while count &lt; len(tree_info):
-        if &#34;leaf&#34; in tree_info[count]:
-            features.append(0)
-            thresholds.append(0)
-            values.append([float(tree_info[count].split(&#34;=&#34;)[1])])
-            lefts.append(-1)
-            rights.append(-1)
-            count += 1
-        else:
-            features.append(int(tree_info[count].split(&#34;:&#34;)[1].split(&#34;&lt;&#34;)[0].replace(&#34;[f&#34;, &#34;&#34;)))
-            thresholds.append(float(tree_info[count].split(&#34;:&#34;)[1].split(&#34;&lt;&#34;)[1].replace(&#34;]&#34;, &#34;&#34;)))
-            values.append([-1])
-            count += 1
-            l_wrong_id = tree_info[count].split(&#34;,&#34;)[0].replace(&#34;yes=&#34;, &#34;&#34;)
-            l_correct_id = 0
-            temp = 0
-            while not tree_info[temp].startswith(str(l_wrong_id + &#34;:&#34;)):
-                if &#34;leaf&#34; in tree_info[temp]:
-                    temp += 1
-                else:
-                    temp += 2
-                l_correct_id += 1
-            lefts.append(l_correct_id)
-
-            r_wrong_id = tree_info[count].split(&#34;,&#34;)[1].replace(&#34;no=&#34;, &#34;&#34;)
-            r_correct_id = 0
-            temp = 0
-            while not tree_info[temp].startswith(str(r_wrong_id + &#34;:&#34;)):
-                if &#34;leaf&#34; in tree_info[temp]:
-                    temp += 1
-                else:
-                    temp += 2
-                r_correct_id += 1
-            rights.append(r_correct_id)
-
-            count += 1
-
-
-def _get_tree_parameters(tree_info):
-    &#34;&#34;&#34;
-    Parse the tree and returns an in-memory friendly representation of its structure.
-    &#34;&#34;&#34;
-    lefts = []
-    rights = []
-    features = []
-    thresholds = []
-    values = []
-    _tree_traversal(
-        tree_info.replace(&#34;[f&#34;, &#34;&#34;).replace(&#34;[&#34;, &#34;&#34;).replace(&#34;]&#34;, &#34;&#34;).split(), lefts, rights, features, thresholds, values
-    )
-
-    return TreeParameters(lefts, rights, features, thresholds, values)
-
-
-def convert_sklearn_xgb_classifier(operator, device, extra_config):
-    &#34;&#34;&#34;
-    Converter for `xgboost.XGBClassifier` (trained using the Sklearn API).
+    Converter for `ai.onnx.ml.LinearClassifier`.
 
     Args:
-        operator: An operator wrapping a `xgboost.XGBClassifier` model
+        operator: An operator wrapping a `ai.onnx.ml.LinearClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
+
     assert operator is not None
 
-    # Get tree information out of the model.
-    if &#34;n_features&#34; in extra_config:
-        n_features = extra_config[&#34;n_features&#34;]
-    else:
-        raise RuntimeError(
-            &#39;XGBoost converter is not able to infer the number of input features.\
-             Please pass &#34;n_features:N&#34; as extra configuration to the converter or fill a bug report.&#39;
+    operator = operator.raw_operator
+    coefficients = intercepts = classes = multi_class = None
+
+    for attr in operator.origin.attribute:
+        if attr.name == &#34;coefficients&#34;:
+            coefficients = np.array(attr.floats).astype(&#34;float32&#34;)
+        elif attr.name == &#34;intercepts&#34;:
+            intercepts = np.array(attr.floats).astype(&#34;float32&#34;)
+        elif attr.name == &#34;classlabels_ints&#34;:
+            classes = np.array(attr.ints)
+        elif attr.name == &#34;multi_class&#34;:
+            if attr.i != 0:  # https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md#ai.onnx.ml.LinearClassifier
+                multi_class = &#34;multinomial&#34;
+
+    if any(v is None for v in [coefficients, intercepts, classes]):
+        raise RuntimeError(&#34;Error parsing LinearClassifier, found unexpected None&#34;)
+    if multi_class is None:  # if &#39;multi_class&#39; attr was not present
+        multi_class = &#34;none&#34; if len(classes) &lt; 3 else &#34;ovr&#34;
+
+    # Now reshape the coefficients/intercepts
+    if len(classes) == 2:
+        # for the binary case, it seems there is a duplicate copy of everything with opposite +/- sign. This just takes the correct copy
+        coefficients = np.array([[np.array(val).astype(&#34;float32&#34;)] for val in coefficients[len(coefficients) // 2 :]]).astype(
+            &#34;float32&#34;
         )
-    tree_infos = operator.raw_operator.get_booster().get_dump()
-    n_classes = operator.raw_operator.n_classes_
+        intercepts = np.array([[np.array(val).astype(&#34;float32&#34;)] for val in intercepts[len(intercepts) // 2 :]]).astype(
+            &#34;float32&#34;
+        )
+    elif len(classes) &gt; 2:
+        # intercepts are OK in this case.
 
-    return convert_gbdt_classifier_common(tree_infos, _get_tree_parameters, n_features, n_classes, extra_config=extra_config)
+        # reshape coefficients into tuples
+        tmp = coefficients.reshape(len(classes), (len(coefficients) // len(classes)))
+        # then unzip the zipmap format
+        coefficients = np.array(list(zip(*tmp)))
+    else:
+        raise RuntimeError(&#34;Error parsing LinearClassifier, length of classes {} unexpected:{}&#34;.format(len(classes), classes))
+    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class, is_linear_regression=False)
 
 
-def convert_sklearn_xgb_regressor(operator, device, extra_config):
+def convert_onnx_linear_regression_model(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `xgboost.XGBRegressor` (trained using the Sklearn API).
-
+    Converter for `ai.onnx.ml.LinearRegression`
     Args:
-        operator: An operator wrapping a `xgboost.XGBRegressor` model
+        operator: An operator wrapping a `ai.onnx.ml.LinearRegression` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
-
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
     assert operator is not None
-    if &#34;n_features&#34; in extra_config:
-        n_features = extra_config[&#34;n_features&#34;]
-    else:
-        raise RuntimeError(
-            &#39;XGBoost converter is not able to infer the number of input features.\
-             Please pass &#34;n_features:N&#34; as extra configuration to the converter or fill a bug report.&#39;
-        )
 
-    # Get tree information out of the model.
-    tree_infos = operator.raw_operator.get_booster().get_dump()
-    base_prediction = operator.raw_operator.base_score
-    if type(base_prediction) is float:
-        base_prediction = [base_prediction]
+    operator = operator.raw_operator
+    coefficients = intercepts = None
+    for attr in operator.origin.attribute:
 
-    extra_config[constants.BASE_PREDICTION] = base_prediction
+        if attr.name == &#34;coefficients&#34;:
+            coefficients = np.array([[np.array(val).astype(&#34;float32&#34;)] for val in attr.floats]).astype(&#34;float32&#34;)
+        elif attr.name == &#34;intercepts&#34;:
+            intercepts = np.array(attr.floats).astype(&#34;float32&#34;)
 
-    return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
+    if any(v is None for v in [coefficients, intercepts]):
+        raise RuntimeError(&#34;Error parsing LinearRegression, found unexpected None&#34;)
+
+    return LinearModel(coefficients, intercepts, device, is_linear_regression=True)
 
 
-# Register the converters.
-register_converter(&#34;SklearnXGBClassifier&#34;, convert_sklearn_xgb_classifier)
-register_converter(&#34;SklearnXGBRanker&#34;, convert_sklearn_xgb_regressor)
-register_converter(&#34;SklearnXGBRegressor&#34;, convert_sklearn_xgb_regressor)</code></pre>
+register_converter(&#34;ONNXMLLinearClassifier&#34;, convert_onnx_linear_model)
+register_converter(&#34;ONNXMLLinearRegressor&#34;, convert_onnx_linear_regression_model)</code></pre>
 </details>
 </section>
 <section>
@@ -178,15 +137,15 @@ register_converter(&#34;SklearnXGBRegressor&#34;, convert_sklearn_xgb_regressor)
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.xgb.convert_sklearn_xgb_classifier"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_xgb_classifier</span></span>(<span>operator, device, extra_config)</span>
+<dt id="hummingbird.ml.operator_converters.onnxml_linear.convert_onnx_linear_model"><code class="name flex">
+<span>def <span class="ident">convert_onnx_linear_model</span></span>(<span>operator, device=None, extra_config={})</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>xgboost.XGBClassifier</code> (trained using the Sklearn API).</p>
+<div class="desc"><p>Converter for <code>ai.onnx.ml.LinearClassifier</code>.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>xgboost.XGBClassifier</code> model</dd>
+<dd>An operator wrapping a <code>ai.onnx.ml.LinearClassifier</code> model</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -201,43 +160,70 @@ register_converter(&#34;SklearnXGBRegressor&#34;, convert_sklearn_xgb_regressor)
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def convert_sklearn_xgb_classifier(operator, device, extra_config):
+<pre><code class="python">def convert_onnx_linear_model(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Converter for `xgboost.XGBClassifier` (trained using the Sklearn API).
+    Converter for `ai.onnx.ml.LinearClassifier`.
 
     Args:
-        operator: An operator wrapping a `xgboost.XGBClassifier` model
+        operator: An operator wrapping a `ai.onnx.ml.LinearClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
+
     assert operator is not None
 
-    # Get tree information out of the model.
-    if &#34;n_features&#34; in extra_config:
-        n_features = extra_config[&#34;n_features&#34;]
-    else:
-        raise RuntimeError(
-            &#39;XGBoost converter is not able to infer the number of input features.\
-             Please pass &#34;n_features:N&#34; as extra configuration to the converter or fill a bug report.&#39;
-        )
-    tree_infos = operator.raw_operator.get_booster().get_dump()
-    n_classes = operator.raw_operator.n_classes_
+    operator = operator.raw_operator
+    coefficients = intercepts = classes = multi_class = None
 
-    return convert_gbdt_classifier_common(tree_infos, _get_tree_parameters, n_features, n_classes, extra_config=extra_config)</code></pre>
+    for attr in operator.origin.attribute:
+        if attr.name == &#34;coefficients&#34;:
+            coefficients = np.array(attr.floats).astype(&#34;float32&#34;)
+        elif attr.name == &#34;intercepts&#34;:
+            intercepts = np.array(attr.floats).astype(&#34;float32&#34;)
+        elif attr.name == &#34;classlabels_ints&#34;:
+            classes = np.array(attr.ints)
+        elif attr.name == &#34;multi_class&#34;:
+            if attr.i != 0:  # https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md#ai.onnx.ml.LinearClassifier
+                multi_class = &#34;multinomial&#34;
+
+    if any(v is None for v in [coefficients, intercepts, classes]):
+        raise RuntimeError(&#34;Error parsing LinearClassifier, found unexpected None&#34;)
+    if multi_class is None:  # if &#39;multi_class&#39; attr was not present
+        multi_class = &#34;none&#34; if len(classes) &lt; 3 else &#34;ovr&#34;
+
+    # Now reshape the coefficients/intercepts
+    if len(classes) == 2:
+        # for the binary case, it seems there is a duplicate copy of everything with opposite +/- sign. This just takes the correct copy
+        coefficients = np.array([[np.array(val).astype(&#34;float32&#34;)] for val in coefficients[len(coefficients) // 2 :]]).astype(
+            &#34;float32&#34;
+        )
+        intercepts = np.array([[np.array(val).astype(&#34;float32&#34;)] for val in intercepts[len(intercepts) // 2 :]]).astype(
+            &#34;float32&#34;
+        )
+    elif len(classes) &gt; 2:
+        # intercepts are OK in this case.
+
+        # reshape coefficients into tuples
+        tmp = coefficients.reshape(len(classes), (len(coefficients) // len(classes)))
+        # then unzip the zipmap format
+        coefficients = np.array(list(zip(*tmp)))
+    else:
+        raise RuntimeError(&#34;Error parsing LinearClassifier, length of classes {} unexpected:{}&#34;.format(len(classes), classes))
+    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class, is_linear_regression=False)</code></pre>
 </details>
 </dd>
-<dt id="hummingbird.ml.operator_converters.xgb.convert_sklearn_xgb_regressor"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_xgb_regressor</span></span>(<span>operator, device, extra_config)</span>
+<dt id="hummingbird.ml.operator_converters.onnxml_linear.convert_onnx_linear_regression_model"><code class="name flex">
+<span>def <span class="ident">convert_onnx_linear_regression_model</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>xgboost.XGBRegressor</code> (trained using the Sklearn API).</p>
+<div class="desc"><p>Converter for <code>ai.onnx.ml.LinearRegression</code></p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>xgboost.XGBRegressor</code> model</dd>
+<dd>An operator wrapping a <code>ai.onnx.ml.LinearRegression</code> model</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -252,36 +238,31 @@ register_converter(&#34;SklearnXGBRegressor&#34;, convert_sklearn_xgb_regressor)
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def convert_sklearn_xgb_regressor(operator, device, extra_config):
+<pre><code class="python">def convert_onnx_linear_regression_model(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `xgboost.XGBRegressor` (trained using the Sklearn API).
-
+    Converter for `ai.onnx.ml.LinearRegression`
     Args:
-        operator: An operator wrapping a `xgboost.XGBRegressor` model
+        operator: An operator wrapping a `ai.onnx.ml.LinearRegression` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
-
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
     assert operator is not None
-    if &#34;n_features&#34; in extra_config:
-        n_features = extra_config[&#34;n_features&#34;]
-    else:
-        raise RuntimeError(
-            &#39;XGBoost converter is not able to infer the number of input features.\
-             Please pass &#34;n_features:N&#34; as extra configuration to the converter or fill a bug report.&#39;
-        )
 
-    # Get tree information out of the model.
-    tree_infos = operator.raw_operator.get_booster().get_dump()
-    base_prediction = operator.raw_operator.base_score
-    if type(base_prediction) is float:
-        base_prediction = [base_prediction]
+    operator = operator.raw_operator
+    coefficients = intercepts = None
+    for attr in operator.origin.attribute:
 
-    extra_config[constants.BASE_PREDICTION] = base_prediction
+        if attr.name == &#34;coefficients&#34;:
+            coefficients = np.array([[np.array(val).astype(&#34;float32&#34;)] for val in attr.floats]).astype(&#34;float32&#34;)
+        elif attr.name == &#34;intercepts&#34;:
+            intercepts = np.array(attr.floats).astype(&#34;float32&#34;)
 
-    return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)</code></pre>
+    if any(v is None for v in [coefficients, intercepts]):
+        raise RuntimeError(&#34;Error parsing LinearRegression, found unexpected None&#34;)
+
+    return LinearModel(coefficients, intercepts, device, is_linear_regression=True)</code></pre>
 </details>
 </dd>
 </dl>
@@ -306,8 +287,8 @@ register_converter(&#34;SklearnXGBRegressor&#34;, convert_sklearn_xgb_regressor)
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.xgb.convert_sklearn_xgb_classifier" href="#hummingbird.ml.operator_converters.xgb.convert_sklearn_xgb_classifier">convert_sklearn_xgb_classifier</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.xgb.convert_sklearn_xgb_regressor" href="#hummingbird.ml.operator_converters.xgb.convert_sklearn_xgb_regressor">convert_sklearn_xgb_regressor</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnxml_linear.convert_onnx_linear_model" href="#hummingbird.ml.operator_converters.onnxml_linear.convert_onnx_linear_model">convert_onnx_linear_model</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnxml_linear.convert_onnx_linear_regression_model" href="#hummingbird.ml.operator_converters.onnxml_linear.convert_onnx_linear_regression_model">convert_onnx_linear_regression_model</a></code></li>
 </ul>
 </li>
 </ul>
