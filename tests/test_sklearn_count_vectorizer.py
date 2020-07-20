@@ -27,7 +27,7 @@ class TestSklearnCountVectorizerConverter(unittest.TestCase):
         cleaner = re.compile("[^a-zA-Z\s\.\@]")  # noqa: W605
         text_documents = [cleaner.sub("", doc.encode("ascii", "replace").decode("ascii")) for doc in text_documents]
 
-        ## tokenizer = RegexpTokenizer(r"(?u)\b\w\w+\b")
+        tokenizer = RegexpTokenizer(r"(?u)\b\w\w+\b")
 
         model = CountVectorizer(max_features=10000, stop_words=stopwords.words("english"), ngram_range=(1, 2))
         model.fit(text_documents)
@@ -48,11 +48,22 @@ class TestSklearnCountVectorizerConverter(unittest.TestCase):
         torch_model = hummingbird.ml.convert(model, "torch")
 
         self.assertTrue(torch_model is not None)
-        # TODO:fixup input data
-        ### data_tensor = [
-        ###     torch.from_numpy(np.array(tokenizer.tokenize(doc.lower()), dtype='|S'+str(max_word_length)).view(np.uint8)).view(-1, max_word_length) for doc
-        ###     in text_documents]
-        ### self.assertTrue(np.allclose(model.transform(text_documents).todense(), torch_model.transform(data_tensor)))
+
+        data_tensor = [
+            torch.from_numpy(np.array(tokenizer.tokenize(doc.lower()), dtype="|S" + str(max_word_length)).view(np.uint8)).view(
+                -1, max_word_length
+            )
+            for doc in text_documents
+        ]
+
+        # # TODO:fixup input data.  it seems the forward code for CVect expects "list", but that doesn't fit with the new code flow
+        # x=data_tensor[0]
+        # for i in data_tensor[1:]:
+        #     x=torch.cat((x,i),0)
+        # ## what is the correct format for "transform"?
+        # self.assertTrue(np.allclose(model.transform(text_documents).todense(), torch_model.transform(x)))
+
+        self.assertTrue(np.allclose(model.transform(text_documents).todense(), torch_model.transform(data_tensor)))
 
 
 if __name__ == "__main__":
