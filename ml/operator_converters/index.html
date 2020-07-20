@@ -48,19 +48,32 @@ constants = _Constants(converter_constants, hummingbird_constants)
 
 # To register a converter for scikit-learn API operators, import associated modules here.
 from . import lightgbm  # noqa: E402
-from . import onnx_tree_ensembles  # noqa: E402
+
+from . import onnx_operator  # noqa: E402
+from . import onnxml_array_feature_extractor  # noqa: E402
+from . import onnxml_linear  # noqa: E402
+from . import onnxml_normalizer  # noqa: E402
+from . import onnxml_scaler  # noqa: E402
+from . import onnxml_tree_ensemble  # noqa: E402
+from . import skl_array_feature_extractor  # noqa: E402
 from . import skl_decision_tree  # noqa: E402
 from . import skl_gbdt  # noqa: E402
+from . import skl_iforest  # noqa: E402
 from . import skl_linear  # noqa: E402
 from . import skl_normalizer  # noqa: E402
+from . import skl_one_hot_encoder  # noqa: E402
 from . import skl_scaler  # noqa: E402
 from . import skl_sv  # noqa: E402
 from . import xgb  # noqa: E402
 
 
 __pdoc__ = {}
+__pdoc__[&#34;hummingbird.operator_converters._array_feature_extractor_implementations&#34;] = True
 __pdoc__[&#34;hummingbird.operator_converters._gbdt_commons&#34;] = True
 __pdoc__[&#34;hummingbird.operator_converters._tree_commons&#34;] = True
+__pdoc__[&#34;hummingbird.operator_converters._linear_implementations&#34;] = True
+__pdoc__[&#34;hummingbird.operator_converters._normalizer_implementations&#34;] = True
+__pdoc__[&#34;hummingbird.operator_converters._scaler_implementations&#34;] = True
 __pdoc__[&#34;hummingbird.operator_converters._tree_implementations&#34;] = True</code></pre>
 </details>
 </section>
@@ -75,26 +88,64 @@ __pdoc__[&#34;hummingbird.operator_converters._tree_implementations&#34;] = True
 <dd>
 <div class="desc"><p>Converters for LightGBM models.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx_tree_ensembles" href="onnx_tree_ensembles.html">hummingbird.ml.operator_converters.onnx_tree_ensembles</a></code></dt>
+
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx_operator" href="onnx_operator.html">hummingbird.ml.operator_converters.onnx_operator</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for ONNX operators.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnxml_array_feature_extractor" href="onnxml_array_feature_extractor.html">hummingbird.ml.operator_converters.onnxml_array_feature_extractor</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnxml_linear" href="onnxml_linear.html">hummingbird.ml.operator_converters.onnxml_linear</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for ONNX-ML linear models.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnxml_normalizer" href="onnxml_normalizer.html">hummingbird.ml.operator_converters.onnxml_normalizer</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnxml_scaler" href="onnxml_scaler.html">hummingbird.ml.operator_converters.onnxml_scaler</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnxml_tree_ensemble" href="onnxml_tree_ensemble.html">hummingbird.ml.operator_converters.onnxml_tree_ensemble</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for ONNX-ML tree-ensemble models.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_array_feature_extractor" href="skl_array_feature_extractor.html">hummingbird.ml.operator_converters.skl_array_feature_extractor</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn feature selectors: SelectKBest, SelectPercentile, VarianceThreshold</p></div>
 </dd>
 <dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_decision_tree" href="skl_decision_tree.html">hummingbird.ml.operator_converters.skl_decision_tree</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees.</p></div>
 </dd>
+
 <dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_gbdt" href="skl_gbdt.html">hummingbird.ml.operator_converters.skl_gbdt</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for Sklearn's GradientBoosting models.</p></div>
 </dd>
+
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_iforest" href="skl_iforest.html">hummingbird.ml.operator_converters.skl_iforest</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn isolation forest.</p></div>
+</dd>
 <dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_linear" href="skl_linear.html">hummingbird.ml.operator_converters.skl_linear</a></code></dt>
 <dd>
+
 <div class="desc"></div>
 </dd>
 <dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_normalizer" href="skl_normalizer.html">hummingbird.ml.operator_converters.skl_normalizer</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
+
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_one_hot_encoder" href="skl_one_hot_encoder.html">hummingbird.ml.operator_converters.skl_one_hot_encoder</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+
 <dt><code class="name"><a title="hummingbird.ml.operator_converters.skl_scaler" href="skl_scaler.html">hummingbird.ml.operator_converters.skl_scaler</a></code></dt>
 <dd>
 <div class="desc"></div>
@@ -135,11 +186,21 @@ __pdoc__[&#34;hummingbird.operator_converters._tree_implementations&#34;] = True
 <ul>
 <li><code><a title="hummingbird.ml.operator_converters.constants" href="constants.html">hummingbird.ml.operator_converters.constants</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.lightgbm" href="lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx_tree_ensembles" href="onnx_tree_ensembles.html">hummingbird.ml.operator_converters.onnx_tree_ensembles</a></code></li>
+
+<li><code><a title="hummingbird.ml.operator_converters.onnx_operator" href="onnx_operator.html">hummingbird.ml.operator_converters.onnx_operator</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnxml_array_feature_extractor" href="onnxml_array_feature_extractor.html">hummingbird.ml.operator_converters.onnxml_array_feature_extractor</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnxml_linear" href="onnxml_linear.html">hummingbird.ml.operator_converters.onnxml_linear</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnxml_normalizer" href="onnxml_normalizer.html">hummingbird.ml.operator_converters.onnxml_normalizer</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnxml_scaler" href="onnxml_scaler.html">hummingbird.ml.operator_converters.onnxml_scaler</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnxml_tree_ensemble" href="onnxml_tree_ensemble.html">hummingbird.ml.operator_converters.onnxml_tree_ensemble</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.skl_array_feature_extractor" href="skl_array_feature_extractor.html">hummingbird.ml.operator_converters.skl_array_feature_extractor</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.skl_decision_tree" href="skl_decision_tree.html">hummingbird.ml.operator_converters.skl_decision_tree</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.skl_gbdt" href="skl_gbdt.html">hummingbird.ml.operator_converters.skl_gbdt</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.skl_iforest" href="skl_iforest.html">hummingbird.ml.operator_converters.skl_iforest</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.skl_linear" href="skl_linear.html">hummingbird.ml.operator_converters.skl_linear</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.skl_normalizer" href="skl_normalizer.html">hummingbird.ml.operator_converters.skl_normalizer</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.skl_one_hot_encoder" href="skl_one_hot_encoder.html">hummingbird.ml.operator_converters.skl_one_hot_encoder</a></code></li>
+
 <li><code><a title="hummingbird.ml.operator_converters.skl_scaler" href="skl_scaler.html">hummingbird.ml.operator_converters.skl_scaler</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.skl_sv" href="skl_sv.html">hummingbird.ml.operator_converters.skl_sv</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.xgb" href="xgb.html">hummingbird.ml.operator_converters.xgb</a></code></li>
