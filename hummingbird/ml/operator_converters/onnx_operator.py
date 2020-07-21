@@ -30,6 +30,14 @@ class Cast(BaseOperator, torch.nn.Module):
             return x.long()
 
 
+class Concat(BaseOperator, torch.nn.Module):
+    def __init__(self):
+        super(Concat, self).__init__()
+
+    def forward(self, x):
+        return torch.cat(x, dim=1)
+
+
 def convert_onnx_cast(operator, device=None, extra_config={}):
     """
     Converter for `ai.onnx.Cast`.
@@ -54,4 +62,23 @@ def convert_onnx_cast(operator, device=None, extra_config={}):
     return Cast(to_type)
 
 
+def convert_onnx_concat(operator, device=None, extra_config={}):
+    """
+    Converter for `ai.onnx.Concat`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Concat` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    # Generate the model.
+    return Concat()
+
+
 register_converter("ONNXMLCast", convert_onnx_cast)
+register_converter("ONNXMLConcat", convert_onnx_concat)
