@@ -20,8 +20,8 @@ GET_PARAMETERS_FOR_TREE_TRAVERSAL = "get_parameters_for_tree_trav"
 REORDER_TREES = "reorder_trees"
 """Whether to reorder trees in multiclass tasks"""
 
-ONNX_INPUTS = "onnx_inputs"
-"""The inputs to the onnx model"""
+ONNX_INITIALIZERS = "onnx_initializers"
+"""The initializers of the onnx model"""
 
 ONNX_TEST_INPUT = "onnx_test_input"
 """The test input data for the onnx model"""

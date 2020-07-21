@@ -54,25 +54,6 @@ class TestONNXOneHotEncoder(unittest.TestCase):
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
-    # # Test that malformed models throw an exception
-    # @unittest.skipIf(
-    #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
-    # )
-    # def test_scaler_converter_raises_rt_onnx(self):
-    #     warnings.filterwarnings("ignore")
-    #     X = np.array([[0.0, 0.0, 3.0], [1.0, -1.0, 0.0], [0.0, 2.0, 1.0], [1.0, 0.0, -2.0]], dtype=np.float32)
-
-    #     # Create SKL model for testing
-    #     model = StandardScaler()
-    #     model.fit(X)
-
-    #     # generate test input
-    #     onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
-    #     print(onnx_ml_model.graph.node[0].attribute[0].name)
-    #     onnx_ml_model.graph.node[0].attribute[0].name = "".encode()
-
-    #     self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
-
 
 if __name__ == "__main__":
     unittest.main()
