@@ -166,6 +166,7 @@ def _build_onnxml_operator_list():
             # ONNX operators.
             "Cast",
             # Preprocessing
+            "ArrayFeatureExtractor",
             "OneHotEncoder",
             "Normalizer",
             "Scaler",

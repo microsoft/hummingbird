@@ -95,6 +95,8 @@ def parse_onnx_api_model(model):
     inputs = []
     for i in model.graph.input:
         inputs.append(scope.declare_local_variable(i.name))
+    for i in model.graph.initializer:
+        inputs.append(scope.declare_local_variable(i.name))
 
     # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the inputs of the ONNX graph.
