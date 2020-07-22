@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml API documentation</title>
-<meta name="description" content="Hummingbird.ml is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
-(e.g., one-hot encoding) into tensor …" />
+<title>hummingbird.ml.operator_converters.onnx_operator API documentation</title>
+<meta name="description" content="Converters for ONNX operators." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -14,19 +13,17 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/onnx_operator.html">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.onnx_operator</code></h1>
 </header>
 <section id="section-intro">
-<p>Hummingbird.ml is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
-(e.g., one-hot encoding) into tensor operations.
-Through Hummingbird, DNN frameworks can be used for both optimizing and enabling seamless hardware acceleration of traditional ML.</p>
+<p>Converters for ONNX operators.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -38,65 +35,172 @@ Through Hummingbird, DNN frameworks can be used for both optimizing and enabling
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Hummingbird.ml is a compiler for translating traditional ML operators (e.g., tree-based models) and featurizers
-(e.g., one-hot encoding) into tensor operations.
-Through Hummingbird, DNN frameworks can be used for both optimizing and enabling seamless hardware acceleration of traditional ML.
+Converters for ONNX operators.
 &#34;&#34;&#34;
 
+import numpy as np
+import torch
 
-# Register constants used for Hummingbird extra configs.
-from . import supported as hummingbird_constants
-from ._utils import _Constants
+from onnxconverter_common.registration import register_converter
 
-# Add constants in scope.
-constants = _Constants(hummingbird_constants)
-
-
-# Add the converters in the Hummingbird scope.
-from .convert import convert  # noqa: F401, E402
-
-# Add the supported backends in scope.
-from .supported import backends  # noqa: F401, E402
+from . import constants
+from ._base_operator import BaseOperator
 
 
-# Pdoc stuff.
-__pdoc__ = {}
-__pdoc__[&#34;hummingbird._container&#34;] = True
-__pdoc__[&#34;hummingbird._parse&#34;] = True
-__pdoc__[&#34;hummingbird._supported_operators&#34;] = True
-__pdoc__[&#34;hummingbird._utils&#34;] = True</code></pre>
+class Cast(BaseOperator, torch.nn.Module):
+    def __init__(self, to_type):
+        super(Cast, self).__init__()
+
+        assert to_type is not None
+
+        self.to_type = to_type
+
+    def forward(self, x):
+        if self.to_type == 7:  # Cast to long
+            return x.long()
+
+
+def convert_onnx_cast(operator, device=None, extra_config={}):
+    &#34;&#34;&#34;
+    Converter for `ai.onnx.Cast`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Cast` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+    assert operator is not None
+
+    to_type = None
+
+    for attr in operator.raw_operator.origin.attribute:
+        if attr.name == &#34;to&#34;:
+            to_type = attr.i
+
+    # Generate the model.
+    return Cast(to_type)
+
+
+register_converter(&#34;ONNXMLCast&#34;, convert_onnx_cast)</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="hummingbird.ml.convert" href="convert.html">hummingbird.ml.convert</a></code></dt>
+<dt id="hummingbird.ml.operator_converters.onnx_operator.convert_onnx_cast"><code class="name flex">
+<span>def <span class="ident">convert_onnx_cast</span></span>(<span>operator, device=None, extra_config={})</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Hummingbird main (converters) API.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.exceptions" href="exceptions.html">hummingbird.ml.exceptions</a></code></dt>
-<dd>
-<div class="desc"><p>Common errors.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.ir_converters" href="ir_converters/index.html">hummingbird.ml.ir_converters</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters" href="operator_converters/index.html">hummingbird.ml.operator_converters</a></code></dt>
-<dd>
-<div class="desc"><p>All operators converters are stored under this package.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.supported" href="supported.html">hummingbird.ml.supported</a></code></dt>
-<dd>
-<div class="desc"><p>All operators, backends, and configurations settings supported in Hummingbird are registered here …</p></div>
+<div class="desc"><p>Converter for <code>ai.onnx.Cast</code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>operator</code></strong></dt>
+<dd>An operator wrapping a <code>ai.onnx.Cast</code> model</dd>
+<dt><strong><code>device</code></strong></dt>
+<dd>String defining the type of device the converted operator should be run on</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to select the best conversion strategy</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A PyTorch model</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def convert_onnx_cast(operator, device=None, extra_config={}):
+    &#34;&#34;&#34;
+    Converter for `ai.onnx.Cast`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Cast` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+    assert operator is not None
+
+    to_type = None
+
+    for attr in operator.raw_operator.origin.attribute:
+        if attr.name == &#34;to&#34;:
+            to_type = attr.i
+
+    # Generate the model.
+    return Cast(to_type)</code></pre>
+</details>
 </dd>
 </dl>
 </section>
 <section>
-</section>
-<section>
-</section>
-<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="hummingbird.ml.operator_converters.onnx_operator.Cast"><code class="flex name class">
+<span>class <span class="ident">Cast</span></span>
+<span>(</span><span>to_type)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Cast(BaseOperator, torch.nn.Module):
+    def __init__(self, to_type):
+        super(Cast, self).__init__()
+
+        assert to_type is not None
+
+        self.to_type = to_type
+
+    def forward(self, x):
+        if self.to_type == 7:  # Cast to long
+            return x.long()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>hummingbird.ml.operator_converters._base_operator.BaseOperator</li>
+<li>abc.ABC</li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="hummingbird.ml.operator_converters.onnx_operator.Cast.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    if self.to_type == 7:  # Cast to long
+        return x.long()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -111,16 +215,22 @@ __pdoc__[&#34;hummingbird._utils&#34;] = True</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird" href="../index.html">hummingbird</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters" href="index.html">hummingbird.ml.operator_converters</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="hummingbird.ml.operator_converters.onnx_operator.convert_onnx_cast" href="#hummingbird.ml.operator_converters.onnx_operator.convert_onnx_cast">convert_onnx_cast</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li><code><a title="hummingbird.ml.convert" href="convert.html">hummingbird.ml.convert</a></code></li>
-<li><code><a title="hummingbird.ml.exceptions" href="exceptions.html">hummingbird.ml.exceptions</a></code></li>
-<li><code><a title="hummingbird.ml.ir_converters" href="ir_converters/index.html">hummingbird.ml.ir_converters</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters" href="operator_converters/index.html">hummingbird.ml.operator_converters</a></code></li>
-<li><code><a title="hummingbird.ml.supported" href="supported.html">hummingbird.ml.supported</a></code></li>
+<li>
+<h4><code><a title="hummingbird.ml.operator_converters.onnx_operator.Cast" href="#hummingbird.ml.operator_converters.onnx_operator.Cast">Cast</a></code></h4>
+<ul class="">
+<li><code><a title="hummingbird.ml.operator_converters.onnx_operator.Cast.forward" href="#hummingbird.ml.operator_converters.onnx_operator.Cast.forward">forward</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
