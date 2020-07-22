@@ -239,7 +239,7 @@ def _parse_onnx_single_operator(scope, operator):
     # LinkedNode uses dictionaries and with Python 3.5 the order is not deterministic.
     input_names = list(operator.input.keys())
     input_names.sort()
-    this_operator.inputs = [scope.variables[in_] for in_ in input_names]
+    this_operator.inputs = [scope.variables[in_] for in_ in input_names if in_ in scope.variables]
 
     # Register the operator's outpurs.
     output_names = list(operator.output.keys())

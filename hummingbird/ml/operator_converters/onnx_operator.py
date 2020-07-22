@@ -34,7 +34,7 @@ class Concat(BaseOperator, torch.nn.Module):
     def __init__(self):
         super(Concat, self).__init__()
 
-    def forward(self, x):
+    def forward(self, *x):
         return torch.cat(x, dim=1)
 
 
@@ -106,7 +106,7 @@ def convert_onnx_reshape(operator, device=None, extra_config={}):
 
     shape = []
     initializers = extra_config[constants.ONNX_INITIALIZERS]
-    shape = initializers[operator.raw_operator.origin.input[1]].int64_data
+    shape = list(initializers[operator.raw_operator.origin.input[1]].int64_data)
 
     # Generate the model.
     return Reshape(shape)
