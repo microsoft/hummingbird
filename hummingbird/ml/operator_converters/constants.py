@@ -17,10 +17,10 @@ LEARNING_RATE = "learning_rate"
 POST_TRANSFORM = "post_transform"
 """Post transform for tree inference"""
 
-SIGMOID = "post_transform_sigmoid"
+SIGMOID = "LOGISTIC"
 """Sigmoid post transform"""
 
-SOFTMAX = "post_transform_softmax"
+SOFTMAX = "SOFTMAX"
 """Softmax post transform"""
 
 GET_PARAMETERS_FOR_TREE_TRAVERSAL = "get_parameters_for_tree_trav"

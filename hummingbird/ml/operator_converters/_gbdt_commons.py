@@ -114,7 +114,7 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
         return torch.softmax(x, dim=1)
 
     # For models following the Sklearn API we need to build the post transform ourselves.
-    if classes is not None:
+    if classes is not None and constants.POST_TRANSFORM not in extra_config:
         if len(classes) <= 2:
             extra_config[constants.POST_TRANSFORM] = constants.SIGMOID
         else:
@@ -132,6 +132,8 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
                 extra_config[constants.POST_TRANSFORM] = lambda x: apply_softmax(apply_base_prediction(base_prediction)(x))
             else:
                 extra_config[constants.POST_TRANSFORM] = apply_softmax
+        elif extra_config[constants.POST_TRANSFORM] == "NONE":
+            extra_config.pop(constants.POST_TRANSFORM)
         else:
             raise NotImplementedError("Post transform {} not implemeneted yet".format(extra_config[constants.POST_TRANSFORM]))
     elif constants.BASE_PREDICTION in extra_config:

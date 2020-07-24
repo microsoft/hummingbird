@@ -12,6 +12,11 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 
 from . import constants
+from ._tree_commons import (
+    convert_decision_ensemble_tree_common,
+    get_parameters_for_tree_trav_common,
+    get_parameters_for_tree_trav_sklearn,
+)
 from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
 from ._tree_commons import TreeParameters
 
@@ -51,9 +56,9 @@ def _get_tree_infos_from_onnx_ml_operator(model):
         elif attr.name == "classlabels_strings ":
             if len(attr.strings) > 0:
                 raise AssertionError("String class labels not supported yet.")
-        elif attr.name == "post_transform_transform":
-            post_transform = attr.s
-            if post_transform not in [None, b"LOGISTIC", b"SOFTMAX"]:
+        elif attr.name == "post_transform":
+            post_transform = attr.s.decode("utf-8")
+            if post_transform not in ["NONE", "LOGISTIC", "SOFTMAX"]:
                 raise AssertionError("Post transform {} not supported".format(post_transform))
         elif attr.name == "nodes_modes":
             modes = attr.strings
@@ -164,6 +169,11 @@ def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}
     )
 
     # Generate the model.
+    if post_transform == "NONE":
+        return convert_decision_ensemble_tree_common(
+            tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, classes, extra_config
+        )
+    extra_config[constants.POST_TRANSFORM] = post_transform
     return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)
 
 

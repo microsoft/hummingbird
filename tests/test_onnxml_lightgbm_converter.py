@@ -129,6 +129,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         n_features = 28
         n_total = 100
+        np.random.seed(0)
         X = np.random.rand(n_total, n_features)
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(n_total, size=n_total)
@@ -136,7 +137,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         # Create LightGBM model
         model = lgb.LGBMRegressor()
         model.fit(X, y)
-        self._test_regressor(X, model, rtol=1e-02, atol=1e-02)  # Lower tolerance to avoid random errors
+        self._test_regressor(X, model)
 
     # Regression test with 3 estimators (taken from ONNXMLTOOLS).
     @unittest.skipIf(
