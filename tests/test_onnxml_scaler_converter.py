@@ -32,13 +32,11 @@ class TestONNXScaler(unittest.TestCase):
         # Get the predictions for the ONNX-ML model
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
         output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
-        onnx_ml_pred = [[] for i in range(len(output_names))]
         inputs = {session.get_inputs()[0].name: X}
         onnx_ml_pred = session.run(output_names, inputs)
 
         # Get the predictions for the ONNX model
         session = ort.InferenceSession(onnx_model.SerializeToString())
-        onnx_pred = [[] for i in range(len(output_names))]
         onnx_pred = session.run(output_names, inputs)
 
         return onnx_ml_pred, onnx_pred
