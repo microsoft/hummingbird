@@ -86,6 +86,10 @@ class TestONNXOneHotEncoder(unittest.TestCase):
 
     #     return onnx_ml_pred, onnx_pred
 
+    # Test OneHotEncoder temporary failcase
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_ohe_string_raises_notimpl_onnx(self):
         warnings.filterwarnings("ignore")
         model = OneHotEncoder()
