@@ -45,7 +45,6 @@ class TestONNXOneHotEncoder(unittest.TestCase):
 
         # Get the predictions for the ONNX model
         session = ort.InferenceSession(onnx_model.SerializeToString())
-        onnx_pred = [[] for i in range(len(output_names))]
         onnx_pred = session.run(output_names, inputs)
 
         # Check that predicted values match
