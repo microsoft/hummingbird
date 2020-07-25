@@ -87,24 +87,17 @@ class TestONNXOneHotEncoder(unittest.TestCase):
 
     #     return onnx_ml_pred, onnx_pred
 
-    def test_scaler_converter_raises_rt_onnx(self):
+    def test_ohe_string_raises_notimpl_onnx(self):
         warnings.filterwarnings("ignore")
         model = OneHotEncoder()
         data = [["a", "r", "x"], ["a", "r", "x"], ["aaaa", "r", "x"], ["a", "r", "xx"]]
         model.fit(data)
 
-        # max word length is the smallest number which is divisible by 4 and larger than or equal to the length of any word
-        max_word_length = 4
-        num_columns = 3
         # Create ONNX-ML model
         onnx_ml_model = convert_sklearn(model, initial_types=[("input", StringTensorType_onnx([4, 3]))])
 
-        pytorch_input = (
-            np.array(data, dtype="|S" + str(max_word_length)).view(np.int32).reshape(-1, num_columns, max_word_length // 4)
-        )
-
         # Create ONNX model by calling converter, should raise error for strings
-        self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", pytorch_input)
+        self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", data)
 
 
 if __name__ == "__main__":
