@@ -229,6 +229,10 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
         extra_config[constants.N_FEATURES] = np.array(test_input).shape[1]
     extra_config[constants.ONNX_TEST_INPUT] = test_input
 
+    # Set the initializers. Some converter requires the access to initializers.
+    initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
+    extra_config[constants.ONNX_INITIALIZERS] = initializers
+
     # Parse ONNX model as our internal data structure (i.e., Topology).
     topology = parse_onnx_api_model(model)
 

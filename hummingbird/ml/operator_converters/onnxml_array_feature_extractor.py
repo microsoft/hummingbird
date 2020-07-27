@@ -7,6 +7,7 @@ import torch
 from onnxconverter_common.registration import register_converter
 
 from ._base_operator import BaseOperator
+from . import constants
 from ._array_feature_extractor_implementations import ArrayFeatureExtractor
 
 
@@ -25,8 +26,8 @@ def convert_onnx_array_feature_extractor(operator, device, extra_config):
 
     # TODO, this will be tested as part of the ai.onnx.ml.OneHotEncoder tests
     column_indices = []
-    initializers = extra_config["initializers"]
-    column_indices = initializers[operator.origin.input[1]].int64_data
+    initializers = extra_config[constants.ONNX_INITIALIZERS]
+    column_indices = initializers[operator.raw_operator.origin.input[1]].int64_data
     return ArrayFeatureExtractor(column_indices, device)
 
 
