@@ -7,6 +7,7 @@
 """
 Converters for topology IR are stored in this file.
 """
+from distutils.version import StrictVersion
 import os
 import torch
 from uuid import uuid4
@@ -51,6 +52,14 @@ def convert(topology, backend, device=None, extra_config={}):
     for operator in topology.topological_operator_iterator():
         try:
             converter = get_converter(operator.type)
+
+            if backend == onnx_backend:
+                vers = StrictVersion(torch.__version__)
+                allowed_min = StrictVersion("1.6")
+                # Pytorch < 1.6.0 has a bug with exporting GEMM into ONNX.
+                # For the moment only tree_trav is enabled for pytorch < 1.6.0
+                if vers < allowed_min:
+                    extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
 
             operator_map[operator.full_name] = converter(operator, device, extra_config)
         except ValueError:
