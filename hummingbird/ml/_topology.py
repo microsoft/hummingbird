@@ -13,8 +13,12 @@ from uuid import uuid4
 
 from onnxconverter_common.registration import get_converter
 
-from ._container import PyTorchBackendModelRegression, PyTorchBackendModelClassification, \
-    PyTorchBackendModelTransformer, PyTorchBackendModelAnomalyDetection
+from ._container import (
+    PyTorchBackendModelRegression,
+    PyTorchBackendModelClassification,
+    PyTorchBackendModelTransformer,
+    PyTorchBackendModelAnomalyDetection,
+)
 from ._utils import onnx_runtime_installed
 from .exceptions import MissingConverter
 from .operator_converters import constants
@@ -48,11 +52,6 @@ def convert(topology, backend, device=None, extra_config={}):
         try:
             converter = get_converter(operator.type)
 
-            if backend == onnx_backend:
-                # Pytorch has a bug with exporting GEMM into ONNX.
-                # For the moment only tree_trav is enabled.
-                extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
-
             operator_map[operator.full_name] = converter(operator, device, extra_config)
         except ValueError:
             raise MissingConverter(
@@ -83,7 +82,7 @@ def convert(topology, backend, device=None, extra_config={}):
 
     if backend == onnx_backend:
         onnx_model_name = output_model_name = None
-        target_opset = 9
+        target_opset = 11
 
         # Set optional configuration options for ONNX if any.
         if constants.ONNX_OUTPUT_MODEL_NAME in extra_config:
