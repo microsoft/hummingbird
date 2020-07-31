@@ -54,12 +54,12 @@ def convert(topology, backend, device=None, extra_config={}):
             converter = get_converter(operator.type)
 
             if backend == onnx_backend:
-                vers = LooseVersion(torch.__version__)
-                allowed_min = LooseVersion("1.6")
-                # Pytorch < 1.6.0 has a bug with exporting GEMM into ONNX.
-                # For the moment only tree_trav is enabled for pytorch < 1.6.0
-                if vers < allowed_min:
-                    extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
+                # vers = LooseVersion(torch.__version__)
+                # allowed_min = LooseVersion("1.6.1")
+                # Pytorch <= 1.6.0 has a bug with exporting GEMM into ONNX.
+                # For the moment only tree_trav is enabled for pytorch <= 1.6.0
+                # if vers < allowed_min:
+                extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
 
             operator_map[operator.full_name] = converter(operator, device, extra_config)
         except ValueError:
