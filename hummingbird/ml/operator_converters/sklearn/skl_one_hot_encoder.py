@@ -4,12 +4,14 @@
 # license information.
 # --------------------------------------------------------------------------
 
+"""
+Converter for scikit-learn one hot encoder.
+"""
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
-import torch
 
-from ._base_operator import BaseOperator
-from ._one_hot_encoder_implementations import OneHotEncoderString, OneHotEncoder
+from .._one_hot_encoder_implementations import OneHotEncoderString, OneHotEncoder
 
 
 def convert_sklearn_one_hot_encoder(operator, device, extra_config):

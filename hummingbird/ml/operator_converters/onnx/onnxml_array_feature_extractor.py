@@ -3,12 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
-import torch
+
+"""
+Converter for ONNX-ML Array Feature Extractor.
+"""
+
 from onnxconverter_common.registration import register_converter
 
-from ._base_operator import BaseOperator
-from . import constants
-from ._array_feature_extractor_implementations import ArrayFeatureExtractor
+from .. import constants
+from .._array_feature_extractor_implementations import ArrayFeatureExtractor
 
 
 def convert_onnx_array_feature_extractor(operator, device, extra_config):

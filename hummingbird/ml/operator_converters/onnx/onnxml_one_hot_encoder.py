@@ -3,12 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
+
+"""
+Converter for ONNX-ML One Hot Encoder.
+"""
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
-import torch
 
-from ._base_operator import BaseOperator
-from ._one_hot_encoder_implementations import OneHotEncoderString, OneHotEncoder
+
+from .._one_hot_encoder_implementations import OneHotEncoderString, OneHotEncoder
 
 
 def convert_onnx_one_hot_encoder(operator, device=None, extra_config={}):

@@ -3,12 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
+
+"""
+Converter for ONNX-ML Scaler.
+"""
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
-import torch
 
-from ._base_operator import BaseOperator
-from ._scaler_implementations import Scaler
+from .._base_operator import BaseOperator
+from .._scaler_implementations import Scaler
 
 
 def convert_onnx_scaler(operator, device=None, extra_config={}):

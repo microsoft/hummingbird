@@ -17,24 +17,24 @@ from .._utils import _Constants
 constants = _Constants(converter_constants, hummingbird_constants)
 
 # To register a converter for scikit-learn API operators, import associated modules here.
-from . import lightgbm  # noqa: E402
-from . import onnx_operator  # noqa: E402
-from . import onnxml_array_feature_extractor  # noqa: E402
-from . import onnxml_linear  # noqa: E402
-from . import onnxml_normalizer  # noqa: E402
-from . import onnxml_one_hot_encoder  # noqa: E402
-from . import onnxml_scaler  # noqa: E402
-from . import onnxml_tree_ensemble  # noqa: E402
-from . import skl_array_feature_extractor  # noqa: E402
-from . import skl_decision_tree  # noqa: E402
-from . import skl_gbdt  # noqa: E402
-from . import skl_iforest  # noqa: E402
-from . import skl_linear  # noqa: E402
-from . import skl_normalizer  # noqa: E402
-from . import skl_one_hot_encoder  # noqa: E402
-from . import skl_scaler  # noqa: E402
-from . import skl_sv  # noqa: E402
-from . import xgb  # noqa: E402
+from .onnx import onnx_operator  # noqa: E402
+from .onnx import onnxml_array_feature_extractor  # noqa: E402
+from .onnx import onnxml_linear  # noqa: E402
+from .onnx import onnxml_normalizer  # noqa: E402
+from .onnx import onnxml_one_hot_encoder  # noqa: E402
+from .onnx import onnxml_scaler  # noqa: E402
+from .onnx import onnxml_tree_ensemble  # noqa: E402
+from .sklearn import lightgbm  # noqa: E402
+from .sklearn import skl_array_feature_extractor  # noqa: E402
+from .sklearn import skl_decision_tree  # noqa: E402
+from .sklearn import skl_gbdt  # noqa: E402
+from .sklearn import skl_iforest  # noqa: E402
+from .sklearn import skl_linear  # noqa: E402
+from .sklearn import skl_normalizer  # noqa: E402
+from .sklearn import skl_one_hot_encoder  # noqa: E402
+from .sklearn import skl_scaler  # noqa: E402
+from .sklearn import skl_sv  # noqa: E402
+from .sklearn import xgb  # noqa: E402
 
 
 __pdoc__ = {}

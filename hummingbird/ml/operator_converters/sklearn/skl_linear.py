@@ -4,15 +4,14 @@
 # license information.
 # --------------------------------------------------------------------------
 
-import torch
+"""
+Converters for scikit-learn linear models: LinearRegression, LogisticRegression, LinearSVC, SGDClassifier, LogisticRegressionCV.
+"""
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
-from ._linear_implementations import LinearModel
 
-
-"""
-Converters for scikit-learn linear models: LinearRegression, LogisticRegression, LinearSVC, SGDClassifier, LogisticRegressionCV
-"""
+from .._linear_implementations import LinearModel
 
 
 def convert_sklearn_linear_model(operator, device, extra_config):

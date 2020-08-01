@@ -11,7 +11,7 @@ Converters for ONNX-ML linear models.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from ._linear_implementations import LinearModel
+from .._linear_implementations import LinearModel
 
 
 def convert_onnx_linear_model(operator, device=None, extra_config={}):

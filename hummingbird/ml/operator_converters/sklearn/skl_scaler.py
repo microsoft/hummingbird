@@ -4,12 +4,14 @@
 # license information.
 # --------------------------------------------------------------------------
 
-import torch
+"""
+Converters for scikit-learn scalers: RobustScaler, MaxAbsScaler, MinMaxScaler, StandardScaler.
+"""
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from ._base_operator import BaseOperator
-from ._scaler_implementations import Scaler
+from .._scaler_implementations import Scaler
 
 
 def convert_sklearn_robust_scaler(operator, device, extra_config):

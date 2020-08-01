@@ -11,9 +11,9 @@ Converters for Sklearn's GradientBoosting models.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from . import constants
-from ._gbdt_commons import convert_gbdt_common, convert_gbdt_classifier_common
-from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn, TreeParameters
+from .. import constants
+from .._gbdt_commons import convert_gbdt_common, convert_gbdt_classifier_common
+from .._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn, TreeParameters
 
 
 def _get_parameters_hist_gbdt(trees):

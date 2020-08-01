@@ -9,12 +9,11 @@ Converters for ONNX operators.
 """
 
 import numpy as np
+from onnxconverter_common.registration import register_converter
 import torch
 
-from onnxconverter_common.registration import register_converter
-
-from . import constants
-from ._base_operator import BaseOperator
+from .. import constants
+from .._base_operator import BaseOperator
 
 
 class Cast(BaseOperator, torch.nn.Module):
