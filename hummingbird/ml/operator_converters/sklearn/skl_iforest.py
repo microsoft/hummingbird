@@ -7,13 +7,18 @@
 """
 Converters for scikit-learn isolation forest.
 """
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from . import constants
-from ._tree_commons import get_parameters_for_sklearn_common, \
-    get_parameters_for_tree_trav_sklearn, get_tree_params_and_type, get_parameters_for_gemm_common
-from ._tree_implementations import TreeImpl, GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl
+from .. import constants
+from .._tree_commons import (
+    get_parameters_for_sklearn_common,
+    get_parameters_for_tree_trav_sklearn,
+    get_tree_params_and_type,
+    get_parameters_for_gemm_common,
+)
+from .._tree_implementations import TreeImpl, GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl
 
 
 def _average_path_length(n_samples_leaf):
@@ -37,8 +42,8 @@ def _average_path_length(n_samples_leaf):
     mask_2 = n_samples_leaf == 2
     not_mask = ~np.logical_or(mask_1, mask_2)
 
-    average_path_length[mask_1] = 0.
-    average_path_length[mask_2] = 1.
+    average_path_length[mask_1] = 0.0
+    average_path_length[mask_2] = 1.0
     average_path_length[not_mask] = (
         2.0 * (np.log(n_samples_leaf[not_mask] - 1.0) + np.euler_gamma)
         - 2.0 * (n_samples_leaf[not_mask] - 1.0) / n_samples_leaf[not_mask]
@@ -81,12 +86,9 @@ def _get_parameters_for_sklearn_iforest(tree_infos):
         The tree parameters wrapped into an instance of `operator_converters._tree_commons_TreeParameters`
     """
     tree_parameters = get_parameters_for_sklearn_common(tree_infos)
-    tree_parameters.values = (
-        _get_iforest_anomaly_score_per_node(tree_parameters.lefts,
-                                            tree_parameters.rights,
-                                            tree_infos.tree_.n_node_samples)
-        .reshape(tree_parameters.values.shape)
-    )
+    tree_parameters.values = _get_iforest_anomaly_score_per_node(
+        tree_parameters.lefts, tree_parameters.rights, tree_infos.tree_.n_node_samples
+    ).reshape(tree_parameters.values.shape)
     return tree_parameters
 
 
@@ -119,7 +121,7 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
         if self.final_probability_divider > 1:
             output = output / self.final_probability_divider
         # Further normalize to match "decision_function" in sklearn implementation.
-        output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
         return output
 
 
@@ -154,7 +156,7 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
         if self.final_probability_divider > 1:
             output = output / self.final_probability_divider
         # Further normalize to match "decision_function" in sklearn implementation.
-        output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
         return output
 
 
@@ -189,7 +191,7 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
         if self.final_probability_divider > 1:
             output = output / self.final_probability_divider
         # Further normalize to match "decision_function" in sklearn implementation.
-        output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
         return output
 
 
@@ -217,15 +219,15 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     # Predict in isolation forest sklearn implementation produce 2 classes: -1 (normal) & 1 (anomaly).
     classes = [-1, 1]
 
-    tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, _get_parameters_for_sklearn_iforest,
-                                                                     extra_config)
+    tree_parameters, max_depth, tree_type = get_tree_params_and_type(
+        tree_infos, _get_parameters_for_sklearn_iforest, extra_config
+    )
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
         net_parameters = [
             get_parameters_for_gemm_common(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values,
-                n_features
+                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
             )
             for tree_param in tree_parameters
         ]
@@ -238,11 +240,11 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes,
-                                                extra_config=extra_config)
+        return TreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes, extra_config=extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
-        return PerfectTreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes,
-                                                       extra_config=extra_config)
+        return PerfectTreeTraversalIsolationForestImpl(
+            net_parameters, max_depth, n_features, classes, extra_config=extra_config
+        )
 
 
 # Register the converters.

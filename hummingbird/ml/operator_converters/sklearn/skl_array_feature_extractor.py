@@ -5,15 +5,13 @@
 # --------------------------------------------------------------------------
 
 """
-Converters for scikit-learn feature selectors: SelectKBest, SelectPercentile, VarianceThreshold
+Converters for scikit-learn feature selectors: SelectKBest, SelectPercentile, VarianceThreshold.
 """
-
 
 import numpy as np
 from onnxconverter_common.registration import register_converter
-import torch
 
-from ._array_feature_extractor_implementations import ArrayFeatureExtractor
+from .._array_feature_extractor_implementations import ArrayFeatureExtractor
 
 
 def convert_sklearn_select_k_best(operator, device, extra_config):
