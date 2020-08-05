@@ -71,10 +71,13 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
         onnx_ml_pred, onnx_pred, output_names = self._test_decision_tree(X, model, extra_config)
 
+        pt_model = convert(model, "torch")
+        np.testing.assert_allclose(pt_model(X), onnx_pred[0], rtol=rtol, atol=atol)
+
         # np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
-        np.testing.assert_allclose(
-            list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
-        )  # probs
+        # np.testing.assert_allclose(
+        #     list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
+        # )  # probs
 
     # # Regression.
     # # Regression test with Decision Tree.
@@ -153,36 +156,36 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     #     self._test_regressor(X, model, rtol=1e-03, atol=1e-03)
 
     # Binary.
-    # # Binary classication test.
+    # # Binary classication test random.
+    # @unittest.skipIf(
+    #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    # )
+    # def test_decision_tree_binary_random(self):
+    #     warnings.filterwarnings("ignore")
+    #     n_features = 28
+    #     n_total = 100
+    #     np.random.seed(0)
+    #     X = np.random.rand(n_total, n_features)
+    #     X = np.array(X, dtype=np.float32)
+    #     y = np.random.randint(2, size=n_total)
+
+    #     # Create DecisionTree model
+    #     model = DecisionTreeClassifier()
+    #     model.fit(X, y)
+    #     self._test_classifier(X, model)
+
+    # Binary classification test Decision Tree.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
     def test_decision_tree_binary(self):
         warnings.filterwarnings("ignore")
-        n_features = 28
-        n_total = 100
-        np.random.seed(0)
-        X = np.random.rand(n_total, n_features)
-        X = np.array(X, dtype=np.float32)
-        y = np.random.randint(2, size=n_total)
-
-        # Create LightGBM model
         model = DecisionTreeClassifier()
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = [0, 1, 0]
         model.fit(X, y)
         self._test_classifier(X, model)
-
-    # # Binary classification test with 3 estimators (taken from ONNXMLTOOLS).
-    # @unittest.skipIf(
-    #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    # )
-    # def test_lightgbm_classifier(self):
-    #     warnings.filterwarnings("ignore")
-    #     model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
-    #     X = [[0, 1], [1, 1], [2, 0]]
-    #     X = np.array(X, dtype=np.float32)
-    #     y = [0, 1, 0]
-    #     model.fit(X, y)
-    #     self._test_classifier(X, model)
 
     # # Binary classification test with 3 estimators zipmap (taken from ONNXMLTOOLS).
     # @unittest.skipIf(

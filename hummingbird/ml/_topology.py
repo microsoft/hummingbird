@@ -47,10 +47,10 @@ def convert(topology, backend, device=None, extra_config={}):
         try:
             converter = get_converter(operator.type)
 
-            if backend == onnx_backend:
-                # Pytorch has a bug with exporting GEMM into ONNX.
-                # For the moment only tree_trav is enabled.
-                extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
+            # if backend == onnx_backend:
+            # Pytorch has a bug with exporting GEMM into ONNX.
+            # For the moment only tree_trav is enabled.
+            # extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
 
             operator_map[operator.full_name] = converter(operator, device, extra_config)
         except ValueError:
@@ -79,7 +79,7 @@ def convert(topology, backend, device=None, extra_config={}):
 
     if backend == onnx_backend:
         onnx_model_name = output_model_name = None
-        target_opset = 9
+        target_opset = 11
 
         # Set optional configuration options for ONNX if any.
         if constants.ONNX_OUTPUT_MODEL_NAME in extra_config:
