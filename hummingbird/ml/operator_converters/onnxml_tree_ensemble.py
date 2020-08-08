@@ -116,7 +116,13 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             l_count += 1
         else:
             t_values[i] = 0
-    tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, 1)))
+    if len(classes) > 1:
+        for i in range(len(t_values)):
+            t_values[i] = [t_values[i]] * len(classes)
+            prob = (1 - t_values[i][len(classes) - 1]) / (len(classes) - 1)
+            for j in range(len(classes) - 1):
+                t_values[i][j] = prob
+    tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values)))
     return tree_infos, classes, post_transform
 
 

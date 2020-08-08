@@ -71,13 +71,10 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
         onnx_ml_pred, onnx_pred, output_names = self._test_decision_tree(X, model, extra_config)
 
-        pt_model = convert(model, "torch")
-        np.testing.assert_allclose(pt_model(X), onnx_pred[0], rtol=rtol, atol=atol)
-
-        # np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
-        # np.testing.assert_allclose(
-        #     list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
-        # )  # probs
+        np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
+        np.testing.assert_allclose(
+            list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
+        )  # probs
 
     # # Regression.
     # # Regression test with Decision Tree.
@@ -156,7 +153,7 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     #     self._test_regressor(X, model, rtol=1e-03, atol=1e-03)
 
     # Binary.
-    # # Binary classication test random.
+    # Binary classication test random.
     # @unittest.skipIf(
     #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     # )
@@ -187,7 +184,7 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
         model.fit(X, y)
         self._test_classifier(X, model)
 
-    # # Binary classification test with 3 estimators zipmap (taken from ONNXMLTOOLS).
+    # # Binary classification test Random Forest with 3 estimators zipmap (taken from ONNXMLTOOLS).
     # @unittest.skipIf(
     #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     # )
@@ -196,7 +193,7 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     #     X = [[0, 1], [1, 1], [2, 0], [1, 2]]
     #     X = np.array(X, dtype=np.float32)
     #     y = [0, 1, 0, 1]
-    #     model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
+    #     model = RandomForestClassifier(n_estimators=2)
     #     model.fit(X, y)
     #     self._test_classifier(X, model)
 
@@ -226,11 +223,11 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     #     model = lgb.train({"boosting_type": "gbdt", "objective": "binary", "n_estimators": 3, "min_child_samples": 1}, data)
     #     self._test_classifier(X, model)
 
-    # # Multiclass classification test.
+    # Multiclass classification test.
     # @unittest.skipIf(
     #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     # )
-    # def test_lgbm_onnxml_model_multi(self):
+    # def test_decision_tree_multi(self):
     #     warnings.filterwarnings("ignore")
     #     n_features = 28
     #     n_total = 100
@@ -239,8 +236,8 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     #     X = np.array(X, dtype=np.float32)
     #     y = np.random.randint(3, size=n_total)
 
-    #     # Create LightGBM model
-    #     model = lgb.LGBMClassifier()
+    #     # Create the DecisionTree model
+    #     model = DecisionTreeClassifier()
     #     model.fit(X, y)
     #     self._test_classifier(X, model)
 
@@ -250,7 +247,20 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     # )
     # def test_lightgbm_classifier_multi(self):
     #     warnings.filterwarnings("ignore")
-    #     model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
+    #     model = DecisionTreeClassifier()
+    #     X = [[0, 1], [1, 1], [2, 0], [0.5, 0.5], [1.1, 1.1], [2.1, 0.1]]
+    #     X = np.array(X, dtype=np.float32)
+    #     y = [0, 1, 2, 1, 1, 2]
+    #     model.fit(X, y)
+    #     self._test_classifier(X, model)
+
+    # Multiclass classification test with 3 estimators (taken from ONNXMLTOOLS).
+    # @unittest.skipIf(
+    #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    # )
+    # def test_lightgbm_classifier_multi(self):
+    #     warnings.filterwarnings("ignore")
+    #     model = DecisionTreeClassifier(n_estimators=3, min_child_samples=1)
     #     X = [[0, 1], [1, 1], [2, 0], [0.5, 0.5], [1.1, 1.1], [2.1, 0.1]]
     #     X = np.array(X, dtype=np.float32)
     #     y = [0, 1, 2, 1, 1, 2]
