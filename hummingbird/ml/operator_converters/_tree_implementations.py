@@ -394,13 +394,9 @@ class GEMMDecisionTreeImpl(GEMMTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
         """
         super(GEMMDecisionTreeImpl, self).__init__(tree_parameters, n_features, classes)
-        self.final_probability_divider = len(tree_parameters)
 
     def aggregation(self, x):
         output = x.sum(0).t()
-
-        if self.final_probability_divider > 1:
-            output = output / self.final_probability_divider
 
         return output
 
@@ -419,13 +415,9 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
         """
         super(TreeTraversalDecisionTreeImpl, self).__init__(tree_parameters, max_depth, n_features, classes)
-        self.final_probability_divider = len(tree_parameters)
 
     def aggregation(self, x):
         output = x.sum(1)
-
-        if self.final_probability_divider > 1:
-            output = output / self.final_probability_divider
 
         return output
 
@@ -444,13 +436,9 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
         """
         super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(tree_parameters, max_depth, n_features, classes)
-        self.final_probability_divider = len(tree_parameters)
 
     def aggregation(self, x):
         output = x.sum(1)
-
-        if self.final_probability_divider > 1:
-            output = output / self.final_probability_divider
 
         return output
 

@@ -183,7 +183,7 @@ def get_parameters_for_sklearn_common(tree_infos):
     return TreeParameters(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values):
+def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, n_trees):
     """
     Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
 
@@ -248,7 +248,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     return [nodes_map, ids, lefts, rights, features, thresholds, values]
 
 
-def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values):
+def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, n_trees):
     """
     This function is used to generate tree parameters for sklearn trees.
     Includes SklearnRandomForestClassifier/Regressor, and SklearnGradientBoostingClassifier.
@@ -269,11 +269,12 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
         values = values.reshape(values.shape[0], -1)
     if values.shape[1] > 1:
         values /= np.sum(values, axis=1, keepdims=True)
+    values /= n_trees
 
-    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
+    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, n_trees)
 
 
-def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features):
+def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, n_trees):
     """
     Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
 
@@ -378,7 +379,13 @@ def convert_decision_ensemble_tree_common(
     if tree_type == TreeImpl.gemm:
         net_parameters = [
             get_parameters_for_gemm_common(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
+                tree_param.lefts,
+                tree_param.rights,
+                tree_param.features,
+                tree_param.thresholds,
+                tree_param.values,
+                n_features,
+                len(tree_parameters),
             )
             for tree_param in tree_parameters
         ]
@@ -386,7 +393,12 @@ def convert_decision_ensemble_tree_common(
 
     net_parameters = [
         get_parameters_for_tree_trav(
-            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values
+            tree_param.lefts,
+            tree_param.rights,
+            tree_param.features,
+            tree_param.thresholds,
+            tree_param.values,
+            len(tree_parameters),
         )
         for tree_param in tree_parameters
     ]
