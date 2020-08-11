@@ -78,7 +78,13 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
     if tree_type == TreeImpl.gemm:
         net_parameters = [
             get_parameters_for_gemm_common(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
+                tree_param.lefts,
+                tree_param.rights,
+                tree_param.features,
+                tree_param.thresholds,
+                tree_param.values,
+                n_features,
+                len(tree_parameters),
             )
             for tree_param in tree_parameters
         ]
@@ -90,7 +96,12 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
             get_parameters_for_tree_trav = extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL]
         net_parameters = [
             get_parameters_for_tree_trav(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values
+                tree_param.lefts,
+                tree_param.rights,
+                tree_param.features,
+                tree_param.thresholds,
+                tree_param.values,
+                len(tree_parameters),
             )
             for tree_param in tree_parameters
         ]

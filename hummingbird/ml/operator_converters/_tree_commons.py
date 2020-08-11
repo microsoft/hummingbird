@@ -204,7 +204,9 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         rights = [2, -1, -1]
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
-        values = [np.array([0.0]), values[0], values[0]]
+        n_classes = values.shape[1]
+        values = np.array([np.array([0.0]), values[0], values[0]])
+        values.reshape(3, n_classes)
 
     ids = [i for i in range(len(lefts))]
     nodes = list(zip(ids, lefts, rights, features, thresholds, values))
@@ -271,7 +273,7 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
         values /= np.sum(values, axis=1, keepdims=True)
     values /= n_trees
 
-    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, n_trees)
+    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
 
 
 def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, n_trees):

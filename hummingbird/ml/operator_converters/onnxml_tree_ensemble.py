@@ -68,6 +68,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
 
     # Order values based on target node and tree ids.
     new_values = []
+    n_classes = 1 if classes is None else len(classes)
     j = 0
     for i in range(max(target_tree_ids) + 1):
         k = j
@@ -76,7 +77,13 @@ def _get_tree_infos_from_onnx_ml_operator(model):
         target_ids = target_node_ids[j:k]
         target_ids_zipped = dict(zip(target_ids, range(len(target_ids))))
         for key in sorted(target_ids_zipped):
-            new_values.append(values[j + target_ids_zipped[key]])
+            if n_classes > 2:  # For multiclass we have 2d arrays.
+                tmp_values = []
+                for c in range(n_classes):
+                    tmp_values.append(values[j + c + (target_ids_zipped[key] - (n_classes - 1))])
+                new_values.append(tmp_values)
+            else:
+                new_values.append(values[j + target_ids_zipped[key]])
         j = k
 
     values = new_values
@@ -95,12 +102,18 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             t_right = right[prev_id:count]
             t_features = features[prev_id:count]
             t_threshold = threshold[prev_id:count]
-            t_values = [0] * len(t_left)
+            t_values = np.zeros((len(t_left), n_classes))
             for j in range(len(t_left)):
                 if t_threshold[j] == -1 and l_count < len(values):
                     t_values[j] = values[l_count]
                     l_count += 1
-            tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, 1)))
+            if post_transform == "NONE" and n_classes == 2:  # We need to fix the probabilities in this case.
+                for k in range(len(t_left)):
+                    prob = (1 / (max(tree_ids) + 1)) - t_values[k][1]
+                    t_values[k][0] = prob
+            tree_infos.append(
+                TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, n_classes))
+            )
             prev_id = count
             i += 1
         count += 1
@@ -109,20 +122,16 @@ def _get_tree_infos_from_onnx_ml_operator(model):
     t_right = right[prev_id:count]
     t_features = features[prev_id:count]
     t_threshold = threshold[prev_id:count]
-    t_values = [0] * len(t_left)
+    t_values = np.zeros((len(t_left), n_classes))
     for i in range(len(t_left)):
         if t_threshold[i] == -1 and l_count < len(values):
             t_values[i] = values[l_count]
             l_count += 1
-        else:
-            t_values[i] = 0
-    if len(classes) > 1:
-        for i in range(len(t_values)):
-            t_values[i] = [t_values[i]] * len(classes)
-            prob = (1 - t_values[i][len(classes) - 1]) / (len(classes) - 1)
-            for j in range(len(classes) - 1):
-                t_values[i][j] = prob
-    tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values)))
+    if post_transform == "NONE" and n_classes == 2:  # We need to fix the probabilities in this case.
+        for i in range(len(t_left)):
+            prob = (1 / (max(tree_ids) + 1)) - t_values[i][1]
+            t_values[i][0] = prob
+    tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, n_classes)))
     return tree_infos, classes, post_transform
 
 
@@ -201,7 +210,9 @@ def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={})
     n_features, tree_infos, _, _ = _get_tree_infos_from_tree_ensemble(operator.raw_operator, device, extra_config)
 
     # Generate the model.
-    return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)
+    return convert_decision_ensemble_tree_common(
+        tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, extra_config=extra_config
+    )
 
 
 register_converter("ONNXMLTreeEnsembleClassifier", convert_onnx_tree_ensemble_classifier)
