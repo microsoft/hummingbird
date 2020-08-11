@@ -66,9 +66,10 @@ def _get_tree_infos_from_onnx_ml_operator(model):
                 if (not mode == b"BRANCH_LEQ") and (not mode == b"LEAF"):
                     raise AssertionError("Modality {} not supported".format(mode))
 
+    is_decision_tree = post_transform == "NONE"
     # Order values based on target node and tree ids.
     new_values = []
-    n_classes = 1 if classes is None else len(classes)
+    n_classes = 1 if classes is None or not is_decision_tree else len(classes)
     j = 0
     for i in range(max(target_tree_ids) + 1):
         k = j
@@ -77,7 +78,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
         target_ids = target_node_ids[j:k]
         target_ids_zipped = dict(zip(target_ids, range(len(target_ids))))
         for key in sorted(target_ids_zipped):
-            if n_classes > 2:  # For multiclass we have 2d arrays.
+            if is_decision_tree and n_classes > 2:  # For multiclass we have 2d arrays.
                 tmp_values = []
                 for c in range(n_classes):
                     tmp_values.append(values[j + c + (target_ids_zipped[key] - (n_classes - 1))])
@@ -102,15 +103,32 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             t_right = right[prev_id:count]
             t_features = features[prev_id:count]
             t_threshold = threshold[prev_id:count]
-            t_values = np.zeros((len(t_left), n_classes))
-            for j in range(len(t_left)):
-                if t_threshold[j] == -1 and l_count < len(values):
-                    t_values[j] = values[l_count]
+            t_values = np.zeros((len(t_left), n_classes)) if is_decision_tree else np.zeros(len(t_left))
+            if len(t_left) == 1:
+                # Model creating trees with just a single leaf node. We transform it
+                # to a model with one internal node.
+                t_left = [1, -1, -1]
+                t_right = [2, -1, -1]
+                t_features = [0, 0, 0]
+                t_threshold = [0, -1, -1]
+                if l_count < len(values):
+                    t_values[0] = values[l_count]
                     l_count += 1
-            if post_transform == "NONE" and n_classes == 2:  # We need to fix the probabilities in this case.
+            else:
+                for j in range(len(t_left)):
+                    if t_threshold[j] == -1 and l_count < len(values):
+                        t_values[j] = values[l_count]
+                        l_count += 1
+            if t_values.shape[0] == 1:
+                # Model creating trees with just a single leaf node. We fix the values here.
+                n_classes = t_values.shape[1]
+                t_values = np.array([np.array([0.0]), t_values[0], t_values[0]])
+                t_values.reshape(3, n_classes)
+            if is_decision_tree and n_classes == 2:  # We need to fix the probabilities in this case.
                 for k in range(len(t_left)):
                     prob = (1 / (max(tree_ids) + 1)) - t_values[k][1]
                     t_values[k][0] = prob
+
             tree_infos.append(
                 TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, n_classes))
             )
@@ -122,15 +140,31 @@ def _get_tree_infos_from_onnx_ml_operator(model):
     t_right = right[prev_id:count]
     t_features = features[prev_id:count]
     t_threshold = threshold[prev_id:count]
-    t_values = np.zeros((len(t_left), n_classes))
-    for i in range(len(t_left)):
-        if t_threshold[i] == -1 and l_count < len(values):
-            t_values[i] = values[l_count]
+    t_values = np.zeros((len(t_left), n_classes)) if is_decision_tree else np.zeros(len(t_left))
+    if len(t_left) == 1:
+        # Model creating trees with just a single leaf node. We transform it
+        # to a model with one internal node.
+        t_left = [1, -1, -1]
+        t_right = [2, -1, -1]
+        t_features = [0, 0, 0]
+        t_threshold = [0, -1, -1]
+        if l_count < len(values):
+            t_values[0] = values[l_count]
             l_count += 1
-    if post_transform == "NONE" and n_classes == 2:  # We need to fix the probabilities in this case.
-        for i in range(len(t_left)):
-            prob = (1 / (max(tree_ids) + 1)) - t_values[i][1]
-            t_values[i][0] = prob
+    else:
+        for j in range(len(t_left)):
+            if t_threshold[j] == -1 and l_count < len(values):
+                t_values[j] = values[l_count]
+                l_count += 1
+    if t_values.shape[0] == 1:
+        # Model creating trees with just a single leaf node. We fix the values here.
+        n_classes = t_values.shape[1]
+        t_values = np.array([np.array([0.0]), t_values[0], t_values[0]])
+        t_values.reshape(3, n_classes)
+    if is_decision_tree and n_classes == 2:  # We need to fix the probabilities in this case.
+        for k in range(len(t_left)):
+            prob = (1 / (max(tree_ids) + 1)) - t_values[k][1]
+            t_values[k][0] = prob
     tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, n_classes)))
     return tree_infos, classes, post_transform
 
@@ -210,9 +244,7 @@ def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={})
     n_features, tree_infos, _, _ = _get_tree_infos_from_tree_ensemble(operator.raw_operator, device, extra_config)
 
     # Generate the model.
-    return convert_decision_ensemble_tree_common(
-        tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, extra_config=extra_config
-    )
+    return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)
 
 
 register_converter("ONNXMLTreeEnsembleClassifier", convert_onnx_tree_ensemble_classifier)

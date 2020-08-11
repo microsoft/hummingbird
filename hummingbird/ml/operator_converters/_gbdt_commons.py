@@ -84,7 +84,7 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
                 tree_param.thresholds,
                 tree_param.values,
                 n_features,
-                len(tree_parameters),
+                extra_config,
             )
             for tree_param in tree_parameters
         ]
@@ -101,7 +101,7 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
                 tree_param.features,
                 tree_param.thresholds,
                 tree_param.values,
-                len(tree_parameters),
+                extra_config,
             )
             for tree_param in tree_parameters
         ]

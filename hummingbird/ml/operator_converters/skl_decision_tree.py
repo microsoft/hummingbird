@@ -15,6 +15,7 @@ from onnxconverter_common.registration import register_converter
 
 from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn
 from ._tree_commons import convert_decision_ensemble_tree_common
+from . import constants
 
 
 def convert_sklearn_random_forest_classifier(operator, device, extra_config):
@@ -35,6 +36,9 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
     tree_infos = operator.raw_operator.estimators_
     n_features = operator.raw_operator.n_features_
     classes = operator.raw_operator.classes_.tolist()
+
+    # For Sklearn Trees we need to know how many trees are there for normalization.
+    extra_config[constants.NUM_TREES] = len(tree_infos)
 
     # Analyze classes.
     if not all(isinstance(c, int) for c in classes):
@@ -62,6 +66,9 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator.estimators_
     n_features = operator.raw_operator.n_features_
+
+    # For Sklearn Trees we need to know how many trees are there for normalization.
+    extra_config[constants.NUM_TREES] = len(tree_infos)
 
     return convert_decision_ensemble_tree_common(
         tree_infos,

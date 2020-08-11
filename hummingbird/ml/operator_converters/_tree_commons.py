@@ -183,7 +183,7 @@ def get_parameters_for_sklearn_common(tree_infos):
     return TreeParameters(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, n_trees):
+def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, extra_config={}):
     """
     Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
 
@@ -204,7 +204,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         rights = [2, -1, -1]
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
-        n_classes = values.shape[1]
+        n_classes = values.shape[1] if type(values) is np.ndarray else 1
         values = np.array([np.array([0.0]), values[0], values[0]])
         values.reshape(3, n_classes)
 
@@ -250,7 +250,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     return [nodes_map, ids, lefts, rights, features, thresholds, values]
 
 
-def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, n_trees):
+def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, extra_config={}):
     """
     This function is used to generate tree parameters for sklearn trees.
     Includes SklearnRandomForestClassifier/Regressor, and SklearnGradientBoostingClassifier.
@@ -271,12 +271,13 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
         values = values.reshape(values.shape[0], -1)
     if values.shape[1] > 1:
         values /= np.sum(values, axis=1, keepdims=True)
-    values /= n_trees
+    if constants.NUM_TREES in extra_config:
+        values /= extra_config[constants.NUM_TREES]
 
     return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, n_trees):
+def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, extra_config={}):
     """
     Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
 
@@ -291,6 +292,10 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
     Returns:
         The weights and bias for the GEMM implementation
     """
+    values = np.array(values)
+    weights = []
+    biases = []
+
     if len(lefts) == 1:
         # Model creating trees with just a single leaf node. We transform it
         # to a model with one internal node.
@@ -298,11 +303,9 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
         rights = [2, -1, -1]
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
-        values = [np.array([0.0]), values[0], values[0]]
-
-    values = np.array(values)
-    weights = []
-    biases = []
+        n_classes = values.shape[1]
+        values = np.array([np.array([0.0]), values[0], values[0]])
+        values.reshape(3, n_classes)
 
     # First hidden layer has all inequalities.
     hidden_weights = []
@@ -347,10 +350,14 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
                     raise RuntimeError("Inconsistent state encountered while tree translation.")
 
             if values.shape[-1] > 1:
-                class_proba.append((values[i] / np.sum(values[i])).flatten())
+                proba = (values[i] / np.sum(values[i])).flatten()
             else:
                 # We have only a single value. e.g., GBDT
-                class_proba.append(values[i].flatten())
+                proba = values[i].flatten()
+            # Some Sklearn tree implementations require normalization.
+            if constants.NUM_TREES in extra_config:
+                proba /= extra_config[constants.NUM_TREES]
+            class_proba.append(proba)
 
             hidden_weights.append(vec)
             hidden_biases.append(num_positive)
@@ -387,7 +394,7 @@ def convert_decision_ensemble_tree_common(
                 tree_param.thresholds,
                 tree_param.values,
                 n_features,
-                len(tree_parameters),
+                extra_config,
             )
             for tree_param in tree_parameters
         ]
@@ -395,12 +402,7 @@ def convert_decision_ensemble_tree_common(
 
     net_parameters = [
         get_parameters_for_tree_trav(
-            tree_param.lefts,
-            tree_param.rights,
-            tree_param.features,
-            tree_param.thresholds,
-            tree_param.values,
-            len(tree_parameters),
+            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, extra_config,
         )
         for tree_param in tree_parameters
     ]

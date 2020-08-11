@@ -34,3 +34,6 @@ ONNX_INPUTS = "onnx_inputs"
 
 ONNX_TEST_INPUT = "onnx_test_input"
 """The test input data for the onnx model"""
+
+NUM_TREES = "n_trees"
+"""Number of trees composing an ensemble"""

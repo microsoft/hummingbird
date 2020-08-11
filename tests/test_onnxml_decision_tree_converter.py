@@ -121,19 +121,6 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
         model.fit(X, y)
         self._test_regressor(X, model)
 
-    # Regression test with Random Forest, 3 estimators.
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
-    def test_random_forest_regressor_2(self):
-        warnings.filterwarnings("ignore")
-        model = RandomForestRegressor(n_estimators=3)
-        X = [[0, 1], [1, 1], [2, 0]]
-        X = np.array(X, dtype=np.float32)
-        y = np.array([100, -10, 50], dtype=np.float32)
-        model.fit(X, y)
-        self._test_regressor(X, model)
-
     # Basic regression test with Random Forest.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
@@ -246,20 +233,7 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
         model.fit(X, y)
         self._test_classifier(X, model)
 
-    # Multiclass classification test with RandomForest 3 estimators (taken from ONNXMLTOOLS).
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
-    def test_random_forest_classifier_multi(self):
-        warnings.filterwarnings("ignore")
-        model = RandomForestClassifier(n_estimators=1)
-        X = [[0, 1], [1, 1], [2, 0], [0.5, 0.5], [1.1, 1.1], [2.1, 0.1]]
-        X = np.array(X, dtype=np.float32)
-        y = [0, 1, 2, 1, 1, 2]
-        model.fit(X, y)
-        self._test_classifier(X, model)
-
-    # Multiclass classification test with Random Forest, random.
+    # Multiclass classification test with Random Forest.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
