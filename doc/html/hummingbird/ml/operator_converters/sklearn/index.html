@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.skl_scaler API documentation</title>
-<meta name="description" content="" />
+<title>hummingbird.ml.operator_converters.sklearn API documentation</title>
+<meta name="description" content="All scikit-learn operators converters are stored under this package." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,16 +13,17 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/skl_scaler.html">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/sklearn/">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.skl_scaler</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn</code></h1>
 </header>
 <section id="section-intro">
+<p>All scikit-learn operators converters are stored under this package.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -33,118 +34,64 @@
 # license information.
 # --------------------------------------------------------------------------
 
-import torch
-import numpy as np
-from onnxconverter_common.registration import register_converter
-
-from ._base_operator import BaseOperator
-from ._scaler_implementations import Scaler
-
-
-def convert_sklearn_robust_scaler(operator, device, extra_config):
-    scale = operator.raw_operator.scale_
-    if scale is not None:
-        scale = np.reciprocal(scale)
-    return Scaler(operator.raw_operator.center_, scale, device)
-
-
-def convert_sklearn_max_abs_scaler(operator, device, extra_config):
-    scale = operator.raw_operator.scale_
-    if scale is not None:
-        scale = np.reciprocal(scale)
-    return Scaler(0, scale, device)
-
-
-def convert_sklearn_min_max_scaler(operator, device, extra_config):
-    scale = [x for x in operator.raw_operator.scale_]
-    offset = [-1.0 / x * y for x, y in zip(operator.raw_operator.scale_, operator.raw_operator.min_)]
-    return Scaler(offset, scale, device)
-
-
-def convert_sklearn_standard_scaler(operator, device, extra_config):
-    scale = operator.raw_operator.scale_
-    if scale is not None:
-        scale = np.reciprocal(scale)
-    return Scaler(operator.raw_operator.mean_, scale, device)
-
-
-register_converter(&#34;SklearnRobustScaler&#34;, convert_sklearn_robust_scaler)
-register_converter(&#34;SklearnMaxAbsScaler&#34;, convert_sklearn_max_abs_scaler)
-register_converter(&#34;SklearnMinMaxScaler&#34;, convert_sklearn_min_max_scaler)
-register_converter(&#34;SklearnStandardScaler&#34;, convert_sklearn_standard_scaler)</code></pre>
+&#34;&#34;&#34;
+All scikit-learn operators converters are stored under this package.
+&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
-</section>
-<section>
-</section>
-<section>
-<h2 class="section-title" id="header-functions">Functions</h2>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_max_abs_scaler"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_max_abs_scaler</span></span>(<span>operator, device, extra_config)</span>
-</code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.lightgbm" href="lightgbm.html">hummingbird.ml.operator_converters.sklearn.lightgbm</a></code></dt>
 <dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def convert_sklearn_max_abs_scaler(operator, device, extra_config):
-    scale = operator.raw_operator.scale_
-    if scale is not None:
-        scale = np.reciprocal(scale)
-    return Scaler(0, scale, device)</code></pre>
-</details>
+<div class="desc"><p>Converters for LightGBM models.</p></div>
 </dd>
-<dt id="hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_min_max_scaler"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_min_max_scaler</span></span>(<span>operator, device, extra_config)</span>
-</code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor" href="skl_array_feature_extractor.html">hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor</a></code></dt>
 <dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def convert_sklearn_min_max_scaler(operator, device, extra_config):
-    scale = [x for x in operator.raw_operator.scale_]
-    offset = [-1.0 / x * y for x, y in zip(operator.raw_operator.scale_, operator.raw_operator.min_)]
-    return Scaler(offset, scale, device)</code></pre>
-</details>
+<div class="desc"><p>Converters for scikit-learn feature selectors: SelectKBest, SelectPercentile, VarianceThreshold.</p></div>
 </dd>
-<dt id="hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_robust_scaler"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_robust_scaler</span></span>(<span>operator, device, extra_config)</span>
-</code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_decision_tree" href="skl_decision_tree.html">hummingbird.ml.operator_converters.sklearn.skl_decision_tree</a></code></dt>
 <dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def convert_sklearn_robust_scaler(operator, device, extra_config):
-    scale = operator.raw_operator.scale_
-    if scale is not None:
-        scale = np.reciprocal(scale)
-    return Scaler(operator.raw_operator.center_, scale, device)</code></pre>
-</details>
+<div class="desc"><p>Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees.</p></div>
 </dd>
-<dt id="hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_standard_scaler"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_standard_scaler</span></span>(<span>operator, device, extra_config)</span>
-</code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_gbdt" href="skl_gbdt.html">hummingbird.ml.operator_converters.sklearn.skl_gbdt</a></code></dt>
 <dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def convert_sklearn_standard_scaler(operator, device, extra_config):
-    scale = operator.raw_operator.scale_
-    if scale is not None:
-        scale = np.reciprocal(scale)
-    return Scaler(operator.raw_operator.mean_, scale, device)</code></pre>
-</details>
+<div class="desc"><p>Converters for Sklearn's GradientBoosting models.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest" href="skl_iforest.html">hummingbird.ml.operator_converters.sklearn.skl_iforest</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn isolation forest.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_linear" href="skl_linear.html">hummingbird.ml.operator_converters.sklearn.skl_linear</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn linear models: LinearRegression, LogisticRegression, LinearSVC, SGDClassifier, LogisticRegressionCV.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_normalizer" href="skl_normalizer.html">hummingbird.ml.operator_converters.sklearn.skl_normalizer</a></code></dt>
+<dd>
+<div class="desc"><p>Converter for scikit-learn Normalizer.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder" href="skl_one_hot_encoder.html">hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder</a></code></dt>
+<dd>
+<div class="desc"><p>Converter for scikit-learn one hot encoder.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_scaler" href="skl_scaler.html">hummingbird.ml.operator_converters.sklearn.skl_scaler</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn scalers: RobustScaler, MaxAbsScaler, MinMaxScaler, StandardScaler.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_sv" href="skl_sv.html">hummingbird.ml.operator_converters.sklearn.skl_sv</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn SV models: SVC, NuSVC.
+(LinearSVC is covered by linear_classifier.py).</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.xgb" href="xgb.html">hummingbird.ml.operator_converters.sklearn.xgb</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for XGBoost models.</p></div>
 </dd>
 </dl>
+</section>
+<section>
+</section>
+<section>
 </section>
 <section>
 </section>
@@ -161,15 +108,22 @@ register_converter(&#34;SklearnStandardScaler&#34;, convert_sklearn_standard_sca
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.ml.operator_converters" href="index.html">hummingbird.ml.operator_converters</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters" href="../index.html">hummingbird.ml.operator_converters</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_max_abs_scaler" href="#hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_max_abs_scaler">convert_sklearn_max_abs_scaler</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_min_max_scaler" href="#hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_min_max_scaler">convert_sklearn_min_max_scaler</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_robust_scaler" href="#hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_robust_scaler">convert_sklearn_robust_scaler</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_standard_scaler" href="#hummingbird.ml.operator_converters.skl_scaler.convert_sklearn_standard_scaler">convert_sklearn_standard_scaler</a></code></li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.lightgbm" href="lightgbm.html">hummingbird.ml.operator_converters.sklearn.lightgbm</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor" href="skl_array_feature_extractor.html">hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_decision_tree" href="skl_decision_tree.html">hummingbird.ml.operator_converters.sklearn.skl_decision_tree</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_gbdt" href="skl_gbdt.html">hummingbird.ml.operator_converters.sklearn.skl_gbdt</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest" href="skl_iforest.html">hummingbird.ml.operator_converters.sklearn.skl_iforest</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_linear" href="skl_linear.html">hummingbird.ml.operator_converters.sklearn.skl_linear</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_normalizer" href="skl_normalizer.html">hummingbird.ml.operator_converters.sklearn.skl_normalizer</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder" href="skl_one_hot_encoder.html">hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_scaler" href="skl_scaler.html">hummingbird.ml.operator_converters.sklearn.skl_scaler</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_sv" href="skl_sv.html">hummingbird.ml.operator_converters.sklearn.skl_sv</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.xgb" href="xgb.html">hummingbird.ml.operator_converters.sklearn.xgb</a></code></li>
 </ul>
 </li>
 </ul>

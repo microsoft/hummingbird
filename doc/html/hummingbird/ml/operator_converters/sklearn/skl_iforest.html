@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.skl_iforest API documentation</title>
+<title>hummingbird.ml.operator_converters.sklearn.skl_iforest API documentation</title>
 <meta name="description" content="Converters for scikit-learn isolation forest." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -13,14 +13,14 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/skl_iforest.html">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/sklearn/skl_iforest.html">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.skl_iforest</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.skl_iforest</code></h1>
 </header>
 <section id="section-intro">
 <p>Converters for scikit-learn isolation forest.</p>
@@ -37,13 +37,18 @@
 &#34;&#34;&#34;
 Converters for scikit-learn isolation forest.
 &#34;&#34;&#34;
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from . import constants
-from ._tree_commons import get_parameters_for_sklearn_common, \
-    get_parameters_for_tree_trav_sklearn, get_tree_params_and_type, get_parameters_for_gemm_common
-from ._tree_implementations import TreeImpl, GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl
+from .. import constants
+from .._tree_commons import (
+    get_parameters_for_sklearn_common,
+    get_parameters_for_tree_trav_sklearn,
+    get_tree_params_and_type,
+    get_parameters_for_gemm_common,
+)
+from .._tree_implementations import TreeImpl, GEMMTreeImpl, TreeTraversalTreeImpl, PerfectTreeTraversalTreeImpl
 
 
 def _average_path_length(n_samples_leaf):
@@ -67,8 +72,8 @@ def _average_path_length(n_samples_leaf):
     mask_2 = n_samples_leaf == 2
     not_mask = ~np.logical_or(mask_1, mask_2)
 
-    average_path_length[mask_1] = 0.
-    average_path_length[mask_2] = 1.
+    average_path_length[mask_1] = 0.0
+    average_path_length[mask_2] = 1.0
     average_path_length[not_mask] = (
         2.0 * (np.log(n_samples_leaf[not_mask] - 1.0) + np.euler_gamma)
         - 2.0 * (n_samples_leaf[not_mask] - 1.0) / n_samples_leaf[not_mask]
@@ -111,12 +116,9 @@ def _get_parameters_for_sklearn_iforest(tree_infos):
         The tree parameters wrapped into an instance of `operator_converters._tree_commons_TreeParameters`
     &#34;&#34;&#34;
     tree_parameters = get_parameters_for_sklearn_common(tree_infos)
-    tree_parameters.values = (
-        _get_iforest_anomaly_score_per_node(tree_parameters.lefts,
-                                            tree_parameters.rights,
-                                            tree_infos.tree_.n_node_samples)
-        .reshape(tree_parameters.values.shape)
-    )
+    tree_parameters.values = _get_iforest_anomaly_score_per_node(
+        tree_parameters.lefts, tree_parameters.rights, tree_infos.tree_.n_node_samples
+    ).reshape(tree_parameters.values.shape)
     return tree_parameters
 
 
@@ -149,7 +151,7 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
         if self.final_probability_divider &gt; 1:
             output = output / self.final_probability_divider
         # Further normalize to match &#34;decision_function&#34; in sklearn implementation.
-        output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
         return output
 
 
@@ -184,7 +186,7 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
         if self.final_probability_divider &gt; 1:
             output = output / self.final_probability_divider
         # Further normalize to match &#34;decision_function&#34; in sklearn implementation.
-        output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
         return output
 
 
@@ -219,7 +221,7 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
         if self.final_probability_divider &gt; 1:
             output = output / self.final_probability_divider
         # Further normalize to match &#34;decision_function&#34; in sklearn implementation.
-        output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
         return output
 
 
@@ -247,15 +249,15 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     # Predict in isolation forest sklearn implementation produce 2 classes: -1 (normal) &amp; 1 (anomaly).
     classes = [-1, 1]
 
-    tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, _get_parameters_for_sklearn_iforest,
-                                                                     extra_config)
+    tree_parameters, max_depth, tree_type = get_tree_params_and_type(
+        tree_infos, _get_parameters_for_sklearn_iforest, extra_config
+    )
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
         net_parameters = [
             get_parameters_for_gemm_common(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values,
-                n_features
+                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
             )
             for tree_param in tree_parameters
         ]
@@ -268,11 +270,11 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes,
-                                                extra_config=extra_config)
+        return TreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes, extra_config=extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
-        return PerfectTreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes,
-                                                       extra_config=extra_config)
+        return PerfectTreeTraversalIsolationForestImpl(
+            net_parameters, max_depth, n_features, classes, extra_config=extra_config
+        )
 
 
 # Register the converters.
@@ -286,7 +288,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.skl_iforest.convert_sklearn_isolation_forest"><code class="name flex">
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_iforest.convert_sklearn_isolation_forest"><code class="name flex">
 <span>def <span class="ident">convert_sklearn_isolation_forest</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
@@ -333,15 +335,15 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
     # Predict in isolation forest sklearn implementation produce 2 classes: -1 (normal) &amp; 1 (anomaly).
     classes = [-1, 1]
 
-    tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, _get_parameters_for_sklearn_iforest,
-                                                                     extra_config)
+    tree_parameters, max_depth, tree_type = get_tree_params_and_type(
+        tree_infos, _get_parameters_for_sklearn_iforest, extra_config
+    )
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
         net_parameters = [
             get_parameters_for_gemm_common(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values,
-                n_features
+                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
             )
             for tree_param in tree_parameters
         ]
@@ -354,11 +356,11 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes,
-                                                extra_config=extra_config)
+        return TreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes, extra_config=extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
-        return PerfectTreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes,
-                                                       extra_config=extra_config)</code></pre>
+        return PerfectTreeTraversalIsolationForestImpl(
+            net_parameters, max_depth, n_features, classes, extra_config=extra_config
+        )</code></pre>
 </details>
 </dd>
 </dl>
@@ -366,7 +368,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.skl_iforest.GEMMIsolationForestImpl"><code class="flex name class">
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_iforest.GEMMIsolationForestImpl"><code class="flex name class">
 <span>class <span class="ident">GEMMIsolationForestImpl</span></span>
 <span>(</span><span>tree_parameters, n_features, classes=None, extra_config={})</span>
 </code></dt>
@@ -415,7 +417,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
         if self.final_probability_divider &gt; 1:
             output = output / self.final_probability_divider
         # Further normalize to match &#34;decision_function&#34; in sklearn implementation.
-        output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
         return output</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -429,7 +431,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="hummingbird.ml.operator_converters.skl_iforest.GEMMIsolationForestImpl.aggregation"><code class="name flex">
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_iforest.GEMMIsolationForestImpl.aggregation"><code class="name flex">
 <span>def <span class="ident">aggregation</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
@@ -453,13 +455,13 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
     if self.final_probability_divider &gt; 1:
         output = output / self.final_probability_divider
     # Further normalize to match &#34;decision_function&#34; in sklearn implementation.
-    output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+    output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
     return output</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
-<dt id="hummingbird.ml.operator_converters.skl_iforest.PerfectTreeTraversalIsolationForestImpl"><code class="flex name class">
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_iforest.PerfectTreeTraversalIsolationForestImpl"><code class="flex name class">
 <span>class <span class="ident">PerfectTreeTraversalIsolationForestImpl</span></span>
 <span>(</span><span>tree_parameters, max_depth, n_features, classes=None, extra_config={})</span>
 </code></dt>
@@ -513,7 +515,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
         if self.final_probability_divider &gt; 1:
             output = output / self.final_probability_divider
         # Further normalize to match &#34;decision_function&#34; in sklearn implementation.
-        output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
         return output</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -527,7 +529,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="hummingbird.ml.operator_converters.skl_iforest.PerfectTreeTraversalIsolationForestImpl.aggregation"><code class="name flex">
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_iforest.PerfectTreeTraversalIsolationForestImpl.aggregation"><code class="name flex">
 <span>def <span class="ident">aggregation</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
@@ -551,13 +553,13 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
     if self.final_probability_divider &gt; 1:
         output = output / self.final_probability_divider
     # Further normalize to match &#34;decision_function&#34; in sklearn implementation.
-    output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+    output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
     return output</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
-<dt id="hummingbird.ml.operator_converters.skl_iforest.TreeTraversalIsolationForestImpl"><code class="flex name class">
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_iforest.TreeTraversalIsolationForestImpl"><code class="flex name class">
 <span>class <span class="ident">TreeTraversalIsolationForestImpl</span></span>
 <span>(</span><span>tree_parameters, max_depth, n_features, classes=None, extra_config={})</span>
 </code></dt>
@@ -611,7 +613,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
         if self.final_probability_divider &gt; 1:
             output = output / self.final_probability_divider
         # Further normalize to match &#34;decision_function&#34; in sklearn implementation.
-        output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
         return output</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -625,7 +627,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="hummingbird.ml.operator_converters.skl_iforest.TreeTraversalIsolationForestImpl.aggregation"><code class="name flex">
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_iforest.TreeTraversalIsolationForestImpl.aggregation"><code class="name flex">
 <span>def <span class="ident">aggregation</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
@@ -649,7 +651,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
     if self.final_probability_divider &gt; 1:
         output = output / self.final_probability_divider
     # Further normalize to match &#34;decision_function&#34; in sklearn implementation.
-    output = -1.0 * 2**(-output / self.average_path_length) - self.offset
+    output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
     return output</code></pre>
 </details>
 </dd>
@@ -670,32 +672,32 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.ml.operator_converters" href="index.html">hummingbird.ml.operator_converters</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn" href="index.html">hummingbird.ml.operator_converters.sklearn</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.skl_iforest.convert_sklearn_isolation_forest" href="#hummingbird.ml.operator_converters.skl_iforest.convert_sklearn_isolation_forest">convert_sklearn_isolation_forest</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest.convert_sklearn_isolation_forest" href="#hummingbird.ml.operator_converters.sklearn.skl_iforest.convert_sklearn_isolation_forest">convert_sklearn_isolation_forest</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="hummingbird.ml.operator_converters.skl_iforest.GEMMIsolationForestImpl" href="#hummingbird.ml.operator_converters.skl_iforest.GEMMIsolationForestImpl">GEMMIsolationForestImpl</a></code></h4>
+<h4><code><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest.GEMMIsolationForestImpl" href="#hummingbird.ml.operator_converters.sklearn.skl_iforest.GEMMIsolationForestImpl">GEMMIsolationForestImpl</a></code></h4>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.skl_iforest.GEMMIsolationForestImpl.aggregation" href="#hummingbird.ml.operator_converters.skl_iforest.GEMMIsolationForestImpl.aggregation">aggregation</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest.GEMMIsolationForestImpl.aggregation" href="#hummingbird.ml.operator_converters.sklearn.skl_iforest.GEMMIsolationForestImpl.aggregation">aggregation</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="hummingbird.ml.operator_converters.skl_iforest.PerfectTreeTraversalIsolationForestImpl" href="#hummingbird.ml.operator_converters.skl_iforest.PerfectTreeTraversalIsolationForestImpl">PerfectTreeTraversalIsolationForestImpl</a></code></h4>
+<h4><code><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest.PerfectTreeTraversalIsolationForestImpl" href="#hummingbird.ml.operator_converters.sklearn.skl_iforest.PerfectTreeTraversalIsolationForestImpl">PerfectTreeTraversalIsolationForestImpl</a></code></h4>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.skl_iforest.PerfectTreeTraversalIsolationForestImpl.aggregation" href="#hummingbird.ml.operator_converters.skl_iforest.PerfectTreeTraversalIsolationForestImpl.aggregation">aggregation</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest.PerfectTreeTraversalIsolationForestImpl.aggregation" href="#hummingbird.ml.operator_converters.sklearn.skl_iforest.PerfectTreeTraversalIsolationForestImpl.aggregation">aggregation</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="hummingbird.ml.operator_converters.skl_iforest.TreeTraversalIsolationForestImpl" href="#hummingbird.ml.operator_converters.skl_iforest.TreeTraversalIsolationForestImpl">TreeTraversalIsolationForestImpl</a></code></h4>
+<h4><code><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest.TreeTraversalIsolationForestImpl" href="#hummingbird.ml.operator_converters.sklearn.skl_iforest.TreeTraversalIsolationForestImpl">TreeTraversalIsolationForestImpl</a></code></h4>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.skl_iforest.TreeTraversalIsolationForestImpl.aggregation" href="#hummingbird.ml.operator_converters.skl_iforest.TreeTraversalIsolationForestImpl.aggregation">aggregation</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest.TreeTraversalIsolationForestImpl.aggregation" href="#hummingbird.ml.operator_converters.sklearn.skl_iforest.TreeTraversalIsolationForestImpl.aggregation">aggregation</a></code></li>
 </ul>
 </li>
 </ul>

@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.onnxml_scaler API documentation</title>
-<meta name="description" content="" />
+<title>hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder API documentation</title>
+<meta name="description" content="Converter for scikit-learn one hot encoder." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,16 +13,17 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/onnxml_scaler.html">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/sklearn/skl_one_hot_encoder.html">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.onnxml_scaler</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder</code></h1>
 </header>
 <section id="section-intro">
+<p>Converter for scikit-learn one hot encoder.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -32,43 +33,37 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
+
+&#34;&#34;&#34;
+Converter for scikit-learn one hot encoder.
+&#34;&#34;&#34;
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
-import torch
 
-from ._base_operator import BaseOperator
-from ._scaler_implementations import Scaler
+from .._one_hot_encoder_implementations import OneHotEncoderString, OneHotEncoder
 
 
-def convert_onnx_scaler(operator, device=None, extra_config={}):
+def convert_sklearn_one_hot_encoder(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.ml.Scaler`
+    Converter for `sklearn.preprocessing.OneHotEncoder`
 
     Args:
-        operator: An operator wrapping a `ai.onnx.ml.Scaler` model
+        operator: An operator wrapping a `sklearn.preprocessing.OneHotEncoder` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-
-    operator = operator.raw_operator
-    offset = scale = None
-
-    for attr in operator.origin.attribute:
-        if attr.name == &#34;offset&#34;:
-            offset = np.array(attr.floats).astype(&#34;float32&#34;)
-        if attr.name == &#34;scale&#34;:
-            scale = np.array(attr.floats).astype(&#34;float32&#34;)
-
-    if any(v is None for v in [offset, scale]):
-        raise RuntimeError(&#34;Error parsing Scalar, found unexpected None&#34;)
-
-    return Scaler(offset, scale, device)
+    if all([np.array(c).dtype == object for c in operator.raw_operator.categories_]):
+        categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
+        return OneHotEncoderString(categories, device)
+    else:
+        return OneHotEncoder(operator.raw_operator.categories_, device)
 
 
-register_converter(&#34;ONNXMLScaler&#34;, convert_onnx_scaler)</code></pre>
+register_converter(&#34;SklearnOneHotEncoder&#34;, convert_sklearn_one_hot_encoder)</code></pre>
 </details>
 </section>
 <section>
@@ -78,15 +73,15 @@ register_converter(&#34;ONNXMLScaler&#34;, convert_onnx_scaler)</code></pre>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.onnxml_scaler.convert_onnx_scaler"><code class="name flex">
-<span>def <span class="ident">convert_onnx_scaler</span></span>(<span>operator, device=None, extra_config={})</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder.convert_sklearn_one_hot_encoder"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_one_hot_encoder</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>ai.onnx.ml.Scaler</code></p>
+<div class="desc"><p>Converter for <code>sklearn.preprocessing.OneHotEncoder</code></p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>ai.onnx.ml.Scaler</code> model</dd>
+<dd>An operator wrapping a <code>sklearn.preprocessing.OneHotEncoder</code> model</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -101,32 +96,23 @@ register_converter(&#34;ONNXMLScaler&#34;, convert_onnx_scaler)</code></pre>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def convert_onnx_scaler(operator, device=None, extra_config={}):
+<pre><code class="python">def convert_sklearn_one_hot_encoder(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.ml.Scaler`
+    Converter for `sklearn.preprocessing.OneHotEncoder`
 
     Args:
-        operator: An operator wrapping a `ai.onnx.ml.Scaler` model
+        operator: An operator wrapping a `sklearn.preprocessing.OneHotEncoder` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-
-    operator = operator.raw_operator
-    offset = scale = None
-
-    for attr in operator.origin.attribute:
-        if attr.name == &#34;offset&#34;:
-            offset = np.array(attr.floats).astype(&#34;float32&#34;)
-        if attr.name == &#34;scale&#34;:
-            scale = np.array(attr.floats).astype(&#34;float32&#34;)
-
-    if any(v is None for v in [offset, scale]):
-        raise RuntimeError(&#34;Error parsing Scalar, found unexpected None&#34;)
-
-    return Scaler(offset, scale, device)</code></pre>
+    if all([np.array(c).dtype == object for c in operator.raw_operator.categories_]):
+        categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
+        return OneHotEncoderString(categories, device)
+    else:
+        return OneHotEncoder(operator.raw_operator.categories_, device)</code></pre>
 </details>
 </dd>
 </dl>
@@ -146,12 +132,12 @@ register_converter(&#34;ONNXMLScaler&#34;, convert_onnx_scaler)</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.ml.operator_converters" href="index.html">hummingbird.ml.operator_converters</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn" href="index.html">hummingbird.ml.operator_converters.sklearn</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.onnxml_scaler.convert_onnx_scaler" href="#hummingbird.ml.operator_converters.onnxml_scaler.convert_onnx_scaler">convert_onnx_scaler</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder.convert_sklearn_one_hot_encoder" href="#hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder.convert_sklearn_one_hot_encoder">convert_sklearn_one_hot_encoder</a></code></li>
 </ul>
 </li>
 </ul>
