@@ -79,8 +79,6 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
                 self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
                 self.perform_class_select = True
 
-        self.post_transform = lambda x: x
-
 
 class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     """
@@ -154,8 +152,6 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         x = x.view(self.n_trees, self.hidden_three_size, -1)
 
         x = self.aggregation(x)
-
-        x = self.post_transform(x)
 
         if self.regression:
             return x
@@ -236,8 +232,6 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         output = torch.index_select(self.values, 0, indexes).view(-1, self.num_trees, self.n_classes)
 
         output = self.aggregation(output)
-
-        output = self.post_transform(output)
 
         if self.regression:
             return output
@@ -326,8 +320,6 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         output = torch.index_select(self.leaf_nodes, 0, prev_indices.view(-1)).view(-1, self.num_trees, self.n_classes)
 
         output = self.aggregation(output)
-
-        output = self.post_transform(output)
 
         if self.regression:
             return output
@@ -460,6 +452,8 @@ class GEMMGBDTImpl(GEMMTreeImpl):
         super(GEMMGBDTImpl, self).__init__(tree_parameters, n_features, classes, 1)
 
         self.n_gbdt_classes = 1
+        self.post_transform = lambda x: x
+
         if constants.POST_TRANSFORM in extra_config:
             self.post_transform = extra_config[constants.POST_TRANSFORM]
 
@@ -469,7 +463,9 @@ class GEMMGBDTImpl(GEMMTreeImpl):
         self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
 
     def aggregation(self, x):
-        return torch.squeeze(x).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+        output = torch.squeeze(x).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+
+        return self.post_transform(output)
 
 
 class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
@@ -489,6 +485,8 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
         super(TreeTraversalGBDTImpl, self).__init__(tree_parameters, max_detph, n_features, classes, 1)
 
         self.n_gbdt_classes = 1
+        self.post_transform = lambda x: x
+
         if constants.POST_TRANSFORM in extra_config:
             self.post_transform = extra_config[constants.POST_TRANSFORM]
 
@@ -498,7 +496,9 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
         self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
 
     def aggregation(self, x):
-        return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+        output = x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+
+        return self.post_transform(output)
 
 
 class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
@@ -518,6 +518,8 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
         super(PerfectTreeTraversalGBDTImpl, self).__init__(tree_parameters, max_depth, n_features, classes, 1)
 
         self.n_gbdt_classes = 1
+        self.post_transform = lambda x: x
+
         if constants.POST_TRANSFORM in extra_config:
             self.post_transform = extra_config[constants.POST_TRANSFORM]
 
@@ -527,4 +529,6 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
         self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
 
     def aggregation(self, x):
-        return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+        output = x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+
+        return self.post_transform(output)
