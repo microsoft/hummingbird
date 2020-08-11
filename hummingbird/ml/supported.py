@@ -20,6 +20,7 @@ GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
+IsolationForest,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -27,13 +28,16 @@ LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
 Normalizer,
+OneHotEncoder,
 RandomForestClassifier,
 RandomForestRegressor,
 RobustScaler,
+SelectKBest,
 SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,
+VarianceThreshold,
 
 LGBMClassifier,
 LGBMRanker,
@@ -64,6 +68,7 @@ def _build_sklearn_operator_list():
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
             HistGradientBoostingRegressor,
+            IsolationForest,
             RandomForestClassifier,
             RandomForestRegressor,
         )
@@ -82,7 +87,10 @@ def _build_sklearn_operator_list():
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
         # Preprocessing
-        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, RobustScaler, StandardScaler
+        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, OneHotEncoder, RobustScaler, StandardScaler
+
+        # Features
+        from sklearn.feature_selection import SelectKBest, VarianceThreshold
 
         return [
             # Trees
@@ -94,6 +102,8 @@ def _build_sklearn_operator_list():
             GradientBoostingRegressor,
             HistGradientBoostingClassifier,
             HistGradientBoostingRegressor,
+            IsolationForest,
+            OneHotEncoder,
             RandomForestClassifier,
             RandomForestRegressor,
             # Linear-methods
@@ -111,6 +121,9 @@ def _build_sklearn_operator_list():
             Normalizer,
             RobustScaler,
             StandardScaler,
+            # Feature selection
+            SelectKBest,
+            VarianceThreshold,
         ]
 
     return []
@@ -149,10 +162,16 @@ def _build_onnxml_operator_list():
         return [
             # Linear-based models
             "LinearClassifier",
+            "LinearRegressor",
             # ONNX operators.
             "Cast",
+            "Concat",
+            "Reshape",
             # Preprocessing
+            "ArrayFeatureExtractor",
+            "OneHotEncoder",
             "Normalizer",
+            "Scaler",
             # Tree-based models
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",

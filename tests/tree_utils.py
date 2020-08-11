@@ -12,3 +12,9 @@ dt_implementation_map = {
     "perf_tree_trav": "<class 'hummingbird.ml.operator_converters._tree_implementations.PerfectTreeTraversalDecisionTreeImpl'>",
     "gemm": "<class 'hummingbird.ml.operator_converters._tree_implementations.GEMMDecisionTreeImpl'>",
 }
+
+iforest_implementation_map = {
+    "tree_trav": "<class 'hummingbird.ml.operator_converters.sklearn.skl_iforest.TreeTraversalIsolationForestImpl'>",
+    "perf_tree_trav": "<class 'hummingbird.ml.operator_converters.sklearn.skl_iforest.PerfectTreeTraversalIsolationForestImpl'>",
+    "gemm": "<class 'hummingbird.ml.operator_converters.sklearn.skl_iforest.GEMMIsolationForestImpl'>",
+}

@@ -3,11 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
-import torch
+
 from onnxconverter_common.registration import register_converter
 
-from ._base_operator import BaseOperator
-from ._normalizer_implementations import Normalizer
+from .._normalizer_implementations import Normalizer
+
+"""
+Converter for ONNX-ML Normalizer.
+"""
 
 
 def convert_onnx_normalizer(operator, device=None, extra_config={}):

@@ -4,16 +4,16 @@
 # license information.
 # --------------------------------------------------------------------------
 
-import torch
-import scipy
+"""
+Converters for scikit-learn SV models: SVC, NuSVC.  (LinearSVC is covered by linear_classifier.py).
+"""
+
 import numpy as np
+import scipy
+import torch
 from onnxconverter_common.registration import register_converter
 
-from ._base_operator import BaseOperator
-
-"""
-Converters for scikit-learn linear models: SVC, NuSVC.  (LinearSVC is covered by linear_classifier.py)
-"""
+from .._base_operator import BaseOperator
 
 
 class SVC(BaseOperator, torch.nn.Module):

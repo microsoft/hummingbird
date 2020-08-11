@@ -11,14 +11,14 @@ Converters for ONNX-ML tree-ensemble models.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from . import constants
-from ._tree_commons import (
+from .. import constants
+from .._tree_commons import (
     convert_decision_ensemble_tree_common,
     get_parameters_for_tree_trav_common,
     get_parameters_for_tree_trav_sklearn,
 )
-from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
-from ._tree_commons import TreeParameters
+from .._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
+from .._tree_commons import TreeParameters
 
 
 def _get_tree_infos_from_onnx_ml_operator(model):

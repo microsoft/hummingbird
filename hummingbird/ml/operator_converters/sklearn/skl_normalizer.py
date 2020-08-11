@@ -3,11 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
-import torch
+
+"""
+Converter for scikit-learn Normalizer.
+"""
+
 from onnxconverter_common.registration import register_converter
 
-from ._base_operator import BaseOperator
-from ._normalizer_implementations import Normalizer
+from .._normalizer_implementations import Normalizer
 
 
 def convert_sklearn_normalizer(operator, device, extra_config):

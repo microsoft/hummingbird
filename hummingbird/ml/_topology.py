@@ -7,13 +7,19 @@
 """
 Converters for topology IR are stored in this file.
 """
+from distutils.version import LooseVersion
 import os
 import torch
 from uuid import uuid4
 
 from onnxconverter_common.registration import get_converter
 
-from ._container import PyTorchBackendModelRegression, PyTorchBackendModelClassification, PyTorchBackendModelTransformer
+from ._container import (
+    PyTorchBackendModelRegression,
+    PyTorchBackendModelClassification,
+    PyTorchBackendModelTransformer,
+    PyTorchBackendModelAnomalyDetection,
+)
 from ._utils import onnx_runtime_installed
 from .exceptions import MissingConverter
 from .operator_converters import constants
@@ -48,8 +54,11 @@ def convert(topology, backend, device=None, extra_config={}):
             converter = get_converter(operator.type)
 
             if backend == onnx_backend:
-                # Pytorch has a bug with exporting GEMM into ONNX.
-                # For the moment only tree_trav is enabled.
+                # vers = LooseVersion(torch.__version__)
+                # allowed_min = LooseVersion("1.6.1")
+                # Pytorch <= 1.6.0 has a bug with exporting GEMM into ONNX.
+                # For the moment only tree_trav is enabled for pytorch <= 1.6.0
+                # if vers < allowed_min:
                 extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
 
             operator_map[operator.full_name] = converter(operator, device, extra_config)
@@ -66,6 +75,9 @@ def convert(topology, backend, device=None, extra_config={}):
     if operator_map[operators[-1].full_name].regression:
         # We are doing a regression task.
         pytorch_container = PyTorchBackendModelRegression
+    elif operator_map[operators[-1].full_name].anomaly_detection:
+        # We are doing anomaly detection.
+        pytorch_container = PyTorchBackendModelAnomalyDetection
     elif operator_map[operators[-1].full_name].transformer:
         # We are just transforming the input data.
         pytorch_container = PyTorchBackendModelTransformer

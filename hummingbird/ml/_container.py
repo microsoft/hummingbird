@@ -9,9 +9,10 @@ All custom model containers are listed here.
 """
 
 import numpy as np
+from onnxconverter_common.container import CommonSklearnModelContainer
 import torch
 
-from onnxconverter_common.container import CommonSklearnModelContainer
+from .operator_converters import constants
 
 
 class CommonONNXModelContainer(CommonSklearnModelContainer):
@@ -44,6 +45,7 @@ class PyTorchBackendModel(torch.nn.Module):
         self.operators = operators
         self.extra_config = extra_config
         self.is_regression = self.operator_map[self.operators[-1].full_name].regression
+        self.anomaly_detection = self.operator_map[self.operators[-1].full_name].anomaly_detection
 
     def forward(self, *inputs):
         with torch.no_grad():
@@ -56,7 +58,7 @@ class PyTorchBackendModel(torch.nn.Module):
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self.input_names):
                 if type(inputs[i]) is np.ndarray:
-                    inputs[i] = torch.from_numpy(inputs[i])
+                    inputs[i] = torch.from_numpy(inputs[i]).float()
                 elif type(inputs[i]) is not torch.Tensor:
                     raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(inputs[i])))
                 if device is not None:
@@ -96,9 +98,12 @@ class PyTorchBackendModelRegression(PyTorchBackendModel):
         Utility functions used to emulate the behavior of the Sklearn API.
         On regression returns the predicted values.
         On classification tasks returns the predicted class labels for the input data.
+        On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
         if self.is_regression:
             return self.forward(*inputs).cpu().numpy().flatten()
+        elif self.anomaly_detection:
+            return self.forward(*inputs)[0].cpu().numpy().flatten()
         else:
             return self.forward(*inputs)[0].cpu().numpy()
 
@@ -110,3 +115,19 @@ class PyTorchBackendModelClassification(PyTorchBackendModelRegression):
         On classification tasks returns the probability estimates.
         """
         return self.forward(*inputs)[1].cpu().numpy()
+
+
+class PyTorchBackendModelAnomalyDetection(PyTorchBackendModelRegression):
+    def decision_function(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision function scores.
+        """
+        return self.forward(*inputs)[1].cpu().numpy().flatten()
+
+    def score_samples(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
+        """
+        return self.decision_function(*inputs) + self.extra_config[constants.OFFSET]

@@ -9,13 +9,11 @@ Converters for scikit-learn decision-tree-based models: DecisionTree, RandomFore
 """
 
 import copy
-
-import torch
 from onnxconverter_common.registration import register_converter
 
-from ._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn
-from ._tree_commons import convert_decision_ensemble_tree_common
-from . import constants
+from .. import constants
+from .._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn
+from .._tree_commons import convert_decision_ensemble_tree_common
 
 
 def convert_sklearn_random_forest_classifier(operator, device, extra_config):

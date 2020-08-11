@@ -18,7 +18,7 @@ if onnx_ml_tools_installed():
     from onnxmltools.convert.common.data_types import FloatTensorType as FloatTensorType_onnx
 
 
-class TestSklearnNormalizer(unittest.TestCase):
+class TestONNXNormalizer(unittest.TestCase):
     def _test_normalizer_converter(self, norm):
         warnings.filterwarnings("ignore")
         X = np.array([[1, 2, 3], [4, 3, 0], [0, 1, 4], [0, 5, 6]], dtype=np.float32)
@@ -35,13 +35,11 @@ class TestSklearnNormalizer(unittest.TestCase):
         # Get the predictions for the ONNX-ML model
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
         output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
-        onnx_ml_pred = [[] for i in range(len(output_names))]
         inputs = {session.get_inputs()[0].name: X}
         onnx_ml_pred = session.run(output_names, inputs)
 
         # Get the predictions for the ONNX model
         session = ort.InferenceSession(onnx_model.SerializeToString())
-        onnx_pred = [[] for i in range(len(output_names))]
         onnx_pred = session.run(output_names, inputs)
 
         return onnx_ml_pred, onnx_pred
