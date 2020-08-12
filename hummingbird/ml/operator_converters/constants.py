@@ -14,6 +14,15 @@ BASE_PREDICTION = "base_prediction"
 LEARNING_RATE = "learning_rate"
 """Learning Rate"""
 
+POST_TRANSFORM = "post_transform"
+"""Post transform for tree inference"""
+
+SIGMOID = "LOGISTIC"
+"""Sigmoid post transform"""
+
+SOFTMAX = "SOFTMAX"
+"""Softmax post transform"""
+
 GET_PARAMETERS_FOR_TREE_TRAVERSAL = "get_parameters_for_tree_trav"
 """Which function to use to extract the parameters for the tree traversal strategy"""
 
@@ -29,8 +38,11 @@ ONNX_INPUTS = "onnx_inputs"
 TEST_INPUT = "test_input"
 """The test input data for models that need to be traced"""
 
-OFFSET = "offset_"
+NUM_TREES = "n_trees"
+"""Number of trees composing an ensemble"""
+
+OFFSET = "offset"
 """offset of the sklearn anomaly detection implementation"""
 
-MAX_SAMPLES = "max_samples_"
+MAX_SAMPLES = "max_samples"
 """max_samples of sklearn isolation forest implementation"""

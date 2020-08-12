@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.skl_linear API documentation</title>
-<meta name="description" content="" />
+<title>hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor API documentation</title>
+<meta name="description" content="Converters for scikit-learn feature selectors: SelectKBest, SelectPercentile, VarianceThreshold." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,19 +13,23 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/skl_linear.html">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/sklearn/skl_array_feature_extractor.html">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.skl_linear</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor</code></h1>
 </header>
 <section id="section-intro">
+<p>Converters for scikit-learn feature selectors: SelectKBest, SelectPercentile, VarianceThreshold.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
+
+<a href="https://github.com/microsoft/hummingbird/blob/12d05a15fb4e9e21f57cfd4ac77a774461fa8b86/hummingbird/ml/operator_converters/sklearn/skl_array_feature_extractor.py#L0-L56" class="git-link">Browse git</a>
+
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -33,57 +37,22 @@
 # license information.
 # --------------------------------------------------------------------------
 
-import torch
+&#34;&#34;&#34;
+Converters for scikit-learn feature selectors: SelectKBest, SelectPercentile, VarianceThreshold.
+&#34;&#34;&#34;
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
-from ._linear_implementations import LinearModel
+
+from .._array_feature_extractor_implementations import ArrayFeatureExtractor
 
 
-&#34;&#34;&#34;
-Converters for scikit-learn linear models: LinearRegression, LogisticRegression, LinearSVC, SGDClassifier, LogisticRegressionCV
-&#34;&#34;&#34;
-
-
-def convert_sklearn_linear_model(operator, device, extra_config):
+def convert_sklearn_select_k_best(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `sklearn.svm.LinearSVC`, `sklearn.linear_model.LogisticRegression`,
-    `sklearn.linear_model.SGDClassifier`, and `sklearn.linear_model.LogisticRegressionCV`
+    Converter for `sklearn.feature_selection.SelectKBest`.
 
     Args:
-        operator: An operator wrapping a `sklearn.svm.LinearSVC`, `sklearn.linear_model.LogisticRegression`,
-            `sklearn.linear_model.SGDClassifier`, or `sklearn.linear_model.LogisticRegressionCV` model
-        device: String defining the type of device the converted operator should be run on
-        extra_config: Extra configuration used to select the best conversion strategy
-
-    Returns:
-        A PyTorch model
-    &#34;&#34;&#34;
-    classes = [0] if not hasattr(operator.raw_operator, &#34;classes_&#34;) else operator.raw_operator.classes_
-
-    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
-        raise RuntimeError(
-            &#34;Hummingbird currently supports only integer labels for class labels. Please file an issue at https://github.com/microsoft/hummingbird.&#34;
-        )
-
-    coefficients = operator.raw_operator.coef_.transpose().astype(&#34;float32&#34;)
-    intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype(&#34;float32&#34;)
-
-    multi_class = None
-    if hasattr(operator.raw_operator, &#34;multi_class&#34;):
-        if operator.raw_operator.multi_class == &#34;ovr&#34; or operator.raw_operator.solver in [&#34;warn&#34;, &#34;liblinear&#34;]:
-            multi_class = &#34;ovr&#34;
-        else:
-            multi_class = &#34;multinomial&#34;
-
-    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)
-
-
-def convert_sklearn_linear_regression_model(operator, device, extra_config):
-    &#34;&#34;&#34;
-    Converter for `sklearn.linear_model.LinearRegression`
-
-    Args:
-        operator: An operator wrapping a `sklearn.linear_model.LinearRegression` model
+        operator: An operator wrapping a `sklearn.feature_selection.SelectKBest` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -91,17 +60,34 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
         A PyTorch model
     &#34;&#34;&#34;
 
-    coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype(&#34;float32&#34;)
-    intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype(&#34;float32&#34;)
+    # TODO FIXME: This will fail with chi2 (Ex: SelectKBest(chi2, k=20))
+    # but pass with SelectKBest(mutual_info_classif, k=20)
+    # See issue #200
+    k = operator.raw_operator.k
+    indices = np.sort(np.array(operator.raw_operator.scores_).argsort()[-k:])
+    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
-    return LinearModel(coefficients, intercepts, device, is_linear_regression=True)
+
+def convert_sklearn_variance_threshold(operator, device, extra_config):
+    &#34;&#34;&#34;
+    Converter for `sklearn.feature_selection.VarianceThreshold`.
+
+    Args:
+        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+    var = operator.raw_operator.variances_
+    threshold = operator.raw_operator.threshold
+    indices = np.array([i for i in range(len(var)) if var[i] &gt; threshold])
+    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
-register_converter(&#34;SklearnLinearRegression&#34;, convert_sklearn_linear_regression_model)
-register_converter(&#34;SklearnLogisticRegression&#34;, convert_sklearn_linear_model)
-register_converter(&#34;SklearnLinearSVC&#34;, convert_sklearn_linear_model)
-register_converter(&#34;SklearnSGDClassifier&#34;, convert_sklearn_linear_model)
-register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear_model)</code></pre>
+register_converter(&#34;SklearnSelectKBest&#34;, convert_sklearn_select_k_best)
+register_converter(&#34;SklearnVarianceThreshold&#34;, convert_sklearn_variance_threshold)</code></pre>
 </details>
 </section>
 <section>
@@ -111,17 +97,15 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.skl_linear.convert_sklearn_linear_model"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_linear_model</span></span>(<span>operator, device, extra_config)</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor.convert_sklearn_select_k_best"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_select_k_best</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>sklearn.svm.LinearSVC</code>, <code>sklearn.linear_model.LogisticRegression</code>,
-<code>sklearn.linear_model.SGDClassifier</code>, and <code>sklearn.linear_model.LogisticRegressionCV</code></p>
+<div class="desc"><p>Converter for <code>sklearn.feature_selection.SelectKBest</code>.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>sklearn.svm.LinearSVC</code>, <code>sklearn.linear_model.LogisticRegression</code>,
-<code>sklearn.linear_model.SGDClassifier</code>, or <code>sklearn.linear_model.LogisticRegressionCV</code> model</dd>
+<dd>An operator wrapping a <code>sklearn.feature_selection.SelectKBest</code> model</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -135,50 +119,40 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
 <details class="source">
 <summary>
 <span>Expand source code</span>
+
+<a href="https://github.com/microsoft/hummingbird/blob/12d05a15fb4e9e21f57cfd4ac77a774461fa8b86/hummingbird/ml/operator_converters/sklearn/skl_array_feature_extractor.py#L17-L35" class="git-link">Browse git</a>
+
 </summary>
-<pre><code class="python">def convert_sklearn_linear_model(operator, device, extra_config):
+<pre><code class="python">def convert_sklearn_select_k_best(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `sklearn.svm.LinearSVC`, `sklearn.linear_model.LogisticRegression`,
-    `sklearn.linear_model.SGDClassifier`, and `sklearn.linear_model.LogisticRegressionCV`
+    Converter for `sklearn.feature_selection.SelectKBest`.
 
     Args:
-        operator: An operator wrapping a `sklearn.svm.LinearSVC`, `sklearn.linear_model.LogisticRegression`,
-            `sklearn.linear_model.SGDClassifier`, or `sklearn.linear_model.LogisticRegressionCV` model
+        operator: An operator wrapping a `sklearn.feature_selection.SelectKBest` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-    classes = [0] if not hasattr(operator.raw_operator, &#34;classes_&#34;) else operator.raw_operator.classes_
 
-    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
-        raise RuntimeError(
-            &#34;Hummingbird currently supports only integer labels for class labels. Please file an issue at https://github.com/microsoft/hummingbird.&#34;
-        )
-
-    coefficients = operator.raw_operator.coef_.transpose().astype(&#34;float32&#34;)
-    intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype(&#34;float32&#34;)
-
-    multi_class = None
-    if hasattr(operator.raw_operator, &#34;multi_class&#34;):
-        if operator.raw_operator.multi_class == &#34;ovr&#34; or operator.raw_operator.solver in [&#34;warn&#34;, &#34;liblinear&#34;]:
-            multi_class = &#34;ovr&#34;
-        else:
-            multi_class = &#34;multinomial&#34;
-
-    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)</code></pre>
+    # TODO FIXME: This will fail with chi2 (Ex: SelectKBest(chi2, k=20))
+    # but pass with SelectKBest(mutual_info_classif, k=20)
+    # See issue #200
+    k = operator.raw_operator.k
+    indices = np.sort(np.array(operator.raw_operator.scores_).argsort()[-k:])
+    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)</code></pre>
 </details>
 </dd>
-<dt id="hummingbird.ml.operator_converters.skl_linear.convert_sklearn_linear_regression_model"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_linear_regression_model</span></span>(<span>operator, device, extra_config)</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor.convert_sklearn_variance_threshold"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_variance_threshold</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>sklearn.linear_model.LinearRegression</code></p>
+<div class="desc"><p>Converter for <code>sklearn.feature_selection.VarianceThreshold</code>.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>sklearn.linear_model.LinearRegression</code> model</dd>
+<dd>An operator wrapping a <code>sklearn.feature_selection.VarianceThreshold</code> model</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -192,24 +166,26 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
 <details class="source">
 <summary>
 <span>Expand source code</span>
+
+<a href="https://github.com/microsoft/hummingbird/blob/12d05a15fb4e9e21f57cfd4ac77a774461fa8b86/hummingbird/ml/operator_converters/sklearn/skl_array_feature_extractor.py#L38-L53" class="git-link">Browse git</a>
+
 </summary>
-<pre><code class="python">def convert_sklearn_linear_regression_model(operator, device, extra_config):
+<pre><code class="python">def convert_sklearn_variance_threshold(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `sklearn.linear_model.LinearRegression`
+    Converter for `sklearn.feature_selection.VarianceThreshold`.
 
     Args:
-        operator: An operator wrapping a `sklearn.linear_model.LinearRegression` model
+        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-
-    coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype(&#34;float32&#34;)
-    intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype(&#34;float32&#34;)
-
-    return LinearModel(coefficients, intercepts, device, is_linear_regression=True)</code></pre>
+    var = operator.raw_operator.variances_
+    threshold = operator.raw_operator.threshold
+    indices = np.array([i for i in range(len(var)) if var[i] &gt; threshold])
+    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)</code></pre>
 </details>
 </dd>
 </dl>
@@ -229,13 +205,13 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.ml.operator_converters" href="index.html">hummingbird.ml.operator_converters</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn" href="index.html">hummingbird.ml.operator_converters.sklearn</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.skl_linear.convert_sklearn_linear_model" href="#hummingbird.ml.operator_converters.skl_linear.convert_sklearn_linear_model">convert_sklearn_linear_model</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.skl_linear.convert_sklearn_linear_regression_model" href="#hummingbird.ml.operator_converters.skl_linear.convert_sklearn_linear_regression_model">convert_sklearn_linear_regression_model</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor.convert_sklearn_select_k_best" href="#hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor.convert_sklearn_select_k_best">convert_sklearn_select_k_best</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor.convert_sklearn_variance_threshold" href="#hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor.convert_sklearn_variance_threshold">convert_sklearn_variance_threshold</a></code></li>
 </ul>
 </li>
 </ul>

@@ -44,7 +44,7 @@ setup(
     install_requires=install_requires,
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
-        "docs": ["pdoc"],
+        "docs": ["pdoc3==0.8.1"],
         "onnx": ["onnxruntime>=1.0.0", "onnxmltools>=1.6.0"],
         "extra": [
             # The need each for these depends on which libraries you plan to convert from

@@ -7,7 +7,6 @@
 """
 Collections of functions shared among GBDT converters.
 """
-
 import torch
 import numpy as np
 
@@ -75,26 +74,83 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
         for parameter in tree_parameters:
             parameter.values = parameter.values * extra_config[constants.LEARNING_RATE]
 
-    # Generate the tree implementation based on the selected strategy.
+    # Generate the model parameters based on the selected strategy.
     if tree_type == TreeImpl.gemm:
         net_parameters = [
             get_parameters_for_gemm_common(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
+                tree_param.lefts,
+                tree_param.rights,
+                tree_param.features,
+                tree_param.thresholds,
+                tree_param.values,
+                n_features,
+                extra_config,
             )
             for tree_param in tree_parameters
         ]
-        return GEMMGBDTImpl(net_parameters, n_features, classes, extra_config)
+    else:
+        # Some models require some additional massaging of the parameters before generating the tree_trav implementation.
+        get_parameters_for_tree_trav = get_parameters_for_tree_trav_common
 
-    # Some models require some additional massagging of the parameters before generating the tree_trav implementation.
-    get_parameters_for_tree_trav = get_parameters_for_tree_trav_common
-    if constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL in extra_config:
-        get_parameters_for_tree_trav = extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL]
-    net_parameters = [
-        get_parameters_for_tree_trav(
-            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values
-        )
-        for tree_param in tree_parameters
-    ]
+        if constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL in extra_config:
+            get_parameters_for_tree_trav = extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL]
+        net_parameters = [
+            get_parameters_for_tree_trav(
+                tree_param.lefts,
+                tree_param.rights,
+                tree_param.features,
+                tree_param.thresholds,
+                tree_param.values,
+                extra_config,
+            )
+            for tree_param in tree_parameters
+        ]
+
+    # Define the post transform.
+    if constants.BASE_PREDICTION in extra_config:
+        base_prediction = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False)
+
+    def apply_base_prediction(base_prediction):
+        def apply(x):
+            x += base_prediction
+            return x
+
+        return apply
+
+    def apply_sigmoid(x):
+        output = torch.sigmoid(x)
+        return torch.cat([1 - output, output], dim=1)
+
+    def apply_softmax(x):
+        return torch.softmax(x, dim=1)
+
+    # For models following the Sklearn API we need to build the post transform ourselves.
+    if classes is not None and constants.POST_TRANSFORM not in extra_config:
+        if len(classes) <= 2:
+            extra_config[constants.POST_TRANSFORM] = constants.SIGMOID
+        else:
+            extra_config[constants.POST_TRANSFORM] = constants.SOFTMAX
+
+    # Set the post transform.
+    if constants.POST_TRANSFORM in extra_config:
+        if extra_config[constants.POST_TRANSFORM] == constants.SIGMOID:
+            if constants.BASE_PREDICTION in extra_config:
+                extra_config[constants.POST_TRANSFORM] = lambda x: apply_sigmoid(apply_base_prediction(base_prediction)(x))
+            else:
+                extra_config[constants.POST_TRANSFORM] = apply_sigmoid
+        elif extra_config[constants.POST_TRANSFORM] == constants.SOFTMAX:
+            if constants.BASE_PREDICTION in extra_config:
+                extra_config[constants.POST_TRANSFORM] = lambda x: apply_softmax(apply_base_prediction(base_prediction)(x))
+            else:
+                extra_config[constants.POST_TRANSFORM] = apply_softmax
+        else:
+            raise NotImplementedError("Post transform {} not implemeneted yet".format(extra_config[constants.POST_TRANSFORM]))
+    elif constants.BASE_PREDICTION in extra_config:
+        extra_config[constants.POST_TRANSFORM] = apply_base_prediction(base_prediction)
+
+    # Generate the tree implementation based on the selected strategy.
+    if tree_type == TreeImpl.gemm:
+        return GEMMGBDTImpl(net_parameters, n_features, classes, extra_config)
     if tree_type == TreeImpl.tree_trav:
         return TreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav.

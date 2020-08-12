@@ -302,6 +302,9 @@ def convert(model, backend, test_input=None, extra_config={}):
     _supported_model_format_backend_mapping_check(model, backend)
     _supported_backend_check_extra_config(model, extra_config)
 
+    # We destroy extra_config during conversion, we create a copy here.
+    extra_config = deepcopy(extra_config)
+
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, backend, test_input, extra_config)
 
