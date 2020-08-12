@@ -36,7 +36,7 @@ def _supported_backend_check(backend):
     """
     Function used to check whether the specified backend is supported or not.
     """
-    if backend not in backends:
+    if backend is None:
         raise MissingBackend("Backend: {}".format(backend))
 
 
@@ -54,13 +54,33 @@ def _supported_model_format_backend_mapping_check(model, backend):
         assert torch_installed()
         import torch
 
-        if not backend == torch.__name__ and not backend == "py" + torch.__name__:
+        if not backend == torch.__name__ and not backend == torch.jit.__name__:
             raise RuntimeError(
                 "Hummingbird currently support conversion of XGBoost / LightGBM / Sklearn models only into PyTorch."
             )
 
 
-def _convert_sklearn(model, test_input=None, extra_config={}):
+def _supported_backend_check_extra_config(backend, extra_config):
+    """
+    Function used to check whether the specified backend is supported or not.
+    """
+    assert torch_installed()
+    import torch
+
+    if backend is torch.jit.__name__ and constants.TEST_INPUT not in extra_config:
+        raise RuntimeError("Backend {} requires test inputs. Please pass some test input to the convert.".format(backend))
+
+    if onnx_runtime_installed():
+        import onnx
+
+        if backend is onnx.__name__:
+            if constants.ONNX_INITIAL_TYPES not in extra_config and constants.TEST_INPUT not in extra_config:
+                raise RuntimeError(
+                    "Cannot generate test input data for ONNX. Either pass some input data or the initial_types"
+                )
+
+
+def _convert_sklearn(model, backend, test_input=None, extra_config={}):
     """
     This function converts the specified *scikit-learn* (API) model into its [PyTorch] counterpart.
     The supported operators can be found at `hummingbird.ml.supported`.
@@ -89,11 +109,11 @@ def _convert_sklearn(model, test_input=None, extra_config={}):
     topology = parse_sklearn_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, torch.__name__, extra_config=extra_config)
+    hb_model = topology_converter(topology, backend, extra_config=extra_config)
     return hb_model
 
 
-def _convert_lightgbm(model, test_input=None, extra_config={}):
+def _convert_lightgbm(model, backend, test_input=None, extra_config={}):
     """
     This function is used to generate a [PyTorch] model from a given input [LightGBM] model.
     [LightGBM]: https://lightgbm.readthedocs.io/
@@ -115,10 +135,10 @@ def _convert_lightgbm(model, test_input=None, extra_config={}):
         lightgbm_installed()
     ), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
 
-    return _convert_sklearn(model, test_input, extra_config)
+    return _convert_sklearn(model, backend, test_input, extra_config)
 
 
-def _convert_xgboost(model, test_input, extra_config={}):
+def _convert_xgboost(model, backend, test_input, extra_config={}):
     """
     This function is used to generate a [PyTorch] model from a given input [XGBoost] model.
     [PyTorch]: https://pytorch.org/
@@ -159,7 +179,7 @@ def _convert_xgboost(model, test_input, extra_config={}):
                 "XGBoost converter is not able to infer the number of input features.\
                     Please pass some test_input to the converter."
             )
-    return _convert_sklearn(model, test_input, extra_config)
+    return _convert_sklearn(model, backend, test_input, extra_config)
 
 
 def _convert_onnxml(model, test_input=None, extra_config={}):
@@ -200,10 +220,6 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
     if constants.ONNX_INITIAL_TYPES in extra_config:
         initial_types = extra_config[constants.ONNX_INITIAL_TYPES]
 
-    assert (
-        test_input is not None and len(test_input) > 0
-    ) or initial_types is not None, "Cannot generate test input data. Either pass some input data or the initial_types"
-
     # Generate some test input if necessary.
     if test_input is None:
         assert (
@@ -227,7 +243,7 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
             )
     else:
         extra_config[constants.N_FEATURES] = np.array(test_input).shape[1]
-    extra_config[constants.ONNX_TEST_INPUT] = test_input
+    extra_config[constants.TEST_INPUT] = test_input
 
     # Set the initializers. Some converter requires the access to initializers.
     initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
@@ -273,17 +289,26 @@ def convert(model, backend, test_input=None, extra_config={}):
     """
     assert model is not None
 
+    # Add test input as extra configuration for conversion.
+    if test_input is not None and constants.TEST_INPUT not in extra_config:
+        extra_config[constants.TEST_INPUT] = test_input
+
+    # We do some normalization on backends.
     backend = backend.lower()
+    backend = backends[backend]
+
+    # Check whether we actually support the backend.
     _supported_backend_check(backend)
     _supported_model_format_backend_mapping_check(model, backend)
+    _supported_backend_check_extra_config(model, extra_config)
 
     if type(model) in xgb_operator_list:
-        return _convert_xgboost(model, test_input, extra_config)
+        return _convert_xgboost(model, backend, test_input, extra_config)
 
     if type(model) in lgbm_operator_list:
-        return _convert_lightgbm(model, test_input, extra_config)
+        return _convert_lightgbm(model, backend, test_input, extra_config)
 
     if _is_onnx_model(model):
         return _convert_onnxml(model, test_input, extra_config)
 
-    return _convert_sklearn(model, test_input, extra_config)
+    return _convert_sklearn(model, backend, test_input, extra_config)

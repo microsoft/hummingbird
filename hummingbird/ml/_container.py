@@ -25,9 +25,20 @@ class CommonONNXModelContainer(CommonSklearnModelContainer):
         super(CommonONNXModelContainer, self).__init__(onnx_model)
 
 
+def _get_device(model):
+    """
+    Convenient function used to get the runtime device for the model.
+    """
+    device = None
+    if len(list(model.parameters())) > 0:
+        device = next(model.parameters()).device  # Assuming we are using a single device for all parameters
+
+    return device
+
+
 class PyTorchBackendModel(torch.nn.Module):
     """
-    Container for a model compiled into PyTorch.
+    Hummingbird model representing a converted pipeline.
     """
 
     def __init__(self, input_names, output_names, operator_map, operators, extra_config):
@@ -45,16 +56,12 @@ class PyTorchBackendModel(torch.nn.Module):
         self.operator_map = torch.nn.ModuleDict(operator_map)
         self.operators = operators
         self.extra_config = extra_config
-        self.is_regression = self.operator_map[self.operators[-1].full_name].regression
-        self.anomaly_detection = self.operator_map[self.operators[-1].full_name].anomaly_detection
 
     def forward(self, *inputs):
         with torch.no_grad():
             inputs = [*inputs]
             variable_map = {}
-            device = None
-            if len(list(self.parameters())) > 0:
-                device = next(self.parameters()).device  # Assuming we are using a single device for all parameters
+            device = _get_device(self)
 
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self.input_names):
@@ -85,6 +92,11 @@ class PyTorchBackendModel(torch.nn.Module):
 
 
 class PyTorchTorchscriptSklearnContainer(ABC):
+    """
+    Base container for PyTorch and TorchScript models.
+    The container allows to mirror the Sklearn API.
+    """
+
     def __init__(self, model):
         """
         Args:
@@ -93,7 +105,12 @@ class PyTorchTorchscriptSklearnContainer(ABC):
         self.model = model
 
 
-class PyTorchTorchscriptSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer):
+# PyTorch containers.
+class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer):
+    """
+    Container mirroring Sklearn transformers API.
+    """
+
     def transform(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
@@ -102,7 +119,18 @@ class PyTorchTorchscriptSklearnContainerTransformer(PyTorchTorchscriptSklearnCon
         return self.model.forward(*inputs).cpu().numpy()
 
 
-class PyTorchTorchscriptSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
+class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
+    """
+    Container mirroring Sklearn regressors API.
+    """
+
+    def __init__(self, model, is_regression=True, is_anomaly_detection=False, **kwargs):
+        super(PyTorchSklearnContainerRegression, self).__init__(model)
+        assert not (is_regression and is_anomaly_detection)
+
+        self._is_regression = is_regression
+        self._is_anomaly_detection = is_anomaly_detection
+
     def predict(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
@@ -110,15 +138,22 @@ class PyTorchTorchscriptSklearnContainerRegression(PyTorchTorchscriptSklearnCont
         On classification tasks returns the predicted class labels for the input data.
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
-        if self.model.is_regression:
+        if self._is_regression:
             return self.model.forward(*inputs).cpu().numpy().flatten()
-        elif self.model.anomaly_detection:
+        elif self._is_anomaly_detection:
             return self.model.forward(*inputs)[0].cpu().numpy().flatten()
         else:
             return self.model.forward(*inputs)[0].cpu().numpy()
 
 
-class PyTorchTorchscriptSklearnContainerClassification(PyTorchTorchscriptSklearnContainerRegression):
+class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
+    """
+    Container mirroring Sklearn classifiers API.
+    """
+
+    def __init__(self, model):
+        super(PyTorchSklearnContainerClassification, self).__init__(model, is_regression=False)
+
     def predict_proba(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
@@ -127,7 +162,14 @@ class PyTorchTorchscriptSklearnContainerClassification(PyTorchTorchscriptSklearn
         return self.model.forward(*inputs)[1].cpu().numpy()
 
 
-class PyTorchTorchscriptSklearnContainerAnomalyDetection(PyTorchTorchscriptSklearnContainerRegression):
+class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression):
+    """
+    Container mirroring Sklearn anomaly detection API.
+    """
+
+    def __init__(self, model):
+        super(PyTorchSklearnContainerAnomalyDetection, self).__init__(model, is_regression=False, is_anomaly_detection=True)
+
     def decision_function(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
@@ -141,3 +183,76 @@ class PyTorchTorchscriptSklearnContainerAnomalyDetection(PyTorchTorchscriptSklea
         On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
         """
         return self.decision_function(*inputs) + self.model.extra_config[constants.OFFSET]
+
+
+# TorchScript containers.
+def _torchscript_wrapper(device, function, *inputs):
+    """
+    This function contains the code to enable predictions over torchscript models.
+    It used to wrap pytorch container functions.
+    """
+    inputs = [*inputs]
+
+    with torch.no_grad():
+        # Maps data inputs to the expected type and device.
+        for i in range(len(inputs)):
+            if type(inputs[i]) is np.ndarray:
+                inputs[i] = torch.from_numpy(inputs[i]).float()
+            elif type(inputs[i]) is not torch.Tensor:
+                raise RuntimeError("Inputer tensor {} of not supported type {}".format(i, type(inputs[i])))
+            if device is not None:
+                inputs[i] = inputs[i].to(device)
+        return function(*inputs)
+
+
+class TorchScriptSklearnContainerTransformer(PyTorchSklearnContainerTransformer):
+    """
+    Container mirroring Sklearn transformers API.
+    """
+
+    def transform(self, *inputs):
+        device = _get_device(self.model)
+        f = super(TorchScriptSklearnContainerTransformer, self).transform
+
+        return _torchscript_wrapper(device, f, *inputs)
+
+
+class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
+    """
+    Container mirroring Sklearn regressors API.
+    """
+
+    def predict(self, *inputs):
+        device = _get_device(self.model)
+        f = super(TorchScriptSklearnContainerRegression, self).predict
+
+        return _torchscript_wrapper(device, f, *inputs)
+
+
+class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassification):
+    """
+    Container mirroring Sklearn classifiers API.
+    """
+
+    def predict_proba(self, *inputs):
+        device = _get_device(self.model)
+        f = super(TorchScriptSklearnContainerClassification, self).predict_proba
+
+        return _torchscript_wrapper(device, f, *inputs)
+
+
+class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression):
+    """
+    Container mirroring Sklearn anomaly detection API.
+    """
+
+    def decision_function(self, *inputs):
+        device = _get_device(self.model)
+        f = super(TorchScriptSklearnContainerAnomalyDetection, self).decision_function
+
+        return _torchscript_wrapper(device, f, *inputs)
+
+    def score_samples(self, *inputs):
+        device = _get_device(self.model)
+        f = super(TorchScriptSklearnContainerAnomalyDetection, self).score_samples
+        return _torchscript_wrapper(device, f, *inputs)
