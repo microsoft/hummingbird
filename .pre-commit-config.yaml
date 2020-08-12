@@ -24,3 +24,5 @@ repos:
       language: system
       types: [python]
       pass_filenames: false
+      nonBlocking: true
+      message: "pdoc error or some new doc was generated"
