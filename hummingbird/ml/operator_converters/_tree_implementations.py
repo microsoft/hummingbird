@@ -7,11 +7,10 @@
 """
 Base classes for tree algorithm implementations.
 """
-
-import torch
-import numpy as np
-from enum import Enum
 from abc import abstractmethod
+from enum import Enum
+import numpy as np
+import torch
 
 from . import constants
 from ._base_operator import BaseOperator
@@ -45,19 +44,6 @@ class AbstracTreeImpl(BaseOperator):
 
         Returns:
             The tensor result of the aggregation
-        """
-        pass
-
-    @abstractmethod
-    def calibration(self, x):
-        """
-        Method implementating the calibration operation for classifiers.
-
-        Args:
-            x: An input tensor
-
-        Returns:
-            The tensor result of the calibration
         """
         pass
 
@@ -153,9 +139,6 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     def aggregation(self, x):
         return x
 
-    def calibration(self, x):
-        return x
-
     def forward(self, x):
         x = x.t()
         x = torch.mm(self.weight_1, x) < self.bias_1
@@ -173,17 +156,12 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         x = self.aggregation(x)
 
-        if self.base_prediction is not None:
-            x += self.base_prediction
-
         if self.regression:
             return x
 
         if self.anomaly_detection:
             # Select the class (-1 if negative) and return the score.
             return torch.where(x < 0, self.classes[0], self.classes[1]), x
-
-        x = self.calibration(x)
 
         if self.perform_class_select:
             return torch.index_select(self.classes, 0, torch.argmax(x, dim=1)), x
@@ -240,9 +218,6 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     def aggregation(self, x):
         return x
 
-    def calibration(self, x):
-        return x
-
     def forward(self, x):
         indexes = self.nodes_offset
         indexes = indexes.expand(x.size()[0], self.num_trees)
@@ -265,17 +240,12 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         output = self.aggregation(output)
 
-        if self.base_prediction is not None:
-            output += self.base_prediction
-
         if self.regression:
             return output
 
         if self.anomaly_detection:
             # Select the class (-1 if negative) and return the score.
             return torch.where(output < 0, self.classes[0], self.classes[1]), output
-
-        output = self.calibration(output)
 
         if self.perform_class_select:
             return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
@@ -345,9 +315,6 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     def aggregation(self, x):
         return x
 
-    def calibration(self, x):
-        return x
-
     def forward(self, x):
         prev_indices = (torch.ge(torch.index_select(x, 1, self.root_nodes), self.root_biases)).long()
         prev_indices = prev_indices + self.tree_indices
@@ -365,17 +332,12 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         output = self.aggregation(output)
 
-        if self.base_prediction is not None:
-            output += self.base_prediction
-
         if self.regression:
             return output
 
         if self.anomaly_detection:
             # Select the class (-1 if negative) and return the score.
             return torch.where(output < 0, self.classes[0], self.classes[1]), output
-
-        output = self.calibration(output)
 
         if self.perform_class_select:
             return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
@@ -439,13 +401,9 @@ class GEMMDecisionTreeImpl(GEMMTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
         """
         super(GEMMDecisionTreeImpl, self).__init__(tree_parameters, n_features, classes)
-        self.final_probability_divider = len(tree_parameters)
 
     def aggregation(self, x):
         output = x.sum(0).t()
-
-        if self.final_probability_divider > 1:
-            output = output / self.final_probability_divider
 
         return output
 
@@ -464,13 +422,9 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
         """
         super(TreeTraversalDecisionTreeImpl, self).__init__(tree_parameters, max_depth, n_features, classes)
-        self.final_probability_divider = len(tree_parameters)
 
     def aggregation(self, x):
         output = x.sum(1)
-
-        if self.final_probability_divider > 1:
-            output = output / self.final_probability_divider
 
         return output
 
@@ -489,13 +443,9 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
         """
         super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(tree_parameters, max_depth, n_features, classes)
-        self.final_probability_divider = len(tree_parameters)
 
     def aggregation(self, x):
         output = x.sum(1)
-
-        if self.final_probability_divider > 1:
-            output = output / self.final_probability_divider
 
         return output
 
@@ -515,29 +465,22 @@ class GEMMGBDTImpl(GEMMTreeImpl):
             extra_config: Extra configuration used to properly implement the source tree
         """
         super(GEMMGBDTImpl, self).__init__(tree_parameters, n_features, classes, 1)
-        self.n_gbdt_classes = 1
 
-        if constants.BASE_PREDICTION in extra_config:
-            self.base_prediction = torch.nn.Parameter(
-                torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False
-            )
+        self.n_gbdt_classes = 1
+        self.post_transform = lambda x: x
+
+        if constants.POST_TRANSFORM in extra_config:
+            self.post_transform = extra_config[constants.POST_TRANSFORM]
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
-            if self.n_gbdt_classes == 1:
-                self.binary_classification = True
 
         self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
 
     def aggregation(self, x):
-        return torch.squeeze(x).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+        output = torch.squeeze(x).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
-    def calibration(self, x):
-        if self.binary_classification:
-            output = torch.sigmoid(x)
-            return torch.cat([1 - output, output], dim=1)
-        else:
-            return torch.softmax(x, dim=1)
+        return self.post_transform(output)
 
 
 class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
@@ -555,29 +498,22 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
             extra_config: Extra configuration used to properly implement the source tree
         """
         super(TreeTraversalGBDTImpl, self).__init__(tree_parameters, max_detph, n_features, classes, 1)
-        self.n_gbdt_classes = 1
 
-        if constants.BASE_PREDICTION in extra_config:
-            self.base_prediction = torch.nn.Parameter(
-                torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False
-            )
+        self.n_gbdt_classes = 1
+        self.post_transform = lambda x: x
+
+        if constants.POST_TRANSFORM in extra_config:
+            self.post_transform = extra_config[constants.POST_TRANSFORM]
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
-            if self.n_gbdt_classes == 1:
-                self.binary_classification = True
 
         self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
 
     def aggregation(self, x):
-        return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+        output = x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
-    def calibration(self, x):
-        if self.binary_classification:
-            output = torch.sigmoid(x)
-            return torch.cat([1 - output, output], dim=1)
-        else:
-            return torch.softmax(x, dim=1)
+        return self.post_transform(output)
 
 
 class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
@@ -595,26 +531,19 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
             extra_config: Extra configuration used to properly implement the source tree
         """
         super(PerfectTreeTraversalGBDTImpl, self).__init__(tree_parameters, max_depth, n_features, classes, 1)
-        self.n_gbdt_classes = 1
 
-        if constants.BASE_PREDICTION in extra_config:
-            self.base_prediction = torch.nn.Parameter(
-                torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False
-            )
+        self.n_gbdt_classes = 1
+        self.post_transform = lambda x: x
+
+        if constants.POST_TRANSFORM in extra_config:
+            self.post_transform = extra_config[constants.POST_TRANSFORM]
 
         if classes is not None:
             self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
-            if self.n_gbdt_classes == 1:
-                self.binary_classification = True
 
         self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
 
     def aggregation(self, x):
-        return x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+        output = x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
-    def calibration(self, x):
-        if self.binary_classification:
-            output = torch.sigmoid(x)
-            return torch.cat([1 - output, output], dim=1)
-        else:
-            return torch.softmax(x, dim=1)
+        return self.post_transform(output)

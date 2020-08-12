@@ -44,22 +44,37 @@ BASE_PREDICTION = &#34;base_prediction&#34;
 LEARNING_RATE = &#34;learning_rate&#34;
 &#34;&#34;&#34;Learning Rate&#34;&#34;&#34;
 
+POST_TRANSFORM = &#34;post_transform&#34;
+&#34;&#34;&#34;Post transform for tree inference&#34;&#34;&#34;
+
+SIGMOID = &#34;LOGISTIC&#34;
+&#34;&#34;&#34;Sigmoid post transform&#34;&#34;&#34;
+
+SOFTMAX = &#34;SOFTMAX&#34;
+&#34;&#34;&#34;Softmax post transform&#34;&#34;&#34;
+
 GET_PARAMETERS_FOR_TREE_TRAVERSAL = &#34;get_parameters_for_tree_trav&#34;
 &#34;&#34;&#34;Which function to use to extract the parameters for the tree traversal strategy&#34;&#34;&#34;
 
 REORDER_TREES = &#34;reorder_trees&#34;
 &#34;&#34;&#34;Whether to reorder trees in multiclass tasks&#34;&#34;&#34;
 
+ONNX_INITIALIZERS = &#34;onnx_initializers&#34;
+&#34;&#34;&#34;The initializers of the onnx model&#34;&#34;&#34;
+
 ONNX_INPUTS = &#34;onnx_inputs&#34;
-&#34;&#34;&#34;The inputs to the onnx model&#34;&#34;&#34;
+&#34;&#34;&#34;The input of the onnx model&#34;&#34;&#34;
 
 ONNX_TEST_INPUT = &#34;onnx_test_input&#34;
 &#34;&#34;&#34;The test input data for the onnx model&#34;&#34;&#34;
 
-OFFSET = &#34;offset_&#34;
+NUM_TREES = &#34;n_trees&#34;
+&#34;&#34;&#34;Number of trees composing an ensemble&#34;&#34;&#34;
+
+OFFSET = &#34;offset&#34;
 &#34;&#34;&#34;offset of the sklearn anomaly detection implementation&#34;&#34;&#34;
 
-MAX_SAMPLES = &#34;max_samples_&#34;
+MAX_SAMPLES = &#34;max_samples&#34;
 &#34;&#34;&#34;max_samples of sklearn isolation forest implementation&#34;&#34;&#34;</code></pre>
 </details>
 </section>
@@ -84,13 +99,29 @@ MAX_SAMPLES = &#34;max_samples_&#34;
 <dd>
 <div class="desc"><p>max_samples of sklearn isolation forest implementation</p></div>
 </dd>
+<dt id="hummingbird.ml.operator_converters.constants.NUM_TREES"><code class="name">var <span class="ident">NUM_TREES</span></code></dt>
+<dd>
+<div class="desc"><p>Number of trees composing an ensemble</p></div>
+</dd>
 <dt id="hummingbird.ml.operator_converters.constants.OFFSET"><code class="name">var <span class="ident">OFFSET</span></code></dt>
 <dd>
 <div class="desc"><p>offset of the sklearn anomaly detection implementation</p></div>
 </dd>
+<dt id="hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS"><code class="name">var <span class="ident">ONNX_INITIALIZERS</span></code></dt>
+<dd>
+<div class="desc"><p>The initializers of the onnx model</p></div>
+</dd>
 <dt id="hummingbird.ml.operator_converters.constants.ONNX_INPUTS"><code class="name">var <span class="ident">ONNX_INPUTS</span></code></dt>
 <dd>
-<div class="desc"><p>The inputs to the onnx model</p></div>
+<div class="desc"><p>The input of the onnx model</p></div>
+</dd>
+<dt id="hummingbird.ml.operator_converters.constants.ONNX_TEST_INPUT"><code class="name">var <span class="ident">ONNX_TEST_INPUT</span></code></dt>
+<dd>
+<div class="desc"><p>The test input data for the onnx model</p></div>
+</dd>
+<dt id="hummingbird.ml.operator_converters.constants.POST_TRANSFORM"><code class="name">var <span class="ident">POST_TRANSFORM</span></code></dt>
+<dd>
+<div class="desc"><p>Post transform for tree inference</p></div>
 </dd>
 <dt id="hummingbird.ml.operator_converters.constants.ONNX_TEST_INPUT"><code class="name">var <span class="ident">ONNX_TEST_INPUT</span></code></dt>
 <dd>
@@ -99,6 +130,14 @@ MAX_SAMPLES = &#34;max_samples_&#34;
 <dt id="hummingbird.ml.operator_converters.constants.REORDER_TREES"><code class="name">var <span class="ident">REORDER_TREES</span></code></dt>
 <dd>
 <div class="desc"><p>Whether to reorder trees in multiclass tasks</p></div>
+</dd>
+<dt id="hummingbird.ml.operator_converters.constants.SIGMOID"><code class="name">var <span class="ident">SIGMOID</span></code></dt>
+<dd>
+<div class="desc"><p>Sigmoid post transform</p></div>
+</dd>
+<dt id="hummingbird.ml.operator_converters.constants.SOFTMAX"><code class="name">var <span class="ident">SOFTMAX</span></code></dt>
+<dd>
+<div class="desc"><p>Softmax post transform</p></div>
 </dd>
 </dl>
 </section>
@@ -128,10 +167,15 @@ MAX_SAMPLES = &#34;max_samples_&#34;
 <li><code><a title="hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL" href="#hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL">GET_PARAMETERS_FOR_TREE_TRAVERSAL</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.LEARNING_RATE" href="#hummingbird.ml.operator_converters.constants.LEARNING_RATE">LEARNING_RATE</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.MAX_SAMPLES" href="#hummingbird.ml.operator_converters.constants.MAX_SAMPLES">MAX_SAMPLES</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.NUM_TREES" href="#hummingbird.ml.operator_converters.constants.NUM_TREES">NUM_TREES</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.OFFSET" href="#hummingbird.ml.operator_converters.constants.OFFSET">OFFSET</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS" href="#hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS">ONNX_INITIALIZERS</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.ONNX_INPUTS" href="#hummingbird.ml.operator_converters.constants.ONNX_INPUTS">ONNX_INPUTS</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.ONNX_TEST_INPUT" href="#hummingbird.ml.operator_converters.constants.ONNX_TEST_INPUT">ONNX_TEST_INPUT</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.POST_TRANSFORM" href="#hummingbird.ml.operator_converters.constants.POST_TRANSFORM">POST_TRANSFORM</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.REORDER_TREES" href="#hummingbird.ml.operator_converters.constants.REORDER_TREES">REORDER_TREES</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.SIGMOID" href="#hummingbird.ml.operator_converters.constants.SIGMOID">SIGMOID</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.SOFTMAX" href="#hummingbird.ml.operator_converters.constants.SOFTMAX">SOFTMAX</a></code></li>
 </ul>
 </li>
 </ul>
