@@ -240,7 +240,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            torch_model = hummingbird.ml.convert(model, "torchscript", X)
+            torch_model = hummingbird.ml.convert(model, "torchscript", X, extra_config={})
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
@@ -259,7 +259,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            torch_model = hummingbird.ml.convert(model, "torchscript", X)
+            torch_model = hummingbird.ml.convert(model, "torchscript", X, extra_config={})
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
