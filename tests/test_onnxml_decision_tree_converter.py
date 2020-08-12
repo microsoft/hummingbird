@@ -30,7 +30,7 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     def _test_decision_tree(self, X, model, extra_config={}):
         # Create ONNX-ML model
         onnx_ml_model = convert_sklearn(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=11
         )
 
         # Create ONNX model
@@ -248,6 +248,20 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
 
         # Create the RandomForest model
         model = RandomForestClassifier(n_estimators=10)
+        model.fit(X, y)
+        self._test_classifier(X, model)
+
+    # Used for small tree tests
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_random_forest_classifier_single_node(self):
+        warnings.filterwarnings("ignore")
+        np.random.seed(0)
+        X = np.random.rand(1, 1)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(1, size=1)
+        model = RandomForestClassifier(n_estimators=5).fit(X, y)
         model.fit(X, y)
         self._test_classifier(X, model)
 

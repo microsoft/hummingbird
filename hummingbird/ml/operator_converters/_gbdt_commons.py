@@ -74,7 +74,7 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
         for parameter in tree_parameters:
             parameter.values = parameter.values * extra_config[constants.LEARNING_RATE]
 
-    # Generate the network parameters based on the selected strategy.
+    # Generate the model parameters based on the selected strategy.
     if tree_type == TreeImpl.gemm:
         net_parameters = [
             get_parameters_for_gemm_common(
@@ -89,7 +89,7 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
             for tree_param in tree_parameters
         ]
     else:
-        # Some models require some additional massagging of the parameters before generating the tree_trav implementation.
+        # Some models require some additional massaging of the parameters before generating the tree_trav implementation.
         get_parameters_for_tree_trav = get_parameters_for_tree_trav_common
 
         if constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL in extra_config:
@@ -143,8 +143,6 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
                 extra_config[constants.POST_TRANSFORM] = lambda x: apply_softmax(apply_base_prediction(base_prediction)(x))
             else:
                 extra_config[constants.POST_TRANSFORM] = apply_softmax
-        elif extra_config[constants.POST_TRANSFORM] == "NONE":
-            extra_config.pop(constants.POST_TRANSFORM)
         else:
             raise NotImplementedError("Post transform {} not implemeneted yet".format(extra_config[constants.POST_TRANSFORM]))
     elif constants.BASE_PREDICTION in extra_config:
