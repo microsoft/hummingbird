@@ -30,7 +30,7 @@ class TestIsolationForestConverter(unittest.TestCase):
 
     def _run_isolation_forest_converter(self, extra_config={}):
         warnings.filterwarnings("ignore")
-        for max_samples in [2**1, 2**3, 2**8, 2**10, 2**12]:
+        for max_samples in [2 ** 1, 2 ** 3, 2 ** 8, 2 ** 10, 2 ** 12]:
             model = IsolationForest(n_estimators=10, max_samples=max_samples)
             np.random.seed(0)
             X = np.random.rand(100, 200)
@@ -61,7 +61,7 @@ class TestIsolationForestConverter(unittest.TestCase):
     # Float 64 data tests
     def test_float64_isolation_forest_converter(self):
         warnings.filterwarnings("ignore")
-        for max_samples in [2**1, 2**3, 2**8, 2**10, 2**12]:
+        for max_samples in [2 ** 1, 2 ** 3, 2 ** 8, 2 ** 10, 2 ** 12]:
             model = IsolationForest(n_estimators=10, max_samples=max_samples)
             np.random.seed(0)
             X = np.random.rand(100, 200)
