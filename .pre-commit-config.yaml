@@ -15,3 +15,12 @@ repos:
     - id: detect-private-key
     - id: trailing-whitespace
     - id: no-commit-to-branch
+  - repo: local
+    hooks:
+    - id: pdoc
+      name: run-pdoc
+      entry: pdoc
+      args: ["--html --output-dir=doc/html --template-dir=doc/pdoc_template hummingbird --force"]
+      language: system
+      types: [python]
+      pass_filenames: false
