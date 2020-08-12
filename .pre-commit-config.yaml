@@ -20,7 +20,7 @@ repos:
     - id: pdoc
       name: run-pdoc
       entry: pdoc
-      args: ["--html --output-dir=doc/html --template-dir=doc/pdoc_template hummingbird --force"]
+      args: [hummingbird, --html, --force, --template-dir=doc/pdoc_template/, --output-dir=doc/html]
       language: system
       types: [python]
       pass_filenames: false

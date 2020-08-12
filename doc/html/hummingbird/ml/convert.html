@@ -27,6 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/12d05a15fb4e9e21f57cfd4ac77a774461fa8b86/hummingbird/ml/convert.py#L0-L288" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -259,6 +260,10 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
         extra_config[constants.N_FEATURES] = np.array(test_input).shape[1]
     extra_config[constants.ONNX_TEST_INPUT] = test_input
 
+    # Set the initializers. Some converter requires the access to initializers.
+    initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
+    extra_config[constants.ONNX_INITIALIZERS] = initializers
+
     # Parse ONNX model as our internal data structure (i.e., Topology).
     topology = parse_onnx_api_model(model)
 
@@ -354,6 +359,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/12d05a15fb4e9e21f57cfd4ac77a774461fa8b86/hummingbird/ml/convert.py#L244-L289" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert(model, backend, test_input=None, extra_config={}):
     &#34;&#34;&#34;
