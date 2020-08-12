@@ -29,7 +29,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
                 torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
                 self.assertIsNotNone(torch_model)
                 self.assertTrue(
-                    str(type(list(torch_model.operator_map.values())[0])) == dt_implementation_map[extra_config_param]
+                    str(type(list(torch_model.model.operator_map.values())[0])) == dt_implementation_map[extra_config_param]
                 )
 
     # Used for classification tests

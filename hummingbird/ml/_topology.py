@@ -15,10 +15,11 @@ from uuid import uuid4
 from onnxconverter_common.registration import get_converter
 
 from ._container import (
-    PyTorchBackendModelRegression,
-    PyTorchBackendModelClassification,
-    PyTorchBackendModelTransformer,
-    PyTorchBackendModelAnomalyDetection,
+    PyTorchBackendModel,
+    PyTorchTorchscriptSklearnContainerRegression,
+    PyTorchTorchscriptSklearnContainerClassification,
+    PyTorchTorchscriptSklearnContainerTransformer,
+    PyTorchTorchscriptSklearnContainerAnomalyDetection,
 )
 from ._utils import onnx_runtime_installed
 from .exceptions import MissingConverter
@@ -72,22 +73,24 @@ def convert(topology, backend, device=None, extra_config={}):
             raise e
 
     operators = list(topology.topological_operator_iterator())
-    if operator_map[operators[-1].full_name].regression:
-        # We are doing a regression task.
-        pytorch_container = PyTorchBackendModelRegression
-    elif operator_map[operators[-1].full_name].anomaly_detection:
-        # We are doing anomaly detection.
-        pytorch_container = PyTorchBackendModelAnomalyDetection
-    elif operator_map[operators[-1].full_name].transformer:
-        # We are just transforming the input data.
-        pytorch_container = PyTorchBackendModelTransformer
-    else:
-        # We are doing a classification task.
-        pytorch_container = PyTorchBackendModelClassification
-
-    pytorch_model = pytorch_container(
+    pytorch_model = PyTorchBackendModel(
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
+
+    if operator_map[operators[-1].full_name].regression:
+        # We are doing a regression task.
+        pytorch_container = PyTorchTorchscriptSklearnContainerRegression
+    elif operator_map[operators[-1].full_name].anomaly_detection:
+        # We are doing anomaly detection.
+        pytorch_container = PyTorchTorchscriptSklearnContainerAnomalyDetection
+    elif operator_map[operators[-1].full_name].transformer:
+        # We are just transforming the input data.
+        pytorch_container = PyTorchTorchscriptSklearnContainerTransformer
+    else:
+        # We are doing a classification task.
+        pytorch_container = PyTorchTorchscriptSklearnContainerClassification
+
+    container = pytorch_container(pytorch_model)
 
     if backend == onnx_backend:
         onnx_model_name = output_model_name = None
@@ -123,5 +126,5 @@ def convert(topology, backend, device=None, extra_config={}):
         return onnx_model
 
     if device is not None:
-        pytorch_model = pytorch_model.to(device)
-    return pytorch_model
+        container = container.to(device)
+    return container
