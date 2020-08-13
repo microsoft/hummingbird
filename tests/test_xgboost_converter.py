@@ -173,7 +173,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={})
+            torch_model = hummingbird.ml.convert(model, "torch", [])
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
@@ -189,7 +189,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y, group=[X.shape[0]])
 
-            torch_model = hummingbird.ml.convert(model, "torch", X[0:1], extra_config={})
+            torch_model = hummingbird.ml.convert(model, "torch", X[0:1])
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
@@ -204,7 +204,7 @@ class TestXGBoostConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            torch_model = hummingbird.ml.convert(model, "torch", X[0:1], extra_config={})
+            torch_model = hummingbird.ml.convert(model, "torch", X[0:1])
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
@@ -240,7 +240,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            torch_model = hummingbird.ml.convert(model, "torchscript", X, extra_config={})
+            torch_model = hummingbird.ml.convert(model, "torchscript", X)
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
@@ -259,7 +259,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            torch_model = hummingbird.ml.convert(model, "torchscript", X, extra_config={})
+            torch_model = hummingbird.ml.convert(model, "torchscript", X)
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 

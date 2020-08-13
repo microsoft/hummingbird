@@ -29,7 +29,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/477e9ccfdfc24dda0441551ba3219e867fc1dfda/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L0-L117" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/217c4995830ff63e6b24512ef85394c3c2c6ead1/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L0-L117" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -180,7 +180,7 @@ register_converter(&#34;SklearnNuSVC&#34;, convert_sklearn_svc_model)</code></pr
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/477e9ccfdfc24dda0441551ba3219e867fc1dfda/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L83-L114" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/217c4995830ff63e6b24512ef85394c3c2c6ead1/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L83-L114" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_svc_model(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -230,7 +230,7 @@ register_converter(&#34;SklearnNuSVC&#34;, convert_sklearn_svc_model)</code></pr
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/477e9ccfdfc24dda0441551ba3219e867fc1dfda/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L19-L80" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/217c4995830ff63e6b24512ef85394c3c2c6ead1/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L19-L80" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class SVC(BaseOperator, torch.nn.Module):
     def __init__(self, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device):
@@ -319,7 +319,7 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/477e9ccfdfc24dda0441551ba3219e867fc1dfda/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L46-L80" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/217c4995830ff63e6b24512ef85394c3c2c6ead1/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L46-L80" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     x = x.double()

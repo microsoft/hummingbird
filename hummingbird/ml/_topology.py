@@ -30,7 +30,7 @@ from .exceptions import MissingConverter
 from .operator_converters import constants
 
 
-def convert(topology, backend, device=None, extra_config={}):
+def convert(topology, backend, device, extra_config={}):
     """
     This function is used to convert a `onnxconverter_common.topology.Topology` object into a *backend* model.
 
@@ -45,6 +45,7 @@ def convert(topology, backend, device=None, extra_config={}):
     """
     assert topology is not None, "Cannot convert a Topology object of type None."
     assert backend is not None, "Cannot convert a Topology object into backend None."
+    assert device is not None, "Cannot convert a Topology object into device None."
 
     operator_map = {}
     onnx_backend = None
@@ -114,8 +115,16 @@ def convert(topology, backend, device=None, extra_config={}):
 
         return onnx_model
 
+    # Set the device for the model.
+    if device != "cpu":
+        torch_model = torch_model.to(device)
+
+    # If the backend is tochscript, jit the model.
     if backend == torch.jit.__name__:
-        torch_model = torch.jit.trace(torch_model, torch.from_numpy(extra_config[constants.TEST_INPUT])).eval()
+        test_data = torch.from_numpy(extra_config[constants.TEST_INPUT])
+        if device != "cpu":
+            test_data.to(device)
+        torch_model = torch.jit.trace(torch_model, test_data).eval()
 
     if operator_map[operators[-1].full_name].regression:
         # We are doing a regression task.
@@ -144,6 +153,4 @@ def convert(topology, backend, device=None, extra_config={}):
 
     hb_model = container(torch_model, extra_config)
 
-    if device is not None:
-        hb_model = hb_model.to(device)
     return hb_model

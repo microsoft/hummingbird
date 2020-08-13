@@ -68,7 +68,7 @@ class PyTorchBackendModel(torch.nn.Module):
                     inputs[i] = torch.from_numpy(inputs[i]).float()
                 elif type(inputs[i]) is not torch.Tensor:
                     raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(inputs[i])))
-                if device is not None:
+                if device != "cpu":
                     inputs[i] = inputs[i].to(device)
                 variable_map[input_name] = inputs[i]
 
@@ -104,6 +104,15 @@ class PyTorchTorchscriptSklearnContainer(ABC):
         """
         self.model = model
         self.extra_config = extra_config
+
+    def to(self, device):
+        """
+        Set the target device for the model.
+
+        Args:
+            device: The target device.
+        """
+        self.model.to(device)
 
 
 # PyTorch containers.

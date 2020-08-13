@@ -80,23 +80,10 @@ def _supported_backend_check_extra_config(backend, extra_config):
                 )
 
 
-def _convert_sklearn(model, backend, test_input=None, extra_config={}):
+def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     """
-    This function converts the specified *scikit-learn* (API) model into its [PyTorch] counterpart.
-    The supported operators can be found at `hummingbird.ml.supported`.
-    [PyTorch]: https://pytorch.org/
-
-    Args:
-        model: A scikit-learn model
-        test_input: some input data used to trace the model execution
-        extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
-
-    Examples:
-        >>> pytorch_model = _convert_sklearn(sklearn_model)
-
-    Returns:
-        A model implemented in *PyTorch*, which is equivalent to the input *scikit-learn* model
+    This function converts the specified *scikit-learn* (API) model into its *backend* counterpart.
+    The supported operators and backends can be found at `hummingbird.ml.supported`.
     """
     assert model is not None
     assert torch_installed(), "To use Hummingbird you need to install torch."
@@ -109,52 +96,26 @@ def _convert_sklearn(model, backend, test_input=None, extra_config={}):
     topology = parse_sklearn_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, backend, extra_config=extra_config)
+    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
     return hb_model
 
 
-def _convert_lightgbm(model, backend, test_input=None, extra_config={}):
+def _convert_lightgbm(model, backend, test_input, device, extra_config={}):
     """
-    This function is used to generate a [PyTorch] model from a given input [LightGBM] model.
+    This function is used to generate a *backend* model from a given input [LightGBM] model.
     [LightGBM]: https://lightgbm.readthedocs.io/
-    [PyTorch]: https://pytorch.org/
-
-    Args:
-        model: A LightGBM model (trained using the scikit-learn API)
-        test_input: Some input data that will be used to trace the model execution
-        extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
-
-    Examples:
-        >>> pytorch_model = _convert_lightgbm(lgbm_model)
-
-    Returns:
-        A *PyTorch* model which is equivalent to the input *LightGBM* model
     """
     assert (
         lightgbm_installed()
     ), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
 
-    return _convert_sklearn(model, backend, test_input, extra_config)
+    return _convert_sklearn(model, backend, test_input, device, extra_config)
 
 
-def _convert_xgboost(model, backend, test_input, extra_config={}):
+def _convert_xgboost(model, backend, test_input, device, extra_config={}):
     """
-    This function is used to generate a [PyTorch] model from a given input [XGBoost] model.
-    [PyTorch]: https://pytorch.org/
+    This function is used to generate a *backend* model from a given input [XGBoost] model.
     [XGBoost]: https://xgboost.readthedocs.io/
-
-    Args:
-        model: A XGBoost model (trained using the scikit-learn API)
-        test_input: Some input data used to trace the model execution
-        extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
-
-    Examples:
-        >>> pytorch_model = _convert_xgboost(xgb_model, [], extra_config={"n_features":200})
-
-    Returns:
-        A *PyTorch* model which is equivalent to the input *XGBoost* model
     """
     assert (
         xgboost_installed()
@@ -179,31 +140,13 @@ def _convert_xgboost(model, backend, test_input, extra_config={}):
                 "XGBoost converter is not able to infer the number of input features.\
                     Please pass some test_input to the converter."
             )
-    return _convert_sklearn(model, backend, test_input, extra_config)
+    return _convert_sklearn(model, backend, test_input, device, extra_config)
 
 
-def _convert_onnxml(model, test_input=None, extra_config={}):
+def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     """
-    This function converts the specified [ONNX-ML] model into its [ONNX] counterpart.
+    This function converts the specified [ONNX-ML] model into its *backend* counterpart.
     The supported operators can be found at `hummingbird.ml.supported`.
-    The ONNX-ML converter requires either a test_input of a the initial types set through the exta_config parameter.
-    [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
-    [ONNX]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
-
-    Args:
-        model: A model containing ONNX-ML operators
-        test_input: Some input data used to trace the model execution.
-                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
-        extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
-
-    Examples:
-        extra_config = {}
-        extra_config[constans.ONNX_INITIAL_TYPES] =[('input', FloatTensorType([1, 20])]
-        >>> onnx_model = _convert_onnxml(onnx_ml_model, None, extra_config)
-
-    Returns:
-        A model containing only *ONNX* operators. The mode is equivalent to the input *ONNX-ML* model
     """
     assert model is not None
     assert torch_installed(), "To use Hummingbird you need to install torch."
@@ -253,19 +196,21 @@ def _convert_onnxml(model, test_input=None, extra_config={}):
     topology = parse_onnx_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, onnx.__name__, extra_config=extra_config)
+    hb_model = topology_converter(topology, onnx.__name__, device, extra_config=extra_config)
     return hb_model
 
 
-def convert(model, backend, test_input=None, extra_config={}):
+def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     """
     This function converts the specified input *model* into an implementation targeting *backend*.
     *Convert* supports [Sklearn], [LightGBM], [XGBoost] and [ONNX] models.
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
-    For *Sklearn*, *LightGBM* and *XGBoost* currently only the *torch* backend is supported.
+    For *Sklearn*, *LightGBM* and *XGBoost* currently only the *torch* and *torch.jit* backends are supported.
     For *ONNX* currently only the *onnx* backend is supported. For ONNX models, Hummingbird behave as a model
     rewriter converting [ONNX-ML] into [ONNX operators].
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
+    The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
+    The *torch.jit* backend requires a test_input.
     [Sklearn]: https://scikit-learn.org/
     [LightGBM]: https://lightgbm.readthedocs.io/
     [XGBoost]: https://xgboost.readthedocs.io/
@@ -276,8 +221,10 @@ def convert(model, backend, test_input=None, extra_config={}):
     Args:
         model: An input model
         backend: The target for the conversion
-        test_input: some input data used to trace the model execution.
+        test_input: Some input data used to trace the model execution.
                     For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
+        device: The target device the model should be run. This parameter is only used by the *torch** backends, and
+                the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
         extra_config: Extra configurations to be used by the individual operator converters.
                       The set of supported extra configurations can be found at `hummingbird.ml.supported`
 
@@ -306,12 +253,12 @@ def convert(model, backend, test_input=None, extra_config={}):
     _supported_backend_check_extra_config(model, extra_config)
 
     if type(model) in xgb_operator_list:
-        return _convert_xgboost(model, backend, test_input, extra_config)
+        return _convert_xgboost(model, backend, test_input, device, extra_config)
 
     if type(model) in lgbm_operator_list:
-        return _convert_lightgbm(model, backend, test_input, extra_config)
+        return _convert_lightgbm(model, backend, test_input, device, extra_config)
 
     if _is_onnx_model(model):
-        return _convert_onnxml(model, test_input, extra_config)
+        return _convert_onnxml(model, backend, test_input, device, extra_config)
 
-    return _convert_sklearn(model, backend, test_input, extra_config)
+    return _convert_sklearn(model, backend, test_input, device, extra_config)
