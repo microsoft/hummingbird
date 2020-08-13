@@ -58,7 +58,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
         elif attr.name == "nodes_modes":
             modes = attr.strings
             for mode in modes:
-                if (not mode == b"BRANCH_LEQ") and (not mode == b"LEAF"):
+                if (not mode == b"BRANCH_LEQ") and (not mode == b"LEAF") and (not mode == b"BRANCH_LT"):
                     raise AssertionError("Modality {} not supported".format(mode))
 
     is_decision_tree = post_transform == "NONE"
