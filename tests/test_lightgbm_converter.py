@@ -226,6 +226,44 @@ class TestLGBMConverter(unittest.TestCase):
     def test_float64_lgbm_perf_tree_trav_regressor_converter(self):
         self._run_float64_lgbm_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
+    # Test TorchScript backend regression.
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_regressor_converter_torchscript(self):
+        warnings.filterwarnings("ignore")
+        import torch
+
+        for max_depth in [1, 3, 8, 10, 12]:
+            model = lgb.LGBMRegressor(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(1000, size=100)
+
+            model.fit(X, y)
+
+            torch_model = hummingbird.ml.convert(model, "torchscript", X, extra_config={})
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Test TorchScript backend classification.
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_classifier_converter_torchscript(self):
+        warnings.filterwarnings("ignore")
+        import torch
+
+        for max_depth in [1, 3, 8, 10, 12]:
+            model = lgb.LGBMClassifier(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(2, size=100)
+
+            model.fit(X, y)
+
+            torch_model = hummingbird.ml.convert(model, "torchscript", X, extra_config={})
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
 
 if __name__ == "__main__":
     unittest.main()

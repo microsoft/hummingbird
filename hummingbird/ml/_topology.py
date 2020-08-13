@@ -142,7 +142,7 @@ def convert(topology, backend, device=None, extra_config={}):
         else:
             container = PyTorchSklearnContainerClassification
 
-    hb_model = container(torch_model)
+    hb_model = container(torch_model, extra_config)
 
     if device is not None:
         hb_model = hb_model.to(device)

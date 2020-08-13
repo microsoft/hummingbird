@@ -55,7 +55,6 @@ class PyTorchBackendModel(torch.nn.Module):
         self.output_names = output_names
         self.operator_map = torch.nn.ModuleDict(operator_map)
         self.operators = operators
-        self.extra_config = extra_config
 
     def forward(self, *inputs):
         with torch.no_grad():
@@ -97,12 +96,14 @@ class PyTorchTorchscriptSklearnContainer(ABC):
     The container allows to mirror the Sklearn API.
     """
 
-    def __init__(self, model):
+    def __init__(self, model, extra_config={}):
         """
         Args:
             model: A pytorch or torchscript model
+            extra_config: Some additional configuration parameter
         """
         self.model = model
+        self.extra_config = extra_config
 
 
 # PyTorch containers.
@@ -124,8 +125,8 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
     Container mirroring Sklearn regressors API.
     """
 
-    def __init__(self, model, is_regression=True, is_anomaly_detection=False, **kwargs):
-        super(PyTorchSklearnContainerRegression, self).__init__(model)
+    def __init__(self, model, extra_config={}, is_regression=True, is_anomaly_detection=False, **kwargs):
+        super(PyTorchSklearnContainerRegression, self).__init__(model, extra_config)
         assert not (is_regression and is_anomaly_detection)
 
         self._is_regression = is_regression
@@ -151,8 +152,8 @@ class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
     Container mirroring Sklearn classifiers API.
     """
 
-    def __init__(self, model):
-        super(PyTorchSklearnContainerClassification, self).__init__(model, is_regression=False)
+    def __init__(self, model, extra_config={}):
+        super(PyTorchSklearnContainerClassification, self).__init__(model, extra_config, is_regression=False)
 
     def predict_proba(self, *inputs):
         """
@@ -167,8 +168,10 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
     Container mirroring Sklearn anomaly detection API.
     """
 
-    def __init__(self, model):
-        super(PyTorchSklearnContainerAnomalyDetection, self).__init__(model, is_regression=False, is_anomaly_detection=True)
+    def __init__(self, model, extra_config={}):
+        super(PyTorchSklearnContainerAnomalyDetection, self).__init__(
+            model, extra_config, is_regression=False, is_anomaly_detection=True
+        )
 
     def decision_function(self, *inputs):
         """
@@ -182,7 +185,7 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
         """
-        return self.decision_function(*inputs) + self.model.extra_config[constants.OFFSET]
+        return self.decision_function(*inputs) + self.extra_config[constants.OFFSET]
 
 
 # TorchScript containers.
@@ -241,10 +244,16 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
         return _torchscript_wrapper(device, f, *inputs)
 
 
-class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression):
+class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomalyDetection):
     """
     Container mirroring Sklearn anomaly detection API.
     """
+
+    def predict(self, *inputs):
+        device = _get_device(self.model)
+        f = super(TorchScriptSklearnContainerAnomalyDetection, self).predict
+
+        return _torchscript_wrapper(device, f, *inputs)
 
     def decision_function(self, *inputs):
         device = _get_device(self.model)
@@ -255,4 +264,5 @@ class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegress
     def score_samples(self, *inputs):
         device = _get_device(self.model)
         f = super(TorchScriptSklearnContainerAnomalyDetection, self).score_samples
+
         return _torchscript_wrapper(device, f, *inputs)
