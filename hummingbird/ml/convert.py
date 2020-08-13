@@ -250,7 +250,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     # Check whether we actually support the backend.
     _supported_backend_check(backend)
     _supported_model_format_backend_mapping_check(model, backend)
-    _supported_backend_check_extra_config(model, extra_config)
+    _supported_backend_check_extra_config(backend, extra_config)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, backend, test_input, device, extra_config)

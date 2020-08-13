@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/217c4995830ff63e6b24512ef85394c3c2c6ead1/hummingbird/ml/convert.py#L0-L263" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/convert.py#L0-L263" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -281,7 +281,7 @@ def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config=
     # Check whether we actually support the backend.
     _supported_backend_check(backend)
     _supported_model_format_backend_mapping_check(model, backend)
-    _supported_backend_check_extra_config(model, extra_config)
+    _supported_backend_check_extra_config(backend, extra_config)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, backend, test_input, device, extra_config)
@@ -339,7 +339,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/217c4995830ff63e6b24512ef85394c3c2c6ead1/hummingbird/ml/convert.py#L203-L264" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/convert.py#L203-L264" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config={}):
     &#34;&#34;&#34;
@@ -391,7 +391,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
     # Check whether we actually support the backend.
     _supported_backend_check(backend)
     _supported_model_format_backend_mapping_check(model, backend)
-    _supported_backend_check_extra_config(model, extra_config)
+    _supported_backend_check_extra_config(backend, extra_config)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, backend, test_input, device, extra_config)
