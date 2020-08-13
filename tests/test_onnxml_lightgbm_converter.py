@@ -76,7 +76,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
             list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
         )  # probs
 
-    # Check that ONNXML models can only target the ONNX backend.
+    # Check that ONNXML models raise error if the input data or type is not set.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
@@ -94,6 +94,35 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         )
 
         self.assertRaises(RuntimeError, convert, onnx_ml_model, "torch")
+
+    # Check that ONNXML models can only target the ONNX backend.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_lightgbm_onnx_pytorch(self):
+        warnings.filterwarnings("ignore")
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = np.array([100, -10, 50], dtype=np.float32)
+        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
+        model.fit(X, y)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_lightgbm(
+            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+        )
+
+        pt_model = convert(onnx_ml_model, "torch", X)
+        assert pt_model
+
+        # Get the predictions for the ONNX-ML model
+        session = ort.InferenceSession(onnx_ml_model.SerializeToString())
+        output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
+        onnx_ml_pred = [[] for i in range(len(output_names))]
+        inputs = {session.get_inputs()[0].name: X}
+        onnx_ml_pred = session.run(output_names, inputs)
+
+        np.testing.assert_allclose(onnx_ml_pred[0].flatten(), pt_model.predict(X))
 
     # Check converter with extra configs.
     @unittest.skipIf(
