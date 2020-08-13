@@ -29,11 +29,13 @@ class TestSklearnTreeConverter(unittest.TestCase):
                 torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
                 self.assertIsNotNone(torch_model)
                 self.assertTrue(
-                    str(type(list(torch_model.operator_map.values())[0])) == dt_implementation_map[extra_config_param]
+                    str(type(list(torch_model.model.operator_map.values())[0])) == dt_implementation_map[extra_config_param]
                 )
 
     # Used for classification tests
-    def _run_tree_classification_converter(self, model_type, num_classes, extra_config={}, labels_shift=0, **kwargs):
+    def _run_tree_classification_converter(
+        self, model_type, num_classes, backend="torch", extra_config={}, labels_shift=0, **kwargs
+    ):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             np.random.seed(0)
@@ -43,7 +45,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
             model = model_type(max_depth=max_depth, **kwargs)
             model.fit(X, y)
-            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            torch_model = hummingbird.ml.convert(model, backend, X, extra_config=extra_config)
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
@@ -110,7 +112,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
         )
 
     # Used for regression tests
-    def _run_tree_regressor_converter(self, model_type, num_classes, extra_config={}, **kwargs):
+    def _run_tree_regressor_converter(self, model_type, num_classes, backend="torch", extra_config={}, **kwargs):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
             model = model_type(max_depth=max_depth, **kwargs)
@@ -120,7 +122,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            torch_model = hummingbird.ml.convert(model, backend, X, extra_config=extra_config)
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
@@ -287,6 +289,160 @@ class TestSklearnTreeConverter(unittest.TestCase):
         self.assertRaises(
             MissingConverter, hummingbird.ml.convert, model, "torch", extra_config={"tree_implementation": "nonsense"}
         )
+
+    # Test trees with TorchScript backend
+    # Random forest binary classifier
+    def test_random_forest_ts_classifier_binary_converter(self):
+        self._run_tree_classification_converter(RandomForestClassifier, 2, "torch.jit", n_estimators=10)
+
+    # Random forest gemm classifier
+    def test_random_forest_ts_gemm_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 2, "torch.jit", extra_config={"tree_implementation": "gemm"}, n_estimators=10
+        )
+
+    # Random forest tree_trav classifier
+    def test_random_forest_ts_tree_trav_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 2, "torch.jit", extra_config={"tree_implementation": "tree_trav"}, n_estimators=10
+        )
+
+    # Random forest perf_tree_trav classifier
+    def test_random_forest_ts_perf_tree_trav_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 2, "torch.jit", extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10
+        )
+
+    # Random forest multi classifier
+    def test_random_forest_ts_multi_classifier_converter(self):
+        self._run_tree_classification_converter(RandomForestClassifier, 3, "torch.jit", n_estimators=10)
+
+    # Random forest gemm multi classifier
+    def test_random_forest_ts_gemm_multi_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 3, "torch.jit", extra_config={"tree_implementation": "gemm"}, n_estimators=10
+        )
+
+    # Random forest tree_trav multi classifier
+    def test_random_forest_ts_tree_trav_multi_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 3, "torch.jit", extra_config={"tree_implementation": "tree_trav"}, n_estimators=10
+        )
+
+    # Random forest perf_tree_trav multi classifier
+    def test_random_forest_ts_perf_tree_trav_multi_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 3, "torch.jit", extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10
+        )
+
+    # Random forest gemm classifier shifted classes
+    def test_random_forest_ts_gemm_classifier_shifted_labels_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier,
+            3,
+            "torch.jit",
+            labels_shift=2,
+            extra_config={"tree_implementation": "gemm"},
+            n_estimators=10,
+        )
+
+    # Random forest tree_trav classifier shifted classes
+    def test_random_forest_ts_tree_trav_classifier_shifted_labels_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier,
+            3,
+            "torch.jit",
+            labels_shift=2,
+            extra_config={"tree_implementation": "tree_trav"},
+            n_estimators=10,
+        )
+
+    # Random forest perf_tree_trav classifier shifted classes
+    def test_random_forest_ts_perf_tree_trav_classifier_shifted_labels_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier,
+            3,
+            "torch.jit",
+            labels_shift=2,
+            extra_config={"tree_implementation": "perf_tree_trav"},
+            n_estimators=10,
+        )
+
+    # Random forest regressor
+    def test_random_forest_ts_regressor_converter(self):
+        self._run_tree_regressor_converter(RandomForestRegressor, 1000, "torch.jit", n_estimators=10)
+
+    # Random forest gemm regressor
+    def test_random_forest_ts_gemm_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            RandomForestRegressor, 1000, "torch.jit", extra_config={"tree_implementation": "gemm"}, n_estimators=10
+        )
+
+    # Random forest tree_trav regressor
+    def test_random_forest_ts_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            RandomForestRegressor, 1000, "torch.jit", extra_config={"tree_implementation": "tree_trav"}, n_estimators=10
+        )
+
+    # Random forest perf_tree_trav regressor
+    def test_random_forest_ts_perf_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            RandomForestRegressor, 1000, "torch.jit", extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10
+        )
+
+    # Extra trees regressor
+    def test_extra_trees_ts_regressor_converter(self):
+        self._run_tree_regressor_converter(ExtraTreesRegressor, 1000, "torch.jit", n_estimators=10)
+
+    # Extra trees gemm regressor
+    def test_extra_trees_ts_gemm_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            ExtraTreesRegressor, 1000, "torch.jit", extra_config={"tree_implementation": "gemm"}, n_estimators=10
+        )
+
+    # Extra trees tree_trav regressor
+    def test_extra_trees_ts_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            ExtraTreesRegressor, 1000, "torch.jit", extra_config={"tree_implementation": "tree_trav"}, n_estimators=10
+        )
+
+    # Extra trees perf_tree_trav regressor
+    def test_extra_trees_ts_perf_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            ExtraTreesRegressor, 1000, "torch.jit", extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10
+        )
+
+    # Decision tree regressor
+    def test_decision_tree_ts_regressor_converter(self):
+        self._run_tree_regressor_converter(DecisionTreeRegressor, 1000, "torch.jit")
+
+    # Decision tree gemm regressor
+    def test_decision_tree_ts_gemm_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            DecisionTreeRegressor, 1000, "torch.jit", extra_config={"tree_implementation": "gemm"}
+        )
+
+    # Decision tree tree_trav regressor
+    def test_decision_tree_ts_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            DecisionTreeRegressor, 1000, "torch.jit", extra_config={"tree_implementation": "tree_trav"}
+        )
+
+    # Decision tree perf_tree_trav regressor
+    def test_decision_tree_ts_perf_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            DecisionTreeRegressor, 1000, "torch.jit", extra_config={"tree_implementation": "perf_tree_trav"}
+        )
+
+    # Decision tree classifier
+    def test_decision_tree_ts_classifier_converter(self):
+        self._run_tree_classification_converter(
+            DecisionTreeClassifier, 3, "torch.jit",
+        )
+
+    # Extra trees classifier
+    def test_extra_trees_ts_classifier_converter(self):
+        self._run_tree_classification_converter(ExtraTreesClassifier, 3, "torch.jit", n_estimators=10)
 
 
 if __name__ == "__main__":

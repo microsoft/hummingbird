@@ -33,7 +33,7 @@ class TestXGBoostConverter(unittest.TestCase):
                 )
                 self.assertIsNotNone(torch_model)
                 self.assertEqual(
-                    str(type(list(torch_model.operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
+                    str(type(list(torch_model.model.operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
                 )
 
     def _run_xgb_classifier_converter(self, num_classes, extra_config={}):
@@ -173,7 +173,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={})
+            torch_model = hummingbird.ml.convert(model, "torch", [])
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
@@ -189,7 +189,7 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y, group=[X.shape[0]])
 
-            torch_model = hummingbird.ml.convert(model, "torch", X[0:1], extra_config={})
+            torch_model = hummingbird.ml.convert(model, "torch", X[0:1])
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
@@ -204,11 +204,11 @@ class TestXGBoostConverter(unittest.TestCase):
             y = np.random.randint(num_classes, size=100)
 
             model.fit(X, y)
-            torch_model = hummingbird.ml.convert(model, "torch", X[0:1], extra_config={})
+            torch_model = hummingbird.ml.convert(model, "torch", X[0:1])
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
-    # Small tree
+    # Small tree.
     @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     def test_run_xgb_classifier_converter(self):
         warnings.filterwarnings("ignore")
@@ -222,6 +222,44 @@ class TestXGBoostConverter(unittest.TestCase):
             model.fit(X, y)
 
             torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={"tree_implementation": extra_config_param})
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+    # Test TorchScript backend regression.
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
+    def test_xgb_regressor_converter_torchscript(self):
+        warnings.filterwarnings("ignore")
+        import torch
+
+        for max_depth in [1, 3, 8, 10, 12]:
+            model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(1000, size=100)
+
+            model.fit(X, y)
+
+            torch_model = hummingbird.ml.convert(model, "torchscript", X)
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Test TorchScript backend classification.
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
+    def test_xgb_classifier_converter_torchscript(self):
+        warnings.filterwarnings("ignore")
+        import torch
+
+        for max_depth in [1, 3, 8, 10, 12]:
+            model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(2, size=100)
+
+            model.fit(X, y)
+
+            torch_model = hummingbird.ml.convert(model, "torchscript", X)
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 

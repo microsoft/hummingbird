@@ -9,6 +9,7 @@ All operators, backends, and configurations settings supported in Hummingbird ar
 
 **Supported Backends**
 PyTorch,
+TorchScript,
 ONNX
 
 **Supported Operators**
@@ -48,7 +49,9 @@ XGBClassifier,
 XGBRanker,
 XGBRegressor
 """
+from collections import defaultdict
 from .exceptions import MissingConverter
+
 from ._utils import torch_installed, sklearn_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
 
 
@@ -183,18 +186,21 @@ def _build_backend_map():
     """
     The set of supported backends is defined here.
     """
-    backends = set()
+    backends = defaultdict(lambda: None)
 
     if torch_installed():
         import torch
 
-        backends.add(torch.__name__)
-        backends.add("py" + torch.__name__)  # For compatibility with earlier versions.
+        backends[torch.__name__] = torch.__name__
+        backends["py" + torch.__name__] = torch.__name__  # For compatibility with earlier versions.
+
+        backends[torch.jit.__name__] = torch.jit.__name__
+        backends["torchscript"] = torch.jit.__name__  # For reference outside Hummingbird.
 
     if onnx_runtime_installed():
         import onnx
 
-        backends.add(onnx.__name__)
+        backends[onnx.__name__] = onnx.__name__
 
     return backends
 
@@ -259,7 +265,6 @@ onnxml_api_operator_name_map = _build_onnxml_api_operator_name_map()
 
 # Supported backends.
 backends = _build_backend_map()
-
 
 # Supported configurations settings accepted by Hummingbird are defined below.
 N_FEATURES = "n_features"

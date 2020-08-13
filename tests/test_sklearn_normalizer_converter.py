@@ -41,7 +41,7 @@ class TestSklearnNormalizer(unittest.TestCase):
 
         torch_model = hummingbird.ml.convert(model, "torch")
 
-        self.assertRaises(RuntimeError, torch_model.operator_map.SklearnNormalizer, torch.from_numpy(data))
+        self.assertRaises(RuntimeError, torch_model.model.operator_map.SklearnNormalizer, torch.from_numpy(data))
 
     # Float 64 data tests
     def test_float64_normalizer_converter(self):

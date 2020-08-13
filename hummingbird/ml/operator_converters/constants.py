@@ -35,8 +35,8 @@ ONNX_INITIALIZERS = "onnx_initializers"
 ONNX_INPUTS = "onnx_inputs"
 """The input of the onnx model"""
 
-ONNX_TEST_INPUT = "onnx_test_input"
-"""The test input data for the onnx model"""
+TEST_INPUT = "test_input"
+"""The test input data for models that need to be traced"""
 
 NUM_TREES = "n_trees"
 """Number of trees composing an ensemble"""
