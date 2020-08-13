@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 
 import hummingbird.ml
-from hummingbird.ml._utils import lightgbm_installed
+from hummingbird.ml._utils import lightgbm_installed, onnx_runtime_installed
 from tree_utils import gbdt_implementation_map
 
 if lightgbm_installed():
@@ -263,6 +263,29 @@ class TestLGBMConverter(unittest.TestCase):
             torch_model = hummingbird.ml.convert(model, "torchscript", X, extra_config={})
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+    # Check that we can export into ONNX.
+    @unittest.skipIf(not (onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
+    def test_lightgbm_onnx(self):
+        import onnxruntime as ort
+
+        warnings.filterwarnings("ignore")
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = np.array([100, -10, 50], dtype=np.float32)
+        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
+        model.fit(X, y)
+
+        # Create ONNX model
+        onnx_model = hummingbird.ml.convert(model, "onnx", X)
+
+        # Get the predictions for the ONNX-ML model
+        session = ort.InferenceSession(onnx_model.SerializeToString())
+        output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
+        inputs = {session.get_inputs()[0].name: X}
+        onnx_pred = session.run(output_names, inputs)
+
+        np.testing.assert_allclose(onnx_pred[0].flatten(), model.predict(X))
 
 
 if __name__ == "__main__":

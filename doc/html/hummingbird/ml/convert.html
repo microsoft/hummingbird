@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L0-L263" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L0-L238" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -44,7 +44,7 @@ import numpy as np
 from .operator_converters import constants
 from ._parse import parse_sklearn_api_model, parse_onnx_api_model
 from ._topology import convert as topology_converter
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
 
@@ -71,44 +71,25 @@ def _supported_backend_check(backend):
         raise MissingBackend(&#34;Backend: {}&#34;.format(backend))
 
 
-def _supported_model_format_backend_mapping_check(model, backend):
+def _supported_backend_check_config(model, backend, extra_config):
     &#34;&#34;&#34;
-    Function used to check whether the specified backend/input model format is supported or not.
-    &#34;&#34;&#34;
-    if _is_onnx_model(model):
-        assert onnx_runtime_installed()
-        import onnx
-
-        if not backend == onnx.__name__:
-            raise RuntimeError(&#34;Hummingbird currently support conversion of ONNX(-ML) models only into ONNX.&#34;)
-    else:
-        assert torch_installed()
-        import torch
-
-        if not backend == torch.__name__ and not backend == torch.jit.__name__:
-            raise RuntimeError(
-                &#34;Hummingbird currently support conversion of XGBoost / LightGBM / Sklearn models only into PyTorch.&#34;
-            )
-
-
-def _supported_backend_check_extra_config(backend, extra_config):
-    &#34;&#34;&#34;
-    Function used to check whether the specified backend is supported or not.
+    Function used to check whether the specified backend and configuration pair is supported or not.
     &#34;&#34;&#34;
     assert torch_installed()
+    import onnx
     import torch
 
     if backend is torch.jit.__name__ and constants.TEST_INPUT not in extra_config:
         raise RuntimeError(&#34;Backend {} requires test inputs. Please pass some test input to the convert.&#34;.format(backend))
 
-    if onnx_runtime_installed():
-        import onnx
+    if backend is onnx.__name__:
+        if constants.ONNX_INITIAL_TYPES not in extra_config and constants.TEST_INPUT not in extra_config:
+            raise RuntimeError(&#34;Cannot generate test input data for ONNX. Either pass some input data or the initial_types&#34;)
 
-        if backend is onnx.__name__:
-            if constants.ONNX_INITIAL_TYPES not in extra_config and constants.TEST_INPUT not in extra_config:
-                raise RuntimeError(
-                    &#34;Cannot generate test input data for ONNX. Either pass some input data or the initial_types&#34;
-                )
+    if _is_onnx_model(model) and constants.ONNX_INITIAL_TYPES not in extra_config and constants.TEST_INPUT not in extra_config:
+        raise RuntimeError(
+            &#34;Cannot extract number of input features from the ONNX. Either pass some input data or the initial_types&#34;
+        )
 
 
 def _convert_sklearn(model, backend, test_input, device, extra_config={}):
@@ -181,9 +162,6 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     &#34;&#34;&#34;
     assert model is not None
     assert torch_installed(), &#34;To use Hummingbird you need to install torch.&#34;
-    assert (
-        onnx_runtime_installed()
-    ), &#34;To use the onnxml converter you need to install onnxruntime (or `pip install hummingbird-ml[onnx]`).&#34;
 
     import onnx
 
@@ -196,25 +174,26 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
 
     # Generate some test input if necessary.
     if test_input is None:
-        assert (
-            not initial_types[0][1].shape is None
-        ), &#34;Cannot generate test input data. Initial_types do not contain shape information.&#34;
-        assert len(initial_types[0][1].shape) == 2, &#34;Hummingbird currently support only inputs with len(shape) == 2.&#34;
+        if backend == onnx.__name__:
+            assert (
+                initial_types is not None and not initial_types[0][1].shape is None
+            ), &#34;Cannot generate test input data. Initial_types do not contain shape information.&#34;
+            assert len(initial_types[0][1].shape) == 2, &#34;Hummingbird currently support only inputs with len(shape) == 2.&#34;
 
-        from onnxconverter_common.data_types import FloatTensorType, Int32TensorType
+            from onnxconverter_common.data_types import FloatTensorType, Int32TensorType
 
-        test_input = np.random.rand(initial_types[0][1].shape[0], initial_types[0][1].shape[1])
-        extra_config[constants.N_FEATURES] = initial_types[0][1].shape[1]
-        if type(initial_types[0][1]) is FloatTensorType:
-            test_input = np.array(test_input, dtype=np.float32)
-        elif type(initial_types[0][1]) is Int32TensorType:
-            test_input = np.array(test_input, dtype=np.int32)
-        else:
-            raise RuntimeError(
-                &#34;Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.&#34;.format(
-                    type(initial_types[0][1])
+            test_input = np.random.rand(initial_types[0][1].shape[0], initial_types[0][1].shape[1])
+            extra_config[constants.N_FEATURES] = initial_types[0][1].shape[1]
+            if type(initial_types[0][1]) is FloatTensorType:
+                test_input = np.array(test_input, dtype=np.float32)
+            elif type(initial_types[0][1]) is Int32TensorType:
+                test_input = np.array(test_input, dtype=np.int32)
+            else:
+                raise RuntimeError(
+                    &#34;Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.&#34;.format(
+                        type(initial_types[0][1])
+                    )
                 )
-            )
     else:
         extra_config[constants.N_FEATURES] = np.array(test_input).shape[1]
     extra_config[constants.TEST_INPUT] = test_input
@@ -227,7 +206,7 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     topology = parse_onnx_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, onnx.__name__, device, extra_config=extra_config)
+    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
     return hb_model
 
 
@@ -236,9 +215,6 @@ def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config=
     This function converts the specified input *model* into an implementation targeting *backend*.
     *Convert* supports [Sklearn], [LightGBM], [XGBoost] and [ONNX] models.
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
-    For *Sklearn*, *LightGBM* and *XGBoost* currently only the *torch* and *torch.jit* backends are supported.
-    For *ONNX* currently only the *onnx* backend is supported. For ONNX models, Hummingbird behave as a model
-    rewriter converting [ONNX-ML] into [ONNX operators].
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
     The *torch.jit* backend requires a test_input.
@@ -280,8 +256,7 @@ def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config=
 
     # Check whether we actually support the backend.
     _supported_backend_check(backend)
-    _supported_model_format_backend_mapping_check(model, backend)
-    _supported_backend_check_extra_config(backend, extra_config)
+    _supported_backend_check_config(model, backend, extra_config)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, backend, test_input, device, extra_config)
@@ -309,9 +284,6 @@ def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config=
 <div class="desc"><p>This function converts the specified input <em>model</em> into an implementation targeting <em>backend</em>.
 <em>Convert</em> supports <a href="https://scikit-learn.org/">Sklearn</a>, <a href="https://lightgbm.readthedocs.io/">LightGBM</a>, <a href="https://xgboost.readthedocs.io/">XGBoost</a> and <a href="https://onnx.ai/">ONNX</a> models.
 For <em>LightGBM</em> and <em>XGBoost</em> currently only the Sklearn API is supported.
-For <em>Sklearn</em>, <em>LightGBM</em> and <em>XGBoost</em> currently only the <em>torch</em> and <em>torch.jit</em> backends are supported.
-For <em>ONNX</em> currently only the <em>onnx</em> backend is supported. For ONNX models, Hummingbird behave as a model
-rewriter converting <a href="https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md">ONNX-ML</a> into <a href="https://github.com/onnx/onnx/blob/master/docs/Operators.md">ONNX operators</a>.
 The detailed list of models and backends can be found at <code><a title="hummingbird.ml.supported" href="supported.html">hummingbird.ml.supported</a></code>.
 The <em>onnx</em> backend requires either a test_input of a the initial types set through the exta_config parameter.
 The <em>torch.jit</em> backend requires a test_input.</p>
@@ -339,16 +311,13 @@ The set of supported extra configurations can be found at <code><a title="hummin
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L203-L264" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L182-L239" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config={}):
     &#34;&#34;&#34;
     This function converts the specified input *model* into an implementation targeting *backend*.
     *Convert* supports [Sklearn], [LightGBM], [XGBoost] and [ONNX] models.
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
-    For *Sklearn*, *LightGBM* and *XGBoost* currently only the *torch* and *torch.jit* backends are supported.
-    For *ONNX* currently only the *onnx* backend is supported. For ONNX models, Hummingbird behave as a model
-    rewriter converting [ONNX-ML] into [ONNX operators].
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
     The *torch.jit* backend requires a test_input.
@@ -390,8 +359,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
 
     # Check whether we actually support the backend.
     _supported_backend_check(backend)
-    _supported_model_format_backend_mapping_check(model, backend)
-    _supported_backend_check_extra_config(backend, extra_config)
+    _supported_backend_check_config(model, backend, extra_config)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, backend, test_input, device, extra_config)
