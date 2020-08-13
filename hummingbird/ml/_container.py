@@ -14,6 +14,7 @@ from onnxconverter_common.container import CommonSklearnModelContainer
 import torch
 
 from .operator_converters import constants
+from ._utils import onnx_runtime_installed
 
 
 class CommonONNXModelContainer(CommonSklearnModelContainer):
@@ -136,6 +137,7 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
 
     def __init__(self, model, extra_config={}, is_regression=True, is_anomaly_detection=False, **kwargs):
         super(PyTorchSklearnContainerRegression, self).__init__(model, extra_config)
+
         assert not (is_regression and is_anomaly_detection)
 
         self._is_regression = is_regression
@@ -275,3 +277,136 @@ class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomaly
         f = super(TorchScriptSklearnContainerAnomalyDetection, self).score_samples
 
         return _torchscript_wrapper(device, f, *inputs)
+
+
+# ONNX containers.
+class ONNXSklearnContainer(ABC):
+    """
+    Base container for ONNX models.
+    The container allows to mirror the Sklearn API.
+    """
+
+    def __init__(self, model, extra_config={}):
+        """
+        Args:
+            model: A ONNX model
+            extra_config: Some additional configuration parameter
+        """
+        if onnx_runtime_installed():
+            import onnxruntime as ort
+
+        self.model = model
+        self.extra_config = extra_config
+
+        self.session = ort.InferenceSession(self.model.SerializeToString())
+        self.output_names = [self.session.get_outputs()[i].name for i in range(len(self.session.get_outputs()))]
+        self.input_names = [input.name for input in self.session.get_inputs()]
+
+    def _get_named_inputs(self, *inputs):
+        assert len(inputs) == len(self.input_names)
+
+        named_inputs = {}
+
+        for i in range(len(inputs)):
+            named_inputs[self.input_names[i]] = inputs[i]
+
+        return named_inputs
+
+
+class ONNXContainerTransformer(ONNXSklearnContainer):
+    """
+    Container mirroring Sklearn transformers API.
+    """
+
+    def __init__(self, model, extra_config={}):
+        super(ONNXContainerTransformer, self).__init__(model, extra_config)
+
+        assert len(self.output_names) == 1
+
+    def transform(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On data transformers it returns transformed output data
+        """
+        named_inputs = self._get_named_inputs(*inputs)
+
+        return self.session.run(self.output_names, named_inputs)
+
+
+class ONNXContainerRegression(PyTorchTorchscriptSklearnContainer):
+    """
+    Container mirroring Sklearn regressors API.
+    """
+
+    def __init__(self, model, extra_config={}, is_regression=True, is_anomaly_detection=False, **kwargs):
+        super(ONNXContainerRegression, self).__init__(model, extra_config)
+
+        assert not (is_regression and is_anomaly_detection)
+        if is_regression:
+            assert len(self.output_names) == 1
+
+        self._is_regression = is_regression
+        self._is_anomaly_detection = is_anomaly_detection
+
+    def predict(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On regression returns the predicted values.
+        On classification tasks returns the predicted class labels for the input data.
+        On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
+        """
+        named_inputs = self._get_named_inputs(*inputs)
+
+        if self._is_regression:
+            return self.session.run(self.output_names, named_inputs)
+        else:
+            return self.session.run(self.output_names[0], named_inputs)
+
+
+class ONNXContainerClassification(PyTorchSklearnContainerRegression):
+    """
+    Container mirroring Sklearn classifiers API.
+    """
+
+    def __init__(self, model, extra_config={}):
+        super(PyTorchSklearnContainerClassification, self).__init__(model, extra_config, is_regression=False)
+
+        assert len(self.output_names) == 2
+
+    def predict_proba(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On classification tasks returns the probability estimates.
+        """
+        named_inputs = self._get_named_inputs(*inputs)
+
+        return self.session.run(self.output_names[1], named_inputs)
+
+
+class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression):
+    """
+    Container mirroring Sklearn anomaly detection API.
+    """
+
+    def __init__(self, model, extra_config={}):
+        super(PyTorchSklearnContainerAnomalyDetection, self).__init__(
+            model, extra_config, is_regression=False, is_anomaly_detection=True
+        )
+
+        assert len(self.output_names) == 2
+
+    def decision_function(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision function scores.
+        """
+        named_inputs = self._get_named_inputs(*inputs)
+
+        return self.session.run(self.output_names[1], named_inputs)
+
+    def score_samples(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
+        """
+        return self.decision_function(*inputs) + self.extra_config[constants.OFFSET]
