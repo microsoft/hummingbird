@@ -250,7 +250,7 @@ def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config=
     [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
 
     Args:
-        model: An input mode
+        model: An input model
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
                     For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
@@ -318,7 +318,7 @@ The <em>torch.jit</em> backend requires a test_input.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>model</code></strong></dt>
-<dd>An input mode</dd>
+<dd>An input model</dd>
 <dt><strong><code>backend</code></strong></dt>
 <dd>The target for the conversion</dd>
 <dt><strong><code>test_input</code></strong></dt>
@@ -360,7 +360,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
     [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
 
     Args:
-        model: An input mode
+        model: An input model
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
                     For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
