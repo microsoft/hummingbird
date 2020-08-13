@@ -289,6 +289,9 @@ def convert(model, backend, test_input=None, extra_config={}):
     """
     assert model is not None
 
+    # We destroy extra_config during conversion, we create a copy here.
+    extra_config = deepcopy(extra_config)
+
     # Add test input as extra configuration for conversion.
     if test_input is not None and constants.TEST_INPUT not in extra_config:
         extra_config[constants.TEST_INPUT] = test_input
@@ -301,9 +304,6 @@ def convert(model, backend, test_input=None, extra_config={}):
     _supported_backend_check(backend)
     _supported_model_format_backend_mapping_check(model, backend)
     _supported_backend_check_extra_config(model, extra_config)
-
-    # We destroy extra_config during conversion, we create a copy here.
-    extra_config = deepcopy(extra_config)
 
     if type(model) in xgb_operator_list:
         return _convert_xgboost(model, backend, test_input, extra_config)
