@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L0-L115" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L0-L115" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -176,7 +176,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L50-L71" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L50-L71" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_cast(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -224,7 +224,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L74-L89" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L74-L89" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_concat(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -266,7 +266,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L92-L111" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L92-L111" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_reshape(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -304,7 +304,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L19-L29" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L19-L29" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Cast(BaseOperator, torch.nn.Module):
     def __init__(self, to_type):
@@ -342,7 +342,7 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L27-L29" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L27-L29" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     if self.to_type == 7:  # Cast to long
@@ -359,7 +359,7 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L32-L37" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L32-L37" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Concat(BaseOperator, torch.nn.Module):
     def __init__(self):
@@ -392,7 +392,7 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L36-L37" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L36-L37" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, *x):
     return torch.cat(x, dim=1)</code></pre>
@@ -409,7 +409,7 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L40-L47" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L40-L47" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Reshape(BaseOperator, torch.nn.Module):
     def __init__(self, shape):
@@ -444,7 +444,7 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/bdcb15d995bf08bd632aec2a1563db90cc96b713/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L46-L47" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L46-L47" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     return torch.reshape(x, self.shape)</code></pre>
