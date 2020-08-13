@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/12d05a15fb4e9e21f57cfd4ac77a774461fa8b86/hummingbird/ml/convert.py#L0-L288" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L0-L263" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -289,7 +289,7 @@ def convert(model, backend, test_input=None, extra_config={}):
     [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
 
     Args:
-        model: An input model
+        model: An input mode
         backend: The target for the conversion
         test_input: some input data used to trace the model execution.
                     For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
@@ -344,7 +344,7 @@ The detailed list of models and backends can be found at <code><a title="humming
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>model</code></strong></dt>
-<dd>An input model</dd>
+<dd>An input mode</dd>
 <dt><strong><code>backend</code></strong></dt>
 <dd>The target for the conversion</dd>
 <dt><strong><code>test_input</code></strong></dt>
@@ -362,7 +362,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/12d05a15fb4e9e21f57cfd4ac77a774461fa8b86/hummingbird/ml/convert.py#L244-L289" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L203-L264" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert(model, backend, test_input=None, extra_config={}):
     &#34;&#34;&#34;
@@ -381,7 +381,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
     [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
 
     Args:
-        model: An input model
+        model: An input mode
         backend: The target for the conversion
         test_input: some input data used to trace the model execution.
                     For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
