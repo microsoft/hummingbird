@@ -33,7 +33,7 @@ class TestXGBoostConverter(unittest.TestCase):
                 )
                 self.assertIsNotNone(torch_model)
                 self.assertEqual(
-                    str(type(list(torch_model.model.operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
+                    str(type(list(torch_model.model._operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
                 )
 
     def _run_xgb_classifier_converter(self, num_classes, extra_config={}):

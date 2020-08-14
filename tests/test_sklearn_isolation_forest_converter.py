@@ -25,7 +25,7 @@ class TestIsolationForestConverter(unittest.TestCase):
             torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
             self.assertIsNotNone(torch_model)
             self.assertEqual(
-                str(type(list(torch_model.model.operator_map.values())[0])), iforest_implementation_map[extra_config_param]
+                str(type(list(torch_model.model._operator_map.values())[0])), iforest_implementation_map[extra_config_param]
             )
 
     def _run_isolation_forest_converter(self, extra_config={}):
