@@ -280,10 +280,7 @@ class TestLGBMConverter(unittest.TestCase):
         onnx_model = hummingbird.ml.convert(model, "onnx", X)
 
         # Get the predictions for the ONNX-ML model
-        session = ort.InferenceSession(onnx_model.SerializeToString())
-        output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
-        inputs = {session.get_inputs()[0].name: X}
-        onnx_pred = session.run(output_names, inputs)
+        onnx_pred = onnx_model.predict(X)
 
         np.testing.assert_allclose(onnx_pred[0].flatten(), model.predict(X))
 
