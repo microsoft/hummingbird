@@ -101,6 +101,18 @@ def xgboost_installed():
     return True
 
 
+def tvm_installed():
+    """
+    Checks that *TVM* is available.
+    """
+    try:
+        import tvm
+        from tvm import relay
+    except ImportError:
+        return False
+    return True
+
+
 class _Constants(object):
     """
     Class enabling the proper definition of constants.
