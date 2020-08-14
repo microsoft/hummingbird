@@ -200,7 +200,7 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
         """
-        return self.decision_function(*inputs) + self.extra_config[constants.OFFSET]
+        return self.decision_function(*inputs) + self._extra_config[constants.OFFSET]
 
 
 # TorchScript containers.
@@ -300,7 +300,7 @@ class ONNXSklearnContainer(ABC):
             import onnxruntime as ort
 
         self.model = model
-        self.extra_config = extra_config
+        self._extra_config = extra_config
 
         self.session = ort.InferenceSession(self.model.SerializeToString())
         self._output_names = [self.session.get_outputs()[i].name for i in range(len(self.session.get_outputs()))]
@@ -413,4 +413,4 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
         """
-        return self.decision_function(*inputs) + self.extra_config[constants.OFFSET]
+        return self.decision_function(*inputs) + self._extra_config[constants.OFFSET]
