@@ -52,10 +52,10 @@ class PyTorchBackendModel(torch.nn.Module):
             extra_config: Some additional custom configuration parameter
         """
         super(PyTorchBackendModel, self).__init__()
-        self.input_names = input_names
-        self.output_names = output_names
-        self.operator_map = torch.nn.ModuleDict(operator_map)
-        self.operators = operators
+        self._input_names = input_names
+        self._output_names = output_names
+        self._operator_map = torch.nn.ModuleDict(operator_map)
+        self._operators = operators
 
     def forward(self, *inputs):
         with torch.no_grad():
@@ -64,7 +64,7 @@ class PyTorchBackendModel(torch.nn.Module):
             device = _get_device(self)
 
             # Maps data inputs to the expected variables.
-            for i, input_name in enumerate(self.input_names):
+            for i, input_name in enumerate(self._input_names):
                 if type(inputs[i]) is np.ndarray:
                     inputs[i] = torch.from_numpy(inputs[i]).float()
                 elif type(inputs[i]) is not torch.Tensor:
@@ -74,8 +74,8 @@ class PyTorchBackendModel(torch.nn.Module):
                 variable_map[input_name] = inputs[i]
 
             # Evaluate all the operators in the topology by properly wiring inputs \ outputs
-            for operator in self.operators:
-                pytorch_op = self.operator_map[operator.full_name]
+            for operator in self._operators:
+                pytorch_op = self._operator_map[operator.full_name]
                 pytorch_outputs = pytorch_op(*(variable_map[input] for input in operator.input_full_names))
 
                 if len(operator.output_full_names) == 1:
@@ -85,10 +85,10 @@ class PyTorchBackendModel(torch.nn.Module):
                         variable_map[output] = pytorch_outputs[i]
 
             # Prepare and return the output.
-            if len(self.output_names) == 1:
-                return variable_map[self.output_names[0]]
+            if len(self._output_names) == 1:
+                return variable_map[self._output_names[0]]
             else:
-                return list(variable_map[output_name] for output_name in self.output_names)
+                return list(variable_map[output_name] for output_name in self._output_names)
 
 
 class PyTorchTorchscriptSklearnContainer(ABC):
@@ -103,8 +103,12 @@ class PyTorchTorchscriptSklearnContainer(ABC):
             model: A pytorch or torchscript model
             extra_config: Some additional configuration parameter
         """
-        self.model = model
-        self.extra_config = extra_config
+        self._model = model
+        self._extra_config = extra_config
+
+    @property
+    def model(self):
+        return self._model
 
     def to(self, device):
         """
@@ -299,7 +303,7 @@ class ONNXSklearnContainer(ABC):
         self.extra_config = extra_config
 
         self.session = ort.InferenceSession(self.model.SerializeToString())
-        self.output_names = [self.session.get_outputs()[i].name for i in range(len(self.session.get_outputs()))]
+        self._output_names = [self.session.get_outputs()[i].name for i in range(len(self.session.get_outputs()))]
         self.input_names = [input.name for input in self.session.get_inputs()]
 
     def _get_named_inputs(self, *inputs):
@@ -321,7 +325,7 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
     def __init__(self, model, extra_config={}):
         super(ONNXSklearnContainerTransformer, self).__init__(model, extra_config)
 
-        assert len(self.output_names) == 1
+        assert len(self._output_names) == 1
 
     def transform(self, *inputs):
         """
@@ -330,7 +334,7 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
         """
         named_inputs = self._get_named_inputs(*inputs)
 
-        return self.session.run(self.output_names, named_inputs)
+        return self.session.run(self._output_names, named_inputs)
 
 
 class ONNXSklearnContainerRegression(ONNXSklearnContainer):
@@ -343,7 +347,7 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
 
         assert not (is_regression and is_anomaly_detection)
         if is_regression:
-            assert len(self.output_names) == 1
+            assert len(self._output_names) == 1
 
         self._is_regression = is_regression
         self._is_anomaly_detection = is_anomaly_detection
@@ -358,9 +362,9 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         named_inputs = self._get_named_inputs(*inputs)
 
         if self._is_regression:
-            return self.session.run(self.output_names, named_inputs)
+            return self.session.run(self._output_names, named_inputs)
         else:
-            return self.session.run([self.output_names[0]], named_inputs)[0]
+            return self.session.run([self._output_names[0]], named_inputs)[0]
 
 
 class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
@@ -371,7 +375,7 @@ class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
     def __init__(self, model, extra_config={}):
         super(ONNXSklearnContainerClassification, self).__init__(model, extra_config, is_regression=False)
 
-        assert len(self.output_names) == 2
+        assert len(self._output_names) == 2
 
     def predict_proba(self, *inputs):
         """
@@ -380,7 +384,7 @@ class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
         """
         named_inputs = self._get_named_inputs(*inputs)
 
-        return self.session.run([self.output_names[1]], named_inputs)[0]
+        return self.session.run([self._output_names[1]], named_inputs)[0]
 
 
 class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
@@ -393,7 +397,7 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
             model, extra_config, is_regression=False, is_anomaly_detection=True
         )
 
-        assert len(self.output_names) == 2
+        assert len(self._output_names) == 2
 
     def decision_function(self, *inputs):
         """
@@ -402,7 +406,7 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         """
         named_inputs = self._get_named_inputs(*inputs)
 
-        return self.session.run([self.output_names[1]], named_inputs)
+        return self.session.run([self._output_names[1]], named_inputs)
 
     def score_samples(self, *inputs):
         """
