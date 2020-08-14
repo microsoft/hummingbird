@@ -13,6 +13,7 @@ import torch
 from uuid import uuid4
 
 from onnxconverter_common.registration import get_converter
+import onnx
 
 from ._container import (
     PyTorchBackendModel,
@@ -29,7 +30,6 @@ from ._container import (
     ONNXSklearnContainerTransformer,
     ONNXSklearnContainerAnomalyDetection,
 )
-from ._utils import onnx_runtime_installed
 from .exceptions import MissingConverter
 from .operator_converters import constants
 
@@ -52,18 +52,12 @@ def convert(topology, backend, device, extra_config={}):
     assert device is not None, "Cannot convert a Topology object into device None."
 
     operator_map = {}
-    onnx_backend = None
-
-    if onnx_runtime_installed():
-        import onnx
-
-        onnx_backend = onnx.__name__
 
     for operator in topology.topological_operator_iterator():
         try:
             converter = get_converter(operator.type)
 
-            if backend == onnx_backend:
+            if backend == onnx.__name__:
                 # vers = LooseVersion(torch.__version__)
                 # allowed_min = LooseVersion("1.6.1")
                 # Pytorch <= 1.6.0 has a bug with exporting GEMM into ONNX.
@@ -86,7 +80,7 @@ def convert(topology, backend, device, extra_config={}):
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
 
-    if backend == onnx_backend:
+    if backend == onnx.__name__:
         onnx_model_name = output_model_name = None
         target_opset = 11
 
