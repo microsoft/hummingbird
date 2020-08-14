@@ -77,6 +77,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
             self.regression = True
             self.n_classes = 1
         else:
+            self.classification = True
             self.n_classes = len(classes) if n_classes is None else n_classes
             if min(classes) != 0 or max(classes) != len(classes) - 1:
                 self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)

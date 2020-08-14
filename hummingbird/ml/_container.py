@@ -313,13 +313,13 @@ class ONNXSklearnContainer(ABC):
         return named_inputs
 
 
-class ONNXContainerTransformer(ONNXSklearnContainer):
+class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
     """
     Container mirroring Sklearn transformers API.
     """
 
     def __init__(self, model, extra_config={}):
-        super(ONNXContainerTransformer, self).__init__(model, extra_config)
+        super(ONNXSklearnContainerTransformer, self).__init__(model, extra_config)
 
         assert len(self.output_names) == 1
 
@@ -333,13 +333,13 @@ class ONNXContainerTransformer(ONNXSklearnContainer):
         return self.session.run(self.output_names, named_inputs)
 
 
-class ONNXContainerRegression(PyTorchTorchscriptSklearnContainer):
+class ONNXSklearnContainerRegression(ONNXSklearnContainer):
     """
     Container mirroring Sklearn regressors API.
     """
 
     def __init__(self, model, extra_config={}, is_regression=True, is_anomaly_detection=False, **kwargs):
-        super(ONNXContainerRegression, self).__init__(model, extra_config)
+        super(ONNXSklearnContainerRegression, self).__init__(model, extra_config)
 
         assert not (is_regression and is_anomaly_detection)
         if is_regression:
@@ -363,13 +363,13 @@ class ONNXContainerRegression(PyTorchTorchscriptSklearnContainer):
             return self.session.run(self.output_names[0], named_inputs)
 
 
-class ONNXContainerClassification(PyTorchSklearnContainerRegression):
+class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
     """
     Container mirroring Sklearn classifiers API.
     """
 
     def __init__(self, model, extra_config={}):
-        super(PyTorchSklearnContainerClassification, self).__init__(model, extra_config, is_regression=False)
+        super(ONNXSklearnContainerClassification, self).__init__(model, extra_config, is_regression=False)
 
         assert len(self.output_names) == 2
 
@@ -383,13 +383,13 @@ class ONNXContainerClassification(PyTorchSklearnContainerRegression):
         return self.session.run(self.output_names[1], named_inputs)
 
 
-class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression):
+class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
     """
     Container mirroring Sklearn anomaly detection API.
     """
 
     def __init__(self, model, extra_config={}):
-        super(PyTorchSklearnContainerAnomalyDetection, self).__init__(
+        super(ONNXSklearnContainerAnomalyDetection, self).__init__(
             model, extra_config, is_regression=False, is_anomaly_detection=True
         )
 

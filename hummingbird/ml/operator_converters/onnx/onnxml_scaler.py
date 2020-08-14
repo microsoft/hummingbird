@@ -11,7 +11,6 @@ Converter for ONNX-ML Scaler.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .._base_operator import BaseOperator
 from .._scaler_implementations import Scaler
 
 
