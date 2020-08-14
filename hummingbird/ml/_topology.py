@@ -134,12 +134,29 @@ def convert(topology, backend, device, extra_config={}):
     # This is necessary because ONNX models can have arbitrary operators doing casting, reshaping etc.
     idx = len(operators) - 1
     while (
-        idx > 0
+        idx >= 0
         and not operator_map[operators[idx].full_name].regression
+        and not operator_map[operators[idx].full_name].classification
         and not operator_map[operators[idx].full_name].anomaly_detection
         and not operator_map[operators[idx].full_name].transformer
     ):
         idx -= 1
+
+    assert idx >= 0, "Cannot detect container type. Please fill an issue at https://github.com/microsoft/hummingbird."
+
+    # If is a transformer, we need to check wheter there is another operator type before.
+    # E.g., normalization after classification.
+    tmp_idx = idx
+    if operator_map[operators[idx].full_name].transformer:
+        while (
+            idx > 0
+            and not operator_map[operators[idx].full_name].regression
+            and not operator_map[operators[idx].full_name].classification
+            and not operator_map[operators[idx].full_name].anomaly_detection
+        ):
+            idx -= 1
+        if idx < 0:
+            idx = tmp_idx
 
     if operator_map[operators[idx].full_name].regression:
         # We are doing a regression task.

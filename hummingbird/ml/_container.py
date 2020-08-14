@@ -360,7 +360,7 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         if self._is_regression:
             return self.session.run(self.output_names, named_inputs)
         else:
-            return self.session.run(self.output_names[0], named_inputs)
+            return self.session.run([self.output_names[0]], named_inputs)[0]
 
 
 class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
@@ -380,7 +380,7 @@ class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
         """
         named_inputs = self._get_named_inputs(*inputs)
 
-        return self.session.run(self.output_names[1], named_inputs)
+        return self.session.run([self.output_names[1]], named_inputs)[0]
 
 
 class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
@@ -402,7 +402,7 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         """
         named_inputs = self._get_named_inputs(*inputs)
 
-        return self.session.run(self.output_names[1], named_inputs)
+        return self.session.run([self.output_names[1]], named_inputs)
 
     def score_samples(self, *inputs):
         """
