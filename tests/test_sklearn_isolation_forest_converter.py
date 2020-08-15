@@ -89,7 +89,7 @@ class TestIsolationForestConverter(unittest.TestCase):
             np.testing.assert_array_equal(model.predict(X), torch_model.predict(X))
 
     # Test ONNX backend.
-    @unittest.skipIf(not (onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
+    @unittest.skipIf(not (onnx_runtime_installed()), reason="ONNX tests require ORT")
     def test_isolation_forest_onnx_converter(self):
         warnings.filterwarnings("ignore")
         for max_samples in [2 ** 1, 2 ** 3, 2 ** 8, 2 ** 10, 2 ** 12]:

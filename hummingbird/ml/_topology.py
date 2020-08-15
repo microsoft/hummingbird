@@ -124,6 +124,10 @@ def convert(topology, backend, device, extra_config={}):
             torch_model = torch.jit.trace(torch_model, test_data).eval()
         hb_model = torch_model
 
+    # Return if the container is not needed.
+    if constants.CONTAINER in extra_config and not extra_config[constants.CONTAINER]:
+        return hb_model
+
     # We scan the operators backwards until we find an operator with a defined type
     # This is necessary because ONNX models can have arbitrary operators doing casting, reshaping etc.
     idx = len(operators) - 1
