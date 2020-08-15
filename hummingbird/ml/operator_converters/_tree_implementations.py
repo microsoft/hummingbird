@@ -162,7 +162,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         if self.anomaly_detection:
             # Select the class (-1 if negative) and return the score.
-            return torch.where(x < 0, self.classes[0], self.classes[1]), x
+            return torch.where(x.view(-1) < 0, self.classes[0], self.classes[1]), x
 
         if self.perform_class_select:
             return torch.index_select(self.classes, 0, torch.argmax(x, dim=1)), x

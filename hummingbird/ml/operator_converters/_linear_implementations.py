@@ -17,7 +17,7 @@ class LinearModel(BaseOperator, torch.nn.Module):
     def __init__(self, coefficients, intercepts, device, classes=[0], multi_class=None, is_linear_regression=False):
         super(LinearModel, self).__init__()
         self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients), requires_grad=False)
-        self.intercepts = torch.nn.Parameter(torch.from_numpy(intercepts), requires_grad=False)
+        self.intercepts = torch.nn.Parameter(torch.from_numpy(intercepts).view(-1), requires_grad=False)
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
         self.multi_class = multi_class
         self.regression = is_linear_regression

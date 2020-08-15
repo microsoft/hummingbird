@@ -434,10 +434,14 @@ class TVMSklearnContainer(ABC):
         assert tvm_installed()
         import tvm
 
-        self.model = model
+        self._model = model
         self._extra_config = extra_config
 
         self._to_tvm_tensor = lambda x: tvm.nd.array(x, self._extra_config[constants.TVM_CONTEXT])
+
+    @property
+    def model(self):
+        return self._model
 
 
 class TVMSklearnContainerTransformer(TVMSklearnContainer):

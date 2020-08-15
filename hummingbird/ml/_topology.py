@@ -155,9 +155,14 @@ def convert(topology, backend, device, extra_config={}):
         if device == "cuda":
             target = tvm.target.cuda()
             ctx = tvm.gpu()
-        else:
+        elif device == "cpu":
             target = "llvm"
             ctx = tvm.cpu()
+        elif "llvm" in device:
+            target = device
+            ctx = tvm.cpu()
+        else:
+            raise RuntimeError("Device {} not recognized".format(device))
 
         # Generate the model.
         with tvm.transform.PassContext(opt_level=3):

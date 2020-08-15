@@ -9,6 +9,7 @@ import torch
 from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV
 
 import hummingbird.ml
+from hummingbird.ml._utils import tvm_installed
 
 
 class TestSklearnLinearClassifiers(unittest.TestCase):
@@ -182,6 +183,42 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    # Test TVM backends.
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_sgd_classifier_tvm(self):
+
+        model = SGDClassifier(loss="log")
+
+        np.random.seed(0)
+        num_classes = 3
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        tvm_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertTrue(tvm_model is not None)
+        np.testing.assert_allclose(model.predict(X), tvm_model.predict(X), rtol=1e-6, atol=1e-6)
+        np.testing.assert_allclose(model.predict_proba(X), tvm_model.predict_proba(X), rtol=1e-6, atol=1e-6)
+
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_lr_tvm(self):
+
+        model = LinearRegression()
+
+        np.random.seed(0)
+        num_classes = 1000
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        tvm_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertTrue(tvm_model is not None)
+        np.testing.assert_allclose(model.predict(X), tvm_model.predict(X), rtol=1e-6, atol=1e-3)
 
 
 if __name__ == "__main__":
