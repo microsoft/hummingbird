@@ -10,7 +10,8 @@ All operators, backends, and configurations settings supported in Hummingbird ar
 **Supported Backends**
 PyTorch,
 TorchScript,
-ONNX
+ONNX,
+TVM
 
 **Supported Operators**
 DecisionTreeClassifier,
@@ -52,7 +53,14 @@ XGBRegressor
 from collections import defaultdict
 from .exceptions import MissingConverter
 
-from ._utils import torch_installed, sklearn_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
+from ._utils import (
+    torch_installed,
+    sklearn_installed,
+    lightgbm_installed,
+    xgboost_installed,
+    onnx_runtime_installed,
+    tvm_installed,
+)
 
 
 def _build_sklearn_operator_list():
@@ -201,6 +209,11 @@ def _build_backend_map():
         import onnx
 
         backends[onnx.__name__] = onnx.__name__
+
+    if tvm_installed():
+        import tvm
+
+        backends[tvm.__name__] = tvm.__name__
 
     return backends
 

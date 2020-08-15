@@ -42,7 +42,10 @@ NUM_TREES = "n_trees"
 """Number of trees composing an ensemble"""
 
 OFFSET = "offset"
-"""offset of the sklearn anomaly detection implementation"""
+"""Offset of the sklearn anomaly detection implementation"""
 
 MAX_SAMPLES = "max_samples"
-"""max_samples of sklearn isolation forest implementation"""
+"""Max_samples of sklearn isolation forest implementation"""
+
+TVM_CONTEXT = "tvm_context"
+"""The context for TVM containing information on the target"""

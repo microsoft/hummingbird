@@ -27,7 +27,8 @@
 <p><strong>Supported Backends</strong>
 PyTorch,
 TorchScript,
-ONNX</p>
+ONNX,
+TVM</p>
 <p><strong>Supported Operators</strong>
 DecisionTreeClassifier,
 DecisionTreeRegressor,
@@ -64,7 +65,7 @@ XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L282" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L295" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -78,7 +79,8 @@ All operators, backends, and configurations settings supported in Hummingbird ar
 **Supported Backends**
 PyTorch,
 TorchScript,
-ONNX
+ONNX,
+TVM
 
 **Supported Operators**
 DecisionTreeClassifier,
@@ -120,7 +122,14 @@ XGBRegressor
 from collections import defaultdict
 from .exceptions import MissingConverter
 
-from ._utils import torch_installed, sklearn_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
+from ._utils import (
+    torch_installed,
+    sklearn_installed,
+    lightgbm_installed,
+    xgboost_installed,
+    onnx_runtime_installed,
+    tvm_installed,
+)
 
 
 def _build_sklearn_operator_list():
@@ -270,6 +279,11 @@ def _build_backend_map():
 
         backends[onnx.__name__] = onnx.__name__
 
+    if tvm_installed():
+        import tvm
+
+        backends[tvm.__name__] = tvm.__name__
+
     return backends
 
 
@@ -400,7 +414,7 @@ ONNX_TARGET_OPSET = &#34;onnx_target_opset&#34;
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L240-L253" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L253-L266" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_onnxml_api_operator_name(model_type):
     &#34;&#34;&#34;
@@ -437,7 +451,7 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L224-L237" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L237-L250" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_sklearn_api_operator_name(model_type):
     &#34;&#34;&#34;

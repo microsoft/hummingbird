@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L47" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L50" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -73,10 +73,13 @@ NUM_TREES = &#34;n_trees&#34;
 &#34;&#34;&#34;Number of trees composing an ensemble&#34;&#34;&#34;
 
 OFFSET = &#34;offset&#34;
-&#34;&#34;&#34;offset of the sklearn anomaly detection implementation&#34;&#34;&#34;
+&#34;&#34;&#34;Offset of the sklearn anomaly detection implementation&#34;&#34;&#34;
 
 MAX_SAMPLES = &#34;max_samples&#34;
-&#34;&#34;&#34;max_samples of sklearn isolation forest implementation&#34;&#34;&#34;</code></pre>
+&#34;&#34;&#34;Max_samples of sklearn isolation forest implementation&#34;&#34;&#34;
+
+TVM_CONTEXT = &#34;tvm_context&#34;
+&#34;&#34;&#34;The context for TVM containing information on the target&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -98,7 +101,7 @@ MAX_SAMPLES = &#34;max_samples&#34;
 </dd>
 <dt id="hummingbird.ml.operator_converters.constants.MAX_SAMPLES"><code class="name">var <span class="ident">MAX_SAMPLES</span></code></dt>
 <dd>
-<div class="desc"><p>max_samples of sklearn isolation forest implementation</p></div>
+<div class="desc"><p>Max_samples of sklearn isolation forest implementation</p></div>
 </dd>
 <dt id="hummingbird.ml.operator_converters.constants.NUM_TREES"><code class="name">var <span class="ident">NUM_TREES</span></code></dt>
 <dd>
@@ -106,7 +109,7 @@ MAX_SAMPLES = &#34;max_samples&#34;
 </dd>
 <dt id="hummingbird.ml.operator_converters.constants.OFFSET"><code class="name">var <span class="ident">OFFSET</span></code></dt>
 <dd>
-<div class="desc"><p>offset of the sklearn anomaly detection implementation</p></div>
+<div class="desc"><p>Offset of the sklearn anomaly detection implementation</p></div>
 </dd>
 <dt id="hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS"><code class="name">var <span class="ident">ONNX_INITIALIZERS</span></code></dt>
 <dd>
@@ -135,6 +138,10 @@ MAX_SAMPLES = &#34;max_samples&#34;
 <dt id="hummingbird.ml.operator_converters.constants.TEST_INPUT"><code class="name">var <span class="ident">TEST_INPUT</span></code></dt>
 <dd>
 <div class="desc"><p>The test input data for models that need to be traced</p></div>
+</dd>
+<dt id="hummingbird.ml.operator_converters.constants.TVM_CONTEXT"><code class="name">var <span class="ident">TVM_CONTEXT</span></code></dt>
+<dd>
+<div class="desc"><p>The context for TVM containing information on the target</p></div>
 </dd>
 </dl>
 </section>
@@ -173,6 +180,7 @@ MAX_SAMPLES = &#34;max_samples&#34;
 <li><code><a title="hummingbird.ml.operator_converters.constants.SIGMOID" href="#hummingbird.ml.operator_converters.constants.SIGMOID">SIGMOID</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.SOFTMAX" href="#hummingbird.ml.operator_converters.constants.SOFTMAX">SOFTMAX</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.TEST_INPUT" href="#hummingbird.ml.operator_converters.constants.TEST_INPUT">TEST_INPUT</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.TVM_CONTEXT" href="#hummingbird.ml.operator_converters.constants.TVM_CONTEXT">TVM_CONTEXT</a></code></li>
 </ul>
 </li>
 </ul>

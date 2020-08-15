@@ -14,7 +14,7 @@ from onnxconverter_common.container import CommonSklearnModelContainer
 import torch
 
 from .operator_converters import constants
-from ._utils import onnx_runtime_installed
+from ._utils import onnx_runtime_installed, tvm_installed
 
 
 class CommonONNXModelContainer(CommonSklearnModelContainer):
@@ -362,7 +362,7 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         named_inputs = self._get_named_inputs(*inputs)
 
         if self._is_regression:
-            return self.session.run(self._output_names, named_inputs)
+            return np.array(self.session.run(self._output_names, named_inputs)).flatten()
         elif self._is_anomaly_detection:
             return np.array(self.session.run([self._output_names[0]], named_inputs))[0].flatten()
         else:
@@ -416,3 +416,112 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
         """
         return self.decision_function(*inputs) + self._extra_config[constants.OFFSET]
+
+
+# TVM containers.
+class TVMSklearnContainer(ABC):
+    """
+    Base container for TVM models.
+    The container allows to mirror the Sklearn API.
+    """
+
+    def __init__(self, model, extra_config={}):
+        """
+        Args:
+            model: A TVM model
+            extra_config: Some additional configuration parameter
+        """
+        assert tvm_installed()
+        import tvm
+
+        self.model = model
+        self._extra_config = extra_config
+
+        self._to_tvm_tensor = lambda x: tvm.nd.array(x, self._extra_config[constants.TVM_CONTEXT])
+
+
+class TVMSklearnContainerTransformer(TVMSklearnContainer):
+    """
+    Container mirroring Sklearn transformers API.
+    """
+
+    def transform(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On data transformers it returns transformed output data
+        """
+        self.model.run(input=self._to_tvm_tensor(*inputs))
+        return self.model.get_output(0).asnumpy()
+
+
+class TVMSklearnContainerRegression(TVMSklearnContainer):
+    """
+    Container mirroring Sklearn regressors API.
+    """
+
+    def __init__(self, model, extra_config={}, is_regression=True, is_anomaly_detection=False, **kwargs):
+        super(TVMSklearnContainerRegression, self).__init__(model, extra_config)
+
+        assert not (is_regression and is_anomaly_detection)
+
+        self._is_regression = is_regression
+        self._is_anomaly_detection = is_anomaly_detection
+
+    def predict(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On regression returns the predicted values.
+        On classification tasks returns the predicted class labels for the input data.
+        On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
+        """
+        # np_data = data.to_numpy() if not isinstance(data,np.ndarray) else data
+        if self._is_regression or self._is_anomaly_detection:
+            self.model.run(input=self._to_tvm_tensor(*inputs))
+            return self.model.get_output(0).asnumpy().flatten()
+        else:
+            self.model.run(input=self._to_tvm_tensor(*inputs))
+            return self.model.get_output(0).asnumpy()
+
+
+class TVMSklearnContainerClassification(TVMSklearnContainerRegression):
+    """
+    Container mirroring Sklearn classifiers API.
+    """
+
+    def __init__(self, model, extra_config={}):
+        super(TVMSklearnContainerClassification, self).__init__(model, extra_config, is_regression=False)
+
+    def predict_proba(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On classification tasks returns the probability estimates.
+        """
+        self.model.run(input=self._to_tvm_tensor(*inputs))
+        return self.model.get_output(1).asnumpy()
+
+
+class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression):
+    """
+    Container mirroring Sklearn anomaly detection API.
+    """
+
+    def __init__(self, model, extra_config={}):
+        super(TVMSklearnContainerAnomalyDetection, self).__init__(
+            model, extra_config, is_regression=False, is_anomaly_detection=True
+        )
+
+    def decision_function(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision function scores.
+        """
+        self.model.run(input=self._to_tvm_tensor(*inputs))
+        return self.model.get_output(1).asnumpy()
+
+    def score_samples(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
+        """
+        self.model.run(input=self._to_tvm_tensor(*inputs))
+        return self.decision_function(inputs) + self._extra_config[constants.OFFSET]

@@ -10,7 +10,7 @@ from sklearn.ensemble import IsolationForest
 
 import hummingbird.ml
 from tree_utils import iforest_implementation_map
-from ._utils import onnx_runtime_installed
+from hummingbird.ml._utils import onnx_runtime_installed
 
 
 class TestIsolationForestConverter(unittest.TestCase):
