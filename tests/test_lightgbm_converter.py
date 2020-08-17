@@ -227,27 +227,26 @@ class TestLGBMConverter(unittest.TestCase):
         self._run_float64_lgbm_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # Random forest in lgbm
-    def lgbm_classifier_random_forest(self, num_classes, extra_config={}):
+    def test_lgbm_classifier_random_forest(self):
         warnings.filterwarnings("ignore")
-        for max_depth in [1, 3, 8, 10, 12, None]:
-            model = lgb.LGBMClassifier(boosting_type="rf", n_estimators=128, max_depth=5, subsample=0.3, bagging_freq=1)
-            np.random.seed(0)
-            X = np.random.rand(100, 200)
-            X = np.array(X, dtype=np.float32)
-            y = np.random.randint(num_classes, size=100)
 
-            model.fit(X, y)
+        model = lgb.LGBMClassifier(boosting_type="rf", n_estimators=128, max_depth=5, subsample=0.3, bagging_freq=1)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=100)
 
-            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
-            self.assertIsNotNone(torch_model)
-            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(torch_model)
+        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Backend tests.
     # Test TorchScript backend regression.
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_regressor_converter_torchscript(self):
         warnings.filterwarnings("ignore")
-        import torch
 
         for max_depth in [1, 3, 8, 10, 12]:
             model = lgb.LGBMRegressor(n_estimators=10, max_depth=max_depth)
@@ -266,7 +265,6 @@ class TestLGBMConverter(unittest.TestCase):
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_classifier_converter_torchscript(self):
         warnings.filterwarnings("ignore")
-        import torch
 
         for max_depth in [1, 3, 8, 10, 12]:
             model = lgb.LGBMClassifier(n_estimators=10, max_depth=max_depth)
@@ -283,6 +281,7 @@ class TestLGBMConverter(unittest.TestCase):
 
     # Check that we can export into ONNX.
     @unittest.skipIf(not (onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_onnx(self):
         import onnxruntime as ort
 
