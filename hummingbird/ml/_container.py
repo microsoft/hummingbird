@@ -299,14 +299,19 @@ class ONNXSklearnContainer(ABC):
         if onnx_runtime_installed():
             import onnxruntime as ort
 
-        self.model = model
-        self._extra_config = extra_config
+            self.model = model
+            self._extra_config = extra_config
 
-        self._session = ort.InferenceSession(self.model.SerializeToString())
-        self._output_names = [self._session.get_outputs()[i].name for i in range(len(self._session.get_outputs()))]
-        self.input_names = [input.name for input in self._session.get_inputs()]
+            self._session = ort.InferenceSession(self.model.SerializeToString())
+            self._output_names = [self._session.get_outputs()[i].name for i in range(len(self._session.get_outputs()))]
+            self.input_names = [input.name for input in self._session.get_inputs()]
+        else:
+            raise RuntimeError("ONNX Container requires ONNX runtime installed.")
 
     def _get_named_inputs(self, *inputs):
+        """
+        Retrieve the inputs names from the session object.
+        """
         assert len(inputs) == len(self.input_names)
 
         named_inputs = {}
