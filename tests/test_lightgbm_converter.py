@@ -227,6 +227,7 @@ class TestLGBMConverter(unittest.TestCase):
         self._run_float64_lgbm_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
     # Random forest in lgbm
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_classifier_random_forest(self):
         warnings.filterwarnings("ignore")
 
@@ -280,12 +281,13 @@ class TestLGBMConverter(unittest.TestCase):
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Check that we can export into ONNX.
-    @unittest.skipIf(not (onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_onnx(self):
         import onnxruntime as ort
 
         warnings.filterwarnings("ignore")
+
         X = [[0, 1], [1, 1], [2, 0]]
         X = np.array(X, dtype=np.float32)
         y = np.array([100, -10, 50], dtype=np.float32)
