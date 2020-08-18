@@ -167,8 +167,11 @@ def _build_onnxml_operator_list():
             "LinearClassifier",
             "LinearRegressor",
             # ONNX operators.
+            "ArgMax",
             "Cast",
             "Concat",
+            "Div",
+            "Sub",
             "Reshape",
             # Preprocessing
             "ArrayFeatureExtractor",

@@ -269,14 +269,18 @@ def _remove_zipmap(node_list):
             )
 
             # We override the output names of the operator preceeding ZipMap with the output names of the ZipMap.
-            # This will evenutally create problems if the output_names of the predecessor
-            # are used somewhere else, but for the moment it works.
             # Perhaps a better strategy is to add an identity node.
             input_keys = list(node_.input.keys())
             for i in range(len(input_keys)):
                 node_.precedence[0].output.pop(input_keys[i])
                 node_.precedence[0].output[node_.origin.output[i]] = node_.origin.output[i]
             node_.precedence[0].origin.output[:] = node_.output.values()
+            if len(node_.precedence[0].successor) > 1:
+                for i in range(len(node_.output.keys())):
+                    for j in range(len(node_.precedence[0].successor)):
+                        if input_keys[i] in node_.precedence[0].successor[j].input:
+                            node_.precedence[0].successor[j].input.pop(input_keys[i])
+                            node_.precedence[0].successor[j].input[node_.origin.output[i]] = node_.origin.output[i]
         else:
             output_node_list.append(node_)
 

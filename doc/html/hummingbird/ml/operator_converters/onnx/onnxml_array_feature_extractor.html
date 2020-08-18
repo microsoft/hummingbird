@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_array_feature_extractor.py#L0-L36" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_array_feature_extractor.py#L0-L38" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -59,10 +59,12 @@ def convert_onnx_array_feature_extractor(operator, device, extra_config):
     &#34;&#34;&#34;
 
     # TODO, this will be tested as part of the ai.onnx.ml.OneHotEncoder tests
-    column_indices = []
     initializers = extra_config[constants.ONNX_INITIALIZERS]
-    column_indices = initializers[operator.raw_operator.origin.input[1]].int64_data
-    return ArrayFeatureExtractor(column_indices, device)
+    for name in operator.raw_operator.origin.input:
+        if name in initializers:
+            column_indices = initializers[name].int64_data
+            return ArrayFeatureExtractor(column_indices, device)
+    raise RuntimeError(&#34;ONNXMLArrayFeatureExtractor: cannot find column inidices in initializers.&#34;)
 
 
 register_converter(&#34;ONNXMLArrayFeatureExtractor&#34;, convert_onnx_array_feature_extractor)</code></pre>
@@ -97,7 +99,7 @@ register_converter(&#34;ONNXMLArrayFeatureExtractor&#34;, convert_onnx_array_fea
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_array_feature_extractor.py#L17-L34" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_array_feature_extractor.py#L17-L36" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_array_feature_extractor(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -113,10 +115,12 @@ register_converter(&#34;ONNXMLArrayFeatureExtractor&#34;, convert_onnx_array_fea
     &#34;&#34;&#34;
 
     # TODO, this will be tested as part of the ai.onnx.ml.OneHotEncoder tests
-    column_indices = []
     initializers = extra_config[constants.ONNX_INITIALIZERS]
-    column_indices = initializers[operator.raw_operator.origin.input[1]].int64_data
-    return ArrayFeatureExtractor(column_indices, device)</code></pre>
+    for name in operator.raw_operator.origin.input:
+        if name in initializers:
+            column_indices = initializers[name].int64_data
+            return ArrayFeatureExtractor(column_indices, device)
+    raise RuntimeError(&#34;ONNXMLArrayFeatureExtractor: cannot find column inidices in initializers.&#34;)</code></pre>
 </details>
 </dd>
 </dl>

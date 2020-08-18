@@ -302,6 +302,24 @@ class TestLGBMConverter(unittest.TestCase):
 
         np.testing.assert_allclose(onnx_pred[0].flatten(), model.predict(X))
 
+    # Random forest in lgbm and onnx
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_onnx_random_forest(self):
+        warnings.filterwarnings("ignore")
+
+        model = lgb.LGBMClassifier(boosting_type="rf", n_estimators=128, max_depth=5, subsample=0.3, bagging_freq=1)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=100)
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "onnx", X)
+        self.assertIsNotNone(torch_model)
+        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
 
 if __name__ == "__main__":
     unittest.main()

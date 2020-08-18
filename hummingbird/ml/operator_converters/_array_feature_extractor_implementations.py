@@ -33,6 +33,9 @@ class ArrayFeatureExtractor(BaseOperator, torch.nn.Module):
 
     def forward(self, x):
         if self.is_contiguous:
-            return x[:, self.min : self.max]
+            if len(x.shape) > 1:
+                return x[:, self.min : self.max]
+            else:
+                return x[self.min : self.max]
         else:
             return torch.index_select(x, 1, self.column_indices)
