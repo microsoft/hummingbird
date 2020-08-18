@@ -64,7 +64,7 @@ XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L282" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L285" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -348,7 +348,10 @@ ONNX_INITIAL_TYPES = &#34;onnx_initial_types&#34;
 &#34;&#34;&#34;For ONNX models we can explicitly set the input types and shapes.&#34;&#34;&#34;
 
 ONNX_TARGET_OPSET = &#34;onnx_target_opset&#34;
-&#34;&#34;&#34;For ONNX models we can set the target opset to use. 9 by default.&#34;&#34;&#34;</code></pre>
+&#34;&#34;&#34;For ONNX models we can set the target opset to use. 9 by default.&#34;&#34;&#34;
+
+CONTAINER = &#34;container&#34;
+&#34;&#34;&#34;Whether to return the container for Sklearn API or just the model&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -356,6 +359,10 @@ ONNX_TARGET_OPSET = &#34;onnx_target_opset&#34;
 <section>
 <h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
+<dt id="hummingbird.ml.supported.CONTAINER"><code class="name">var <span class="ident">CONTAINER</span></code></dt>
+<dd>
+<div class="desc"><p>Whether to return the container for Sklearn API or just the model</p></div>
+</dd>
 <dt id="hummingbird.ml.supported.N_FEATURES"><code class="name">var <span class="ident">N_FEATURES</span></code></dt>
 <dd>
 <div class="desc"><p>Number of features expected in the input data.</p></div>
@@ -477,6 +484,7 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 </li>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
+<li><code><a title="hummingbird.ml.supported.CONTAINER" href="#hummingbird.ml.supported.CONTAINER">CONTAINER</a></code></li>
 <li><code><a title="hummingbird.ml.supported.N_FEATURES" href="#hummingbird.ml.supported.N_FEATURES">N_FEATURES</a></code></li>
 <li><code><a title="hummingbird.ml.supported.ONNX_INITIAL_TYPES" href="#hummingbird.ml.supported.ONNX_INITIAL_TYPES">ONNX_INITIAL_TYPES</a></code></li>
 <li><code><a title="hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME" href="#hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME">ONNX_OUTPUT_MODEL_NAME</a></code></li>

@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_scaler.py#L0-L45" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_scaler.py#L0-L44" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -42,7 +42,6 @@ Converter for ONNX-ML Scaler.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .._base_operator import BaseOperator
 from .._scaler_implementations import Scaler
 
 
@@ -106,7 +105,7 @@ register_converter(&#34;ONNXMLScaler&#34;, convert_onnx_scaler)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_scaler.py#L18-L43" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_scaler.py#L17-L42" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_scaler(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
