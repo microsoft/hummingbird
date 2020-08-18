@@ -81,10 +81,10 @@ def convert(topology, backend, device, extra_config={}):
                 # For the moment only tree_trav is enabled for pytorch <= 1.6.0
                 # if vers < allowed_min:
                 extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
-            elif backend == tvm_backend:
-                # The TVM frontend for PyTorch currently don't support index_select
-                # https://github.com/apache/incubator-tvm/issues/6282
-                extra_config[constants.TREE_IMPLEMENTATION] = "gemm"
+            # elif backend == tvm_backend:
+            # The TVM frontend for PyTorch currently don't support index_select
+            # https://github.com/apache/incubator-tvm/issues/6282
+            # extra_config[constants.TREE_IMPLEMENTATION] = "gemm"
 
             operator_map[operator.full_name] = converter(operator, device, extra_config)
         except ValueError:

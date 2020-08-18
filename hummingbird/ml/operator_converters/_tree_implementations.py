@@ -233,7 +233,8 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             lefts = torch.index_select(self.lefts, 0, indexes).view(-1, self.num_trees)
             rights = torch.index_select(self.rights, 0, indexes).view(-1, self.num_trees)
 
-            indexes = torch.where(torch.ge(feature_values, thresholds), rights, lefts).long()
+            indexes = torch.where(torch.ge(feature_values, thresholds), rights, lefts)
+            indexes = indexes.type(torch.LongTensor)
             indexes = indexes + self.nodes_offset
             indexes = indexes.view(-1)
 
