@@ -21,6 +21,7 @@ class LinearModel(BaseOperator, torch.nn.Module):
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
         self.multi_class = multi_class
         self.regression = is_linear_regression
+        self.classification = not is_linear_regression
 
         self.perform_class_select = False
         if min(classes) != 0 or max(classes) != len(classes) - 1:

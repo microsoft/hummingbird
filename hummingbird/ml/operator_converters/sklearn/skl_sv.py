@@ -18,7 +18,7 @@ from .._base_operator import BaseOperator
 
 class SVC(BaseOperator, torch.nn.Module):
     def __init__(self, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device):
-        super(SVC, self).__init__()
+        super(SVC, self).__init__(classification=True)
         self.kernel = kernel
         self.degree = degree
         self.gamma = gamma

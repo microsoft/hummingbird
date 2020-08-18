@@ -40,8 +40,7 @@ class TestONNXNormalizer(unittest.TestCase):
         onnx_ml_pred = session.run(output_names, inputs)
 
         # Get the predictions for the ONNX model
-        session = ort.InferenceSession(onnx_model.SerializeToString())
-        onnx_pred = session.run(output_names, inputs)
+        onnx_pred = onnx_model.transform(X)
 
         return onnx_ml_pred, onnx_pred
 

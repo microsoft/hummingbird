@@ -22,6 +22,7 @@ class ArrayFeatureExtractor(BaseOperator, torch.nn.Module):
 
     def __init__(self, column_indices, device):
         super(ArrayFeatureExtractor, self).__init__(transformer=True)
+
         is_contiguous = False
         if max(column_indices) - min(column_indices) + 1 == len(column_indices):
             is_contiguous = True

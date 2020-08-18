@@ -25,6 +25,10 @@ from ._container import (
     TorchScriptSklearnContainerClassification,
     TorchScriptSklearnContainerTransformer,
     TorchScriptSklearnContainerAnomalyDetection,
+    ONNXSklearnContainerRegression,
+    ONNXSklearnContainerClassification,
+    ONNXSklearnContainerTransformer,
+    ONNXSklearnContainerAnomalyDetection,
 )
 from .exceptions import MissingConverter
 from .operator_converters import constants
@@ -100,51 +104,91 @@ def convert(topology, backend, device, extra_config={}):
             opset_version=target_opset,
             do_constant_folding=True,
         )
-        onnx_model = onnx.load(output_model_name)
+        hb_model = onnx.load(output_model_name)
         os.remove(output_model_name)
 
         # Set the ONNX model name if any.
         if onnx_model_name is not None:
-            onnx_model.graph.name = onnx_model_name
-
-        return onnx_model
-
-    # Set the device for the model.
-    if device != "cpu":
-        torch_model = torch_model.to(device)
-
-    # If the backend is tochscript, jit the model.
-    if backend == torch.jit.__name__:
-        test_data = torch.from_numpy(extra_config[constants.TEST_INPUT])
+            hb_model.graph.name = onnx_model_name
+    else:
+        # Set the device for the model.
         if device != "cpu":
-            test_data.to(device)
-        torch_model = torch.jit.trace(torch_model, test_data).eval()
+            if backend == torch.__name__ or torch.jit.__name__:
+                torch_model = torch_model.to(device)
 
-    if operator_map[operators[-1].full_name].regression:
+        # If the backend is tochscript, jit the model.
+        if backend == torch.jit.__name__:
+            test_data = torch.from_numpy(extra_config[constants.TEST_INPUT])
+            if device != "cpu":
+                test_data.to(device)
+            torch_model = torch.jit.trace(torch_model, test_data).eval()
+        hb_model = torch_model
+
+    # Return if the container is not needed.
+    if constants.CONTAINER in extra_config and not extra_config[constants.CONTAINER]:
+        return hb_model
+
+    # We scan the operators backwards until we find an operator with a defined type
+    # This is necessary because ONNX models can have arbitrary operators doing casting, reshaping etc.
+    idx = len(operators) - 1
+    while (
+        idx >= 0
+        and not operator_map[operators[idx].full_name].regression
+        and not operator_map[operators[idx].full_name].classification
+        and not operator_map[operators[idx].full_name].anomaly_detection
+        and not operator_map[operators[idx].full_name].transformer
+    ):
+        idx -= 1
+
+    assert idx >= 0, "Cannot detect container type. Please fill an issue at https://github.com/microsoft/hummingbird."
+
+    # If is a transformer, we need to check whether there is another operator type before.
+    # E.g., normalization after classification.
+    tmp_idx = idx
+    if operator_map[operators[idx].full_name].transformer:
+        while (
+            idx > 0
+            and not operator_map[operators[idx].full_name].regression
+            and not operator_map[operators[idx].full_name].classification
+            and not operator_map[operators[idx].full_name].anomaly_detection
+        ):
+            idx -= 1
+        if idx < 0:
+            idx = tmp_idx
+
+    if operator_map[operators[idx].full_name].regression:
         # We are doing a regression task.
         if backend == torch.jit.__name__:
             container = TorchScriptSklearnContainerRegression
+        elif backend == onnx.__name__:
+            container = ONNXSklearnContainerRegression
         else:
             container = PyTorchSklearnContainerRegression
-    elif operator_map[operators[-1].full_name].anomaly_detection:
+    elif operator_map[operators[idx].full_name].anomaly_detection:
         # We are doing anomaly detection.
         if backend == torch.jit.__name__:
             container = TorchScriptSklearnContainerAnomalyDetection
+        elif backend == onnx.__name__:
+            container = ONNXSklearnContainerAnomalyDetection
         else:
             container = PyTorchSklearnContainerAnomalyDetection
-    elif operator_map[operators[-1].full_name].transformer:
+    elif operator_map[operators[idx].full_name].transformer:
         # We are just transforming the input data.
         if backend == torch.jit.__name__:
             container = TorchScriptSklearnContainerTransformer
+        elif backend == onnx.__name__:
+            container = ONNXSklearnContainerTransformer
         else:
             container = PyTorchSklearnContainerTransformer
     else:
         # We are doing a classification task.
         if backend == torch.jit.__name__:
             container = TorchScriptSklearnContainerClassification
+        elif backend == onnx.__name__:
+            container = ONNXSklearnContainerClassification
         else:
             container = PyTorchSklearnContainerClassification
 
-    hb_model = container(torch_model, extra_config)
+    hb_model = container(hb_model, extra_config)
 
     return hb_model

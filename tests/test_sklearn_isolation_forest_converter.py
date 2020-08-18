@@ -10,6 +10,7 @@ from sklearn.ensemble import IsolationForest
 
 import hummingbird.ml
 from tree_utils import iforest_implementation_map
+from hummingbird.ml._utils import onnx_runtime_installed
 
 
 class TestIsolationForestConverter(unittest.TestCase):
@@ -25,7 +26,7 @@ class TestIsolationForestConverter(unittest.TestCase):
             torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
             self.assertIsNotNone(torch_model)
             self.assertEqual(
-                str(type(list(torch_model.model.operator_map.values())[0])), iforest_implementation_map[extra_config_param]
+                str(type(list(torch_model.model._operator_map.values())[0])), iforest_implementation_map[extra_config_param]
             )
 
     def _run_isolation_forest_converter(self, extra_config={}):
@@ -86,6 +87,22 @@ class TestIsolationForestConverter(unittest.TestCase):
             np.testing.assert_allclose(model.decision_function(X), torch_model.decision_function(X), rtol=1e-06, atol=1e-06)
             np.testing.assert_allclose(model.score_samples(X), torch_model.score_samples(X), rtol=1e-06, atol=1e-06)
             np.testing.assert_array_equal(model.predict(X), torch_model.predict(X))
+
+    # Test ONNX backend.
+    @unittest.skipIf(not (onnx_runtime_installed()), reason="ONNX tests require ORT")
+    def test_isolation_forest_onnx_converter(self):
+        warnings.filterwarnings("ignore")
+        for max_samples in [2 ** 1, 2 ** 3, 2 ** 8, 2 ** 10, 2 ** 12]:
+            model = IsolationForest(n_estimators=10, max_samples=max_samples)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            model.fit(X)
+            onnx_model = hummingbird.ml.convert(model, "onnx", X, extra_config={})
+            self.assertIsNotNone(onnx_model)
+            np.testing.assert_allclose(model.decision_function(X), onnx_model.decision_function(X), rtol=1e-06, atol=1e-06)
+            np.testing.assert_allclose(model.score_samples(X), onnx_model.score_samples(X), rtol=1e-06, atol=1e-06)
+            np.testing.assert_array_equal(model.predict(X), onnx_model.predict(X))
 
 
 if __name__ == "__main__":

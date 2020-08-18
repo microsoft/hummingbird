@@ -281,3 +281,6 @@ ONNX_INITIAL_TYPES = "onnx_initial_types"
 
 ONNX_TARGET_OPSET = "onnx_target_opset"
 """For ONNX models we can set the target opset to use. 9 by default."""
+
+CONTAINER = "container"
+"""Whether to return the container for Sklearn API or just the model"""

@@ -52,20 +52,18 @@ class TestONNXLinear(unittest.TestCase):
         inputs = {session.get_inputs()[0].name: X}
         pred = session.run(output_names, inputs)
         for i in range(len(output_names)):
-            if output_names[i] == "output_label":
+            if "label" in output_names[i]:
                 onnx_ml_pred[1] = pred[i]
             else:
                 onnx_ml_pred[0] = pred[i]
 
         # Get the predictions for the ONNX model
-        session = ort.InferenceSession(onnx_model.SerializeToString())
         onnx_pred = [[] for i in range(len(output_names))]
-        pred = session.run(output_names, inputs)
-        for i in range(len(output_names)):
-            if output_names[i] == "output_label":
-                onnx_pred[1] = pred[i]
-            else:
-                onnx_pred[0] = pred[i]
+        if len(output_names) == 1:  # regression
+            onnx_pred = onnx_model.predict(X)
+        else:  # classification
+            onnx_pred[0] = onnx_model.predict_proba(X)
+            onnx_pred[1] = onnx_model.predict(X)
 
         return onnx_ml_pred, onnx_pred
 
@@ -127,8 +125,7 @@ class TestONNXLinear(unittest.TestCase):
         onnx_ml_pred = session.run(output_names, inputs)
 
         # Get the predictions for the ONNX model
-        session = ort.InferenceSession(onnx_model.SerializeToString())
-        onnx_pred = session.run(output_names, inputs)
+        onnx_pred = onnx_model.predict(X)
 
         return onnx_ml_pred, onnx_pred
 
