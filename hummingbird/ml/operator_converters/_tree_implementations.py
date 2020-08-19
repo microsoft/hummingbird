@@ -220,6 +220,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         return x
 
     def forward(self, x):
+        self.nodes_offset.long()  # This is necessary otherwise TVM does not compile. See https://github.com/apache/incubator-tvm/issues/6300
         indexes = self.nodes_offset
         indexes = indexes.expand(x.size()[0], self.num_trees)
         indexes = indexes.reshape(-1)
@@ -317,6 +318,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         return x
 
     def forward(self, x):
+        self.tree_indices.long()  # This is necessary otherwise TVM does not compile. See https://github.com/apache/incubator-tvm/issues/6300
         prev_indices = (torch.ge(torch.index_select(x, 1, self.root_nodes), self.root_biases)).long()
         prev_indices = prev_indices + self.tree_indices
         prev_indices = prev_indices.view(-1)
