@@ -327,10 +327,18 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <h3>Methods</h3>
 <dl>
 <dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Cast.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, x) -> Callable[..., Any]</span>
+<span>def <span class="ident">forward</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -369,10 +377,18 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <h3>Methods</h3>
 <dl>
 <dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Concat.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, *x) -> Callable[..., Any]</span>
+<span>def <span class="ident">forward</span></span>(<span>self, *x)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -413,10 +429,18 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <h3>Methods</h3>
 <dl>
 <dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Reshape.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, x) -> Callable[..., Any]</span>
+<span>def <span class="ident">forward</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
