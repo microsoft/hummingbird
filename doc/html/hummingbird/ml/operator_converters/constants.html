@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L47" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L50" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -53,6 +53,9 @@ SIGMOID = &#34;LOGISTIC&#34;
 
 SOFTMAX = &#34;SOFTMAX&#34;
 &#34;&#34;&#34;Softmax post transform&#34;&#34;&#34;
+
+TWEEDIE = &#34;TWEEDIE&#34;
+&#34;&#34;&#34;Tweedie post transform&#34;&#34;&#34;
 
 GET_PARAMETERS_FOR_TREE_TRAVERSAL = &#34;get_parameters_for_tree_trav&#34;
 &#34;&#34;&#34;Which function to use to extract the parameters for the tree traversal strategy&#34;&#34;&#34;
@@ -136,6 +139,10 @@ MAX_SAMPLES = &#34;max_samples&#34;
 <dd>
 <div class="desc"><p>The test input data for models that need to be traced</p></div>
 </dd>
+<dt id="hummingbird.ml.operator_converters.constants.TWEEDIE"><code class="name">var <span class="ident">TWEEDIE</span></code></dt>
+<dd>
+<div class="desc"><p>Tweedie post transform</p></div>
+</dd>
 </dl>
 </section>
 <section>
@@ -173,6 +180,7 @@ MAX_SAMPLES = &#34;max_samples&#34;
 <li><code><a title="hummingbird.ml.operator_converters.constants.SIGMOID" href="#hummingbird.ml.operator_converters.constants.SIGMOID">SIGMOID</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.SOFTMAX" href="#hummingbird.ml.operator_converters.constants.SOFTMAX">SOFTMAX</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.TEST_INPUT" href="#hummingbird.ml.operator_converters.constants.TEST_INPUT">TEST_INPUT</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.TWEEDIE" href="#hummingbird.ml.operator_converters.constants.TWEEDIE">TWEEDIE</a></code></li>
 </ul>
 </li>
 </ul>
