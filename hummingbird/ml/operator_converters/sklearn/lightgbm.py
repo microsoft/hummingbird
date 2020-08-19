@@ -11,6 +11,7 @@ Converters for LightGBM models.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
+from .. import constants
 from .._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
 from .._tree_commons import TreeParameters
 
@@ -91,6 +92,8 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     # Get tree information out of the model.
     n_features = operator.raw_operator._n_features
     tree_infos = operator.raw_operator.booster_.dump_model()["tree_info"]
+    if operator.raw_operator._objective == "tweedie":
+        extra_config[constants.POST_TRANSFORM] = constants.TWEEDIE
 
     return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 

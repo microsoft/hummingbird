@@ -243,6 +243,23 @@ class TestLGBMConverter(unittest.TestCase):
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
+    # Test Tweedie loss in lgbm
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_tweedie(self):
+        warnings.filterwarnings("ignore")
+        model = lgb.LGBMRegressor(objective="tweedie", n_estimators=2, max_depth=5)
+
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(100, size=100)
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(torch_model)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
     # Backend tests.
     # Test TorchScript backend regression.
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
