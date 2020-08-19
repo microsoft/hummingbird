@@ -22,13 +22,10 @@ with open(README) as f:
         long_description = long_description[start_pos:]
 
 install_requires = ["numpy>=1.15", "onnxconverter-common>=1.6.0", "scikit-learn==0.22.1"]
-if sys.platform == "darwin":
-    install_requires.append("torch")
+if sys.version_info[1] == 5:
+    install_requires.append("torch<=1.5.1")
 else:
-    if sys.version_info[1] == 5:
-        install_requires.append("torch==1.5.1+cpu")
-    else:
-        install_requires.append("torch==1.6.0+cpu")
+    install_requires.append("torch")
 setup(
     name="hummingbird-ml",
     version=version_str,
