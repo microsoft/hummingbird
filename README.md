@@ -9,22 +9,20 @@
 ## Introduction
 *Hummingbird* is a library for compiling trained traditional ML models into tensor computations. *Hummingbird* allows users to seamlessly leverage neural network frameworks (such as [PyTorch](https://pytorch.org/)) to accelerate traditional ML models. Thanks to *Hummingbird*, users can benefit from: (1) all the current and future optimizations implemented in neural network frameworks; (2) native hardware acceleration; (3) having a unique platform to support for both traditional and neural network models; and have all of this (4) without having to re-engineer their models.
 
-Currently, you can use *Hummingbird* to convert your trained traditional ML models into [PyTorch](https://pytorch.org/), [TorchScript](https://pytorch.org/docs/stable/jit.html), and [ONNX](https://onnx.ai/). *Hummingbird* [supports](https://github.com/microsoft/hummingbird/wiki/Supported-Operators) a variety of tree-based classifiers and regressors.  These models include
+Currently, you can use *Hummingbird* to convert your trained traditional ML models into [PyTorch](https://pytorch.org/), [TorchScript](https://pytorch.org/docs/stable/jit.html), and [ONNX](https://onnx.ai/). *Hummingbird* [supports](https://github.com/microsoft/hummingbird/wiki/Supported-Operators) a variety of ML models and featurizers.  These models include
 [scikit-learn](https://scikit-learn.org/stable/) Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors. Support for other neural network backends (e.g., [TVM](https://docs.tvm.ai/)) and models is on our [roadmap](https://github.com/microsoft/hummingbird/wiki/Roadmap-for-Upcoming-Features-and-Support).
+
+Hummingbird also provides a convenient uniform "inference" API following the Skleran API. This allows to swapping Sklearn models with Hummingbird-generate ones without having to change inference code.
 
 ## Installation
 
 Hummingbird was tested on Python >= 3.5 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
 
+Hummingbird requires PyTorch >= 1.4.0. Please go [here](https://pytorch.org/) for instructions on how to install PyTorch based on your platform and hardware.
 
-Install the Hummingbird package in Linux or Mac
+Once PyTorch is installed, you can get Hummingbird from pip with:
 ```
 pip install hummingbird-ml
-```
-
-To install the package in Windows instead:
-```
-pip install hummingbird-ml -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 If you require the optional dependencies lightgbm and xgboost, you can use:
