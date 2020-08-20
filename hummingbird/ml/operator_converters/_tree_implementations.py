@@ -192,8 +192,8 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.num_trees = len(tree_parameters)
         self.num_nodes = max([len(tree_parameter[1]) for tree_parameter in tree_parameters])
 
-        lefts = np.zeros((self.num_trees, self.num_nodes), dtype=np.float32)
-        rights = np.zeros((self.num_trees, self.num_nodes), dtype=np.float32)
+        lefts = np.zeros((self.num_trees, self.num_nodes), dtype=np.int64)
+        rights = np.zeros((self.num_trees, self.num_nodes), dtype=np.int64)
 
         features = np.zeros((self.num_trees, self.num_nodes), dtype=np.int64)
         thresholds = np.zeros((self.num_trees, self.num_nodes), dtype=np.float32)
