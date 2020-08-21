@@ -28,9 +28,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: testing syntax
-      if: ${{ success() == true && failure() != false }}
+      if: ${{ matrix.python-version == '3.5' && failure() != false }}
       run: |
-        pip install torch -f https://download.pytorch.org/whl/torch_stable.html
+      pip install torch==1.5.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install pytorch 1.5.* if python 3.5
       if: matrix.python-version == '3.5'
       run: |
