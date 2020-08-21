@@ -30,7 +30,7 @@ jobs:
     - name: Install pytorch 1.5.* if python 3.5
       if: matrix.python-version == '3.5'
       run: |
-        pip install torch==1.5.* -f https://download.pytorch.org/whl/torch_stable.html
+        pip install torch==1.5.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install pytorch 1.6.* if python > 3.5
       if:  matrix.python-version != '3.5'
       run: |
