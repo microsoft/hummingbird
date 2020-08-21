@@ -31,7 +31,8 @@ jobs:
       if: matrix.python-version == '3.5'
       run: |
         pip install torch==1.5.*
-      else:
+      # there is no "else" in GHActions apparently
+      if: matrix.python-version != '3.5'
       run: |
         pip install torch==1.6.*
     - name: Install basic dependencies
