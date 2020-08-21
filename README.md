@@ -12,7 +12,7 @@
 Currently, you can use *Hummingbird* to convert your trained traditional ML models into [PyTorch](https://pytorch.org/), [TorchScript](https://pytorch.org/docs/stable/jit.html), and [ONNX](https://onnx.ai/). *Hummingbird* [supports](https://github.com/microsoft/hummingbird/wiki/Supported-Operators) a variety of ML models and featurizers.  These models include
 [scikit-learn](https://scikit-learn.org/stable/) Decision Trees and Random Forest, and also [LightGBM](https://github.com/Microsoft/LightGBM) and [XGBoost](https://github.com/dmlc/xgboost) Classifiers/Regressors. Support for other neural network backends (e.g., [TVM](https://docs.tvm.ai/)) and models is on our [roadmap](https://github.com/microsoft/hummingbird/wiki/Roadmap-for-Upcoming-Features-and-Support).
 
-Hummingbird also provides a convenient uniform "inference" API following the Skleran API. This allows to swapping Sklearn models with Hummingbird-generate ones without having to change inference code.
+Hummingbird also provides a convenient uniform "inference" API following the Sklearn API. This allows swapping Sklearn models with Hummingbird-generatedgit ones without having to change inference code.
 
 ## Installation
 
