@@ -27,6 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_iforest.py#L0-L250" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -310,6 +311,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_iforest.py#L198-L247" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_isolation_forest(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -388,6 +390,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_iforest.py#L96-L125" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class GEMMIsolationForestImpl(GEMMTreeImpl):
     &#34;&#34;&#34;
@@ -449,6 +452,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_iforest.py#L119-L125" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def aggregation(self, x):
     output = x.sum(0).t()
@@ -483,6 +487,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_iforest.py#L163-L195" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
     &#34;&#34;&#34;
@@ -547,6 +552,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_iforest.py#L189-L195" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def aggregation(self, x):
     output = x.sum(1)
@@ -581,6 +587,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_iforest.py#L128-L160" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
     &#34;&#34;&#34;
@@ -645,6 +652,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_iforest.py#L154-L160" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def aggregation(self, x):
     output = x.sum(1)
