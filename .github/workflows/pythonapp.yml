@@ -31,12 +31,12 @@ jobs:
 
     # Installing pytorch requires a bit of conditionals.
     - name: Install pytorch (win py3.5)
-      if: matrix.python-version == '3.5' && matrix.os =='windows-2019'
+      if: ${{  matrix.python-version == '3.5' && matrix.os == 'windows-2019' }}
       run: |
         pip install torch==1.5.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 
     - name: Install pytorch (mac/linx py 3.5)
-        if: matrix.python-version == '3.5' && matrix.os !='windows-2019'
+        if: ${{ matrix.python-version == '3.5' && matrix.os != 'windows-2019' }}
         run: |
           pip install torch==1.5.* -f https://download.pytorch.org/whl/torch_stable.html
 
