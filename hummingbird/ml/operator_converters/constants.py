@@ -32,9 +32,6 @@ REORDER_TREES = "reorder_trees"
 ONNX_INITIALIZERS = "onnx_initializers"
 """The initializers of the onnx model"""
 
-ONNX_INPUTS = "onnx_inputs"
-"""The input of the onnx model"""
-
 TEST_INPUT = "test_input"
 """The test input data for models that need to be traced"""
 

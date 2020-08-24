@@ -13,7 +13,7 @@ import numpy as np
 from .operator_converters import constants
 from ._parse import parse_sklearn_api_model, parse_onnx_api_model
 from ._topology import convert as topology_converter
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed, tvm_installed
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
 
@@ -48,10 +48,16 @@ def _supported_backend_check_config(model, backend, extra_config):
     import onnx
     import torch
 
-    if backend is torch.jit.__name__ and constants.TEST_INPUT not in extra_config:
+    tvm_backend = None
+    if tvm_installed():
+        import tvm
+
+        tvm_backend = tvm.__name__
+
+    if (backend == torch.jit.__name__ or backend == tvm_backend) and constants.TEST_INPUT not in extra_config:
         raise RuntimeError("Backend {} requires test inputs. Please pass some test input to the convert.".format(backend))
 
-    if backend is onnx.__name__:
+    if backend == onnx.__name__:
         if constants.ONNX_INITIAL_TYPES not in extra_config and constants.TEST_INPUT not in extra_config:
             raise RuntimeError("Cannot generate test input data for ONNX. Either pass some input data or the initial_types")
 
@@ -165,6 +171,7 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
                 )
             extra_config[constants.TEST_INPUT] = test_input
             extra_config[constants.BATCH_SIZE] = test_input.shape[0]
+    extra_config[constants.N_FEATURES] = test_input.shape[1]
 
     # Set the initializers. Some converter requires the access to initializers.
     initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
@@ -215,7 +222,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     extra_config = deepcopy(extra_config)
 
     # Add test input as extra configuration for conversion.
-    if test_input is not None and constants.TEST_INPUT not in extra_config:
+    if test_input is not None and len(test_input) > 0 and constants.TEST_INPUT not in extra_config:
         test_input = np.array(test_input)
         extra_config[constants.TEST_INPUT] = test_input
         extra_config[constants.BATCH_SIZE] = test_input.shape[0]

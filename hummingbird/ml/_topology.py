@@ -88,10 +88,6 @@ def convert(topology, backend, device, extra_config={}):
                 # For the moment only tree_trav is enabled for pytorch <= 1.6.0
                 # if vers < allowed_min:
                 extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
-            if backend == tvm_backend:
-                if extra_config[constants.TREE_IMPLEMENTATION] == "tree_trav":
-                    if constants.TVM_MAX_FUSE_DEPTH not in extra_config:
-                        extra_config[constants.TVM_MAX_FUSE_DEPTH] = 50
 
             operator_map[operator.full_name] = converter(operator, device, extra_config)
         except ValueError:
@@ -148,6 +144,10 @@ def convert(topology, backend, device, extra_config={}):
             for i in range(len(topology.raw_model.input_names))
         ]
 
+        # Set some configuration option.
+        if constants.TREE_IMPLEMENTATION in extra_config and extra_config[constants.TREE_IMPLEMENTATION] == "tree_trav":
+            if constants.TVM_MAX_FUSE_DEPTH not in extra_config:
+                extra_config[constants.TVM_MAX_FUSE_DEPTH] = 50
         # Create the relay version of the model.
         model, params = relay.frontend.from_pytorch(ts_model, test_input)
 

@@ -277,7 +277,7 @@ class TestLGBMConverter(unittest.TestCase):
         # Create ONNX model
         onnx_model = hummingbird.ml.convert(model, "onnx", X)
 
-        np.testing.assert_allclose(onnx_model.predict(X), model.predict(X))
+        np.testing.assert_allclose(onnx_model.predict(X).flatten(), model.predict(X))
 
     # TVM backend tests.
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
@@ -297,7 +297,7 @@ class TestLGBMConverter(unittest.TestCase):
             # Check results.
             np.testing.assert_allclose(tvm_model.predict(X), model.predict(X))
 
-    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM installed")
     def test_lightgbm_tvm_classifier(self):
         warnings.filterwarnings("ignore")
 
@@ -314,6 +314,26 @@ class TestLGBMConverter(unittest.TestCase):
             # Check results.
             np.testing.assert_allclose(tvm_model.predict(X), model.predict(X))
             np.testing.assert_allclose(tvm_model.predict_proba(X), model.predict_proba(X))
+
+    # Test TVM with large input datasets.
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM installed")
+    def test_lightgbm_tvm_classifier_large_dataset(self):
+        warnings.filterwarnings("ignore")
+
+        for tree_implementation in ["gemm", "tree_trav", "perf_tree_trav"]:
+            size = 200000
+            X = np.random.rand(size, 28)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(2, size=size)
+            model = lgb.LGBMClassifier(n_estimators=100, max_depth=3)
+            model.fit(X, y)
+
+            # Create TVM model.
+            tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={"tree_implementation": tree_implementation})
+
+            # Check results.
+            np.testing.assert_allclose(tvm_model.predict(X), model.predict(X))
+            np.testing.assert_allclose(tvm_model.predict_proba(X), model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":

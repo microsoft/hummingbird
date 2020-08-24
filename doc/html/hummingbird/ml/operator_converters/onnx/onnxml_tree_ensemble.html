@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.py#L0-L245" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.py#L0-L237" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -206,17 +206,9 @@ def _get_tree_infos_from_tree_ensemble(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
     Base method for extracting parameters from `ai.onnx.ml.TreeEnsemble`s.
     &#34;&#34;&#34;
-    assert constants.ONNX_INPUTS in extra_config or constants.N_FEATURES in extra_config
+    assert constants.N_FEATURES in extra_config
 
-    # Get the number of features.
-    if constants.ONNX_INPUTS in extra_config:
-        inputs = extra_config[constants.ONNX_INPUTS]
-
-        assert operator.origin.input[0] in inputs
-
-        n_features = inputs[operator.origin.input[0]].type.tensor_type.shape.dim[1].dim_value
-    else:
-        n_features = extra_config[constants.N_FEATURES]
+    n_features = extra_config[constants.N_FEATURES]
 
     tree_infos, classes, post_transform = _get_tree_infos_from_onnx_ml_operator(operator)
 
@@ -306,7 +298,7 @@ register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_ense
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.py#L196-L221" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.py#L188-L213" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -358,7 +350,7 @@ register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_ense
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.py#L224-L242" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.py#L216-L234" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
