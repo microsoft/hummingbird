@@ -204,7 +204,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         model: An input model
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
-                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
+                    For the ONNX and TVM backends the test_input size is supposed to be as large as the expected batch size.
         device: The target device the model should be run. This parameter is only used by the *torch** and *tvm* backends, and
                 the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
         extra_config: Extra configurations to be used by the individual operator converters.

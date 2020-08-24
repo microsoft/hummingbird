@@ -235,7 +235,7 @@ def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config=
         model: An input model
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
-                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
+                    For the ONNX and TVM backends the test_input size is supposed to be as large as the expected batch size.
         device: The target device the model should be run. This parameter is only used by the *torch** and *tvm* backends, and
                 the devices supported are the one supported by PyTorch, i.e., &#39;cpu&#39; or &#39;cuda&#39;.
         extra_config: Extra configurations to be used by the individual operator converters.
@@ -303,7 +303,7 @@ The <em>torch.jit</em> and <em>tvm</em> backends requires a test_input.</p>
 <dd>The target for the conversion</dd>
 <dt><strong><code>test_input</code></strong></dt>
 <dd>Some input data used to trace the model execution.
-For the ONNX backend the test_input size is supposed to be as large as the expected batch size.</dd>
+For the ONNX and TVM backends the test_input size is supposed to be as large as the expected batch size.</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>The target device the model should be run. This parameter is only used by the <em>torch</em><em> and </em>tvm* backends, and
 the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.</dd>
@@ -340,7 +340,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
         model: An input model
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
-                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
+                    For the ONNX and TVM backends the test_input size is supposed to be as large as the expected batch size.
         device: The target device the model should be run. This parameter is only used by the *torch** and *tvm* backends, and
                 the devices supported are the one supported by PyTorch, i.e., &#39;cpu&#39; or &#39;cuda&#39;.
         extra_config: Extra configurations to be used by the individual operator converters.

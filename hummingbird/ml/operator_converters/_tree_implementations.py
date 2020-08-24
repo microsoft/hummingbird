@@ -188,6 +188,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
+            extra_config: Extra configuration used to properly implement the source tree
         """
         super(TreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
 
@@ -432,6 +433,7 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
         """
         super(TreeTraversalDecisionTreeImpl, self).__init__(
             tree_parameters, max_depth, n_features, classes, extra_config=extra_config
