@@ -175,7 +175,12 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, **kwargs):
+    def _expand_indexes(self, batch_size):
+        indexes = self.nodes_offset
+        indexes = indexes.expand(batch_size, self.num_trees)
+        return indexes.reshape(-1)
+
+    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, extra_config={}, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -216,13 +221,19 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         nodes_offset = [[i * self.num_nodes for i in range(self.num_trees)]]
         self.nodes_offset = torch.nn.Parameter(torch.LongTensor(nodes_offset), requires_grad=False)
 
+        # Fix the batch size is known upfront. This will help with compilation
+        # (e.g., with TVM we can get a segfault is this is not set https://github.com/microsoft/hummingbird/issues/232)
+        self.indexes = None
+        if constants.BATCH_SIZE in extra_config:
+            self.indexes = self._expand_indexes(extra_config[constants.BATCH_SIZE])
+
     def aggregation(self, x):
         return x
 
     def forward(self, x):
-        indexes = self.nodes_offset
-        indexes = indexes.expand(x.size()[0], self.num_trees)
-        indexes = indexes.reshape(-1)
+        indexes = self.indexes
+        if indexes is None:
+            indexes = self._expand_indexes(x.size()[0])
 
         for _ in range(self.max_tree_depth):
             tree_nodes = indexes
@@ -414,7 +425,7 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None):
+    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -422,7 +433,9 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
         """
-        super(TreeTraversalDecisionTreeImpl, self).__init__(tree_parameters, max_depth, n_features, classes)
+        super(TreeTraversalDecisionTreeImpl, self).__init__(
+            tree_parameters, max_depth, n_features, classes, extra_config=extra_config
+        )
 
     def aggregation(self, x):
         output = x.sum(1)
@@ -498,7 +511,7 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(TreeTraversalGBDTImpl, self).__init__(tree_parameters, max_detph, n_features, classes, 1)
+        super(TreeTraversalGBDTImpl, self).__init__(tree_parameters, max_detph, n_features, classes, 1, extra_config)
 
         self.n_gbdt_classes = 1
         self.post_transform = lambda x: x

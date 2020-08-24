@@ -47,5 +47,8 @@ OFFSET = "offset"
 MAX_SAMPLES = "max_samples"
 """Max_samples of sklearn isolation forest implementation"""
 
+BATCH_SIZE = "batch_size"
+"""Batch size expected by the compiled model"""
+
 TVM_CONTEXT = "tvm_context"
 """The context for TVM containing information on the target"""

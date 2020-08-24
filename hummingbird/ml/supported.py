@@ -294,3 +294,7 @@ ONNX_INITIAL_TYPES = "onnx_initial_types"
 
 ONNX_TARGET_OPSET = "onnx_target_opset"
 """For ONNX models we can set the target opset to use. 9 by default."""
+
+TVM_MAX_FUSE_DEPTH = "tvm_max_fuse_depth"
+"""For TVM we can fix the number of operations that will be fused.
+If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232)"""

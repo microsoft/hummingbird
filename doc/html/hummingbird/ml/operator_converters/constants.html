@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L50" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L53" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -78,6 +78,9 @@ OFFSET = &#34;offset&#34;
 MAX_SAMPLES = &#34;max_samples&#34;
 &#34;&#34;&#34;Max_samples of sklearn isolation forest implementation&#34;&#34;&#34;
 
+BATCH_SIZE = &#34;batch_size&#34;
+&#34;&#34;&#34;Batch size expected by the compiled model&#34;&#34;&#34;
+
 TVM_CONTEXT = &#34;tvm_context&#34;
 &#34;&#34;&#34;The context for TVM containing information on the target&#34;&#34;&#34;</code></pre>
 </details>
@@ -90,6 +93,10 @@ TVM_CONTEXT = &#34;tvm_context&#34;
 <dt id="hummingbird.ml.operator_converters.constants.BASE_PREDICTION"><code class="name">var <span class="ident">BASE_PREDICTION</span></code></dt>
 <dd>
 <div class="desc"><p>Alpha</p></div>
+</dd>
+<dt id="hummingbird.ml.operator_converters.constants.BATCH_SIZE"><code class="name">var <span class="ident">BATCH_SIZE</span></code></dt>
+<dd>
+<div class="desc"><p>Batch size expected by the compiled model</p></div>
 </dd>
 <dt id="hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL"><code class="name">var <span class="ident">GET_PARAMETERS_FOR_TREE_TRAVERSAL</span></code></dt>
 <dd>
@@ -168,6 +175,7 @@ TVM_CONTEXT = &#34;tvm_context&#34;
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
 <li><code><a title="hummingbird.ml.operator_converters.constants.BASE_PREDICTION" href="#hummingbird.ml.operator_converters.constants.BASE_PREDICTION">BASE_PREDICTION</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.BATCH_SIZE" href="#hummingbird.ml.operator_converters.constants.BATCH_SIZE">BATCH_SIZE</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL" href="#hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL">GET_PARAMETERS_FOR_TREE_TRAVERSAL</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.LEARNING_RATE" href="#hummingbird.ml.operator_converters.constants.LEARNING_RATE">LEARNING_RATE</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.MAX_SAMPLES" href="#hummingbird.ml.operator_converters.constants.MAX_SAMPLES">MAX_SAMPLES</a></code></li>

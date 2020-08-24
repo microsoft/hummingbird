@@ -70,6 +70,13 @@ def convert(topology, backend, device, extra_config={}):
     tvm_backend = None
     operator_map = {}
 
+    if tvm_installed():
+        import tvm
+        from tvm import relay
+        from tvm.contrib import graph_runtime
+
+        tvm_backend = tvm.__name__
+
     for operator in topology.topological_operator_iterator():
         try:
             converter = get_converter(operator.type)
@@ -81,6 +88,10 @@ def convert(topology, backend, device, extra_config={}):
                 # For the moment only tree_trav is enabled for pytorch <= 1.6.0
                 # if vers < allowed_min:
                 extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
+            if backend == tvm_backend:
+                if extra_config[constants.TREE_IMPLEMENTATION] == "tree_trav":
+                    if constants.TVM_MAX_FUSE_DEPTH not in extra_config:
+                        extra_config[constants.TVM_MAX_FUSE_DEPTH] = 50
 
             operator_map[operator.full_name] = converter(operator, device, extra_config)
         except ValueError:
@@ -96,13 +107,6 @@ def convert(topology, backend, device, extra_config={}):
     torch_model = PyTorchBackendModel(
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
-
-    if tvm_installed():
-        import tvm
-        from tvm import relay
-        from tvm.contrib import graph_runtime
-
-        tvm_backend = tvm.__name__
 
     if backend == onnx.__name__:
         onnx_model_name = output_model_name = None
@@ -160,8 +164,14 @@ def convert(topology, backend, device, extra_config={}):
         else:
             raise RuntimeError("Device {} not recognized".format(device))
 
+        # Get configuration parameters.
+        config = {}
+        if constants.TVM_MAX_FUSE_DEPTH in extra_config:
+            max_fuse_depth = extra_config[constants.TVM_MAX_FUSE_DEPTH]
+            config["relay.FuseOps.max_depth"] = max_fuse_depth
+
         # Generate the model.
-        with tvm.transform.PassContext(opt_level=3):
+        with tvm.transform.PassContext(opt_level=3, config=config):
             graph, lib, params = relay.build(model, target=target, params=params)
         tvm_model = graph_runtime.create(graph, lib, ctx)
         tvm_model.set_input(**params)
