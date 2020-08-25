@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters API documentation</title>
-<meta name="description" content="All operators converters are stored under this package." />
+<title>hummingbird.ml.operator_converters.onnx.normalizer API documentation</title>
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,21 +13,20 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/onnx/normalizer.html">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.onnx.normalizer</code></h1>
 </header>
 <section id="section-intro">
-<p>All operators converters are stored under this package.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/__init__.py#L0-L47" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/normalizer.py#L0-L33" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -35,78 +34,86 @@
 # license information.
 # --------------------------------------------------------------------------
 
+from onnxconverter_common.registration import register_converter
+
+from .._normalizer_implementations import Normalizer
+
 &#34;&#34;&#34;
-All operators converters are stored under this package.
+Converter for ONNX-ML Normalizer.
 &#34;&#34;&#34;
 
-# Register constants used within Hummingbird converters.
-from . import constants as converter_constants
-from .. import supported as hummingbird_constants
-from .._utils import _Constants
 
-# Add constants in scope.
-constants = _Constants(converter_constants, hummingbird_constants)
+def convert_onnx_normalizer(operator, device=None, extra_config={}):
+    &#34;&#34;&#34;
+    Converter for `ai.onnx.ml.Normalizer`
 
-# To register a converter for scikit-learn API operators, import associated modules here.
-from .onnx import onnx_operator  # noqa: E402
-from .onnx import array_feature_extractor as onnx_afe  # noqa: E402, F811
-from .onnx import linear as onnx_linear  # noqa: E402, F811
-from .onnx import normalizer as onnx_normalizer  # noqa: E402, F811
-from .onnx import one_hot_encoder as onnx_ohe  # noqa: E402, F811
-from .onnx import scaler as onnx_scaler  # noqa: E402, F811
-from .onnx import tree_ensemble  # noqa: E402
-from .sklearn import array_feature_extractor as sklearn_afe  # noqa: E402
-from .sklearn import decision_tree  # noqa: E402
-from .sklearn import gbdt  # noqa: E402
-from .sklearn import iforest  # noqa: E402
-from .sklearn import linear as sklearn_linear  # noqa: E402
-from .sklearn import normalizer as sklearn_normalizer  # noqa: E402
-from .sklearn import one_hot_encoder as sklearn_ohe  # noqa: E402
-from .sklearn import scaler as sklearn_scaler  # noqa: E402
-from .sklearn import sv  # noqa: E402
-from . import lightgbm  # noqa: E402
-from . import xgb  # noqa: E402
+    Args:
+        operator: An operator wrapping a `ai.onnx.ml.Normalizer` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+    raw_operator = operator.raw_operator.origin.attribute[0].s.lower().decode(&#34;UTF-8&#34;)  # (ex: b&#39;L1&#39; to &#39;l1&#39;)
+    if raw_operator is None or raw_operator == &#34;&#34;:
+        raise RuntimeError(&#34;Error parsing Normalizer, found unexpected None&#34;)
+    return Normalizer(raw_operator, device)
 
 
-__pdoc__ = {}
-__pdoc__[&#34;hummingbird.operator_converters._array_feature_extractor_implementations&#34;] = True
-__pdoc__[&#34;hummingbird.operator_converters._gbdt_commons&#34;] = True
-__pdoc__[&#34;hummingbird.operator_converters._linear_implementations&#34;] = True
-__pdoc__[&#34;hummingbird.operator_converters._normalizer_implementations&#34;] = True
-__pdoc__[&#34;hummingbird.operator_converters._one_hot_encoder_implementations&#34;] = True
-__pdoc__[&#34;hummingbird.operator_converters._scaler_implementations&#34;] = True
-__pdoc__[&#34;hummingbird.operator_converters._tree_commons&#34;] = True
-__pdoc__[&#34;hummingbird.operator_converters._tree_implementations&#34;] = True</code></pre>
+register_converter(&#34;ONNXMLNormalizer&#34;, convert_onnx_normalizer)</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.constants" href="constants.html">hummingbird.ml.operator_converters.constants</a></code></dt>
+<dt id="hummingbird.ml.operator_converters.onnx.normalizer.convert_onnx_normalizer"><code class="name flex">
+<span>def <span class="ident">convert_onnx_normalizer</span></span>(<span>operator, device=None, extra_config={})</span>
+</code></dt>
 <dd>
-<div class="desc"><p>Constants used in the Hummingbird converters are defined here.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.lightgbm" href="lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></code></dt>
-<dd>
-<div class="desc"><p>Converters for LightGBM models.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx" href="onnx/index.html">hummingbird.ml.operator_converters.onnx</a></code></dt>
-<dd>
-<div class="desc"><p>All onnx operators converters are stored under this package.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn" href="sklearn/index.html">hummingbird.ml.operator_converters.sklearn</a></code></dt>
-<dd>
-<div class="desc"><p>All scikit-learn operators converters are stored under this package.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.xgb" href="xgb.html">hummingbird.ml.operator_converters.xgb</a></code></dt>
-<dd>
-<div class="desc"><p>Converters for XGBoost models.</p></div>
+<div class="desc"><p>Converter for <code>ai.onnx.ml.Normalizer</code></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>operator</code></strong></dt>
+<dd>An operator wrapping a <code>ai.onnx.ml.Normalizer</code> model</dd>
+<dt><strong><code>device</code></strong></dt>
+<dd>String defining the type of device the converted operator should be run on</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to select the best conversion strategy</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A PyTorch model</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/normalizer.py#L16-L31" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def convert_onnx_normalizer(operator, device=None, extra_config={}):
+    &#34;&#34;&#34;
+    Converter for `ai.onnx.ml.Normalizer`
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.ml.Normalizer` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+    raw_operator = operator.raw_operator.origin.attribute[0].s.lower().decode(&#34;UTF-8&#34;)  # (ex: b&#39;L1&#39; to &#39;l1&#39;)
+    if raw_operator is None or raw_operator == &#34;&#34;:
+        raise RuntimeError(&#34;Error parsing Normalizer, found unexpected None&#34;)
+    return Normalizer(raw_operator, device)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -123,16 +130,12 @@ __pdoc__[&#34;hummingbird.operator_converters._tree_implementations&#34;] = True
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.ml" href="../index.html">hummingbird.ml</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnx" href="index.html">hummingbird.ml.operator_converters.onnx</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="hummingbird.ml.operator_converters.constants" href="constants.html">hummingbird.ml.operator_converters.constants</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.lightgbm" href="lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx" href="onnx/index.html">hummingbird.ml.operator_converters.onnx</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn" href="sklearn/index.html">hummingbird.ml.operator_converters.sklearn</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.xgb" href="xgb.html">hummingbird.ml.operator_converters.xgb</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="hummingbird.ml.operator_converters.onnx.normalizer.convert_onnx_normalizer" href="#hummingbird.ml.operator_converters.onnx.normalizer.convert_onnx_normalizer">convert_onnx_normalizer</a></code></li>
 </ul>
 </li>
 </ul>
