@@ -145,9 +145,8 @@ def convert(topology, backend, device, extra_config={}):
         ]
 
         # Set some configuration option.
-        if constants.TREE_IMPLEMENTATION in extra_config and extra_config[constants.TREE_IMPLEMENTATION] == "tree_trav":
-            if constants.TVM_MAX_FUSE_DEPTH not in extra_config:
-                extra_config[constants.TVM_MAX_FUSE_DEPTH] = 50
+        if constants.TVM_MAX_FUSE_DEPTH not in extra_config:
+            extra_config[constants.TVM_MAX_FUSE_DEPTH] = 30
         # Create the relay version of the model.
         model, params = relay.frontend.from_pytorch(ts_model, test_input)
 
@@ -166,9 +165,8 @@ def convert(topology, backend, device, extra_config={}):
 
         # Get configuration parameters.
         config = {}
-        if constants.TVM_MAX_FUSE_DEPTH in extra_config:
-            max_fuse_depth = extra_config[constants.TVM_MAX_FUSE_DEPTH]
-            config["relay.FuseOps.max_depth"] = max_fuse_depth
+        max_fuse_depth = extra_config[constants.TVM_MAX_FUSE_DEPTH]
+        config["relay.FuseOps.max_depth"] = max_fuse_depth
 
         # Generate the model.
         with tvm.transform.PassContext(opt_level=3, config=config):

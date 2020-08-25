@@ -10,6 +10,7 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 import hummingbird.ml
 from hummingbird.ml.exceptions import MissingConverter
+from hummingbird.ml._utils import tvm_installed
 from tree_utils import dt_implementation_map
 
 
@@ -443,6 +444,158 @@ class TestSklearnTreeConverter(unittest.TestCase):
     # Extra trees classifier
     def test_extra_trees_ts_classifier_converter(self):
         self._run_tree_classification_converter(ExtraTreesClassifier, 3, "torch.jit", n_estimators=10)
+
+    # Test trees with TVM backend
+    # Random forest gemm classifier
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_gemm_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 2, "tvm", extra_config={"tree_implementation": "gemm"}, n_estimators=10
+        )
+
+    # Random forest tree_trav classifier
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_tree_trav_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 2, "tvm", extra_config={"tree_implementation": "tree_trav"}, n_estimators=10
+        )
+
+    # Random forest perf_tree_trav classifier
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_perf_tree_trav_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 2, "tvm", extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10
+        )
+
+    # Random forest gemm multi classifier
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_gemm_multi_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 3, "tvm", extra_config={"tree_implementation": "gemm"}, n_estimators=10
+        )
+
+    # Random forest tree_trav multi classifier
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_tree_trav_multi_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 3, "tvm", extra_config={"tree_implementation": "tree_trav"}, n_estimators=10
+        )
+
+    # Random forest perf_tree_trav multi classifier
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_perf_tree_trav_multi_classifier_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 3, "tvm", extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10
+        )
+
+    # Random forest gemm classifier shifted classes
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_gemm_classifier_shifted_labels_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier, 3, "tvm", labels_shift=2, extra_config={"tree_implementation": "gemm"}, n_estimators=10,
+        )
+
+    # Random forest tree_trav classifier shifted classes
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_tree_trav_classifier_shifted_labels_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier,
+            3,
+            "tvm",
+            labels_shift=2,
+            extra_config={"tree_implementation": "tree_trav"},
+            n_estimators=10,
+        )
+
+    # Random forest perf_tree_trav classifier shifted classes
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_perf_tree_trav_classifier_shifted_labels_converter(self):
+        self._run_tree_classification_converter(
+            RandomForestClassifier,
+            3,
+            "tvm",
+            labels_shift=2,
+            extra_config={"tree_implementation": "perf_tree_trav"},
+            n_estimators=10,
+        )
+
+    # Random forest gemm regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_gemm_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            RandomForestRegressor, 1000, "tvm", extra_config={"tree_implementation": "gemm"}, n_estimators=10
+        )
+
+    # Random forest tree_trav regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            RandomForestRegressor, 1000, "tvm", extra_config={"tree_implementation": "tree_trav"}, n_estimators=10
+        )
+
+    # Random forest perf_tree_trav regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_random_forest_tvm_perf_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            RandomForestRegressor, 1000, "tvm", extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10
+        )
+
+    # Extra trees gemm regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_extra_trees_tvm_gemm_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            ExtraTreesRegressor, 1000, "tvm", extra_config={"tree_implementation": "gemm"}, n_estimators=10
+        )
+
+    # Extra trees tree_trav regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_extra_trees_tvm_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            ExtraTreesRegressor, 1000, "tvm", extra_config={"tree_implementation": "tree_trav"}, n_estimators=10
+        )
+
+    # Extra trees perf_tree_trav regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_extra_trees_tvm_perf_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            ExtraTreesRegressor, 1000, "tvm", extra_config={"tree_implementation": "perf_tree_trav"}, n_estimators=10
+        )
+
+    # Decision tree regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_decision_tree_tvm_regressor_converter(self):
+        self._run_tree_regressor_converter(DecisionTreeRegressor, 1000, "tvm")
+
+    # Decision tree gemm regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_decision_tree_tvm_gemm_regressor_converter(self):
+        self._run_tree_regressor_converter(DecisionTreeRegressor, 1000, "tvm", extra_config={"tree_implementation": "gemm"})
+
+    # Decision tree tree_trav regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_decision_tree_tvm_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            DecisionTreeRegressor, 1000, "tvm", extra_config={"tree_implementation": "tree_trav"}
+        )
+
+    # Decision tree perf_tree_trav regressor
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_decision_tree_tvm_perf_tree_trav_regressor_converter(self):
+        self._run_tree_regressor_converter(
+            DecisionTreeRegressor, 1000, "tvm", extra_config={"tree_implementation": "perf_tree_trav"}
+        )
+
+    # Decision tree classifier
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_decision_tree_tvm_classifier_converter(self):
+        self._run_tree_classification_converter(
+            DecisionTreeClassifier, 3, "tvm",
+        )
+
+    # Extra trees classifier
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_extra_trees_tvm_classifier_converter(self):
+        self._run_tree_classification_converter(ExtraTreesClassifier, 3, "tvm", n_estimators=10)
 
 
 if __name__ == "__main__":
