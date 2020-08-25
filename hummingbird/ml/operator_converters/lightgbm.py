@@ -11,9 +11,9 @@ Converters for LightGBM models.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .. import constants
-from .._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
-from .._tree_commons import TreeParameters
+from . import constants
+from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
+from ._tree_commons import TreeParameters
 
 
 def _tree_traversal(node, lefts, rights, features, thresholds, values, count):

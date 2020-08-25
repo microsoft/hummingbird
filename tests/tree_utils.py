@@ -14,7 +14,7 @@ dt_implementation_map = {
 }
 
 iforest_implementation_map = {
-    "tree_trav": "<class 'hummingbird.ml.operator_converters.sklearn.skl_iforest.TreeTraversalIsolationForestImpl'>",
-    "perf_tree_trav": "<class 'hummingbird.ml.operator_converters.sklearn.skl_iforest.PerfectTreeTraversalIsolationForestImpl'>",
-    "gemm": "<class 'hummingbird.ml.operator_converters.sklearn.skl_iforest.GEMMIsolationForestImpl'>",
+    "tree_trav": "<class 'hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl'>",
+    "perf_tree_trav": "<class 'hummingbird.ml.operator_converters.sklearn.iforest.PerfectTreeTraversalIsolationForestImpl'>",
+    "gemm": "<class 'hummingbird.ml.operator_converters.sklearn.iforest.GEMMIsolationForestImpl'>",
 }
