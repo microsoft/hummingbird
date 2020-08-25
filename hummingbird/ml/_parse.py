@@ -6,7 +6,9 @@
 
 """
 All functions used for parsing input models are listed here.
+Some code here have been copied from https://github.com/onnx/sklearn-onnx/.
 """
+from collections import OrderedDict
 from copy import deepcopy
 from uuid import uuid4
 
@@ -18,6 +20,18 @@ from . import constants
 from ._container import CommonONNXModelContainer
 from ._utils import sklearn_installed
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name
+
+if sklearn_installed():
+    from sklearn import pipeline
+    from sklearn.preprocessing import OneHotEncoder
+
+    try:
+        from sklearn.compose import ColumnTransformer
+    except ImportError:
+        # ColumnTransformer was introduced in 0.20.
+        ColumnTransformer = None
+
+    do_not_merge_columns = tuple(filter(lambda op: op is not None, [OneHotEncoder, ColumnTransformer]))
 
 
 def parse_sklearn_api_model(model):
@@ -162,33 +176,146 @@ def _parse_sklearn_single_model(scope, model, inputs):
 
 def _parse_sklearn_pipeline(scope, model, inputs):
     """
-    The basic ideas of scikit-learn pipeline parsing:
+    The basic ideas of scikit-learn parsing:
         1. Sequentially go though all stages defined in the considered
            scikit-learn pipeline
-        2. The output `onnxconverter_common.topology.Variable`s of one stage will be fed into its next
+        2. The output variables of one stage will be fed into its next
            stage as the inputs.
-
-    Args:
-        scope: The ``onnxconverter_common.topology.Scope`` for the model
-        model: A `sklearn.pipeline.Pipeline` object
-        inputs: A list of `onnxconverter_common.topology.Variable` objects
-
-    Returns:
-        A list of output `onnxconverter_common.topology.Variable`s produced by the input pipeline
+    :param scope: Scope object defined in _topology.py
+    :param model: scikit-learn pipeline object
+    :param inputs: A list of Variable objects
+    :return: A list of output variables produced by the input pipeline
     """
     for step in model.steps:
         inputs = _parse_sklearn_api(scope, step[1], inputs)
     return inputs
 
 
-def _build_sklearn_api_parsers_map():
-    from sklearn import pipeline
+def _parse_sklearn_feature_union(scope, model, inputs):
+    """
+    :param scope: Scope object
+    :param model: A scikit-learn FeatureUnion object
+    :param inputs: A list of Variable objects
+    :return: A list of output variables produced by feature union
+    """
+    # Output variable name of each transform. It's a list of string.
+    transformed_result_names = []
+    # Encode each transform as our IR object
+    for name, transform in model.transformer_list:
+        transformed_result_names.append(_parse_sklearn_single_model(scope, transform, inputs)[0])
+        if model.transformer_weights is not None and name in model.transformer_weights:
+            transform_result = [transformed_result_names.pop()]
+            # Create a Multiply node
+            multiply_operator = scope.declare_local_operator("SklearnMultiply")
+            multiply_operator.inputs = transform_result
+            multiply_operator.operand = model.transformer_weights[name]
+            multiply_output = scope.declare_local_variable("multiply_output")
+            multiply_operator.outputs.append(multiply_output)
+            transformed_result_names.append(multiply_operator.outputs[0])
 
+    # Create a Concat operator
+    concat_operator = scope.declare_local_operator("SklearnConcat")
+    concat_operator.inputs = transformed_result_names
+
+    # Declare output name of scikit-learn FeatureUnion
+    union_name = scope.declare_local_variable("union")
+    concat_operator.outputs.append(union_name)
+
+    return concat_operator.outputs
+
+
+def _parse_sklearn_column_transformer(scope, model, inputs):
+    """
+    :param scope: Scope object
+    :param model: A *scikit-learn* *ColumnTransformer* object
+    :param inputs: A list of Variable objects
+    :return: A list of output variables produced by column transformer
+    """
+    # Output variable name of each transform. It's a list of string.
+    transformed_result_names = []
+    # Encode each transform as our IR object
+    for name, op, column_indices in model.transformers_:
+        if op == "drop":
+            continue
+        if isinstance(column_indices, slice):
+            column_indices = list(
+                range(
+                    column_indices.start if column_indices.start is not None else 0,
+                    column_indices.stop,
+                    column_indices.step if column_indices.step is not None else 1,
+                )
+            )
+        elif isinstance(column_indices, (int, str)):
+            column_indices = [column_indices]
+        names = _get_column_indices(column_indices, inputs, multiple=True)
+        transform_inputs = []
+        for pt_var, pt_is in names.items():
+            tr_inputs = _fetch_input_slice(scope, [inputs[pt_var]], pt_is)
+            transform_inputs.extend(tr_inputs)
+
+        merged_cols = False
+        if len(transform_inputs) > 1:
+            if isinstance(op, pipeline.Pipeline):
+                if not isinstance(op.steps[0][1], do_not_merge_columns):
+                    merged_cols = True
+            elif not isinstance(op, do_not_merge_columns):
+                merged_cols = True
+
+        if merged_cols:
+            # Operators by default expect one input vector, the default behaviour is to merge columns.
+            ty = transform_inputs[0].type.__class__([None, None])
+
+            conc_op = scope.declare_local_operator("SklearnConcat")
+            conc_op.inputs = transform_inputs
+            conc_names = scope.declare_local_variable("merged_columns", ty)
+            conc_op.outputs.append(conc_names)
+            transform_inputs = [conc_names]
+
+        model_obj = model.named_transformers_[name]
+        if isinstance(model_obj, str):
+            if model_obj == "passthrough":
+                var_out = transform_inputs[0]
+            elif model_obj == "drop":
+                var_out = None
+            else:
+                raise RuntimeError(
+                    "Unknown operator alias " "'{0}'. These are specified in " "supported.py." "".format(model_obj)
+                )
+        else:
+            var_out = _parse_sklearn_api(scope, model_obj, transform_inputs)[0]
+            if model.transformer_weights is not None and name in model.transformer_weights:
+                # Create a Multiply node
+                multiply_operator = scope.declare_local_operator("SklearnMultiply")
+                multiply_operator.inputs.append(var_out)
+                multiply_operator.operand = model.transformer_weights[name]
+                var_out = scope.declare_local_variable("multiply_output")
+                multiply_operator.outputs.append(var_out)
+        if var_out:
+            transformed_result_names.append(var_out)
+
+    # Create a Concat ONNX node
+    if len(transformed_result_names) > 1:
+        ty = transformed_result_names[0].type.__class__([None, None])
+        concat_operator = scope.declare_local_operator("SklearnConcat")
+        concat_operator.inputs = transformed_result_names
+
+        # Declare output name of scikit-learn ColumnTransformer
+        transformed_column_name = scope.declare_local_variable("transformed_column", ty)
+        concat_operator.outputs.append(transformed_column_name)
+        return concat_operator.outputs
+    return transformed_result_names
+
+
+def _build_sklearn_api_parsers_map():
     # Parsers for edge cases are going here.
     map_parser = {
-        pipeline.Pipeline: _parse_sklearn_pipeline
-        # More will go here as added.
+        pipeline.Pipeline: _parse_sklearn_pipeline,
+        pipeline.FeatureUnion: _parse_sklearn_feature_union,
+        # More parsers will go here
     }
+    if ColumnTransformer is not None:
+        map_parser[ColumnTransformer] = _parse_sklearn_column_transformer
+
     return map_parser
 
 
@@ -281,6 +408,111 @@ def _remove_zipmap(node_list):
             output_node_list.append(node_)
 
     return output_node_list
+
+
+def _fetch_input_slice(scope, inputs, column_indices):
+    if not isinstance(inputs, list):
+        raise TypeError("Parameter inputs must be a list.")
+    if len(inputs) == 0:
+        raise RuntimeError("Operator ArrayFeatureExtractor requires at least one inputs.")
+    if len(inputs) != 1:
+        raise RuntimeError("Operator ArrayFeatureExtractor does not support multiple input tensors.")
+
+    array_feature_extractor_operator = scope.declare_local_operator("SklearnArrayFeatureExtractor")
+    array_feature_extractor_operator.inputs = inputs
+    array_feature_extractor_operator.column_indices = column_indices
+    output_variable_name = scope.declare_local_variable("extracted_feature_columns", inputs[0].type)
+    array_feature_extractor_operator.outputs.append(output_variable_name)
+    return array_feature_extractor_operator.outputs
+
+
+def _get_column_index(i, inputs):
+    """
+    Returns a tuples (variable index, column index in that variable).
+    The function has two different behaviours, one when *i* (column index)
+    is an integer, another one when *i* is a string (column name).
+    If *i* is a string, the function looks for input name with this name and returns (index, 0).
+    If *i* is an integer, let's assume first we have two inputs
+    *I0 = FloatTensorType([None, 2])* and *I1 = FloatTensorType([None, 3])*,
+    in this case, here are the results:
+    ::
+        get_column_index(0, inputs) -> (0, 0)
+        get_column_index(1, inputs) -> (0, 1)
+        get_column_index(2, inputs) -> (1, 0)
+        get_column_index(3, inputs) -> (1, 1)
+        get_column_index(4, inputs) -> (1, 2)
+    """
+    if isinstance(i, int):
+        if i == 0:
+            # Useful shortcut, skips the case when end is None
+            # (unknown dimension)
+            return 0, 0
+        vi = 0
+        pos = 0
+        # end = inputs[0].type.shape[1] if isinstance(inputs[0].type, TensorType) else 1
+        end = 1
+        if end is None:
+            raise RuntimeError(
+                "Cannot extract a specific column {0} when one input ('{1}') has unknown " "dimension.".format(i, inputs[0])
+            )
+        while True:
+            if pos <= i < end:
+                return (vi, i - pos)
+            vi += 1
+            pos = end
+            if vi >= len(inputs):
+                raise RuntimeError("Input {} (i={}, end={}) is not available in\n{}".format(vi, i, end, inputs))
+            # rel_end = inputs[vi].type.shape[1] if isinstance(inputs[vi].type, TensorType) else 1
+            rel_end = 1
+            if rel_end is None:
+                raise RuntimeError(
+                    "Cannot extract a specific column {0} when one input ('{1}') has unknown "
+                    "dimension.".format(i, inputs[vi])
+                )
+            end += rel_end
+    else:
+        for ind, inp in enumerate(inputs):
+            if inp.onnx_name == i:
+                return ind, 0
+        raise RuntimeError("Unable to find column name '{0}'".format(i))
+
+
+def _get_column_indices(indices, inputs, multiple):
+    """
+    Returns the requested graph inpudes based on their indices or names. See `_parse._get_column_index`.
+    Args:
+        indices: variables indices or names
+        inputs: model inputs
+        multiple: allows column to come from multiple variables
+
+    Returns:
+        a tuple *(variable name, list of requested indices)* if *multiple* is False, a dictionary *{ var_index: [ list of
+        requested indices ] }* if *multiple* is True
+    """
+    if multiple:
+        res = OrderedDict()
+        for p in indices:
+            pt_v, pt_i = _get_column_index(p, inputs)
+            if pt_v not in res:
+                res[pt_v] = []
+            res[pt_v].append(pt_i)
+        return res
+    else:
+        pt_var = None
+        pt_is = []
+        for p in indices:
+            pt_v, pt_i = _get_column_index(p, inputs)
+            pt_is.append(pt_i)
+            if pt_var is None:
+                pt_var = pt_v
+            elif pt_var != pt_v:
+                cols = [pt_var, pt_v]
+                raise NotImplementedError(
+                    "Hummingbird is not able to merge multiple columns from "
+                    "multiple variables ({0}). You should think about merging "
+                    "initial types.".format(cols)
+                )
+        return pt_var, pt_is
 
 
 # Registered API parsers.
