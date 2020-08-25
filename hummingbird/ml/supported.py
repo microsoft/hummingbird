@@ -212,6 +212,7 @@ def _build_sklearn_api_operator_name_map():
     """
     # Pipeline ops. These are ops injected by the parser not "real" sklearn operators.
     pipeline_operator_list = [
+        "ArrayFeatureExtractor",
         "Concat",
         "Multiply",
     ]

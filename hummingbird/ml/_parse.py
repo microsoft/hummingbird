@@ -293,14 +293,13 @@ def _parse_sklearn_column_transformer(scope, model, inputs):
         if var_out:
             transformed_result_names.append(var_out)
 
-    # Create a Concat ONNX node
+    # Create a Concat node
     if len(transformed_result_names) > 1:
-        ty = transformed_result_names[0].type.__class__([None, None])
         concat_operator = scope.declare_local_operator("SklearnConcat")
         concat_operator.inputs = transformed_result_names
 
         # Declare output name of scikit-learn ColumnTransformer
-        transformed_column_name = scope.declare_local_variable("transformed_column", ty)
+        transformed_column_name = scope.declare_local_variable("transformed_column")
         concat_operator.outputs.append(transformed_column_name)
         return concat_operator.outputs
     return transformed_result_names
@@ -448,31 +447,10 @@ def _get_column_index(i, inputs):
             # (unknown dimension)
             return 0, 0
         vi = 0
-        pos = 0
-        # end = inputs[0].type.shape[1] if isinstance(inputs[0].type, TensorType) else 1
-        end = 1
-        if end is None:
-            raise RuntimeError(
-                "Cannot extract a specific column {0} when one input ('{1}') has unknown " "dimension.".format(i, inputs[0])
-            )
-        while True:
-            if pos <= i < end:
-                return (vi, i - pos)
-            vi += 1
-            pos = end
-            if vi >= len(inputs):
-                raise RuntimeError("Input {} (i={}, end={}) is not available in\n{}".format(vi, i, end, inputs))
-            # rel_end = inputs[vi].type.shape[1] if isinstance(inputs[vi].type, TensorType) else 1
-            rel_end = 1
-            if rel_end is None:
-                raise RuntimeError(
-                    "Cannot extract a specific column {0} when one input ('{1}') has unknown "
-                    "dimension.".format(i, inputs[vi])
-                )
-            end += rel_end
+        return (vi, i)
     else:
         for ind, inp in enumerate(inputs):
-            if inp.onnx_name == i:
+            if inp.full_name == i:
                 return ind, 0
         raise RuntimeError("Unable to find column name '{0}'".format(i))
 
