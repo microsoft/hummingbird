@@ -91,10 +91,13 @@ class PyTorchBackendModel(torch.nn.Module):
 
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self._input_names):
+                if type(inputs[i]) is list:
+                    inputs[i] = np.array(inputs[i])
                 if type(inputs[i]) is np.ndarray:
-                    inputs[i] = torch.from_numpy(inputs[i]).float()
-                elif type(inputs[i]) is list:
-                    inputs[i] = torch.from_numpy(np.array(inputs[i])).float()
+                    inputs[i] = torch.from_numpy(inputs[i])
+                    if inputs[i].dtype == torch.float64:
+                        # We convert double precision arrays into single precision. Sklearn does the same.
+                        inputs[i] = inputs[i].float()
                 elif type(inputs[i]) is not torch.Tensor:
                     raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(inputs[i])))
                 if device != "cpu":
