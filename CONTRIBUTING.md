@@ -30,14 +30,15 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 ## Developing
-The simplest setup is:
+The simplest setup (assuming you have PyTorch already installed) is:
 ```
 mkdir hummingbird
 cd hummingbird
 git clone https://github.com/microsoft/hummingbird.git .
 pip install -e .[docs,tests,extra]
 ```
-On Windows, the last line above must also contain `-f https://download.pytorch.org/whl/torch_stable.html`. (This is required because PyTorch version for Windows is not up to date.)
+
+If you do not have pytorch installed, please [install it](https://pytorch.org/get-started/locally/) first.
 
 ### Docker
 We provide a simple [Dockerfile](https://github.com/microsoft/hummingbird/blob/master/Dockerfile) that you can customize to your preferred development environment.
@@ -45,7 +46,7 @@ We provide a simple [Dockerfile](https://github.com/microsoft/hummingbird/blob/m
 docker build git://github.com/microsoft/hummingbird -t hb-jupy
 docker run -it hb-dev
 ```
-### Codespases
+### Codespaces
 For a light-weight, web-based experience, we provide the configuration ([.devcontainer](https://github.com/microsoft/hummingbird/tree/master/.devcontainer)) for [Codespaces](https://online.visualstudio.com/environments).  More information on this setup can be found [here]( https://docs.microsoft.com/en-us/visualstudio/online/reference/configuring).
 
 ### Tools

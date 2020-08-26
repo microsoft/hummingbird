@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 """
-Converters for ONNX operators.
+Converters for operators necessary for supporting scikit-learn Pipelines.
 """
 
 import numpy as np
