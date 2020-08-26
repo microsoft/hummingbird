@@ -1,10 +1,5 @@
 import unittest
-from distutils.version import StrictVersion
-from io import StringIO
 import numpy as np
-from numpy.testing import assert_almost_equal
-import pandas
-from sklearn import __version__ as sklearn_version
 from sklearn import datasets
 
 try:
@@ -13,42 +8,16 @@ except ImportError:
     # not available in 0.19
     ColumnTransformer = None
 from sklearn.decomposition import PCA
-
-try:
-    from sklearn.impute import SimpleImputer
-except ImportError:
-    from sklearn.preprocessing import Imputer as SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
 
 import hummingbird.ml
+from hummingbird.ml._utils import pandas_installed
 
-
-def check_scikit_version():
-    # StrictVersion does not work with development versions
-    vers = ".".join(sklearn_version.split(".")[:2])
-    return StrictVersion(vers) >= StrictVersion("0.21.0")
-
-
-class PipeConcatenateInput:
-    def __init__(self, pipe):
-        self.pipe = pipe
-
-    def transform(self, inp):
-        if isinstance(inp, (np.ndarray, pandas.DataFrame)):
-            return self.pipe.transform(inp)
-        elif isinstance(inp, dict):
-            keys = list(sorted(inp.keys()))
-            dim = inp[keys[0]].shape[0], len(keys)
-            x2 = np.zeros(dim)
-            for i in range(x2.shape[1]):
-                x2[:, i] = inp[keys[i]].ravel()
-            res = self.pipe.transform(x2)
-            return res
-        else:
-            raise TypeError("Unable to predict with type {0}".format(type(inp)))
+if pandas_installed():
+    import pandas
 
 
 class TestSklearnPipeline(unittest.TestCase):
@@ -116,6 +85,7 @@ class TestSklearnPipeline(unittest.TestCase):
         )
 
     @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer(self):
         iris = datasets.load_iris()
         X = iris.data[:, :3]
