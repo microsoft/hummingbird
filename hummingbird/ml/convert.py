@@ -163,9 +163,9 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
                         type(initial_types[0][1])
                     )
                 )
-    else:
-        extra_config[constants.N_FEATURES] = np.array(test_input).shape[1]
-    extra_config[constants.TEST_INPUT] = test_input
+            extra_config[constants.TEST_INPUT] = test_input
+    elif constants.N_FEATURES not in extra_config:
+        extra_config[constants.N_FEATURES] = test_input.shape[1]
 
     # Set the initializers. Some converter requires the access to initializers.
     initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
@@ -218,6 +218,14 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     # Add test input as extra configuration for conversion.
     if test_input is not None and constants.TEST_INPUT not in extra_config:
         extra_config[constants.TEST_INPUT] = test_input
+
+    # Fix the test_input type
+    if constants.TEST_INPUT in extra_config:
+        if type(extra_config[constants.TEST_INPUT]) == list:
+            extra_config[constants.TEST_INPUT] = np.array(extra_config[constants.TEST_INPUT])
+        elif type(extra_config[constants.TEST_INPUT]) == tuple:
+            extra_config[constants.N_FEATURES] = len(extra_config[constants.TEST_INPUT])
+        test_input = extra_config[constants.TEST_INPUT]
 
     # We do some normalization on backends.
     backend = backend.lower()

@@ -93,10 +93,17 @@ def convert(topology, backend, device, extra_config={}):
         if output_model_name is None:
             output_model_name = str(uuid4().hex) + ".onnx"
 
+        # Put the tracing test input into the right format.
+        trace_input = extra_config[constants.TEST_INPUT]
+        if type(trace_input) is tuple:
+            trace_input = tuple([torch.from_numpy(i) for i in trace_input])
+        else:
+            trace_input = torch.from_numpy(trace_input)
+
         # Generate the ONNX models
         torch.onnx.export(
             torch_model,
-            torch.from_numpy(extra_config[constants.TEST_INPUT]),
+            trace_input,
             output_model_name,
             input_names=topology.raw_model.input_names,
             output_names=topology.raw_model.output_names,
