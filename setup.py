@@ -41,7 +41,6 @@ setup(
         "onnx": ["onnxruntime>=1.0.0", "onnxmltools>=1.6.0"],
         "extra": [
             # The need each for these depends on which libraries you plan to convert from
-            "pandas",
             "xgboost==0.90",
             "lightgbm>=2.2",
         ],
