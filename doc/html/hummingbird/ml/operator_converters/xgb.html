@@ -27,7 +27,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/xgb.py#L0-L140" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/xgb.py#L0-L142" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -158,6 +158,8 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.get_booster().get_dump()
     base_prediction = operator.raw_operator.base_score
+    if base_prediction is None:
+        base_prediction = [0.5]
     if type(base_prediction) is float:
         base_prediction = [base_prediction]
 
@@ -253,7 +255,7 @@ register_converter(&#34;SklearnXGBRegressor&#34;, convert_sklearn_xgb_regressor)
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/xgb.py#L106-L135" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/xgb.py#L106-L137" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_xgb_regressor(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -279,6 +281,8 @@ register_converter(&#34;SklearnXGBRegressor&#34;, convert_sklearn_xgb_regressor)
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.get_booster().get_dump()
     base_prediction = operator.raw_operator.base_score
+    if base_prediction is None:
+        base_prediction = [0.5]
     if type(base_prediction) is float:
         base_prediction = [base_prediction]
 
