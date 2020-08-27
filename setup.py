@@ -44,7 +44,6 @@ setup(
             "xgboost==0.90",
             "lightgbm>=2.2",
             # As extra we can use pandas dataframe as input (for pipeline objects)
-            "pandas",
         ],
     },
     classifiers=[
