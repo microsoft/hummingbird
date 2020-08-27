@@ -127,6 +127,8 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.get_booster().get_dump()
     base_prediction = operator.raw_operator.base_score
+    if base_prediction is None:
+        base_prediction = [0.5]
     if type(base_prediction) is float:
         base_prediction = [base_prediction]
 
