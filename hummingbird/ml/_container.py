@@ -86,6 +86,7 @@ class PyTorchBackendModel(torch.nn.Module):
     def forward(self, *inputs):
         with torch.no_grad():
             assert len(self._input_names) == len(inputs)
+
             inputs = [*inputs]
             variable_map = {}
             device = _get_device(self)
@@ -96,8 +97,6 @@ class PyTorchBackendModel(torch.nn.Module):
                     inputs[i] = np.array(inputs[i])
                 if type(inputs[i]) is np.ndarray:
                     inputs[i] = torch.from_numpy(inputs[i])
-                    # if len(inputs[i].shape) == 1:
-                    #     inputs[i].view(-1, 1)
                     if inputs[i].dtype == torch.float64:
                         # We convert double precision arrays into single precision. Sklearn does the same.
                         inputs[i] = inputs[i].float()
@@ -350,6 +349,9 @@ class ONNXSklearnContainer(ABC):
         """
         Retrieve the inputs names from the session object.
         """
+        if len(inputs) < len(self.input_names):
+            inputs = inputs[0]
+
         assert len(inputs) == len(self.input_names)
 
         named_inputs = {}
