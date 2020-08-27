@@ -62,7 +62,6 @@ jobs:
     - name: Install extra dependencies
       run: |
         pip install .[extra,onnx]
-        pip install pandas
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

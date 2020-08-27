@@ -247,11 +247,10 @@ def _parse_sklearn_column_transformer(scope, model, inputs):
             )
         elif isinstance(column_indices, (int, str)):
             column_indices = [column_indices]
-        names = _get_column_indices(column_indices, inputs, multiple=True)
+        pt_var, pt_is = _get_column_indices(column_indices, inputs)
         transform_inputs = []
-        for pt_var, pt_is in names.items():
-            tr_inputs = _fetch_input_slice(scope, [inputs[pt_var]], pt_is)
-            transform_inputs.extend(tr_inputs)
+        tr_inputs = _fetch_input_slice(scope, [inputs[pt_var]], pt_is)
+        transform_inputs.extend(tr_inputs)
 
         merged_cols = False
         if len(transform_inputs) > 1:
@@ -453,42 +452,32 @@ def _get_column_index(i, inputs):
         raise RuntimeError("Unable to find column name '{0}'".format(i))
 
 
-def _get_column_indices(indices, inputs, multiple):
+def _get_column_indices(indices, inputs):
     """
     Returns the requested graph inpudes based on their indices or names. See `_parse._get_column_index`.
     Args:
         indices: variables indices or names
         inputs: model inputs
-        multiple: allows column to come from multiple variables
 
     Returns:
         a tuple *(variable name, list of requested indices)* if *multiple* is False, a dictionary *{ var_index: [ list of
         requested indices ] }* if *multiple* is True
     """
-    if multiple:
-        res = OrderedDict()
-        for p in indices:
-            pt_v, pt_i = _get_column_index(p, inputs)
-            if pt_v not in res:
-                res[pt_v] = []
-            res[pt_v].append(pt_i)
-        return res
-    else:
-        pt_var = None
-        pt_is = []
-        for p in indices:
-            pt_v, pt_i = _get_column_index(p, inputs)
-            pt_is.append(pt_i)
-            if pt_var is None:
-                pt_var = pt_v
-            elif pt_var != pt_v:
-                cols = [pt_var, pt_v]
-                raise NotImplementedError(
-                    "Hummingbird is not able to merge multiple columns from "
-                    "multiple variables ({0}). You should think about merging "
-                    "initial types.".format(cols)
-                )
-        return pt_var, pt_is
+    pt_var = None
+    pt_is = []
+    for p in indices:
+        pt_v, pt_i = _get_column_index(p, inputs)
+        pt_is.append(pt_i)
+        if pt_var is None:
+            pt_var = pt_v
+        elif pt_var != pt_v:
+            cols = [pt_var, pt_v]
+            raise NotImplementedError(
+                "Hummingbird is not able to merge multiple columns from "
+                "multiple variables ({0}). You should think about merging "
+                "initial types.".format(cols)
+            )
+    return pt_var, pt_is
 
 
 # Registered API parsers.
