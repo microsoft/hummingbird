@@ -61,7 +61,7 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     &#34;&#34;&#34;
     classes = [0] if not hasattr(operator.raw_operator, &#34;classes_&#34;) else operator.raw_operator.classes_
 
-    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
+    if not all([type(x) in [int, np.int32, np.int64, np.intc] for x in classes]):
         raise RuntimeError(
             &#34;Hummingbird currently supports only integer labels for class labels. Please file an issue at https://github.com/microsoft/hummingbird.&#34;
         )
@@ -154,7 +154,7 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
     &#34;&#34;&#34;
     classes = [0] if not hasattr(operator.raw_operator, &#34;classes_&#34;) else operator.raw_operator.classes_
 
-    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
+    if not all([type(x) in [int, np.int32, np.int64, np.intc] for x in classes]):
         raise RuntimeError(
             &#34;Hummingbird currently supports only integer labels for class labels. Please file an issue at https://github.com/microsoft/hummingbird.&#34;
         )
