@@ -29,7 +29,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L0-L117" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L0-L119" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -54,6 +54,7 @@ class SVC(BaseOperator, torch.nn.Module):
         super(SVC, self).__init__(classification=True)
         self.kernel = kernel
         self.degree = degree
+        # self.gamma = torch.nn.Parameter(torch.from_numpy(np.array(gamma, dtype=np.float64)), requires_grad=False)
         self.gamma = gamma
         self.regression = False
         sv = sv.toarray() if type(sv) == scipy.sparse.csr.csr_matrix else sv
@@ -63,7 +64,7 @@ class SVC(BaseOperator, torch.nn.Module):
         self.coef0 = coef0
         self.n_features = sv.shape[1]
         self.a = a
-        self.b = torch.nn.Parameter(torch.nn.Parameter(torch.from_numpy(b.reshape(1, -1)).double()), requires_grad=False)
+        self.b = torch.nn.Parameter(torch.from_numpy(b.reshape(1, -1)).double(), requires_grad=False)
         self.start = [sum(nv[:i]) for i in range(len(nv))]
         self.end = [self.start[i] + nv[i] for i in range(len(nv))]
         self.len_nv = len(nv)
@@ -75,6 +76,7 @@ class SVC(BaseOperator, torch.nn.Module):
         if min(classes) != 0 or max(classes) != len(classes) - 1:
             self.perform_class_select = True
         self.n_classes = len(classes)
+        # self.two = torch.nn.Parameter(torch.from_numpy(np.array(2.0, dtype=np.float64)), requires_grad=False)
 
     def forward(self, x):
         x = x.double()
@@ -85,7 +87,7 @@ class SVC(BaseOperator, torch.nn.Module):
             # using quadratic expansion--susseptible to rounding-off errors
             # http://www.robots.ox.ac.uk/~albanie/notes/Euclidean_distance_trick.pdf
             x_norm = -self.gamma * (x ** 2).sum(1).view(-1, 1)
-            k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t))
+            k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t).double())
         elif self.kernel == &#34;sigmoid&#34;:
             k = torch.sigmoid(self.gamma * torch.mm(x, self.sv_t) + self.coef0)
         else:  # poly kernel
@@ -180,7 +182,7 @@ register_converter(&#34;SklearnNuSVC&#34;, convert_sklearn_svc_model)</code></pr
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L83-L114" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L85-L116" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_svc_model(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -230,13 +232,14 @@ register_converter(&#34;SklearnNuSVC&#34;, convert_sklearn_svc_model)</code></pr
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L19-L80" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L19-L82" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class SVC(BaseOperator, torch.nn.Module):
     def __init__(self, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device):
         super(SVC, self).__init__(classification=True)
         self.kernel = kernel
         self.degree = degree
+        # self.gamma = torch.nn.Parameter(torch.from_numpy(np.array(gamma, dtype=np.float64)), requires_grad=False)
         self.gamma = gamma
         self.regression = False
         sv = sv.toarray() if type(sv) == scipy.sparse.csr.csr_matrix else sv
@@ -246,7 +249,7 @@ register_converter(&#34;SklearnNuSVC&#34;, convert_sklearn_svc_model)</code></pr
         self.coef0 = coef0
         self.n_features = sv.shape[1]
         self.a = a
-        self.b = torch.nn.Parameter(torch.nn.Parameter(torch.from_numpy(b.reshape(1, -1)).double()), requires_grad=False)
+        self.b = torch.nn.Parameter(torch.from_numpy(b.reshape(1, -1)).double(), requires_grad=False)
         self.start = [sum(nv[:i]) for i in range(len(nv))]
         self.end = [self.start[i] + nv[i] for i in range(len(nv))]
         self.len_nv = len(nv)
@@ -258,6 +261,7 @@ register_converter(&#34;SklearnNuSVC&#34;, convert_sklearn_svc_model)</code></pr
         if min(classes) != 0 or max(classes) != len(classes) - 1:
             self.perform_class_select = True
         self.n_classes = len(classes)
+        # self.two = torch.nn.Parameter(torch.from_numpy(np.array(2.0, dtype=np.float64)), requires_grad=False)
 
     def forward(self, x):
         x = x.double()
@@ -268,7 +272,7 @@ register_converter(&#34;SklearnNuSVC&#34;, convert_sklearn_svc_model)</code></pr
             # using quadratic expansion--susseptible to rounding-off errors
             # http://www.robots.ox.ac.uk/~albanie/notes/Euclidean_distance_trick.pdf
             x_norm = -self.gamma * (x ** 2).sum(1).view(-1, 1)
-            k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t))
+            k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t).double())
         elif self.kernel == &#34;sigmoid&#34;:
             k = torch.sigmoid(self.gamma * torch.mm(x, self.sv_t) + self.coef0)
         else:  # poly kernel
@@ -311,7 +315,7 @@ register_converter(&#34;SklearnNuSVC&#34;, convert_sklearn_svc_model)</code></pr
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L46-L80" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_sv.py#L48-L82" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     x = x.double()
@@ -322,7 +326,7 @@ register_converter(&#34;SklearnNuSVC&#34;, convert_sklearn_svc_model)</code></pr
         # using quadratic expansion--susseptible to rounding-off errors
         # http://www.robots.ox.ac.uk/~albanie/notes/Euclidean_distance_trick.pdf
         x_norm = -self.gamma * (x ** 2).sum(1).view(-1, 1)
-        k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t))
+        k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t).double())
     elif self.kernel == &#34;sigmoid&#34;:
         k = torch.sigmoid(self.gamma * torch.mm(x, self.sv_t) + self.coef0)
     else:  # poly kernel

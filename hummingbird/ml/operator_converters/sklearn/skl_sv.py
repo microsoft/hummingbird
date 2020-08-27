@@ -21,6 +21,7 @@ class SVC(BaseOperator, torch.nn.Module):
         super(SVC, self).__init__(classification=True)
         self.kernel = kernel
         self.degree = degree
+        # self.gamma = torch.nn.Parameter(torch.from_numpy(np.array(gamma, dtype=np.float64)), requires_grad=False)
         self.gamma = gamma
         self.regression = False
         sv = sv.toarray() if type(sv) == scipy.sparse.csr.csr_matrix else sv
@@ -30,7 +31,7 @@ class SVC(BaseOperator, torch.nn.Module):
         self.coef0 = coef0
         self.n_features = sv.shape[1]
         self.a = a
-        self.b = torch.nn.Parameter(torch.nn.Parameter(torch.from_numpy(b.reshape(1, -1)).double()), requires_grad=False)
+        self.b = torch.nn.Parameter(torch.from_numpy(b.reshape(1, -1)).double(), requires_grad=False)
         self.start = [sum(nv[:i]) for i in range(len(nv))]
         self.end = [self.start[i] + nv[i] for i in range(len(nv))]
         self.len_nv = len(nv)
@@ -42,6 +43,7 @@ class SVC(BaseOperator, torch.nn.Module):
         if min(classes) != 0 or max(classes) != len(classes) - 1:
             self.perform_class_select = True
         self.n_classes = len(classes)
+        # self.two = torch.nn.Parameter(torch.from_numpy(np.array(2.0, dtype=np.float64)), requires_grad=False)
 
     def forward(self, x):
         x = x.double()
@@ -52,7 +54,7 @@ class SVC(BaseOperator, torch.nn.Module):
             # using quadratic expansion--susseptible to rounding-off errors
             # http://www.robots.ox.ac.uk/~albanie/notes/Euclidean_distance_trick.pdf
             x_norm = -self.gamma * (x ** 2).sum(1).view(-1, 1)
-            k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t))
+            k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t).double())
         elif self.kernel == "sigmoid":
             k = torch.sigmoid(self.gamma * torch.mm(x, self.sv_t) + self.coef0)
         else:  # poly kernel
