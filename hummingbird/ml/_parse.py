@@ -231,6 +231,9 @@ def _parse_sklearn_column_transformer(scope, model, inputs):
     :param inputs: A list of Variable objects
     :return: A list of output variables produced by column transformer
     """
+    assert (
+        len(inputs) < 2
+    ), "Hummingbird currently supports ColumnTransformer over single inputs. Please fill an issue at https://github.com/microsoft/hummingbird."
     # Output variable name of each transform. It's a list of string.
     transformed_result_names = []
     # Encode each transform as our IR object
@@ -251,24 +254,6 @@ def _parse_sklearn_column_transformer(scope, model, inputs):
         transform_inputs = []
         tr_inputs = _fetch_input_slice(scope, [inputs[pt_var]], pt_is)
         transform_inputs.extend(tr_inputs)
-
-        merged_cols = False
-        if len(transform_inputs) > 1:
-            if isinstance(op, pipeline.Pipeline):
-                if not isinstance(op.steps[0][1], do_not_merge_columns):
-                    merged_cols = True
-            elif not isinstance(op, do_not_merge_columns):
-                merged_cols = True
-
-        if merged_cols:
-            # Operators by default expect one input vector, the default behaviour is to merge columns.
-            ty = transform_inputs[0].type.__class__([None, None])
-
-            conc_op = scope.declare_local_operator("SklearnConcat")
-            conc_op.inputs = transform_inputs
-            conc_names = scope.declare_local_variable("merged_columns", ty)
-            conc_op.outputs.append(conc_names)
-            transform_inputs = [conc_names]
 
         model_obj = model.named_transformers_[name]
         if isinstance(model_obj, str):
@@ -446,10 +431,7 @@ def _get_column_index(i, inputs):
         vi = 0
         return (vi, i)
     else:
-        for ind, inp in enumerate(inputs):
-            if inp.full_name == i:
-                return ind, 0
-        raise RuntimeError("Unable to find column name '{0}'".format(i))
+        raise RuntimeError("Hummingbird currently support only int columns, {} is not supported.".format(i))
 
 
 def _get_column_indices(indices, inputs):
