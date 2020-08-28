@@ -18,6 +18,10 @@ from .._base_operator import BaseOperator
 
 
 class Concat(BaseOperator, torch.nn.Module):
+    """
+    Module used to concatenate tensors into a single tensor.
+    """
+
     def __init__(self):
         super(Concat, self).__init__()
 
@@ -26,6 +30,10 @@ class Concat(BaseOperator, torch.nn.Module):
 
 
 class Multiply(BaseOperator, torch.nn.Module):
+    """
+    Module used to multiply features in a pipeline by a score.
+    """
+
     def __init__(self, score):
         super(Multiply, self).__init__()
 
@@ -37,10 +45,10 @@ class Multiply(BaseOperator, torch.nn.Module):
 
 def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     """
-    Converter for `sklearn.feature_selection.VarianceThreshold`.
+    Converter for ArrayFeatureExtractor.
 
     Args:
-        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
+        operator: An operator wrapping a ArrayFeatureExtractor operator
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 

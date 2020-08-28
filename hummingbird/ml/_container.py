@@ -56,30 +56,27 @@ class PyTorchBackendModel(torch.nn.Module):
         # Define input \ output names.
         # This is required because the internal variable names may differ from the original (raw) one.
         # This may happen, for instance, because we force our internal naming to be unique.
-        self._input_names = []
-        self._output_names = []
-        map = {}
-        for op in operators:
-            for op_input in op.inputs:
-                for i_name in input_names:
-                    if op_input.raw_name == i_name and i_name not in map:
-                        map[op_input.raw_name] = op_input.full_name
-            if len(input_names) == 0:
-                break
-        for i_name in input_names:
-            self._input_names.append(map[i_name])
+        def _fix_var_naming(operators, names, mod="input"):
+            new_names = []
+            map = {}
 
-        map = {}
-        for op in reversed(operators):
-            for op_output in op.outputs:
-                for o_name in output_names:
-                    if op_output.raw_name == o_name and o_name not in map:
-                        map[op_output.raw_name] = op_output.full_name
-            if len(output_names) == 0:
-                break
-        for o_name in output_names:
-            self._output_names.append(map[o_name])
+            for op in operators:
+                if mod == "input":
+                    iter = op.inputs
+                else:
+                    iter = op.outputs
+                for i in iter:
+                    for name in names:
+                        if i.raw_name == name and name not in map:
+                            map[i.raw_name] = i.full_name
+                if len(map) == len(names):
+                    break
+            for name in names:
+                new_names.append(map[name])
+            return new_names
 
+        self._input_names = _fix_var_naming(operators, input_names)
+        self._output_names = _fix_var_naming(reversed(operators), output_names, "output")
         self._operator_map = torch.nn.ModuleDict(operator_map)
         self._operators = operators
 

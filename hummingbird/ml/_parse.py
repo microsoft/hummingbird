@@ -15,18 +15,14 @@ from uuid import uuid4
 from onnxconverter_common.container import CommonSklearnModelContainer
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 from onnxconverter_common.topology import Topology
+from sklearn import pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
 
 from . import constants
 from ._container import CommonONNXModelContainer
 from ._utils import sklearn_installed
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name
-
-if sklearn_installed():
-    from sklearn import pipeline
-    from sklearn.compose import ColumnTransformer
-    from sklearn.preprocessing import OneHotEncoder
-
-    do_not_merge_columns = tuple(filter(lambda op: op is not None, [OneHotEncoder, ColumnTransformer]))
 
 
 def parse_sklearn_api_model(model):
@@ -188,6 +184,7 @@ def _parse_sklearn_pipeline(scope, model, inputs):
 
 def _parse_sklearn_feature_union(scope, model, inputs):
     """
+    Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L199.
     :param scope: Scope object
     :param model: A scikit-learn FeatureUnion object
     :param inputs: A list of Variable objects
@@ -221,6 +218,7 @@ def _parse_sklearn_feature_union(scope, model, inputs):
 
 def _parse_sklearn_column_transformer(scope, model, inputs):
     """
+    Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
     :param scope: Scope object
     :param model: A *scikit-learn* *ColumnTransformer* object
     :param inputs: A list of Variable objects
@@ -386,6 +384,9 @@ def _remove_zipmap(node_list):
 
 
 def _fetch_input_slice(scope, inputs, column_indices):
+    """
+    Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L53.
+    """
     if not isinstance(inputs, list):
         raise TypeError("Parameter inputs must be a list.")
     if len(inputs) == 0:
@@ -403,6 +404,7 @@ def _fetch_input_slice(scope, inputs, column_indices):
 
 def _get_column_index(i, inputs):
     """
+    Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/common/utils.py#L50.
     Returns a tuples (variable index, column index in that variable).
     The function has two different behaviours, one when *i* (column index)
     is an integer, another one when *i* is a string (column name).
@@ -430,6 +432,7 @@ def _get_column_index(i, inputs):
 
 def _get_column_indices(indices, inputs):
     """
+    Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/common/utils.py#L105.
     Returns the requested graph inpudes based on their indices or names. See `_parse._get_column_index`.
     Args:
         indices: variables indices or names
@@ -447,11 +450,10 @@ def _get_column_indices(indices, inputs):
         if pt_var is None:
             pt_var = pt_v
         elif pt_var != pt_v:
-            cols = [pt_var, pt_v]
             raise NotImplementedError(
                 "Hummingbird is not able to merge multiple columns from "
                 "multiple variables ({0}). You should think about merging "
-                "initial types.".format(cols)
+                "initial types.".format([pt_var, pt_v])
             )
     return pt_var, pt_is
 

@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L0-L93" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L0-L101" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -48,6 +48,10 @@ from .._base_operator import BaseOperator
 
 
 class Concat(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Module used to concatenate tensors into a single tensor.
+    &#34;&#34;&#34;
+
     def __init__(self):
         super(Concat, self).__init__()
 
@@ -56,6 +60,10 @@ class Concat(BaseOperator, torch.nn.Module):
 
 
 class Multiply(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Module used to multiply features in a pipeline by a score.
+    &#34;&#34;&#34;
+
     def __init__(self, score):
         super(Multiply, self).__init__()
 
@@ -67,10 +75,10 @@ class Multiply(BaseOperator, torch.nn.Module):
 
 def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `sklearn.feature_selection.VarianceThreshold`.
+    Converter for ArrayFeatureExtractor.
 
     Args:
-        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
+        operator: An operator wrapping a ArrayFeatureExtractor operator
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -135,11 +143,11 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <span>def <span class="ident">convert_sklearn_array_feature_extractor</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>sklearn.feature_selection.VarianceThreshold</code>.</p>
+<div class="desc"><p>Converter for ArrayFeatureExtractor.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>sklearn.feature_selection.VarianceThreshold</code> model</dd>
+<dd>An operator wrapping a ArrayFeatureExtractor operator</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -153,14 +161,14 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L38-L53" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L46-L61" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `sklearn.feature_selection.VarianceThreshold`.
+    Converter for ArrayFeatureExtractor.
 
     Args:
-        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
+        operator: An operator wrapping a ArrayFeatureExtractor operator
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -195,7 +203,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L56-L68" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L64-L76" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_concat(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -234,7 +242,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L71-L89" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L79-L97" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_multiply(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -266,13 +274,17 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <span>class <span class="ident">Concat</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p></div>
+<div class="desc"><p>Module used to concatenate tensors into a single tensor.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L20-L25" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L20-L29" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Concat(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Module used to concatenate tensors into a single tensor.
+    &#34;&#34;&#34;
+
     def __init__(self):
         super(Concat, self).__init__()
 
@@ -295,7 +307,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L24-L25" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L28-L29" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, *x):
     return torch.cat(x, dim=1)</code></pre>
@@ -308,13 +320,17 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <span>(</span><span>score)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p></div>
+<div class="desc"><p>Module used to multiply features in a pipeline by a score.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L28-L35" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L32-L43" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Multiply(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Module used to multiply features in a pipeline by a score.
+    &#34;&#34;&#34;
+
     def __init__(self, score):
         super(Multiply, self).__init__()
 
@@ -339,7 +355,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L34-L35" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L42-L43" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     return x * self.score</code></pre>
