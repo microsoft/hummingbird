@@ -299,14 +299,23 @@ class ONNXSklearnContainer(ABC):
         if onnx_runtime_installed():
             import onnxruntime as ort
 
-        self.model = model
-        self._extra_config = extra_config
+            self._model = model
+            self._extra_config = extra_config
 
-        self.session = ort.InferenceSession(self.model.SerializeToString())
-        self._output_names = [self.session.get_outputs()[i].name for i in range(len(self.session.get_outputs()))]
-        self.input_names = [input.name for input in self.session.get_inputs()]
+            self._session = ort.InferenceSession(self._model.SerializeToString())
+            self._output_names = [self._session.get_outputs()[i].name for i in range(len(self._session.get_outputs()))]
+            self.input_names = [input.name for input in self._session.get_inputs()]
+        else:
+            raise RuntimeError("ONNX Container requires ONNX runtime installed.")
+
+    @property
+    def model(self):
+        return self._model
 
     def _get_named_inputs(self, *inputs):
+        """
+        Retrieve the inputs names from the session object.
+        """
         assert len(inputs) == len(self.input_names)
 
         named_inputs = {}
@@ -334,7 +343,7 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
         """
         named_inputs = self._get_named_inputs(*inputs)
 
-        return self.session.run(self._output_names, named_inputs)
+        return self._session.run(self._output_names, named_inputs)
 
 
 class ONNXSklearnContainerRegression(ONNXSklearnContainer):
@@ -362,11 +371,11 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         named_inputs = self._get_named_inputs(*inputs)
 
         if self._is_regression:
-            return np.array(self.session.run(self._output_names, named_inputs))
+            return self._session.run(self._output_names, named_inputs)
         elif self._is_anomaly_detection:
-            return np.array(self.session.run([self._output_names[0]], named_inputs))[0].flatten()
+            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].flatten()
         else:
-            return self.session.run([self._output_names[0]], named_inputs)[0]
+            return self._session.run([self._output_names[0]], named_inputs)[0]
 
 
 class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
@@ -386,7 +395,7 @@ class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
         """
         named_inputs = self._get_named_inputs(*inputs)
 
-        return self.session.run([self._output_names[1]], named_inputs)[0]
+        return self._session.run([self._output_names[1]], named_inputs)[0]
 
 
 class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
@@ -408,7 +417,7 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         """
         named_inputs = self._get_named_inputs(*inputs)
 
-        return np.array(self.session.run([self._output_names[1]], named_inputs)[0]).flatten()
+        return np.array(self._session.run([self._output_names[1]], named_inputs)[0]).flatten()
 
     def score_samples(self, *inputs):
         """

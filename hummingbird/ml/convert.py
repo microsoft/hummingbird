@@ -44,7 +44,7 @@ def _supported_backend_check_config(model, backend, extra_config):
     """
     Function used to check whether the specified backend and configuration pair is supported or not.
     """
-    assert torch_installed()
+    assert torch_installed(), "To use Hummingbird you need to install torch."
     import onnx
     import torch
 

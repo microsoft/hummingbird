@@ -83,7 +83,7 @@ def convert(topology, backend, device, extra_config={}):
 
             if backend == onnx.__name__:
                 # vers = LooseVersion(torch.__version__)
-                # allowed_min = LooseVersion("1.6.1")
+                # allowed_min = LooseVersion("1.6.0")
                 # Pytorch <= 1.6.0 has a bug with exporting GEMM into ONNX.
                 # For the moment only tree_trav is enabled for pytorch <= 1.6.0
                 # if vers < allowed_min:

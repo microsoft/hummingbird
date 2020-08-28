@@ -11,9 +11,9 @@ Converters for XGBoost models.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .. import constants
-from .._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
-from .._tree_commons import TreeParameters
+from . import constants
+from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
+from ._tree_commons import TreeParameters
 
 
 def _tree_traversal(tree_info, lefts, rights, features, thresholds, values):
@@ -127,6 +127,8 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.get_booster().get_dump()
     base_prediction = operator.raw_operator.base_score
+    if base_prediction is None:
+        base_prediction = [0.5]
     if type(base_prediction) is float:
         base_prediction = [base_prediction]
 

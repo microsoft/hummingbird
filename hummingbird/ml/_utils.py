@@ -94,10 +94,9 @@ def xgboost_installed():
     from xgboost import __version__
 
     vers = LooseVersion(__version__)
-    allowed_min = LooseVersion("0.70")
-    allowed_max = LooseVersion("0.90")
-    if vers < allowed_min or vers > allowed_max:
-        warnings.warn("The converter works for xgboost >= 0.7 and <= 0.9. Different versions might not.")
+    allowed_min = LooseVersion("0.90")
+    if vers < allowed_min:
+        warnings.warn("The converter works for xgboost >= 0.9. Different versions might not.")
     return True
 
 

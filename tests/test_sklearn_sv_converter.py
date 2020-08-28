@@ -128,8 +128,8 @@ class TestSklearnSVC(unittest.TestCase):
 
     # TVM backend.
     # SVC binary
-    def test_svc_bi_tvm(self):
-        self._test_svc(2, backend="tvm")
+    # def test_svc_bi_tvm(self):
+    #     self._test_svc(2, backend="tvm")
 
     # # SVC multiclass
     # def test_svc_multi(self):
