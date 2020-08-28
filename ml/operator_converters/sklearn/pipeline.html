@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.onnx.onnx_operator API documentation</title>
-<meta name="description" content="Converters for ONNX operators." />
+<title>hummingbird.ml.operator_converters.sklearn.pipeline API documentation</title>
+<meta name="description" content="Converters for operators necessary for supporting scikit-learn Pipelines." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,20 +13,20 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/onnx/onnx_operator.html">
+<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/sklearn/pipeline.html">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.onnx.onnx_operator</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.pipeline</code></h1>
 </header>
 <section id="section-intro">
-<p>Converters for ONNX operators.</p>
+<p>Converters for operators necessary for supporting scikit-learn Pipelines.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L0-L120" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L0-L101" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -35,7 +35,7 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Converters for ONNX operators.
+Converters for operators necessary for supporting scikit-learn Pipelines.
 &#34;&#34;&#34;
 
 import numpy as np
@@ -43,51 +43,42 @@ from onnxconverter_common.registration import register_converter
 import torch
 
 from .. import constants
+from .._array_feature_extractor_implementations import ArrayFeatureExtractor
 from .._base_operator import BaseOperator
 
 
-class Cast(BaseOperator, torch.nn.Module):
-    def __init__(self, to_type):
-        super(Cast, self).__init__()
-
-        assert to_type is not None
-
-        self.to_type = to_type
-
-    def forward(self, x):
-        if self.to_type == 1:  # Cast to float
-            return x.float()
-        if self.to_type == 7:  # Cast to long
-            return x.long()
-
-
 class Concat(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Module used to concatenate tensors into a single tensor.
+    &#34;&#34;&#34;
+
     def __init__(self):
         super(Concat, self).__init__()
 
     def forward(self, *x):
-        if len(x[0].shape) &gt; 1:
-            return torch.cat(x, dim=1)
-        else:
-            return torch.stack(x, dim=1)
+        return torch.cat(x, dim=1)
 
 
-class Reshape(BaseOperator, torch.nn.Module):
-    def __init__(self, shape):
-        super(Reshape, self).__init__()
+class Multiply(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Module used to multiply features in a pipeline by a score.
+    &#34;&#34;&#34;
 
-        self.shape = shape
+    def __init__(self, score):
+        super(Multiply, self).__init__()
+
+        self.score = score
 
     def forward(self, x):
-        return torch.reshape(x, self.shape)
+        return x * self.score
 
 
-def convert_onnx_cast(operator, device=None, extra_config={}):
+def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.Cast`.
+    Converter for ArrayFeatureExtractor.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Cast` model
+        operator: An operator wrapping a ArrayFeatureExtractor operator
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -96,40 +87,31 @@ def convert_onnx_cast(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
     assert operator is not None
 
-    to_type = None
-
-    for attr in operator.raw_operator.origin.attribute:
-        if attr.name == &#34;to&#34;:
-            to_type = attr.i
-
-    # Generate the model.
-    return Cast(to_type)
+    indices = operator.column_indices
+    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
-def convert_onnx_concat(operator, device=None, extra_config={}):
+def convert_sklearn_concat(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.Concat`.
+    Converter for concat operators injected when parsing Sklearn pipelines.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Concat` model
+        operator: An empty operator
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-    assert operator is not None
-
-    # Generate the model.
     return Concat()
 
 
-def convert_onnx_reshape(operator, device=None, extra_config={}):
+def convert_sklearn_multiply(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.Reshape`.
+    Converter for multiply operators injected when parsing Sklearn pipelines.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Reshape` model
+        operator: An empty operator
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -137,18 +119,17 @@ def convert_onnx_reshape(operator, device=None, extra_config={}):
         A PyTorch model
     &#34;&#34;&#34;
     assert operator is not None
+    assert hasattr(operator, &#34;operand&#34;)
 
-    shape = []
-    initializers = extra_config[constants.ONNX_INITIALIZERS]
-    shape = list(initializers[operator.raw_operator.origin.input[1]].int64_data)
+    score = operator.operand
 
     # Generate the model.
-    return Reshape(shape)
+    return Multiply(score)
 
 
-register_converter(&#34;ONNXMLCast&#34;, convert_onnx_cast)
-register_converter(&#34;ONNXMLConcat&#34;, convert_onnx_concat)
-register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
+register_converter(&#34;SklearnArrayFeatureExtractor&#34;, convert_sklearn_array_feature_extractor)
+register_converter(&#34;SklearnConcat&#34;, convert_sklearn_concat)
+register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></pre>
 </details>
 </section>
 <section>
@@ -158,15 +139,15 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_cast"><code class="name flex">
-<span>def <span class="ident">convert_onnx_cast</span></span>(<span>operator, device=None, extra_config={})</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_array_feature_extractor"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_array_feature_extractor</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>ai.onnx.Cast</code>.</p>
+<div class="desc"><p>Converter for ArrayFeatureExtractor.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>ai.onnx.Cast</code> model</dd>
+<dd>An operator wrapping a ArrayFeatureExtractor operator</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -180,14 +161,14 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L55-L76" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L46-L61" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">def convert_onnx_cast(operator, device=None, extra_config={}):
+<pre><code class="python">def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.Cast`.
+    Converter for ArrayFeatureExtractor.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Cast` model
+        operator: An operator wrapping a ArrayFeatureExtractor operator
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -196,25 +177,19 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
     &#34;&#34;&#34;
     assert operator is not None
 
-    to_type = None
-
-    for attr in operator.raw_operator.origin.attribute:
-        if attr.name == &#34;to&#34;:
-            to_type = attr.i
-
-    # Generate the model.
-    return Cast(to_type)</code></pre>
+    indices = operator.column_indices
+    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)</code></pre>
 </details>
 </dd>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_concat"><code class="name flex">
-<span>def <span class="ident">convert_onnx_concat</span></span>(<span>operator, device=None, extra_config={})</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_concat"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_concat</span></span>(<span>operator, device=None, extra_config={})</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>ai.onnx.Concat</code>.</p>
+<div class="desc"><p>Converter for concat operators injected when parsing Sklearn pipelines.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>ai.onnx.Concat</code> model</dd>
+<dd>An empty operator</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -228,35 +203,32 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L79-L94" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L64-L76" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">def convert_onnx_concat(operator, device=None, extra_config={}):
+<pre><code class="python">def convert_sklearn_concat(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.Concat`.
+    Converter for concat operators injected when parsing Sklearn pipelines.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Concat` model
+        operator: An empty operator
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-    assert operator is not None
-
-    # Generate the model.
     return Concat()</code></pre>
 </details>
 </dd>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_reshape"><code class="name flex">
-<span>def <span class="ident">convert_onnx_reshape</span></span>(<span>operator, device=None, extra_config={})</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_multiply"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_multiply</span></span>(<span>operator, device=None, extra_config={})</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>ai.onnx.Reshape</code>.</p>
+<div class="desc"><p>Converter for multiply operators injected when parsing Sklearn pipelines.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>ai.onnx.Reshape</code> model</dd>
+<dd>An empty operator</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -270,14 +242,14 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L97-L116" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L79-L97" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">def convert_onnx_reshape(operator, device=None, extra_config={}):
+<pre><code class="python">def convert_sklearn_multiply(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.Reshape`.
+    Converter for multiply operators injected when parsing Sklearn pipelines.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Reshape` model
+        operator: An empty operator
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -285,13 +257,12 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
         A PyTorch model
     &#34;&#34;&#34;
     assert operator is not None
+    assert hasattr(operator, &#34;operand&#34;)
 
-    shape = []
-    initializers = extra_config[constants.ONNX_INITIALIZERS]
-    shape = list(initializers[operator.raw_operator.origin.input[1]].int64_data)
+    score = operator.operand
 
     # Generate the model.
-    return Reshape(shape)</code></pre>
+    return Multiply(score)</code></pre>
 </details>
 </dd>
 </dl>
@@ -299,77 +270,26 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Cast"><code class="flex name class">
-<span>class <span class="ident">Cast</span></span>
-<span>(</span><span>to_type)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L19-L31" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">class Cast(BaseOperator, torch.nn.Module):
-    def __init__(self, to_type):
-        super(Cast, self).__init__()
-
-        assert to_type is not None
-
-        self.to_type = to_type
-
-    def forward(self, x):
-        if self.to_type == 1:  # Cast to float
-            return x.float()
-        if self.to_type == 7:  # Cast to long
-            return x.long()</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>hummingbird.ml.operator_converters._base_operator.BaseOperator</li>
-<li>abc.ABC</li>
-<li>torch.nn.modules.module.Module</li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Cast.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, x) -> Callable[..., Any]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L27-L31" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">def forward(self, x):
-    if self.to_type == 1:  # Cast to float
-        return x.float()
-    if self.to_type == 7:  # Cast to long
-        return x.long()</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Concat"><code class="flex name class">
+<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.Concat"><code class="flex name class">
 <span>class <span class="ident">Concat</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p></div>
+<div class="desc"><p>Module used to concatenate tensors into a single tensor.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L34-L42" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L20-L29" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Concat(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Module used to concatenate tensors into a single tensor.
+    &#34;&#34;&#34;
+
     def __init__(self):
         super(Concat, self).__init__()
 
     def forward(self, *x):
-        if len(x[0].shape) &gt; 1:
-            return torch.cat(x, dim=1)
-        else:
-            return torch.stack(x, dim=1)</code></pre>
+        return torch.cat(x, dim=1)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -379,7 +299,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Concat.forward"><code class="name flex">
+<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.Concat.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, *x) -> Callable[..., Any]</span>
 </code></dt>
 <dd>
@@ -387,36 +307,37 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L38-L42" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L28-L29" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, *x):
-    if len(x[0].shape) &gt; 1:
-        return torch.cat(x, dim=1)
-    else:
-        return torch.stack(x, dim=1)</code></pre>
+    return torch.cat(x, dim=1)</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Reshape"><code class="flex name class">
-<span>class <span class="ident">Reshape</span></span>
-<span>(</span><span>shape)</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.Multiply"><code class="flex name class">
+<span>class <span class="ident">Multiply</span></span>
+<span>(</span><span>score)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p></div>
+<div class="desc"><p>Module used to multiply features in a pipeline by a score.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L45-L52" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L32-L43" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">class Reshape(BaseOperator, torch.nn.Module):
-    def __init__(self, shape):
-        super(Reshape, self).__init__()
+<pre><code class="python">class Multiply(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Module used to multiply features in a pipeline by a score.
+    &#34;&#34;&#34;
 
-        self.shape = shape
+    def __init__(self, score):
+        super(Multiply, self).__init__()
+
+        self.score = score
 
     def forward(self, x):
-        return torch.reshape(x, self.shape)</code></pre>
+        return x * self.score</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -426,7 +347,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Reshape.forward"><code class="name flex">
+<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.Multiply.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, x) -> Callable[..., Any]</span>
 </code></dt>
 <dd>
@@ -434,10 +355,10 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L51-L52" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L42-L43" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
-    return torch.reshape(x, self.shape)</code></pre>
+    return x * self.score</code></pre>
 </details>
 </dd>
 </dl>
@@ -457,34 +378,28 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.ml.operator_converters.onnx" href="index.html">hummingbird.ml.operator_converters.onnx</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn" href="index.html">hummingbird.ml.operator_converters.sklearn</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_cast" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_cast">convert_onnx_cast</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_concat" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_concat">convert_onnx_concat</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_reshape" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_reshape">convert_onnx_reshape</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_array_feature_extractor" href="#hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_array_feature_extractor">convert_sklearn_array_feature_extractor</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_concat" href="#hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_concat">convert_sklearn_concat</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_multiply" href="#hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_multiply">convert_sklearn_multiply</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Cast" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Cast">Cast</a></code></h4>
+<h4><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.Concat" href="#hummingbird.ml.operator_converters.sklearn.pipeline.Concat">Concat</a></code></h4>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Cast.forward" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Cast.forward">forward</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.Concat.forward" href="#hummingbird.ml.operator_converters.sklearn.pipeline.Concat.forward">forward</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Concat" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Concat">Concat</a></code></h4>
+<h4><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.Multiply" href="#hummingbird.ml.operator_converters.sklearn.pipeline.Multiply">Multiply</a></code></h4>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Concat.forward" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Concat.forward">forward</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Reshape" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Reshape">Reshape</a></code></h4>
-<ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Reshape.forward" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Reshape.forward">forward</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.Multiply.forward" href="#hummingbird.ml.operator_converters.sklearn.pipeline.Multiply.forward">forward</a></code></li>
 </ul>
 </li>
 </ul>

@@ -64,7 +64,7 @@ XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L295" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L305" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -288,7 +288,17 @@ def _build_sklearn_api_operator_name_map():
     Associate Sklearn with the operator class names.
     If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     &#34;&#34;&#34;
-    return {k: &#34;Sklearn&#34; + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list}
+    # Pipeline ops. These are ops injected by the parser not &#34;real&#34; sklearn operators.
+    pipeline_operator_list = [
+        &#34;ArrayFeatureExtractor&#34;,
+        &#34;Concat&#34;,
+        &#34;Multiply&#34;,
+    ]
+
+    return {
+        k: &#34;Sklearn&#34; + k.__name__ if hasattr(k, &#34;__name__&#34;) else k
+        for k in sklearn_operator_list + pipeline_operator_list + xgb_operator_list + lgbm_operator_list
+    }
 
 
 def _build_onnxml_api_operator_name_map():
@@ -417,7 +427,7 @@ CONTAINER = &#34;container&#34;
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L250-L263" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L260-L273" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_onnxml_api_operator_name(model_type):
     &#34;&#34;&#34;
@@ -454,7 +464,7 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L234-L247" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L244-L257" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_sklearn_api_operator_name(model_type):
     &#34;&#34;&#34;
