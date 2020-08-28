@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/array_feature_extractor.py#L0-L75" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/array_feature_extractor.py#L0-L56" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -83,25 +83,6 @@ def convert_sklearn_variance_threshold(operator, device, extra_config):
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
-def convert_sklearn_array_feature_extractor(operator, device, extra_config):
-    &#34;&#34;&#34;
-    Converter for `sklearn.feature_selection.VarianceThreshold`.
-
-    Args:
-        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
-        device: String defining the type of device the converted operator should be run on
-        extra_config: Extra configuration used to select the best conversion strategy
-
-    Returns:
-        A PyTorch model
-    &#34;&#34;&#34;
-    assert operator is not None
-
-    indices = operator.column_indices
-    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
-
-
-register_converter(&#34;SklearnArrayFeatureExtractor&#34;, convert_sklearn_array_feature_extractor)
 register_converter(&#34;SklearnSelectKBest&#34;, convert_sklearn_select_k_best)
 register_converter(&#34;SklearnVarianceThreshold&#34;, convert_sklearn_variance_threshold)</code></pre>
 </details>
@@ -113,48 +94,6 @@ register_converter(&#34;SklearnVarianceThreshold&#34;, convert_sklearn_variance_
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.convert_sklearn_array_feature_extractor"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_array_feature_extractor</span></span>(<span>operator, device, extra_config)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Converter for <code>sklearn.feature_selection.VarianceThreshold</code>.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>sklearn.feature_selection.VarianceThreshold</code> model</dd>
-<dt><strong><code>device</code></strong></dt>
-<dd>String defining the type of device the converted operator should be run on</dd>
-<dt><strong><code>extra_config</code></strong></dt>
-<dd>Extra configuration used to select the best conversion strategy</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>A PyTorch model</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/array_feature_extractor.py#L56-L71" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">def convert_sklearn_array_feature_extractor(operator, device, extra_config):
-    &#34;&#34;&#34;
-    Converter for `sklearn.feature_selection.VarianceThreshold`.
-
-    Args:
-        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
-        device: String defining the type of device the converted operator should be run on
-        extra_config: Extra configuration used to select the best conversion strategy
-
-    Returns:
-        A PyTorch model
-    &#34;&#34;&#34;
-    assert operator is not None
-
-    indices = operator.column_indices
-    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)</code></pre>
-</details>
-</dd>
 <dt id="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.convert_sklearn_select_k_best"><code class="name flex">
 <span>def <span class="ident">convert_sklearn_select_k_best</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
@@ -264,7 +203,6 @@ register_converter(&#34;SklearnVarianceThreshold&#34;, convert_sklearn_variance_
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.convert_sklearn_array_feature_extractor" href="#hummingbird.ml.operator_converters.sklearn.array_feature_extractor.convert_sklearn_array_feature_extractor">convert_sklearn_array_feature_extractor</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.convert_sklearn_select_k_best" href="#hummingbird.ml.operator_converters.sklearn.array_feature_extractor.convert_sklearn_select_k_best">convert_sklearn_select_k_best</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.convert_sklearn_variance_threshold" href="#hummingbird.ml.operator_converters.sklearn.array_feature_extractor.convert_sklearn_variance_threshold">convert_sklearn_variance_threshold</a></code></li>
 </ul>

@@ -13,8 +13,7 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/sklearn/pipeline.html">
-<link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
+<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/sklearn/pipeline.html">
 </head>
 <body>
 <main>
@@ -27,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L0-L73" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L0-L93" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -44,6 +43,7 @@ from onnxconverter_common.registration import register_converter
 import torch
 
 from .. import constants
+from .._array_feature_extractor_implementations import ArrayFeatureExtractor
 from .._base_operator import BaseOperator
 
 
@@ -63,6 +63,24 @@ class Multiply(BaseOperator, torch.nn.Module):
 
     def forward(self, x):
         return x * self.score
+
+
+def convert_sklearn_array_feature_extractor(operator, device, extra_config):
+    &#34;&#34;&#34;
+    Converter for `sklearn.feature_selection.VarianceThreshold`.
+
+    Args:
+        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+    assert operator is not None
+
+    indices = operator.column_indices
+    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
 def convert_sklearn_concat(operator, device=None, extra_config={}):
@@ -101,6 +119,7 @@ def convert_sklearn_multiply(operator, device=None, extra_config={}):
     return Multiply(score)
 
 
+register_converter(&#34;SklearnArrayFeatureExtractor&#34;, convert_sklearn_array_feature_extractor)
 register_converter(&#34;SklearnConcat&#34;, convert_sklearn_concat)
 register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></pre>
 </details>
@@ -112,6 +131,48 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_array_feature_extractor"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_array_feature_extractor</span></span>(<span>operator, device, extra_config)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Converter for <code>sklearn.feature_selection.VarianceThreshold</code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>operator</code></strong></dt>
+<dd>An operator wrapping a <code>sklearn.feature_selection.VarianceThreshold</code> model</dd>
+<dt><strong><code>device</code></strong></dt>
+<dd>String defining the type of device the converted operator should be run on</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to select the best conversion strategy</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A PyTorch model</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L38-L53" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def convert_sklearn_array_feature_extractor(operator, device, extra_config):
+    &#34;&#34;&#34;
+    Converter for `sklearn.feature_selection.VarianceThreshold`.
+
+    Args:
+        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+    assert operator is not None
+
+    indices = operator.column_indices
+    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)</code></pre>
+</details>
+</dd>
 <dt id="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_concat"><code class="name flex">
 <span>def <span class="ident">convert_sklearn_concat</span></span>(<span>operator, device=None, extra_config={})</span>
 </code></dt>
@@ -134,7 +195,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L37-L49" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L56-L68" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_concat(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -173,7 +234,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L52-L70" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L71-L89" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_multiply(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -209,7 +270,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L19-L24" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L20-L25" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Concat(BaseOperator, torch.nn.Module):
     def __init__(self):
@@ -234,7 +295,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L23-L24" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L24-L25" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, *x):
     return torch.cat(x, dim=1)</code></pre>
@@ -251,7 +312,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L27-L34" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L28-L35" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Multiply(BaseOperator, torch.nn.Module):
     def __init__(self, score):
@@ -278,7 +339,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L33-L34" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L34-L35" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     return x * self.score</code></pre>
@@ -306,6 +367,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_array_feature_extractor" href="#hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_array_feature_extractor">convert_sklearn_array_feature_extractor</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_concat" href="#hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_concat">convert_sklearn_concat</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_multiply" href="#hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_multiply">convert_sklearn_multiply</a></code></li>
 </ul>
@@ -330,7 +392,6 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 </nav>
 </main>
 <footer id="footer">
-<p><span style="color:#ddd">&#21328;</span></p>
 <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>

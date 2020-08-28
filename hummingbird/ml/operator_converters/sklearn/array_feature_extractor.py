@@ -53,24 +53,5 @@ def convert_sklearn_variance_threshold(operator, device, extra_config):
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
-def convert_sklearn_array_feature_extractor(operator, device, extra_config):
-    """
-    Converter for `sklearn.feature_selection.VarianceThreshold`.
-
-    Args:
-        operator: An operator wrapping a `sklearn.feature_selection.VarianceThreshold` model
-        device: String defining the type of device the converted operator should be run on
-        extra_config: Extra configuration used to select the best conversion strategy
-
-    Returns:
-        A PyTorch model
-    """
-    assert operator is not None
-
-    indices = operator.column_indices
-    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
-
-
-register_converter("SklearnArrayFeatureExtractor", convert_sklearn_array_feature_extractor)
 register_converter("SklearnSelectKBest", convert_sklearn_select_k_best)
 register_converter("SklearnVarianceThreshold", convert_sklearn_variance_threshold)
