@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L0-L30" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L0-L43" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -37,10 +37,23 @@
 &#34;&#34;&#34;
 Converter for scikit-learn Binarizer.
 &#34;&#34;&#34;
-
+from .._base_operator import BaseOperator
 from onnxconverter_common.registration import register_converter
+import torch
 
-from .._binarizer_implementations import Binarizer
+
+class Binarizer(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Class implementing Binarizer operators in PyTorch.
+    &#34;&#34;&#34;
+
+    def __init__(self, threshold, device):
+        super(Binarizer, self).__init__()
+        self.transformer = True
+        self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
+
+    def forward(self, x):
+        return torch.gt(x, self.threshold)
 
 
 def convert_sklearn_binarizer(operator, device, extra_config):
@@ -90,7 +103,7 @@ register_converter(&#34;SklearnBinarizer&#34;, convert_sklearn_binarizer)</code>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L16-L28" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L29-L41" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_binarizer(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -110,6 +123,65 @@ register_converter(&#34;SklearnBinarizer&#34;, convert_sklearn_binarizer)</code>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer"><code class="flex name class">
+<span>class <span class="ident">Binarizer</span></span>
+<span>(</span><span>threshold, device)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Class implementing Binarizer operators in PyTorch.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L15-L26" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">class Binarizer(BaseOperator, torch.nn.Module):
+    &#34;&#34;&#34;
+    Class implementing Binarizer operators in PyTorch.
+    &#34;&#34;&#34;
+
+    def __init__(self, threshold, device):
+        super(Binarizer, self).__init__()
+        self.transformer = True
+        self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
+
+    def forward(self, x):
+        return torch.gt(x, self.threshold)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>hummingbird.ml.operator_converters._base_operator.BaseOperator</li>
+<li>abc.ABC</li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L25-L26" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def forward(self, x):
+    return torch.gt(x, self.threshold)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -130,6 +202,16 @@ register_converter(&#34;SklearnBinarizer&#34;, convert_sklearn_binarizer)</code>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.binarizer.convert_sklearn_binarizer" href="#hummingbird.ml.operator_converters.sklearn.binarizer.convert_sklearn_binarizer">convert_sklearn_binarizer</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer" href="#hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer">Binarizer</a></code></h4>
+<ul class="">
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer.forward" href="#hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer.forward">forward</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

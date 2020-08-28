@@ -40,7 +40,6 @@ from . import xgb  # noqa: E402
 
 __pdoc__ = {}
 __pdoc__["hummingbird.operator_converters._array_feature_extractor_implementations"] = True
-__pdoc__["hummingbird.operator_converters._binarizer_implementations"] = True
 __pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
 __pdoc__["hummingbird.operator_converters._linear_implementations"] = True
 __pdoc__["hummingbird.operator_converters._normalizer_implementations"] = True

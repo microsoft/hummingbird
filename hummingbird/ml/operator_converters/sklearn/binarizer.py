@@ -7,10 +7,23 @@
 """
 Converter for scikit-learn Binarizer.
 """
-
+from .._base_operator import BaseOperator
 from onnxconverter_common.registration import register_converter
+import torch
 
-from .._binarizer_implementations import Binarizer
+
+class Binarizer(BaseOperator, torch.nn.Module):
+    """
+    Class implementing Binarizer operators in PyTorch.
+    """
+
+    def __init__(self, threshold, device):
+        super(Binarizer, self).__init__()
+        self.transformer = True
+        self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
+
+    def forward(self, x):
+        return torch.gt(x, self.threshold)
 
 
 def convert_sklearn_binarizer(operator, device, extra_config):
