@@ -25,6 +25,8 @@ class Cast(BaseOperator, torch.nn.Module):
         self.to_type = to_type
 
     def forward(self, x):
+        if self.to_type == 1:  # Cast to float
+            return x.float()
         if self.to_type == 7:  # Cast to long
             return x.long()
 
@@ -34,7 +36,10 @@ class Concat(BaseOperator, torch.nn.Module):
         super(Concat, self).__init__()
 
     def forward(self, *x):
-        return torch.cat(x, dim=1)
+        if len(x[0].shape) > 1:
+            return torch.cat(x, dim=1)
+        else:
+            return torch.stack(x, dim=1)
 
 
 class Reshape(BaseOperator, torch.nn.Module):

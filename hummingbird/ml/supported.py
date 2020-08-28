@@ -220,7 +220,17 @@ def _build_sklearn_api_operator_name_map():
     Associate Sklearn with the operator class names.
     If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     """
-    return {k: "Sklearn" + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list}
+    # Pipeline ops. These are ops injected by the parser not "real" sklearn operators.
+    pipeline_operator_list = [
+        "ArrayFeatureExtractor",
+        "Concat",
+        "Multiply",
+    ]
+
+    return {
+        k: "Sklearn" + k.__name__ if hasattr(k, "__name__") else k
+        for k in sklearn_operator_list + pipeline_operator_list + xgb_operator_list + lgbm_operator_list
+    }
 
 
 def _build_onnxml_api_operator_name_map():

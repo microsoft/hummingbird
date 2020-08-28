@@ -100,6 +100,17 @@ def xgboost_installed():
     return True
 
 
+def pandas_installed():
+    """
+    Checks that *Pandas* is available.
+    """
+    try:
+        import pandas
+    except ImportError:
+        return False
+    return True
+
+
 class _Constants(object):
     """
     Class enabling the proper definition of constants.
