@@ -371,7 +371,7 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         named_inputs = self._get_named_inputs(*inputs)
 
         if self._is_regression:
-            return self._session.run(self._output_names, named_inputs)
+            return np.array(self._session.run(self._output_names, named_inputs)).flatten()
         elif self._is_anomaly_detection:
             return np.array(self._session.run([self._output_names[0]], named_inputs))[0].flatten()
         else:
