@@ -13,6 +13,7 @@ TorchScript,
 ONNX
 
 **Supported Operators**
+Binarizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
@@ -90,7 +91,15 @@ def _build_sklearn_operator_list():
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
         # Preprocessing
-        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, OneHotEncoder, RobustScaler, StandardScaler
+        from sklearn.preprocessing import (
+            Binarizer,
+            MaxAbsScaler,
+            MinMaxScaler,
+            Normalizer,
+            OneHotEncoder,
+            RobustScaler,
+            StandardScaler,
+        )
 
         # Features
         from sklearn.feature_selection import SelectKBest, VarianceThreshold
@@ -119,6 +128,7 @@ def _build_sklearn_operator_list():
             NuSVC,
             SVC,
             # Preprocessing
+            Binarizer,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
