@@ -2,11 +2,7 @@ import unittest
 import numpy as np
 from sklearn import datasets
 
-try:
-    from sklearn.compose import ColumnTransformer
-except ImportError:
-    # not available in 0.19
-    ColumnTransformer = None
+from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -84,7 +80,6 @@ class TestSklearnPipeline(unittest.TestCase):
             model.transform(data), torch_model.transform(data), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_1(self):
         iris = datasets.load_iris()
@@ -118,7 +113,6 @@ class TestSklearnPipeline(unittest.TestCase):
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer(self):
         iris = datasets.load_iris()
@@ -160,7 +154,6 @@ class TestSklearnPipeline(unittest.TestCase):
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_weights(self):
         iris = datasets.load_iris()
@@ -203,7 +196,6 @@ class TestSklearnPipeline(unittest.TestCase):
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_drop(self):
         iris = datasets.load_iris()
@@ -247,7 +239,6 @@ class TestSklearnPipeline(unittest.TestCase):
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_drop_noweights(self):
         iris = datasets.load_iris()

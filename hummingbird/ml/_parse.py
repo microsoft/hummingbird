@@ -23,13 +23,8 @@ from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_na
 
 if sklearn_installed():
     from sklearn import pipeline
+    from sklearn.compose import ColumnTransformer
     from sklearn.preprocessing import OneHotEncoder
-
-    try:
-        from sklearn.compose import ColumnTransformer
-    except ImportError:
-        # ColumnTransformer was introduced in 0.20.
-        ColumnTransformer = None
 
     do_not_merge_columns = tuple(filter(lambda op: op is not None, [OneHotEncoder, ColumnTransformer]))
 
@@ -292,12 +287,11 @@ def _parse_sklearn_column_transformer(scope, model, inputs):
 def _build_sklearn_api_parsers_map():
     # Parsers for edge cases are going here.
     map_parser = {
+        ColumnTransformer: _parse_sklearn_column_transformer,
         pipeline.Pipeline: _parse_sklearn_pipeline,
         pipeline.FeatureUnion: _parse_sklearn_feature_union,
         # More parsers will go here
     }
-    if ColumnTransformer is not None:
-        map_parser[ColumnTransformer] = _parse_sklearn_column_transformer
 
     return map_parser
 
