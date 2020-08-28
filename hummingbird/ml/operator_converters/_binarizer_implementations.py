@@ -20,6 +20,7 @@ class Binarizer(BaseOperator, torch.nn.Module):
 
     def __init__(self, threshold, device):
         super(Binarizer, self).__init__()
+        self.transformer = True
         self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
 
     def forward(self, x):
