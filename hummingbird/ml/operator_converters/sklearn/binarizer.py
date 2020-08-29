@@ -23,7 +23,7 @@ class Binarizer(BaseOperator, torch.nn.Module):
         self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
 
     def forward(self, x):
-        return torch.gt(x, self.threshold)
+        return torch.gt(x, self.threshold).float()
 
 
 def convert_sklearn_binarizer(operator, device, extra_config):
