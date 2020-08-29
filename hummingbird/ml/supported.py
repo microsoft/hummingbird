@@ -35,6 +35,7 @@ RandomForestClassifier,
 RandomForestRegressor,
 RobustScaler,
 SelectKBest,
+SelectPercentile,
 SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
@@ -102,7 +103,7 @@ def _build_sklearn_operator_list():
         )
 
         # Features
-        from sklearn.feature_selection import SelectKBest, VarianceThreshold
+        from sklearn.feature_selection import SelectKBest, SelectPercentile, VarianceThreshold
 
         return [
             # Trees
@@ -136,6 +137,7 @@ def _build_sklearn_operator_list():
             StandardScaler,
             # Feature selection
             SelectKBest,
+            SelectPercentile,
             VarianceThreshold,
         ]
 
