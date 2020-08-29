@@ -29,7 +29,6 @@ LogisticRegression,
 LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
-MissingIndicator,
 Normalizer,
 OneHotEncoder,
 RandomForestClassifier,
@@ -94,7 +93,7 @@ def _build_sklearn_operator_list():
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
         # Imputers
-        from sklearn.impute import MissingIndicator, SimpleImputer
+        from sklearn.impute import SimpleImputer
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -134,7 +133,6 @@ def _build_sklearn_operator_list():
             NuSVC,
             SVC,
             # Imputers
-            MissingIndicator,
             SimpleImputer,
             # Preprocessing
             Binarizer,
