@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L0-L57" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L0-L58" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -43,13 +43,14 @@ from onnxconverter_common.registration import register_converter
 import torch
 
 
-class MissingIndicator(torch.nn.Module):
+class MissingIndicator(BaseOperator, torch.nn.Module):
     &#34;&#34;&#34;
     Class implementing Imputer operators in MissingIndicator.
     &#34;&#34;&#34;
 
     def __init__(self, sklearn_missing_indicator, device):
         super(MissingIndicator, self).__init__()
+        self.transformer = True
         self.missing_values = torch.nn.Parameter(
             torch.tensor([sklearn_missing_indicator.missing_values], dtype=torch.float32), requires_grad=False
         )
@@ -117,7 +118,7 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L43-L55" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L44-L56" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_missing_indicator(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -144,20 +145,20 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <span>(</span><span>sklearn_missing_indicator, device)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Class implementing Imputer operators in MissingIndicator.</p>
-<p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<div class="desc"><p>Class implementing Imputer operators in MissingIndicator.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L16-L40" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L16-L41" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">class MissingIndicator(torch.nn.Module):
+<pre><code class="python">class MissingIndicator(BaseOperator, torch.nn.Module):
     &#34;&#34;&#34;
     Class implementing Imputer operators in MissingIndicator.
     &#34;&#34;&#34;
 
     def __init__(self, sklearn_missing_indicator, device):
         super(MissingIndicator, self).__init__()
+        self.transformer = True
         self.missing_values = torch.nn.Parameter(
             torch.tensor([sklearn_missing_indicator.missing_values], dtype=torch.float32), requires_grad=False
         )
@@ -179,6 +180,8 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
+<li>hummingbird.ml.operator_converters._base_operator.BaseOperator</li>
+<li>abc.ABC</li>
 <li>torch.nn.modules.module.Module</li>
 </ul>
 <h3>Methods</h3>
@@ -199,7 +202,7 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L30-L40" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L31-L41" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     if self.is_nan:

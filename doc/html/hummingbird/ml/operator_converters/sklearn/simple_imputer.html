@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/simple_imputer.py#L0-L59" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/simple_imputer.py#L0-L60" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -52,6 +52,7 @@ class SimpleImputer(BaseOperator, torch.nn.Module):
         super(SimpleImputer, self).__init__()
         b_mask = np.logical_not(np.isnan(sklearn_imputer.statistics_))
         i_mask = [i for i in range(len(b_mask)) if b_mask[i]]
+        self.transformer = True
         self.do_mask = sklearn_imputer.strategy == &#34;constant&#34; or all(b_mask)
         self.mask = torch.nn.Parameter(torch.LongTensor([] if self.do_mask else i_mask), requires_grad=False)
         self.replace_values = torch.nn.Parameter(
@@ -119,7 +120,7 @@ register_converter(&#34;SklearnSimpleImputer&#34;, convert_sklearn_simple_impute
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/simple_imputer.py#L45-L57" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/simple_imputer.py#L46-L58" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_simple_imputer(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -150,7 +151,7 @@ register_converter(&#34;SklearnSimpleImputer&#34;, convert_sklearn_simple_impute
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/simple_imputer.py#L16-L42" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/simple_imputer.py#L16-L43" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class SimpleImputer(BaseOperator, torch.nn.Module):
     &#34;&#34;&#34;
@@ -161,6 +162,7 @@ register_converter(&#34;SklearnSimpleImputer&#34;, convert_sklearn_simple_impute
         super(SimpleImputer, self).__init__()
         b_mask = np.logical_not(np.isnan(sklearn_imputer.statistics_))
         i_mask = [i for i in range(len(b_mask)) if b_mask[i]]
+        self.transformer = True
         self.do_mask = sklearn_imputer.strategy == &#34;constant&#34; or all(b_mask)
         self.mask = torch.nn.Parameter(torch.LongTensor([] if self.do_mask else i_mask), requires_grad=False)
         self.replace_values = torch.nn.Parameter(
@@ -204,7 +206,7 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/simple_imputer.py#L35-L42" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/simple_imputer.py#L36-L43" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     if self.is_nan:

@@ -13,13 +13,14 @@ from onnxconverter_common.registration import register_converter
 import torch
 
 
-class MissingIndicator(torch.nn.Module):
+class MissingIndicator(BaseOperator, torch.nn.Module):
     """
     Class implementing Imputer operators in MissingIndicator.
     """
 
     def __init__(self, sklearn_missing_indicator, device):
         super(MissingIndicator, self).__init__()
+        self.transformer = True
         self.missing_values = torch.nn.Parameter(
             torch.tensor([sklearn_missing_indicator.missing_values], dtype=torch.float32), requires_grad=False
         )

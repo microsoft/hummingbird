@@ -22,6 +22,7 @@ class SimpleImputer(BaseOperator, torch.nn.Module):
         super(SimpleImputer, self).__init__()
         b_mask = np.logical_not(np.isnan(sklearn_imputer.statistics_))
         i_mask = [i for i in range(len(b_mask)) if b_mask[i]]
+        self.transformer = True
         self.do_mask = sklearn_imputer.strategy == "constant" or all(b_mask)
         self.mask = torch.nn.Parameter(torch.LongTensor([] if self.do_mask else i_mask), requires_grad=False)
         self.replace_values = torch.nn.Parameter(
