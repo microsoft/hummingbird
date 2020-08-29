@@ -53,7 +53,7 @@ class Binarizer(BaseOperator, torch.nn.Module):
         self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
 
     def forward(self, x):
-        return torch.gt(x, self.threshold)
+        return torch.gt(x, self.threshold).float()
 
 
 def convert_sklearn_binarizer(operator, device, extra_config):
@@ -147,7 +147,7 @@ register_converter(&#34;SklearnBinarizer&#34;, convert_sklearn_binarizer)</code>
         self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
 
     def forward(self, x):
-        return torch.gt(x, self.threshold)</code></pre>
+        return torch.gt(x, self.threshold).float()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -168,7 +168,7 @@ register_converter(&#34;SklearnBinarizer&#34;, convert_sklearn_binarizer)</code>
 <a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L25-L26" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
-    return torch.gt(x, self.threshold)</code></pre>
+    return torch.gt(x, self.threshold).float()</code></pre>
 </details>
 </dd>
 </dl>
