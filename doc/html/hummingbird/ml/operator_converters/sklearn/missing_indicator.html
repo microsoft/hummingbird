@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.sklearn.binarizer API documentation</title>
-<meta name="description" content="Converter for scikit-learn Binarizer." />
+<title>hummingbird.ml.operator_converters.sklearn.missing_indicator API documentation</title>
+<meta name="description" content="Converter for scikit-learn MissingIndicator." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,20 +13,20 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/sklearn/binarizer.html">
+<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/sklearn/missing_indicator.html">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.binarizer</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.missing_indicator</code></h1>
 </header>
 <section id="section-intro">
-<p>Converter for scikit-learn Binarizer.</p>
+<p>Converter for scikit-learn MissingIndicator.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L0-L43" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L0-L57" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -35,43 +35,57 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Converter for scikit-learn Binarizer.
+Converter for scikit-learn MissingIndicator.
 &#34;&#34;&#34;
 from .._base_operator import BaseOperator
+import numpy as np
 from onnxconverter_common.registration import register_converter
 import torch
 
 
-class Binarizer(BaseOperator, torch.nn.Module):
+class MissingIndicator(torch.nn.Module):
     &#34;&#34;&#34;
-    Class implementing Binarizer operators in PyTorch.
+    Class implementing Imputer operators in MissingIndicator.
     &#34;&#34;&#34;
 
-    def __init__(self, threshold, device):
-        super(Binarizer, self).__init__()
-        self.transformer = True
-        self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
+    def __init__(self, sklearn_missing_indicator, device):
+        super(MissingIndicator, self).__init__()
+        self.missing_values = torch.nn.Parameter(
+            torch.tensor([sklearn_missing_indicator.missing_values], dtype=torch.float32), requires_grad=False
+        )
+        self.features = sklearn_missing_indicator.features
+        self.is_nan = True if (self.missing_values in [&#34;NaN&#34;, None, np.nan]) else False
+        self.column_indices = torch.nn.Parameter(torch.LongTensor(sklearn_missing_indicator.features_), requires_grad=False)
 
     def forward(self, x):
-        return torch.gt(x, self.threshold)
+        if self.is_nan:
+            if self.features == &#34;all&#34;:
+                return torch.isnan(x).float()
+            else:
+                return torch.isnan(torch.index_select(x, 1, self.column_indices)).float()
+        else:
+            if self.features == &#34;all&#34;:
+                return torch.eq(x, self.missing_values).float()
+            else:
+                return torch.eq(torch.index_select(x, 1, self.column_indices), self.missing_values).float()
 
 
-def convert_sklearn_binarizer(operator, device, extra_config):
+def convert_sklearn_missing_indicator(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `sklearn.preprocessing.Binarizer`
+    Converter for `sklearn.impute.MissingIndicator`
 
     Args:
-        operator: An operator wrapping a `sklearn.preprocessing.Binarizer` model
+        operator: An operator wrapping a `sklearn.impute.MissingIndicator` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-    return Binarizer(operator.raw_operator.threshold, device)
+    return MissingIndicator(operator.raw_operator, device)
 
 
-register_converter(&#34;SklearnBinarizer&#34;, convert_sklearn_binarizer)</code></pre>
+register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_indicator)</code></pre>
 </details>
 </section>
 <section>
@@ -81,15 +95,15 @@ register_converter(&#34;SklearnBinarizer&#34;, convert_sklearn_binarizer)</code>
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.sklearn.binarizer.convert_sklearn_binarizer"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_binarizer</span></span>(<span>operator, device, extra_config)</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.missing_indicator.convert_sklearn_missing_indicator"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_missing_indicator</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>sklearn.preprocessing.Binarizer</code></p>
+<div class="desc"><p>Converter for <code>sklearn.impute.MissingIndicator</code></p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>sklearn.preprocessing.Binarizer</code> model</dd>
+<dd>An operator wrapping a <code>sklearn.impute.MissingIndicator</code> model</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -103,21 +117,21 @@ register_converter(&#34;SklearnBinarizer&#34;, convert_sklearn_binarizer)</code>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L29-L41" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L43-L55" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">def convert_sklearn_binarizer(operator, device, extra_config):
+<pre><code class="python">def convert_sklearn_missing_indicator(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `sklearn.preprocessing.Binarizer`
+    Converter for `sklearn.impute.MissingIndicator`
 
     Args:
-        operator: An operator wrapping a `sklearn.preprocessing.Binarizer` model
+        operator: An operator wrapping a `sklearn.impute.MissingIndicator` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-    return Binarizer(operator.raw_operator.threshold, device)</code></pre>
+    return MissingIndicator(operator.raw_operator, device)</code></pre>
 </details>
 </dd>
 </dl>
@@ -125,39 +139,51 @@ register_converter(&#34;SklearnBinarizer&#34;, convert_sklearn_binarizer)</code>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer"><code class="flex name class">
-<span>class <span class="ident">Binarizer</span></span>
-<span>(</span><span>threshold, device)</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator"><code class="flex name class">
+<span>class <span class="ident">MissingIndicator</span></span>
+<span>(</span><span>sklearn_missing_indicator, device)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Class implementing Binarizer operators in PyTorch.</p></div>
+<div class="desc"><p>Class implementing Imputer operators in MissingIndicator.</p>
+<p>Initializes internal Module state, shared by both nn.Module and ScriptModule.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L15-L26" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L16-L40" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">class Binarizer(BaseOperator, torch.nn.Module):
+<pre><code class="python">class MissingIndicator(torch.nn.Module):
     &#34;&#34;&#34;
-    Class implementing Binarizer operators in PyTorch.
+    Class implementing Imputer operators in MissingIndicator.
     &#34;&#34;&#34;
 
-    def __init__(self, threshold, device):
-        super(Binarizer, self).__init__()
-        self.transformer = True
-        self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
+    def __init__(self, sklearn_missing_indicator, device):
+        super(MissingIndicator, self).__init__()
+        self.missing_values = torch.nn.Parameter(
+            torch.tensor([sklearn_missing_indicator.missing_values], dtype=torch.float32), requires_grad=False
+        )
+        self.features = sklearn_missing_indicator.features
+        self.is_nan = True if (self.missing_values in [&#34;NaN&#34;, None, np.nan]) else False
+        self.column_indices = torch.nn.Parameter(torch.LongTensor(sklearn_missing_indicator.features_), requires_grad=False)
 
     def forward(self, x):
-        return torch.gt(x, self.threshold)</code></pre>
+        if self.is_nan:
+            if self.features == &#34;all&#34;:
+                return torch.isnan(x).float()
+            else:
+                return torch.isnan(torch.index_select(x, 1, self.column_indices)).float()
+        else:
+            if self.features == &#34;all&#34;:
+                return torch.eq(x, self.missing_values).float()
+            else:
+                return torch.eq(torch.index_select(x, 1, self.column_indices), self.missing_values).float()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>hummingbird.ml.operator_converters._base_operator.BaseOperator</li>
-<li>abc.ABC</li>
 <li>torch.nn.modules.module.Module</li>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer.forward"><code class="name flex">
+<dt id="hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, x)</span>
 </code></dt>
 <dd>
@@ -173,10 +199,19 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/binarizer.py#L25-L26" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L30-L40" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
-    return torch.gt(x, self.threshold)</code></pre>
+    if self.is_nan:
+        if self.features == &#34;all&#34;:
+            return torch.isnan(x).float()
+        else:
+            return torch.isnan(torch.index_select(x, 1, self.column_indices)).float()
+    else:
+        if self.features == &#34;all&#34;:
+            return torch.eq(x, self.missing_values).float()
+        else:
+            return torch.eq(torch.index_select(x, 1, self.column_indices), self.missing_values).float()</code></pre>
 </details>
 </dd>
 </dl>
@@ -201,15 +236,15 @@ registered hooks while the latter silently ignores them.</p>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.binarizer.convert_sklearn_binarizer" href="#hummingbird.ml.operator_converters.sklearn.binarizer.convert_sklearn_binarizer">convert_sklearn_binarizer</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.missing_indicator.convert_sklearn_missing_indicator" href="#hummingbird.ml.operator_converters.sklearn.missing_indicator.convert_sklearn_missing_indicator">convert_sklearn_missing_indicator</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer" href="#hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer">Binarizer</a></code></h4>
+<h4><code><a title="hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator" href="#hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator">MissingIndicator</a></code></h4>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer.forward" href="#hummingbird.ml.operator_converters.sklearn.binarizer.Binarizer.forward">forward</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator.forward" href="#hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator.forward">forward</a></code></li>
 </ul>
 </li>
 </ul>

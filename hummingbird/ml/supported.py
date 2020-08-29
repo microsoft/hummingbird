@@ -29,6 +29,7 @@ LogisticRegression,
 LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
+MissingIndicator,
 Normalizer,
 OneHotEncoder,
 RandomForestClassifier,
@@ -36,6 +37,7 @@ RandomForestRegressor,
 RobustScaler,
 SelectKBest,
 SelectPercentile,
+SimpleImputer,
 SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
@@ -91,6 +93,9 @@ def _build_sklearn_operator_list():
         # SVM-based models
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
+        # Imputers
+        from sklearn.impute import MissingIndicator, SimpleImputer
+
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
@@ -128,6 +133,9 @@ def _build_sklearn_operator_list():
             # SVM
             NuSVC,
             SVC,
+            # Imputers
+            MissingIndicator,
+            SimpleImputer,
             # Preprocessing
             Binarizer,
             MaxAbsScaler,

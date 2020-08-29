@@ -30,10 +30,12 @@ from .sklearn import decision_tree  # noqa: E402
 from .sklearn import gbdt  # noqa: E402
 from .sklearn import iforest  # noqa: E402
 from .sklearn import linear as sklearn_linear  # noqa: E402
+from .sklearn import missing_indicator  # noqa: E402
 from .sklearn import normalizer as sklearn_normalizer  # noqa: E402
 from .sklearn import one_hot_encoder as sklearn_ohe  # noqa: E402
 from .sklearn import pipeline  # noqa: E402
 from .sklearn import scaler as sklearn_scaler  # noqa: E402
+from .sklearn import simple_imputer  # noqa: E402
 from .sklearn import sv  # noqa: E402
 from . import lightgbm  # noqa: E402
 from . import xgb  # noqa: E402
