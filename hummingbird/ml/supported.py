@@ -29,6 +29,7 @@ LogisticRegression,
 LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
+MLPClassifier
 Normalizer,
 OneHotEncoder,
 RandomForestClassifier,
@@ -90,6 +91,9 @@ def _build_sklearn_operator_list():
         # SVM-based models
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
+        # MLP Models
+        from sklearn.neural_network import MLPClassifier
+
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
@@ -124,6 +128,8 @@ def _build_sklearn_operator_list():
             LogisticRegression,
             LogisticRegressionCV,
             SGDClassifier,
+            # Other models
+            MLPClassifier,
             # SVM
             NuSVC,
             SVC,
