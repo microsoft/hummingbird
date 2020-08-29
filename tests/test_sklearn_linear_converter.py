@@ -48,11 +48,35 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     def test_logistic_regression_multi_ovr(self):
         self._test_logistic_regression(3, multi_class="ovr")
 
-    # LogisticRegression with multi+multinomial
-    def test_logistic_regression_multi_multin(self):
+    # LogisticRegression with multi+multinomial+sag
+    def test_logistic_regression_multi_multin_sag(self):
         warnings.filterwarnings("ignore")
         # this will not converge due to small test size
         self._test_logistic_regression(3, multi_class="multinomial", solver="sag")
+
+    # LogisticRegression binary lbfgs
+    def test_logistic_regression_bi_lbfgs(self):
+        warnings.filterwarnings("ignore")
+        # this will not converge due to small test size
+        self._test_logistic_regression(2, solver="lbfgs")
+
+    # LogisticRegression with multi+lbfgs
+    def test_logistic_regression_multi_lbfgs(self):
+        warnings.filterwarnings("ignore")
+        # this will not converge due to small test size
+        self._test_logistic_regression(3, solver="lbfgs")
+
+    # LogisticRegression with multi+multinomial+lbfgs
+    def test_logistic_regression_multi_multin_lbfgs(self):
+        warnings.filterwarnings("ignore")
+        # this will not converge due to small test size
+        self._test_logistic_regression(3, multi_class="multinomial", solver="lbfgs")
+
+    # LogisticRegression with multi+ovr+lbfgs
+    def test_logistic_regression_multi_ovr_lbfgs(self):
+        warnings.filterwarnings("ignore")
+        # this will not converge due to small test size
+        self._test_logistic_regression(3, multi_class="ovr", solver="lbfgs")
 
     # LinearRegression test function to be parameterized
     def _test_linear_regression(self, y_input):
