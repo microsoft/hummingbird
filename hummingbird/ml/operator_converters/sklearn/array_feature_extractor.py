@@ -49,5 +49,22 @@ def convert_sklearn_variance_threshold(operator, device, extra_config):
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
+def convert_sklearn_select_percentile(operator, device, extra_config):
+    """
+    Converter for `sklearn.feature_selection.SelectPercentile`.
+
+    Args:
+        operator: An operator wrapping a `sklearn.feature_selection.SelectPercentile` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    indices = np.array([i for i, val in enumerate(operator.raw_operator.get_support()) if val])
+    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
+
+
 register_converter("SklearnSelectKBest", convert_sklearn_select_k_best)
 register_converter("SklearnVarianceThreshold", convert_sklearn_variance_threshold)
+register_converter("SklearnSelectPercentile", convert_sklearn_select_percentile)

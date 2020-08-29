@@ -14,6 +14,36 @@ import hummingbird.ml
 
 class TestSklearnArrayFeatureExtractor(unittest.TestCase):
 
+    # tests SelectPercentile converter (convert_sklearn_select_percentile) with mutual_info_classif
+    def test_select_percentile_mutual_info(self):
+
+        X, y = load_digits(return_X_y=True)
+        selector = SelectPercentile(mutual_info_classif, percentile=15)
+        selector.fit_transform(X, y)
+        data_tensor = torch.from_numpy(X)
+
+        torch_model = hummingbird.ml.convert(selector, "torch")
+
+        self.assertIsNotNone(torch_model)
+        np.testing.assert_allclose(
+            selector.transform(X), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+        )
+
+    # tests SelectPercentile converter (convert_sklearn_select_percentile) with chi2
+    def test_select_percentile_chi2(self):
+
+        X, y = load_digits(return_X_y=True)
+        selector = SelectPercentile(chi2, percentile=15)
+        selector.fit_transform(X, y)
+        data_tensor = torch.from_numpy(X)
+
+        torch_model = hummingbird.ml.convert(selector, "torch")
+
+        self.assertIsNotNone(torch_model)
+        np.testing.assert_allclose(
+            selector.transform(X), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+        )
+
     # tests VarianceThreshold converter (convert_sklearn_variance_threshold)
     def test_variance_threshold(self):
 
