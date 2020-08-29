@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/array_feature_extractor.py#L0-L56" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/array_feature_extractor.py#L0-L52" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -57,11 +57,7 @@ def convert_sklearn_select_k_best(operator, device, extra_config):
         A PyTorch model
     &#34;&#34;&#34;
 
-    # TODO FIXME: This will fail with chi2 (Ex: SelectKBest(chi2, k=20))
-    # but pass with SelectKBest(mutual_info_classif, k=20)
-    # See issue #200
-    k = operator.raw_operator.k
-    indices = np.sort(np.array(operator.raw_operator.scores_).argsort()[-k:])
+    indices = np.array([i for i, val in enumerate(operator.raw_operator.get_support()) if val])
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
@@ -116,7 +112,7 @@ register_converter(&#34;SklearnVarianceThreshold&#34;, convert_sklearn_variance_
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/array_feature_extractor.py#L17-L35" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/array_feature_extractor.py#L17-L31" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_select_k_best(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -131,11 +127,7 @@ register_converter(&#34;SklearnVarianceThreshold&#34;, convert_sklearn_variance_
         A PyTorch model
     &#34;&#34;&#34;
 
-    # TODO FIXME: This will fail with chi2 (Ex: SelectKBest(chi2, k=20))
-    # but pass with SelectKBest(mutual_info_classif, k=20)
-    # See issue #200
-    k = operator.raw_operator.k
-    indices = np.sort(np.array(operator.raw_operator.scores_).argsort()[-k:])
+    indices = np.array([i for i, val in enumerate(operator.raw_operator.get_support()) if val])
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)</code></pre>
 </details>
 </dd>
@@ -161,7 +153,7 @@ register_converter(&#34;SklearnVarianceThreshold&#34;, convert_sklearn_variance_
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/array_feature_extractor.py#L38-L53" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/array_feature_extractor.py#L34-L49" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_variance_threshold(operator, device, extra_config):
     &#34;&#34;&#34;

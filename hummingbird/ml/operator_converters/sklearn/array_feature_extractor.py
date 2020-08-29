@@ -27,11 +27,7 @@ def convert_sklearn_select_k_best(operator, device, extra_config):
         A PyTorch model
     """
 
-    # TODO FIXME: This will fail with chi2 (Ex: SelectKBest(chi2, k=20))
-    # but pass with SelectKBest(mutual_info_classif, k=20)
-    # See issue #200
-    k = operator.raw_operator.k
-    indices = np.sort(np.array(operator.raw_operator.scores_).argsort()[-k:])
+    indices = np.array([i for i, val in enumerate(operator.raw_operator.get_support()) if val])
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
