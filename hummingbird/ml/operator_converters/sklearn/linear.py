@@ -42,6 +42,8 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     if hasattr(operator.raw_operator, "multi_class"):
         if operator.raw_operator.multi_class == "ovr" or operator.raw_operator.solver in ["warn", "liblinear"]:
             multi_class = "ovr"
+        elif operator.raw_operator.multi_class == "auto" and len(classes) == 2:
+            multi_class = "ovr"
         else:
             multi_class = "multinomial"
 
