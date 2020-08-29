@@ -31,6 +31,7 @@ from .sklearn import gbdt  # noqa: E402
 from .sklearn import iforest  # noqa: E402
 from .sklearn import linear as sklearn_linear  # noqa: E402
 from .sklearn import mlp as sklearn_mlp  # noqa: E402
+from .sklearn import nb as sklearn_nb  # noqa: E402
 from .sklearn import normalizer as sklearn_normalizer  # noqa: E402
 from .sklearn import one_hot_encoder as sklearn_ohe  # noqa: E402
 from .sklearn import pipeline  # noqa: E402
