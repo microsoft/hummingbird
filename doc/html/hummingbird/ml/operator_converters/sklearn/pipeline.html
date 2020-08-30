@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L0-L103" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L0-L101" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -88,8 +88,6 @@ def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     assert operator is not None
 
     indices = operator.column_indices
-    if any([type(i) is bool for i in indices]):
-        indices = [i for i in range(len(indices)) if indices[i]]
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
@@ -163,7 +161,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L46-L63" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L46-L61" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -180,8 +178,6 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
     assert operator is not None
 
     indices = operator.column_indices
-    if any([type(i) is bool for i in indices]):
-        indices = [i for i in range(len(indices)) if indices[i]]
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)</code></pre>
 </details>
 </dd>
@@ -207,7 +203,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L66-L78" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L64-L76" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_concat(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -246,7 +242,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L81-L99" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L79-L97" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_multiply(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -304,18 +300,10 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <h3>Methods</h3>
 <dl>
 <dt id="hummingbird.ml.operator_converters.sklearn.pipeline.Concat.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, *x)</span>
+<span>def <span class="ident">forward</span></span>(<span>self, *x) -> Callable[..., Any]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the :class:<code>Module</code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -360,18 +348,10 @@ registered hooks while the latter silently ignores them.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="hummingbird.ml.operator_converters.sklearn.pipeline.Multiply.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, x)</span>
+<span>def <span class="ident">forward</span></span>(<span>self, x) -> Callable[..., Any]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the :class:<code>Module</code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
