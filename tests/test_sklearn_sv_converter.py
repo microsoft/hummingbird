@@ -143,6 +143,10 @@ class TestSklearnSVC(unittest.TestCase):
     def test_svc_poly_tvm(self):
         self._test_svc(2, kernel="poly", backend="tvm")
 
+    # NuSVC binary
+    def test_nu_svc_bi_tvm(self):
+        self._test_nu_svc(2, backend="tvm")
+
     # # SVC multiclass
     # def test_svc_multi(self):
     #     self._test_svc(3)
