@@ -98,9 +98,6 @@ def _build_sklearn_operator_list():
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
         # Imputers
-
-        from sklearn.impute import SimpleImputer
-
         from sklearn.impute import MissingIndicator, SimpleImputer
 
         # MLP Models
@@ -152,8 +149,8 @@ def _build_sklearn_operator_list():
             NuSVC,
             SVC,
             # Imputers
-            SimpleImputer,
             MissingIndicator,
+            SimpleImputer,
             # Preprocessing
             Binarizer,
             MaxAbsScaler,
