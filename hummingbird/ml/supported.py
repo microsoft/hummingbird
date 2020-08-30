@@ -13,11 +13,13 @@ TorchScript,
 ONNX
 
 **Supported Operators**
+BernoulliNB,
 Binarizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
+GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
@@ -30,6 +32,8 @@ LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
 MissingIndicator,
+MLPClassifier,
+MultinomialNB,
 Normalizer,
 OneHotEncoder,
 RandomForestClassifier,
@@ -95,6 +99,12 @@ def _build_sklearn_operator_list():
         # Imputers
         from sklearn.impute import MissingIndicator
 
+        # MLP Models
+        from sklearn.neural_network import MLPClassifier
+
+        # Naive Bayes Models
+        from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
+
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
@@ -129,6 +139,11 @@ def _build_sklearn_operator_list():
             LogisticRegression,
             LogisticRegressionCV,
             SGDClassifier,
+            # Other models
+            MLPClassifier,
+            BernoulliNB,
+            GaussianNB,
+            MultinomialNB,
             # SVM
             NuSVC,
             SVC,

@@ -28,11 +28,13 @@ PyTorch,
 TorchScript,
 ONNX</p>
 <p><strong>Supported Operators</strong>
+BernoulliNB,
 Binarizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
+GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
@@ -45,6 +47,8 @@ LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
 MissingIndicator,
+MLPClassifier,
+MultinomialNB,
 Normalizer,
 OneHotEncoder,
 RandomForestClassifier,
@@ -66,7 +70,7 @@ XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L313" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L322" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -83,11 +87,13 @@ TorchScript,
 ONNX
 
 **Supported Operators**
+BernoulliNB,
 Binarizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
+GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
@@ -100,6 +106,8 @@ LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
 MissingIndicator,
+MLPClassifier,
+MultinomialNB,
 Normalizer,
 OneHotEncoder,
 RandomForestClassifier,
@@ -162,8 +170,16 @@ def _build_sklearn_operator_list():
         # SVM-based models
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
+
         # Imputers
         from sklearn.impute import MissingIndicator
+
+        # MLP Models
+        from sklearn.neural_network import MLPClassifier
+
+        # Naive Bayes Models
+        from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
+
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -199,6 +215,11 @@ def _build_sklearn_operator_list():
             LogisticRegression,
             LogisticRegressionCV,
             SGDClassifier,
+            # Other models
+            MLPClassifier,
+            BernoulliNB,
+            GaussianNB,
+            MultinomialNB,
             # SVM
             NuSVC,
             SVC,
@@ -437,7 +458,9 @@ CONTAINER = &#34;container&#34;
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L268-L281" class="git-link">Browse git</a>
+
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L277-L290" class="git-link">Browse git</a>
+
 </summary>
 <pre><code class="python">def get_onnxml_api_operator_name(model_type):
     &#34;&#34;&#34;
@@ -474,7 +497,9 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L252-L265" class="git-link">Browse git</a>
+
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L261-L274" class="git-link">Browse git</a>
+
 </summary>
 <pre><code class="python">def get_sklearn_api_operator_name(model_type):
     &#34;&#34;&#34;
