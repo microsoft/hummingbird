@@ -128,16 +128,24 @@ class TestSklearnSVC(unittest.TestCase):
 
     # TVM backend.
     # SVC binary
-    # def test_svc_bi_tvm(self):
-    #     self._test_svc(2, backend="tvm")
+    def test_svc_tvm(self):
+        self._test_svc(2, backend="tvm")
+
+    # SVC linear kernel
+    def test_svc_linear_tvm(self):
+        self._test_svc(2, kernel="linear", backend="tvm")
+
+    # SVC sigmoid kernel
+    def test_svc_sigmoid_tvm(self):
+        self._test_svc(2, kernel="sigmoid", backend="tvm")
+
+    # SVC poly kernel
+    def test_svc_poly_tvm(self):
+        self._test_svc(2, kernel="poly", backend="tvm")
 
     # # SVC multiclass
     # def test_svc_multi(self):
     #     self._test_svc(3)
-
-    # # SVC linear kernel
-    # def test_svc_linear(self):
-    #     self._test_svc(2, kernel="linear", backend="tvm")
 
     # # SVC sigmoid kernel
     # def test_svc_sigmoid(self):
