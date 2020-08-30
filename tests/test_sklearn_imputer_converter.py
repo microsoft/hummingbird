@@ -1,5 +1,5 @@
 """
-Tests sklearn Normalizer converter
+Tests sklearn Imputers: MissingIndicator and SimpleImputer
 """
 import unittest
 import warnings
