@@ -24,7 +24,6 @@ class TestSklearnMissingIndicator(unittest.TestCase):
 
             self.assertIsNotNone(torch_model)
 
-            ## TODO: There is some problem.
             np.testing.assert_allclose(
                 model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )

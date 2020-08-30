@@ -25,7 +25,7 @@ class MissingIndicator(BaseOperator, torch.nn.Module):
             torch.tensor([sklearn_missing_indicator.missing_values], dtype=torch.float32), requires_grad=False
         )
         self.features = sklearn_missing_indicator.features
-        self.is_nan = True if (self.missing_values in ["NaN", None, np.nan]) else False
+        self.is_nan = True if (sklearn_missing_indicator.missing_values in ["NaN", None, np.nan]) else False
         self.column_indices = torch.nn.Parameter(torch.LongTensor(sklearn_missing_indicator.features_), requires_grad=False)
 
     def forward(self, x):
