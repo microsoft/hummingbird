@@ -36,6 +36,7 @@ MLPClassifier,
 MultinomialNB,
 Normalizer,
 OneHotEncoder,
+PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
 RobustScaler,
@@ -113,6 +114,7 @@ def _build_sklearn_operator_list():
             MinMaxScaler,
             Normalizer,
             OneHotEncoder,
+            PolynomialFeatures,
             RobustScaler,
             StandardScaler,
         )
@@ -156,6 +158,7 @@ def _build_sklearn_operator_list():
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
+            PolynomialFeatures,
             RobustScaler,
             StandardScaler,
             # Feature selection
