@@ -30,6 +30,9 @@ from .sklearn import decision_tree  # noqa: E402
 from .sklearn import gbdt  # noqa: E402
 from .sklearn import iforest  # noqa: E402
 from .sklearn import linear as sklearn_linear  # noqa: E402
+from .sklearn import missing_indicator  # noqa: E402
+from .sklearn import mlp as sklearn_mlp  # noqa: E402
+from .sklearn import nb as sklearn_nb  # noqa: E402
 from .sklearn import normalizer as sklearn_normalizer  # noqa: E402
 from .sklearn import one_hot_encoder as sklearn_ohe  # noqa: E402
 from .sklearn import pipeline  # noqa: E402
@@ -44,6 +47,8 @@ __pdoc__ = {}
 __pdoc__["hummingbird.operator_converters._array_feature_extractor_implementations"] = True
 __pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
 __pdoc__["hummingbird.operator_converters._linear_implementations"] = True
+__pdoc__["hummingbird.operator_converters._mlp_implementations"] = True
+__pdoc__["hummingbird.operator_converters._nb_implementations"] = True
 __pdoc__["hummingbird.operator_converters._normalizer_implementations"] = True
 __pdoc__["hummingbird.operator_converters._one_hot_encoder_implementations"] = True
 __pdoc__["hummingbird.operator_converters._scaler_implementations"] = True

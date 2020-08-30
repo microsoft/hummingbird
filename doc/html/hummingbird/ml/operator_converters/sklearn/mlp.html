@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.sklearn.missing_indicator API documentation</title>
-<meta name="description" content="Converter for scikit-learn MissingIndicator." />
+<title>hummingbird.ml.operator_converters.sklearn.mlp API documentation</title>
+<meta name="description" content="Converters for scikit-learn MLP models: MLPClassifier" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,84 +13,62 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/sklearn/missing_indicator.html">
+<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/sklearn/mlp.html">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.missing_indicator</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.mlp</code></h1>
 </header>
 <section id="section-intro">
-<p>Converter for scikit-learn MissingIndicator.</p>
+<p>Converters for scikit-learn MLP models: MLPClassifier</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L0-L56" class="git-link">Browse git</a>
-
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/mlp.py#L0-L40" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
+# Copyright (c) 2020 Supun Nakandala. All Rights Reserved.
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Converter for scikit-learn MissingIndicator.
+Converters for scikit-learn MLP models: MLPClassifier
 &#34;&#34;&#34;
-from .._base_operator import BaseOperator
+
 import numpy as np
 from onnxconverter_common.registration import register_converter
-import torch
+
+from .._mlp_implementations import MLPModel
 
 
-class MissingIndicator(BaseOperator, torch.nn.Module):
+def convert_sklearn_mlp_classifier(operator, device, extra_config):
     &#34;&#34;&#34;
-    Class implementing Imputer operators in MissingIndicator.
-    &#34;&#34;&#34;
-
-    def __init__(self, sklearn_missing_indicator, device):
-        super(MissingIndicator, self).__init__()
-        self.transformer = True
-        self.missing_values = torch.nn.Parameter(
-            torch.tensor([sklearn_missing_indicator.missing_values], dtype=torch.float32), requires_grad=False
-        )
-        self.features = sklearn_missing_indicator.features
-
-        self.is_nan = True if (sklearn_missing_indicator.missing_values in [&#34;NaN&#34;, None, np.nan]) else False
-
-        self.column_indices = torch.nn.Parameter(torch.LongTensor(sklearn_missing_indicator.features_), requires_grad=False)
-
-    def forward(self, x):
-        if self.is_nan:
-            if self.features == &#34;all&#34;:
-                return torch.isnan(x).float()
-            else:
-                return torch.isnan(torch.index_select(x, 1, self.column_indices)).float()
-        else:
-            if self.features == &#34;all&#34;:
-                return torch.eq(x, self.missing_values).float()
-            else:
-                return torch.eq(torch.index_select(x, 1, self.column_indices), self.missing_values).float()
-
-
-def convert_sklearn_missing_indicator(operator, device, extra_config):
-    &#34;&#34;&#34;
-    Converter for `sklearn.impute.MissingIndicator`
+    Converter for `sklearn.neural_network.MLPClassifier`
 
     Args:
-        operator: An operator wrapping a `sklearn.impute.MissingIndicator` model
+        operator: An operator wrapping a `sklearn.neural_network.MLPClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-    return MissingIndicator(operator.raw_operator, device)
+    classes = operator.raw_operator.classes_
+    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
+        raise RuntimeError(&#34;Hummingbird supports only integer labels for class labels.&#34;)
+
+    activation = operator.raw_operator.activation
+    weights = operator.raw_operator.coefs_
+    biases = operator.raw_operator.intercepts_
+
+    return MLPModel(weights, biases, activation, classes, device)
 
 
-register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_indicator)</code></pre>
+register_converter(&#34;SklearnMLPClassifier&#34;, convert_sklearn_mlp_classifier)</code></pre>
 </details>
 </section>
 <section>
@@ -100,15 +78,15 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.sklearn.missing_indicator.convert_sklearn_missing_indicator"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_missing_indicator</span></span>(<span>operator, device, extra_config)</span>
+<dt id="hummingbird.ml.operator_converters.sklearn.mlp.convert_sklearn_mlp_classifier"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_mlp_classifier</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>sklearn.impute.MissingIndicator</code></p>
+<div class="desc"><p>Converter for <code>sklearn.neural_network.MLPClassifier</code></p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>sklearn.impute.MissingIndicator</code> model</dd>
+<dd>An operator wrapping a <code>sklearn.neural_network.MLPClassifier</code> model</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -122,106 +100,34 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <details class="source">
 <summary>
 <span>Expand source code</span>
-
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L44-L54" class="git-link">Browse git</a>
-
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/mlp.py#L18-L38" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">def convert_sklearn_missing_indicator(operator, device, extra_config):
+<pre><code class="python">def convert_sklearn_mlp_classifier(operator, device, extra_config):
     &#34;&#34;&#34;
-    Converter for `sklearn.impute.MissingIndicator`
+    Converter for `sklearn.neural_network.MLPClassifier`
 
     Args:
-        operator: An operator wrapping a `sklearn.impute.MissingIndicator` model
+        operator: An operator wrapping a `sklearn.neural_network.MLPClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-    return MissingIndicator(operator.raw_operator, device)</code></pre>
+    classes = operator.raw_operator.classes_
+    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
+        raise RuntimeError(&#34;Hummingbird supports only integer labels for class labels.&#34;)
+
+    activation = operator.raw_operator.activation
+    weights = operator.raw_operator.coefs_
+    biases = operator.raw_operator.intercepts_
+
+    return MLPModel(weights, biases, activation, classes, device)</code></pre>
 </details>
 </dd>
 </dl>
 </section>
 <section>
-<h2 class="section-title" id="header-classes">Classes</h2>
-<dl>
-<dt id="hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator"><code class="flex name class">
-<span>class <span class="ident">MissingIndicator</span></span>
-<span>(</span><span>sklearn_missing_indicator, device)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Class implementing Imputer operators in MissingIndicator.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L16-L41" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">class MissingIndicator(BaseOperator, torch.nn.Module):
-    &#34;&#34;&#34;
-    Class implementing Imputer operators in MissingIndicator.
-    &#34;&#34;&#34;
-
-    def __init__(self, sklearn_missing_indicator, device):
-        super(MissingIndicator, self).__init__()
-        self.transformer = True
-        self.missing_values = torch.nn.Parameter(
-            torch.tensor([sklearn_missing_indicator.missing_values], dtype=torch.float32), requires_grad=False
-        )
-        self.features = sklearn_missing_indicator.features
-
-        self.is_nan = True if (sklearn_missing_indicator.missing_values in [&#34;NaN&#34;, None, np.nan]) else False
-
-        self.column_indices = torch.nn.Parameter(torch.LongTensor(sklearn_missing_indicator.features_), requires_grad=False)
-
-    def forward(self, x):
-        if self.is_nan:
-            if self.features == &#34;all&#34;:
-                return torch.isnan(x).float()
-            else:
-                return torch.isnan(torch.index_select(x, 1, self.column_indices)).float()
-        else:
-            if self.features == &#34;all&#34;:
-                return torch.eq(x, self.missing_values).float()
-            else:
-                return torch.eq(torch.index_select(x, 1, self.column_indices), self.missing_values).float()</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>hummingbird.ml.operator_converters._base_operator.BaseOperator</li>
-<li>abc.ABC</li>
-<li>torch.nn.modules.module.Module</li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator.forward"><code class="name flex">
-
-<span>def <span class="ident">forward</span></span>(<span>self, x) -> Callable[..., Any]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/missing_indicator.py#L31-L41" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">def forward(self, x):
-    if self.is_nan:
-        if self.features == &#34;all&#34;:
-            return torch.isnan(x).float()
-        else:
-            return torch.isnan(torch.index_select(x, 1, self.column_indices)).float()
-    else:
-        if self.features == &#34;all&#34;:
-            return torch.eq(x, self.missing_values).float()
-        else:
-            return torch.eq(torch.index_select(x, 1, self.column_indices), self.missing_values).float()</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -241,17 +147,7 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.missing_indicator.convert_sklearn_missing_indicator" href="#hummingbird.ml.operator_converters.sklearn.missing_indicator.convert_sklearn_missing_indicator">convert_sklearn_missing_indicator</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator" href="#hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator">MissingIndicator</a></code></h4>
-<ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator.forward" href="#hummingbird.ml.operator_converters.sklearn.missing_indicator.MissingIndicator.forward">forward</a></code></li>
-</ul>
-</li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.mlp.convert_sklearn_mlp_classifier" href="#hummingbird.ml.operator_converters.sklearn.mlp.convert_sklearn_mlp_classifier">convert_sklearn_mlp_classifier</a></code></li>
 </ul>
 </li>
 </ul>
