@@ -58,6 +58,8 @@ def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     assert operator is not None
 
     indices = operator.column_indices
+    if any([type(i) is bool for i in indices]):
+        indices = [i for i in range(len(indices)) if indices[i]]
     return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
 
 
