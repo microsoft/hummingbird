@@ -46,6 +46,7 @@ LogisticRegression,
 LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
+MissingIndicator,
 MLPClassifier,
 MultinomialNB,
 Normalizer,
@@ -104,6 +105,7 @@ LogisticRegression,
 LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
+MissingIndicator,
 MLPClassifier,
 MultinomialNB,
 Normalizer,
@@ -168,11 +170,16 @@ def _build_sklearn_operator_list():
         # SVM-based models
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
+
+        # Imputers
+        from sklearn.impute import MissingIndicator
+
         # MLP Models
         from sklearn.neural_network import MLPClassifier
 
         # Naive Bayes Models
         from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
+
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -216,6 +223,8 @@ def _build_sklearn_operator_list():
             # SVM
             NuSVC,
             SVC,
+            # Imputers
+            MissingIndicator,
             # Preprocessing
             Binarizer,
             MaxAbsScaler,
@@ -449,7 +458,9 @@ CONTAINER = &#34;container&#34;
 <details class="source">
 <summary>
 <span>Expand source code</span>
+
 <a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L277-L290" class="git-link">Browse git</a>
+
 </summary>
 <pre><code class="python">def get_onnxml_api_operator_name(model_type):
     &#34;&#34;&#34;
@@ -486,7 +497,9 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
+
 <a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L261-L274" class="git-link">Browse git</a>
+
 </summary>
 <pre><code class="python">def get_sklearn_api_operator_name(model_type):
     &#34;&#34;&#34;
