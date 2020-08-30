@@ -31,6 +31,7 @@ LogisticRegression,
 LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
+MissingIndicator,
 MLPClassifier,
 MultinomialNB,
 Normalizer,
@@ -95,6 +96,9 @@ def _build_sklearn_operator_list():
         # SVM-based models
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
+        # Imputers
+        from sklearn.impute import MissingIndicator
+
         # MLP Models
         from sklearn.neural_network import MLPClassifier
 
@@ -143,6 +147,8 @@ def _build_sklearn_operator_list():
             # SVM
             NuSVC,
             SVC,
+            # Imputers
+            MissingIndicator,
             # Preprocessing
             Binarizer,
             MaxAbsScaler,
