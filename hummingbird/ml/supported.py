@@ -41,6 +41,7 @@ RandomForestRegressor,
 RobustScaler,
 SelectKBest,
 SelectPercentile,
+SimpleImputer,
 SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
@@ -97,7 +98,7 @@ def _build_sklearn_operator_list():
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
         # Imputers
-        from sklearn.impute import MissingIndicator
+        from sklearn.impute import MissingIndicator, SimpleImputer
 
         # MLP Models
         from sklearn.neural_network import MLPClassifier
@@ -149,6 +150,7 @@ def _build_sklearn_operator_list():
             SVC,
             # Imputers
             MissingIndicator,
+            SimpleImputer,
             # Preprocessing
             Binarizer,
             MaxAbsScaler,
