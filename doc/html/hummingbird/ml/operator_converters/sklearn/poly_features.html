@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/poly_features.py#L0-L80" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/poly_features.py#L0-L86" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -45,15 +45,13 @@ import torch
 class PolynomialFeatures(BaseOperator, torch.nn.Module):
     &#34;&#34;&#34;
     Class implementing PolynomialFeatures operators in PyTorch.
+
+    # TODO extend this class to support higher orders
     &#34;&#34;&#34;
 
     def __init__(self, n_features, degree, interaction_only, include_bias, device):
         super(PolynomialFeatures, self).__init__()
         self.transformer = True
-
-        # TODO extend this class to support higher orders
-        if degree != 2:
-            raise RuntimeError(&#34;Only supports degree 2&#34;)
 
         self.n_features = n_features
         self.interaction_only = interaction_only
@@ -71,23 +69,27 @@ class PolynomialFeatures(BaseOperator, torch.nn.Module):
         x = x.view(-1, self.n_features, 1) * x.view(-1, 1, self.n_features)
         x = x.view(-1, self.n_features ** 2)
         x = torch.index_select(x, 1, self.indices)
-        if self.interaction_only:
-            if self.include_bias:
-                bias = self.bias.expand(x_orig.size()[0], 1)
-                return torch.cat([bias, x], dim=1)
-            else:
-                return x
+
+        # TODO: This gives mismatched elements
+        # if self.interaction_only:
+        #    if self.include_bias:
+        #        bias = self.bias.expand(x_orig.size()[0], 1)
+        #        return torch.cat([bias, x], dim=1)
+        #    else:
+        #        return x
+
+        if self.include_bias:
+            bias = self.bias.expand(x_orig.size()[0], 1)
+            return torch.cat([bias, x_orig, x], dim=1)
         else:
-            if self.include_bias:
-                bias = self.bias.expand(x_orig.size()[0], 1)
-                return torch.cat([bias, x_orig, x], dim=1)
-            else:
-                return torch.cat([x_orig, x], dim=1)
+            return torch.cat([x_orig, x], dim=1)
 
 
 def convert_sklearn_poly_features(operator, device, extra_config):
     &#34;&#34;&#34;
     Converter for `sklearn.preprocessing.PolynomialFeatures`
+
+    Currently this supports only degree 2, and does not support interaction_only
 
     Args:
         operator: An operator wrapping a `sklearn.preprocessing.PolynomialFeatures` model
@@ -97,6 +99,10 @@ def convert_sklearn_poly_features(operator, device, extra_config):
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
+
+    if operator.raw_operator.interaction_only:
+        raise NotImplementedError(&#34;Hummingbird does not currently support interaction_only flag for PolynomialFeatures&#34;)
+
     if operator.raw_operator.degree != 2:
         raise NotImplementedError(&#34;Hummingbird currently only supports degree 2 for PolynomialFeatures&#34;)
     return PolynomialFeatures(
@@ -123,6 +129,7 @@ register_converter(&#34;SklearnPolynomialFeatures&#34;, convert_sklearn_poly_fea
 </code></dt>
 <dd>
 <div class="desc"><p>Converter for <code>sklearn.preprocessing.PolynomialFeatures</code></p>
+<p>Currently this supports only degree 2, and does not support interaction_only</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
@@ -140,11 +147,13 @@ register_converter(&#34;SklearnPolynomialFeatures&#34;, convert_sklearn_poly_fea
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/poly_features.py#L58-L78" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/poly_features.py#L58-L84" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_poly_features(operator, device, extra_config):
     &#34;&#34;&#34;
     Converter for `sklearn.preprocessing.PolynomialFeatures`
+
+    Currently this supports only degree 2, and does not support interaction_only
 
     Args:
         operator: An operator wrapping a `sklearn.preprocessing.PolynomialFeatures` model
@@ -154,6 +163,10 @@ register_converter(&#34;SklearnPolynomialFeatures&#34;, convert_sklearn_poly_fea
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
+
+    if operator.raw_operator.interaction_only:
+        raise NotImplementedError(&#34;Hummingbird does not currently support interaction_only flag for PolynomialFeatures&#34;)
+
     if operator.raw_operator.degree != 2:
         raise NotImplementedError(&#34;Hummingbird currently only supports degree 2 for PolynomialFeatures&#34;)
     return PolynomialFeatures(
@@ -175,7 +188,8 @@ register_converter(&#34;SklearnPolynomialFeatures&#34;, convert_sklearn_poly_fea
 <span>(</span><span>n_features, degree, interaction_only, include_bias, device)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Class implementing PolynomialFeatures operators in PyTorch.</p></div>
+<div class="desc"><p>Class implementing PolynomialFeatures operators in PyTorch.</p>
+<h1 id="todo-extend-this-class-to-support-higher-orders">TODO extend this class to support higher orders</h1></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -184,15 +198,13 @@ register_converter(&#34;SklearnPolynomialFeatures&#34;, convert_sklearn_poly_fea
 <pre><code class="python">class PolynomialFeatures(BaseOperator, torch.nn.Module):
     &#34;&#34;&#34;
     Class implementing PolynomialFeatures operators in PyTorch.
+
+    # TODO extend this class to support higher orders
     &#34;&#34;&#34;
 
     def __init__(self, n_features, degree, interaction_only, include_bias, device):
         super(PolynomialFeatures, self).__init__()
         self.transformer = True
-
-        # TODO extend this class to support higher orders
-        if degree != 2:
-            raise RuntimeError(&#34;Only supports degree 2&#34;)
 
         self.n_features = n_features
         self.interaction_only = interaction_only
@@ -210,18 +222,20 @@ register_converter(&#34;SklearnPolynomialFeatures&#34;, convert_sklearn_poly_fea
         x = x.view(-1, self.n_features, 1) * x.view(-1, 1, self.n_features)
         x = x.view(-1, self.n_features ** 2)
         x = torch.index_select(x, 1, self.indices)
-        if self.interaction_only:
-            if self.include_bias:
-                bias = self.bias.expand(x_orig.size()[0], 1)
-                return torch.cat([bias, x], dim=1)
-            else:
-                return x
+
+        # TODO: This gives mismatched elements
+        # if self.interaction_only:
+        #    if self.include_bias:
+        #        bias = self.bias.expand(x_orig.size()[0], 1)
+        #        return torch.cat([bias, x], dim=1)
+        #    else:
+        #        return x
+
+        if self.include_bias:
+            bias = self.bias.expand(x_orig.size()[0], 1)
+            return torch.cat([bias, x_orig, x], dim=1)
         else:
-            if self.include_bias:
-                bias = self.bias.expand(x_orig.size()[0], 1)
-                return torch.cat([bias, x_orig, x], dim=1)
-            else:
-                return torch.cat([x_orig, x], dim=1)</code></pre>
+            return torch.cat([x_orig, x], dim=1)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -247,25 +261,27 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/poly_features.py#L39-L55" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/poly_features.py#L37-L55" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     x_orig = x
     x = x.view(-1, self.n_features, 1) * x.view(-1, 1, self.n_features)
     x = x.view(-1, self.n_features ** 2)
     x = torch.index_select(x, 1, self.indices)
-    if self.interaction_only:
-        if self.include_bias:
-            bias = self.bias.expand(x_orig.size()[0], 1)
-            return torch.cat([bias, x], dim=1)
-        else:
-            return x
+
+    # TODO: This gives mismatched elements
+    # if self.interaction_only:
+    #    if self.include_bias:
+    #        bias = self.bias.expand(x_orig.size()[0], 1)
+    #        return torch.cat([bias, x], dim=1)
+    #    else:
+    #        return x
+
+    if self.include_bias:
+        bias = self.bias.expand(x_orig.size()[0], 1)
+        return torch.cat([bias, x_orig, x], dim=1)
     else:
-        if self.include_bias:
-            bias = self.bias.expand(x_orig.size()[0], 1)
-            return torch.cat([bias, x_orig, x], dim=1)
-        else:
-            return torch.cat([x_orig, x], dim=1)</code></pre>
+        return torch.cat([x_orig, x], dim=1)</code></pre>
 </details>
 </dd>
 </dl>

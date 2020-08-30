@@ -15,15 +15,13 @@ import torch
 class PolynomialFeatures(BaseOperator, torch.nn.Module):
     """
     Class implementing PolynomialFeatures operators in PyTorch.
+
+    # TODO extend this class to support higher orders
     """
 
     def __init__(self, n_features, degree, interaction_only, include_bias, device):
         super(PolynomialFeatures, self).__init__()
         self.transformer = True
-
-        # TODO extend this class to support higher orders
-        if degree != 2:
-            raise RuntimeError("Only supports degree 2")
 
         self.n_features = n_features
         self.interaction_only = interaction_only
@@ -41,23 +39,27 @@ class PolynomialFeatures(BaseOperator, torch.nn.Module):
         x = x.view(-1, self.n_features, 1) * x.view(-1, 1, self.n_features)
         x = x.view(-1, self.n_features ** 2)
         x = torch.index_select(x, 1, self.indices)
-        if self.interaction_only:
-            if self.include_bias:
-                bias = self.bias.expand(x_orig.size()[0], 1)
-                return torch.cat([bias, x], dim=1)
-            else:
-                return x
+
+        # TODO: This gives mismatched elements
+        # if self.interaction_only:
+        #    if self.include_bias:
+        #        bias = self.bias.expand(x_orig.size()[0], 1)
+        #        return torch.cat([bias, x], dim=1)
+        #    else:
+        #        return x
+
+        if self.include_bias:
+            bias = self.bias.expand(x_orig.size()[0], 1)
+            return torch.cat([bias, x_orig, x], dim=1)
         else:
-            if self.include_bias:
-                bias = self.bias.expand(x_orig.size()[0], 1)
-                return torch.cat([bias, x_orig, x], dim=1)
-            else:
-                return torch.cat([x_orig, x], dim=1)
+            return torch.cat([x_orig, x], dim=1)
 
 
 def convert_sklearn_poly_features(operator, device, extra_config):
     """
     Converter for `sklearn.preprocessing.PolynomialFeatures`
+
+    Currently this supports only degree 2, and does not support interaction_only
 
     Args:
         operator: An operator wrapping a `sklearn.preprocessing.PolynomialFeatures` model
@@ -67,6 +69,10 @@ def convert_sklearn_poly_features(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+
+    if operator.raw_operator.interaction_only:
+        raise NotImplementedError("Hummingbird does not currently support interaction_only flag for PolynomialFeatures")
+
     if operator.raw_operator.degree != 2:
         raise NotImplementedError("Hummingbird currently only supports degree 2 for PolynomialFeatures")
     return PolynomialFeatures(
