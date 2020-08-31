@@ -28,10 +28,12 @@ class SimpleImputer(BaseOperator, torch.nn.Module):
         self.replace_values = torch.nn.Parameter(
             torch.tensor([sklearn_imputer.statistics_], dtype=torch.float32), requires_grad=False
         )
-        self.missing_values = torch.nn.Parameter(
-            torch.tensor([sklearn_imputer.missing_values], dtype=torch.float32), requires_grad=False
-        )
+
         self.is_nan = True if (sklearn_imputer.missing_values == "NaN" or np.isnan(sklearn_imputer.missing_values)) else False
+        if not self.is_nan:
+            self.missing_values = torch.nn.Parameter(
+                torch.tensor([sklearn_imputer.missing_values], dtype=torch.float32), requires_grad=False
+            )
 
     def forward(self, x):
         if self.is_nan:
@@ -99,5 +101,6 @@ def convert_sklearn_missing_indicator(operator, device, extra_config):
     return MissingIndicator(operator.raw_operator, device)
 
 
+register_converter("SklearnImputer", convert_sklearn_simple_imputer)
 register_converter("SklearnSimpleImputer", convert_sklearn_simple_imputer)
 register_converter("SklearnMissingIndicator", convert_sklearn_missing_indicator)
