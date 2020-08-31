@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 import torch
 from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV
+from sklearn import datasets
 
 import hummingbird.ml
 
@@ -206,6 +207,22 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    # Test Torschscript backend.
+    def test_logistic_regression_ts(self):
+
+        model = LogisticRegression(solver="liblinear")
+
+        data = datasets.load_iris()
+        X, y = data.data, data.target
+        X = X.astype(np.float32)
+
+        model.fit(X, y)
+
+        ts_model = hummingbird.ml.convert(model, "torch.jit", X)
+        self.assertTrue(ts_model is not None)
+        np.testing.assert_allclose(model.predict(X), ts_model.predict(X), rtol=1e-6, atol=1e-6)
+        np.testing.assert_allclose(model.predict_proba(X), ts_model.predict_proba(X), rtol=1e-6, atol=1e-6)
 
 
 if __name__ == "__main__":

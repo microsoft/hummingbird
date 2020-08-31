@@ -248,7 +248,7 @@ def _torchscript_wrapper(device, function, *inputs):
                 inputs[i] = torch.from_numpy(inputs[i]).float()
             elif type(inputs[i]) is not torch.Tensor:
                 raise RuntimeError("Inputer tensor {} of not supported type {}".format(i, type(inputs[i])))
-            if device is not None:
+            if device != "cpu" and device is not None:
                 inputs[i] = inputs[i].to(device)
         return function(*inputs)
 
@@ -277,10 +277,14 @@ class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
         return _torchscript_wrapper(device, f, *inputs)
 
 
-class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassification):
+class TorchScriptSklearnContainerClassification(TorchScriptSklearnContainerRegression, PyTorchSklearnContainerClassification):
     """
     Container mirroring Sklearn classifiers API.
     """
+
+    def __init__(self, model, extra_config={}):
+        TorchScriptSklearnContainerRegression.__init__(self, model, extra_config, is_regression=False)
+        PyTorchSklearnContainerClassification.__init__(self, model, extra_config)
 
     def predict_proba(self, *inputs):
         device = _get_device(self.model)
