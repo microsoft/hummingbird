@@ -129,6 +129,7 @@ def convert(topology, backend, device, extra_config={}):
             if device != "cpu":
                 test_data.to(device)
             torch_model = torch.jit.trace(torch_model, test_data).eval()
+            torch.jit.optimized_execution(torch_model)
         hb_model = torch_model
 
     # Return if the container is not needed.
