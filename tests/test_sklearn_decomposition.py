@@ -18,32 +18,106 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
         data = load_digits()
         X_train, X_test, y_train, y_test = train_test_split(data.data, data.target, test_size=0.2, random_state=42)
         model.fit(X_train)
-        return model, X_test.astype(np.float32)
-
-    def test_pca_converter(self):
-        model, X_test = self._fit_model_pca(PCA(n_components=2, random_state=42, whiten=True))
         X_test = X_test.astype("float32")
 
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertTrue(torch_model is not None)
-        np.testing.assert_allclose(model.transform(X_test), torch_model.transform(X_test), rtol=1e-6, atol=1e-6)
+        np.testing.assert_allclose(model.transform(X_test), torch_model.transform(X_test), rtol=1e-6, atol=1e-5)
 
-    def test_kernel_pca_converter(self):
-        for kernel in ["linear"]:
-            model, X_test = self._fit_model_pca(KernelPCA(n_components=3, random_state=42, kernel=kernel))
-            X_test = X_test.astype("float32")
+    # PCA n_componenets none
+    def test_pca_converter_none(self):
+        self._fit_model_pca(PCA(n_components=None))
 
-            torch_model = hummingbird.ml.convert(model, "torch")
-            self.assertTrue(torch_model is not None)
-            np.testing.assert_allclose(model.transform(X_test), torch_model.transform(X_test), rtol=1e-6, atol=1e-6)
+    # PCA n_componenets two
+    def test_pca_converter_two(self):
+        self._fit_model_pca(PCA(n_components=2))
 
-    def test_fast_ica_converter(self):
-        model, X_test = self._fit_model_pca(FastICA(n_components=2, random_state=42, whiten=True))
-        X_test = X_test.astype("float32")
+    # PCA n_componenets mlw and whiten true
+    def test_pca_converter_mle_whiten(self):
+        self._fit_model_pca(PCA(n_components="mle", whiten=True))
 
-        torch_model = hummingbird.ml.convert(model, "torch")
-        self.assertTrue(torch_model is not None)
-        np.testing.assert_allclose(model.transform(X_test), torch_model.transform(X_test), rtol=1e-6, atol=1e-6)
+    # PCA n_componenets mle and solver full
+    def test_pca_converter_mle_full(self):
+        self._fit_model_pca(PCA(n_components="mle", svd_solver="full"))
+
+    # PCA n_componenets none and solver arpack
+    def test_pca_converter_none_arpack(self):
+        self._fit_model_pca(PCA(n_components=None, svd_solver="arpack"))
+
+    # PCA n_componenets none and solver randomized
+    def test_pca_converter_none_randomized(self):
+        self._fit_model_pca(PCA(n_components=None, svd_solver="randomized"))
+
+    # KernelPCA linear kernel
+    def test_kernel_pca_converter_linear(self):
+        self._fit_model_pca(KernelPCA(n_components=5, kernel="linear"))
+
+    # KernelPCA linear kernel with
+    def test_kernel_pca_converter_linear_fit_inverse_transform(self):
+        self._fit_model_pca(KernelPCA(n_components=5, kernel="linear", fit_inverse_transform=True))
+
+    # # KernelPCA poly kernel
+    # def test_kernel_pca_converter_poly(self):
+    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='poly', degree=3))
+
+    # # KernelPCA poly kernel coef0
+    # def test_kernel_pca_converter_poly_coef0(self):
+    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='poly', degree=3, coef0=10))
+
+    # # KernelPCA poly kernel
+    # def test_kernel_pca_converter_rbf(self):
+    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='rbf'))
+
+    # # KernelPCA sigmoid kernel
+    # def test_kernel_pca_converter_sigmoid(self):
+    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='sigmoid'))
+
+    # # KernelPCA cosine kernel
+    # def test_kernel_pca_converter_cosine(self):
+    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='cosine'))
+
+    # # KernelPCA precomputed kernel
+    # def test_kernel_pca_converter_cosine(self):
+    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='precomputed'))
+
+    # FastICA converter with n_components none
+    def test_fast_ica_converter_none(self):
+        self._fit_model_pca(FastICA(n_components=None))
+
+    # FastICA converter with n_components 3
+    def test_fast_ica_converter_3(self):
+        self._fit_model_pca(FastICA(n_components=3))
+
+    # FastICA converter with n_components 3 whiten
+    def test_fast_ica_converter_3_whiten(self):
+        self._fit_model_pca(FastICA(n_components=3, whiten=True))
+
+    # FastICA converter with n_components 3 deflation algorithm
+    def test_fast_ica_converter_3_deflation(self):
+        self._fit_model_pca(FastICA(n_components=3, algorithm="deflation"))
+
+    # FastICA converter with n_components 3 fun exp
+    def test_fast_ica_converter_3_exp(self):
+        self._fit_model_pca(FastICA(n_components=3, fun="exp"))
+
+    # FastICA converter with n_components 3 fun cube
+    def test_fast_ica_converter_3_cube(self):
+        self._fit_model_pca(FastICA(n_components=3, fun="cube"))
+
+    # FastICA converter with n_components 3 fun custom
+    def test_fast_ica_converter_3_custom(self):
+        def my_g(x):
+            return x ** 3, (3 * x ** 2).mean(axis=-1)
+
+        self._fit_model_pca(FastICA(n_components=3, fun=my_g))
+
+    # TruncatedSVD converter with n_components 3
+    def test_truncated_svd_converter_3(self):
+        self._fit_model_pca(TruncatedSVD(n_components=3))
+
+    # TruncatedSVD converter with n_components 3 algorithm arpack
+    def test_truncated_svd_converter_3_arpack(self):
+        self._fit_model_pca(TruncatedSVD(n_components=3, algorithm="arpack"))
 
 
 if __name__ == "__main__":
