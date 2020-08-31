@@ -174,6 +174,7 @@ def _build_sklearn_operator_list():
             VarianceThreshold,
         ]
 
+        # Remove all deprecated operators given the sklearn version. E.g., Imputer for sklearn > 0.21.3.
         return [x for x in supported_ops if x is not None]
 
     return []
