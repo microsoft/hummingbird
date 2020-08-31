@@ -59,8 +59,8 @@ XGBRanker,
 XGBRegressor
 """
 from collections import defaultdict
-from .exceptions import MissingConverter
 
+from .exceptions import MissingConverter
 from ._utils import torch_installed, sklearn_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed
 
 
@@ -119,10 +119,16 @@ def _build_sklearn_operator_list():
             StandardScaler,
         )
 
+        try:
+            from sklearn.preprocessing import Imputer
+        except ImportError:
+            # Imputer was deprecate in sklearn >= 0.22
+            Imputer = None
+
         # Features
         from sklearn.feature_selection import SelectKBest, SelectPercentile, VarianceThreshold
 
-        return [
+        supported_ops = [
             # Trees
             DecisionTreeClassifier,
             DecisionTreeRegressor,
@@ -151,6 +157,7 @@ def _build_sklearn_operator_list():
             NuSVC,
             SVC,
             # Imputers
+            Imputer,
             MissingIndicator,
             SimpleImputer,
             # Preprocessing
@@ -166,6 +173,8 @@ def _build_sklearn_operator_list():
             SelectPercentile,
             VarianceThreshold,
         ]
+
+        return [x for x in supported_ops if x is not None]
 
     return []
 
