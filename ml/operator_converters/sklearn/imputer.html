@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L0-L102" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L0-L105" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -58,10 +58,12 @@ class SimpleImputer(BaseOperator, torch.nn.Module):
         self.replace_values = torch.nn.Parameter(
             torch.tensor([sklearn_imputer.statistics_], dtype=torch.float32), requires_grad=False
         )
-        self.missing_values = torch.nn.Parameter(
-            torch.tensor([sklearn_imputer.missing_values], dtype=torch.float32), requires_grad=False
-        )
+
         self.is_nan = True if (sklearn_imputer.missing_values == &#34;NaN&#34; or np.isnan(sklearn_imputer.missing_values)) else False
+        if not self.is_nan:
+            self.missing_values = torch.nn.Parameter(
+                torch.tensor([sklearn_imputer.missing_values], dtype=torch.float32), requires_grad=False
+            )
 
     def forward(self, x):
         if self.is_nan:
@@ -129,6 +131,7 @@ def convert_sklearn_missing_indicator(operator, device, extra_config):
     return MissingIndicator(operator.raw_operator, device)
 
 
+register_converter(&#34;SklearnImputer&#34;, convert_sklearn_simple_imputer)
 register_converter(&#34;SklearnSimpleImputer&#34;, convert_sklearn_simple_imputer)
 register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_indicator)</code></pre>
 </details>
@@ -162,7 +165,7 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L89-L99" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L91-L101" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_missing_indicator(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -199,7 +202,7 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L46-L58" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L48-L60" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_simple_imputer(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -230,7 +233,7 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L61-L86" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L63-L88" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class MissingIndicator(BaseOperator, torch.nn.Module):
     &#34;&#34;&#34;
@@ -268,22 +271,14 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <h3>Methods</h3>
 <dl>
 <dt id="hummingbird.ml.operator_converters.sklearn.imputer.MissingIndicator.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, x)</span>
+<span>def <span class="ident">forward</span></span>(<span>self, x) -> Callable[..., Any]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the :class:<code>Module</code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L76-L86" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L78-L88" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     if self.is_nan:
@@ -309,7 +304,7 @@ registered hooks while the latter silently ignores them.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L16-L43" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L16-L45" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class SimpleImputer(BaseOperator, torch.nn.Module):
     &#34;&#34;&#34;
@@ -326,10 +321,12 @@ registered hooks while the latter silently ignores them.</p>
         self.replace_values = torch.nn.Parameter(
             torch.tensor([sklearn_imputer.statistics_], dtype=torch.float32), requires_grad=False
         )
-        self.missing_values = torch.nn.Parameter(
-            torch.tensor([sklearn_imputer.missing_values], dtype=torch.float32), requires_grad=False
-        )
+
         self.is_nan = True if (sklearn_imputer.missing_values == &#34;NaN&#34; or np.isnan(sklearn_imputer.missing_values)) else False
+        if not self.is_nan:
+            self.missing_values = torch.nn.Parameter(
+                torch.tensor([sklearn_imputer.missing_values], dtype=torch.float32), requires_grad=False
+            )
 
     def forward(self, x):
         if self.is_nan:
@@ -349,22 +346,14 @@ registered hooks while the latter silently ignores them.</p>
 <h3>Methods</h3>
 <dl>
 <dt id="hummingbird.ml.operator_converters.sklearn.imputer.SimpleImputer.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, x)</span>
+<span>def <span class="ident">forward</span></span>(<span>self, x) -> Callable[..., Any]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the :class:<code>Module</code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div></div>
+<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L36-L43" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/imputer.py#L38-L45" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     if self.is_nan:
