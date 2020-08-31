@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/linear.py#L0-L73" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/linear.py#L0-L75" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -60,7 +60,7 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     &#34;&#34;&#34;
     classes = [0] if not hasattr(operator.raw_operator, &#34;classes_&#34;) else operator.raw_operator.classes_
 
-    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
+    if not all([&#34;int&#34; in str(type(x)) for x in classes]):
         raise RuntimeError(
             &#34;Hummingbird currently supports only integer labels for class labels. Please file an issue at https://github.com/microsoft/hummingbird.&#34;
         )
@@ -71,6 +71,8 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     multi_class = None
     if hasattr(operator.raw_operator, &#34;multi_class&#34;):
         if operator.raw_operator.multi_class == &#34;ovr&#34; or operator.raw_operator.solver in [&#34;warn&#34;, &#34;liblinear&#34;]:
+            multi_class = &#34;ovr&#34;
+        elif operator.raw_operator.multi_class == &#34;auto&#34; and len(classes) == 2:
             multi_class = &#34;ovr&#34;
         else:
             multi_class = &#34;multinomial&#34;
@@ -135,7 +137,7 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/linear.py#L17-L48" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/linear.py#L17-L50" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_linear_model(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -153,7 +155,7 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
     &#34;&#34;&#34;
     classes = [0] if not hasattr(operator.raw_operator, &#34;classes_&#34;) else operator.raw_operator.classes_
 
-    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
+    if not all([&#34;int&#34; in str(type(x)) for x in classes]):
         raise RuntimeError(
             &#34;Hummingbird currently supports only integer labels for class labels. Please file an issue at https://github.com/microsoft/hummingbird.&#34;
         )
@@ -164,6 +166,8 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
     multi_class = None
     if hasattr(operator.raw_operator, &#34;multi_class&#34;):
         if operator.raw_operator.multi_class == &#34;ovr&#34; or operator.raw_operator.solver in [&#34;warn&#34;, &#34;liblinear&#34;]:
+            multi_class = &#34;ovr&#34;
+        elif operator.raw_operator.multi_class == &#34;auto&#34; and len(classes) == 2:
             multi_class = &#34;ovr&#34;
         else:
             multi_class = &#34;multinomial&#34;
@@ -193,7 +197,7 @@ register_converter(&#34;SklearnLogisticRegressionCV&#34;, convert_sklearn_linear
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/linear.py#L51-L67" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/linear.py#L53-L69" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_linear_regression_model(operator, device, extra_config):
     &#34;&#34;&#34;

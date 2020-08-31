@@ -52,24 +52,54 @@ class PyTorchBackendModel(torch.nn.Module):
             extra_config: Some additional custom configuration parameter
         """
         super(PyTorchBackendModel, self).__init__()
-        self._input_names = input_names
-        self._output_names = output_names
+
+        # Define input \ output names.
+        # This is required because the internal variable names may differ from the original (raw) one.
+        # This may happen, for instance, because we force our internal naming to be unique.
+        def _fix_var_naming(operators, names, mod="input"):
+            new_names = []
+            map = {}
+
+            for op in operators:
+                if mod == "input":
+                    iter = op.inputs
+                else:
+                    iter = op.outputs
+                for i in iter:
+                    for name in names:
+                        if i.raw_name == name and name not in map:
+                            map[i.raw_name] = i.full_name
+                if len(map) == len(names):
+                    break
+            for name in names:
+                new_names.append(map[name])
+            return new_names
+
+        self._input_names = _fix_var_naming(operators, input_names)
+        self._output_names = _fix_var_naming(reversed(operators), output_names, "output")
         self._operator_map = torch.nn.ModuleDict(operator_map)
         self._operators = operators
 
     def forward(self, *inputs):
         with torch.no_grad():
+            assert len(self._input_names) == len(inputs)
+
             inputs = [*inputs]
             variable_map = {}
             device = _get_device(self)
 
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self._input_names):
+                if type(inputs[i]) is list:
+                    inputs[i] = np.array(inputs[i])
                 if type(inputs[i]) is np.ndarray:
-                    inputs[i] = torch.from_numpy(inputs[i]).float()
+                    inputs[i] = torch.from_numpy(inputs[i])
+                    if inputs[i].dtype == torch.float64:
+                        # We convert double precision arrays into single precision. Sklearn does the same.
+                        inputs[i] = inputs[i].float()
                 elif type(inputs[i]) is not torch.Tensor:
                     raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(inputs[i])))
-                if device != "cpu":
+                if device is not None and device.type != "cpu":
                     inputs[i] = inputs[i].to(device)
                 variable_map[input_name] = inputs[i]
 
@@ -312,16 +342,19 @@ class ONNXSklearnContainer(ABC):
     def model(self):
         return self._model
 
-    def _get_named_inputs(self, *inputs):
+    def _get_named_inputs(self, inputs):
         """
         Retrieve the inputs names from the session object.
         """
+        if len(inputs) < len(self.input_names):
+            inputs = inputs[0]
+
         assert len(inputs) == len(self.input_names)
 
         named_inputs = {}
 
         for i in range(len(inputs)):
-            named_inputs[self.input_names[i]] = inputs[i]
+            named_inputs[self.input_names[i]] = np.array(inputs[i])
 
         return named_inputs
 
@@ -341,7 +374,7 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        named_inputs = self._get_named_inputs(*inputs)
+        named_inputs = self._get_named_inputs(inputs)
 
         return self._session.run(self._output_names, named_inputs)
 
@@ -368,7 +401,7 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         On classification tasks returns the predicted class labels for the input data.
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
-        named_inputs = self._get_named_inputs(*inputs)
+        named_inputs = self._get_named_inputs(inputs)
 
         if self._is_regression:
             return np.array(self._session.run(self._output_names, named_inputs)).flatten()
@@ -393,7 +426,7 @@ class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
         """
-        named_inputs = self._get_named_inputs(*inputs)
+        named_inputs = self._get_named_inputs(inputs)
 
         return self._session.run([self._output_names[1]], named_inputs)[0]
 
@@ -415,7 +448,7 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision function scores.
         """
-        named_inputs = self._get_named_inputs(*inputs)
+        named_inputs = self._get_named_inputs(inputs)
 
         return np.array(self._session.run([self._output_names[1]], named_inputs)[0]).flatten()
 

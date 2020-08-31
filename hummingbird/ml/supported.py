@@ -14,10 +14,13 @@ ONNX,
 TVM
 
 **Supported Operators**
+BernoulliNB,
+Binarizer,
 DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
+GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
@@ -29,12 +32,18 @@ LogisticRegression,
 LogisticRegressionCV,
 MaxAbsScaler,
 MinMaxScaler,
+MissingIndicator,
+MLPClassifier,
+MultinomialNB,
 Normalizer,
 OneHotEncoder,
+PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
 RobustScaler,
 SelectKBest,
+SelectPercentile,
+SimpleImputer,
 SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
@@ -51,8 +60,8 @@ XGBRanker,
 XGBRegressor
 """
 from collections import defaultdict
-from .exceptions import MissingConverter
 
+from .exceptions import MissingConverter
 from ._utils import (
     torch_installed,
     sklearn_installed,
@@ -97,13 +106,37 @@ def _build_sklearn_operator_list():
         # SVM-based models
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
+        # Imputers
+        from sklearn.impute import MissingIndicator, SimpleImputer
+
+        # MLP Models
+        from sklearn.neural_network import MLPClassifier
+
+        # Naive Bayes Models
+        from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
+
         # Preprocessing
-        from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, Normalizer, OneHotEncoder, RobustScaler, StandardScaler
+        from sklearn.preprocessing import (
+            Binarizer,
+            MaxAbsScaler,
+            MinMaxScaler,
+            Normalizer,
+            OneHotEncoder,
+            PolynomialFeatures,
+            RobustScaler,
+            StandardScaler,
+        )
+
+        try:
+            from sklearn.preprocessing import Imputer
+        except ImportError:
+            # Imputer was deprecate in sklearn >= 0.22
+            Imputer = None
 
         # Features
-        from sklearn.feature_selection import SelectKBest, VarianceThreshold
+        from sklearn.feature_selection import SelectKBest, SelectPercentile, VarianceThreshold
 
-        return [
+        supported_ops = [
             # Trees
             DecisionTreeClassifier,
             DecisionTreeRegressor,
@@ -123,19 +156,34 @@ def _build_sklearn_operator_list():
             LogisticRegression,
             LogisticRegressionCV,
             SGDClassifier,
+            # Other models
+            MLPClassifier,
+            BernoulliNB,
+            GaussianNB,
+            MultinomialNB,
             # SVM
             NuSVC,
             SVC,
+            # Imputers
+            Imputer,
+            MissingIndicator,
+            SimpleImputer,
             # Preprocessing
+            Binarizer,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
+            PolynomialFeatures,
             RobustScaler,
             StandardScaler,
             # Feature selection
             SelectKBest,
+            SelectPercentile,
             VarianceThreshold,
         ]
+
+        # Remove all deprecated operators given the sklearn version. E.g., Imputer for sklearn > 0.21.3.
+        return [x for x in supported_ops if x is not None]
 
     return []
 
@@ -223,7 +271,17 @@ def _build_sklearn_api_operator_name_map():
     Associate Sklearn with the operator class names.
     If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.
     """
-    return {k: "Sklearn" + k.__name__ for k in sklearn_operator_list + xgb_operator_list + lgbm_operator_list}
+    # Pipeline ops. These are ops injected by the parser not "real" sklearn operators.
+    pipeline_operator_list = [
+        "ArrayFeatureExtractor",
+        "Concat",
+        "Multiply",
+    ]
+
+    return {
+        k: "Sklearn" + k.__name__ if hasattr(k, "__name__") else k
+        for k in sklearn_operator_list + pipeline_operator_list + xgb_operator_list + lgbm_operator_list
+    }
 
 
 def _build_onnxml_api_operator_name_map():

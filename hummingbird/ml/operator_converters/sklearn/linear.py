@@ -30,7 +30,7 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     """
     classes = [0] if not hasattr(operator.raw_operator, "classes_") else operator.raw_operator.classes_
 
-    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
+    if not all(["int" in str(type(x)) for x in classes]):
         raise RuntimeError(
             "Hummingbird currently supports only integer labels for class labels. Please file an issue at https://github.com/microsoft/hummingbird."
         )
@@ -41,6 +41,8 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     multi_class = None
     if hasattr(operator.raw_operator, "multi_class"):
         if operator.raw_operator.multi_class == "ovr" or operator.raw_operator.solver in ["warn", "liblinear"]:
+            multi_class = "ovr"
+        elif operator.raw_operator.multi_class == "auto" and len(classes) == 2:
             multi_class = "ovr"
         else:
             multi_class = "multinomial"
