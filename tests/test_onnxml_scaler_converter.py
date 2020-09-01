@@ -49,7 +49,7 @@ class TestONNXScaler(unittest.TestCase):
         onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred, rtol=rtol, atol=atol)
 
     # Test StandardScaler with_mean=True, with_std=False
     @unittest.skipIf(
@@ -60,7 +60,7 @@ class TestONNXScaler(unittest.TestCase):
         onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred, rtol=rtol, atol=atol)
 
     # Test StandardScaler with_mean=False, with_std=False
     @unittest.skipIf(
@@ -71,7 +71,7 @@ class TestONNXScaler(unittest.TestCase):
         onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred, rtol=rtol, atol=atol)
 
     # Test RobustScaler with with_centering=True
     @unittest.skipIf(
@@ -82,7 +82,7 @@ class TestONNXScaler(unittest.TestCase):
         onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred, rtol=rtol, atol=atol)
 
     # Test RobustScaler with with_centering=False
     @unittest.skipIf(
@@ -93,7 +93,7 @@ class TestONNXScaler(unittest.TestCase):
         onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred, rtol=rtol, atol=atol)
 
     # Test MaxAbsScaler
     @unittest.skipIf(
@@ -104,7 +104,7 @@ class TestONNXScaler(unittest.TestCase):
         onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred, rtol=rtol, atol=atol)
 
     # Test MinMaxScaler
     @unittest.skipIf(
@@ -115,7 +115,7 @@ class TestONNXScaler(unittest.TestCase):
         onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred, rtol=rtol, atol=atol)
 
     # Test that malformed models throw an exception
     @unittest.skipIf(

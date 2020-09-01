@@ -18,10 +18,12 @@ class MLPModel(BaseOperator, torch.nn.Module):
     def __init__(self, weights, biases, activation, classes, device):
         super(MLPModel, self).__init__()
         self.classification = True
-        self.weights = [
-            torch.nn.Parameter(torch.from_numpy(weight.astype("float32")), requires_grad=False) for weight in weights
-        ]
-        self.biases = [torch.nn.Parameter(torch.from_numpy(bias.astype("float32")), requires_grad=False) for bias in biases]
+        self.weights = torch.nn.ParameterList(
+            [torch.nn.Parameter(torch.from_numpy(weight.astype("float32")), requires_grad=False) for weight in weights]
+        )
+        self.biases = torch.nn.ParameterList(
+            [torch.nn.Parameter(torch.from_numpy(bias.astype("float32")), requires_grad=False) for bias in biases]
+        )
         self.activation = activation
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
         self.perform_class_select = False

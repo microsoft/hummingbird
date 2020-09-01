@@ -248,7 +248,7 @@ def _torchscript_wrapper(device, function, *inputs):
                 inputs[i] = torch.from_numpy(inputs[i]).float()
             elif type(inputs[i]) is not torch.Tensor:
                 raise RuntimeError("Inputer tensor {} of not supported type {}".format(i, type(inputs[i])))
-            if device is not None:
+            if device != "cpu" and device is not None:
                 inputs[i] = inputs[i].to(device)
         return function(*inputs)
 
@@ -277,10 +277,14 @@ class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
         return _torchscript_wrapper(device, f, *inputs)
 
 
-class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassification):
+class TorchScriptSklearnContainerClassification(TorchScriptSklearnContainerRegression, PyTorchSklearnContainerClassification):
     """
     Container mirroring Sklearn classifiers API.
     """
+
+    def __init__(self, model, extra_config={}):
+        TorchScriptSklearnContainerRegression.__init__(self, model, extra_config, is_regression=False)
+        PyTorchSklearnContainerClassification.__init__(self, model, extra_config)
 
     def predict_proba(self, *inputs):
         device = _get_device(self.model)
@@ -376,7 +380,7 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
         """
         named_inputs = self._get_named_inputs(inputs)
 
-        return self._session.run(self._output_names, named_inputs)
+        return np.array(self._session.run(self._output_names, named_inputs)).squeeze()
 
 
 class ONNXSklearnContainerRegression(ONNXSklearnContainer):
@@ -404,11 +408,11 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         named_inputs = self._get_named_inputs(inputs)
 
         if self._is_regression:
-            return np.array(self._session.run(self._output_names, named_inputs)).flatten()
+            return np.array(self._session.run(self._output_names, named_inputs)).reshape(-1)
         elif self._is_anomaly_detection:
-            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].flatten()
+            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].reshape(-1)
         else:
-            return self._session.run([self._output_names[0]], named_inputs)[0]
+            return self._session.run([self._output_names[0]], named_inputs)[0].reshape(-1)
 
 
 class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
@@ -450,7 +454,7 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         """
         named_inputs = self._get_named_inputs(inputs)
 
-        return np.array(self._session.run([self._output_names[1]], named_inputs)[0]).flatten()
+        return np.array(self._session.run([self._output_names[1]], named_inputs)[0]).reshape(-1)
 
     def score_samples(self, *inputs):
         """
@@ -497,7 +501,7 @@ class TVMSklearnContainerTransformer(TVMSklearnContainer):
         On data transformers it returns transformed output data
         """
         self.model.run(input=self._to_tvm_tensor(*inputs))
-        return self.model.get_output(0).asnumpy()
+        return self.model.get_output(0).asnumpy().squeeze()
 
 
 class TVMSklearnContainerRegression(TVMSklearnContainer):
@@ -520,13 +524,11 @@ class TVMSklearnContainerRegression(TVMSklearnContainer):
         On classification tasks returns the predicted class labels for the input data.
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
-        # np_data = data.to_numpy() if not isinstance(data,np.ndarray) else data
+        self.model.run(input=self._to_tvm_tensor(*inputs))
         if self._is_regression or self._is_anomaly_detection:
-            self.model.run(input=self._to_tvm_tensor(*inputs))
-            return self.model.get_output(0).asnumpy().flatten()
+            return self.model.get_output(0).asnumpy().reshape(-1)
         else:
-            self.model.run(input=self._to_tvm_tensor(*inputs))
-            return self.model.get_output(0).asnumpy()
+            return self.model.get_output(0).asnumpy().reshape(-1)
 
 
 class TVMSklearnContainerClassification(TVMSklearnContainerRegression):

@@ -47,7 +47,7 @@ class TestONNXOneHotEncoder(unittest.TestCase):
         onnx_pred = onnx_model.transform(X)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0][0], onnx_pred, rtol=rtol, atol=atol)
 
     # # Test OneHotEncoder with strings
     # @unittest.skipIf(
