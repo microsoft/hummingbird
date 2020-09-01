@@ -66,7 +66,7 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
         onnx_ml_pred, onnx_pred, output_names = self._test_decision_tree(X, model, extra_config)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred[0], rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0].flatten(), onnx_pred, rtol=rtol, atol=atol)
 
     # Utility function for testing classification models.
     def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
