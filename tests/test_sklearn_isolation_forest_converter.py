@@ -9,8 +9,9 @@ import torch
 from sklearn.ensemble import IsolationForest
 
 import hummingbird.ml
-from tree_utils import iforest_implementation_map
+from hummingbird.ml import constants
 from hummingbird.ml._utils import onnx_runtime_installed, tvm_installed
+from tree_utils import iforest_implementation_map
 
 
 class TestIsolationForestConverter(unittest.TestCase):
@@ -114,7 +115,7 @@ class TestIsolationForestConverter(unittest.TestCase):
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
             model.fit(X)
-            onnx_model = hummingbird.ml.convert(model, "tvm", X, extra_config={})
+            onnx_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
             self.assertIsNotNone(onnx_model)
             np.testing.assert_allclose(model.decision_function(X), onnx_model.decision_function(X), rtol=1e-06, atol=1e-06)
             np.testing.assert_allclose(model.score_samples(X), onnx_model.score_samples(X), rtol=1e-06, atol=1e-06)

@@ -8,6 +8,7 @@ from sklearn.preprocessing import RobustScaler, MaxAbsScaler, MinMaxScaler, Stan
 
 import hummingbird.ml
 from hummingbird.ml._utils import tvm_installed
+from hummingbird.ml import constants
 
 
 class TestSklearnScalerConverter(unittest.TestCase):
@@ -119,19 +120,19 @@ class TestSklearnScalerConverter(unittest.TestCase):
 
         model = StandardScaler(with_mean=False, with_std=False)
         model.fit(data)
-        torch_model = hummingbird.ml.convert(model, "tvm", data)
+        torch_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06)
 
         model = StandardScaler(with_mean=True, with_std=False)
         model.fit(data)
-        torch_model = hummingbird.ml.convert(model, "tvm", data)
+        torch_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(model.transform(data), torch_model.transform(data_tensor), rtol=1e-04, atol=1e-04)
 
         model = StandardScaler(with_mean=True, with_std=True)
         model.fit(data)
-        torch_model = hummingbird.ml.convert(model, "tvm", data)
+        torch_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06)
 

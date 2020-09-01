@@ -73,7 +73,7 @@ XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L357" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L358" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -432,7 +432,8 @@ ONNX_TARGET_OPSET = &#34;onnx_target_opset&#34;
 
 TVM_MAX_FUSE_DEPTH = &#34;tvm_max_fuse_depth&#34;
 &#34;&#34;&#34;For TVM we can fix the number of operations that will be fused.
-If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232)&#34;&#34;&#34;</code></pre>
+If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232).
+A good number trading off compilation time with performance is 30.&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -463,7 +464,8 @@ If not set, compilation may take forever (https://github.com/microsoft/hummingbi
 <dt id="hummingbird.ml.supported.TVM_MAX_FUSE_DEPTH"><code class="name">var <span class="ident">TVM_MAX_FUSE_DEPTH</span></code></dt>
 <dd>
 <div class="desc"><p>For TVM we can fix the number of operations that will be fused.
-If not set, compilation may take forever (<a href="https://github.com/microsoft/hummingbird/issues/232">https://github.com/microsoft/hummingbird/issues/232</a>)</p></div>
+If not set, compilation may take forever (<a href="https://github.com/microsoft/hummingbird/issues/232">https://github.com/microsoft/hummingbird/issues/232</a>).
+A good number trading off compilation time with performance is 30.</p></div>
 </dd>
 </dl>
 </section>

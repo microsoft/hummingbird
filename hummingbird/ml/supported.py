@@ -355,4 +355,5 @@ ONNX_TARGET_OPSET = "onnx_target_opset"
 
 TVM_MAX_FUSE_DEPTH = "tvm_max_fuse_depth"
 """For TVM we can fix the number of operations that will be fused.
-If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232)"""
+If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232).
+A good number trading off compilation time with performance is 30."""

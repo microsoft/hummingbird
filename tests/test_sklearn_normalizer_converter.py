@@ -9,6 +9,7 @@ import torch
 from sklearn.preprocessing import Normalizer
 
 import hummingbird.ml
+from hummingbird.ml import constants
 
 
 class TestSklearnNormalizer(unittest.TestCase):
@@ -92,7 +93,7 @@ class TestSklearnNormalizer(unittest.TestCase):
             model = Normalizer(norm=norm)
             model.fit(data)
 
-            torch_model = hummingbird.ml.convert(model, "tvm", data)
+            torch_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(
