@@ -22,7 +22,7 @@ class TestSklearnMLPClassifier(unittest.TestCase):
         y = np.random.randint(num_classes, size=100) + labels_shift
 
         model.fit(X, y)
-        torch_model = hummingbird.ml.convert(model, "torch", X)
+        torch_model = hummingbird.ml.convert(model, backend, X)
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-6, atol=1e-6)
 
