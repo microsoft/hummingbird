@@ -9,6 +9,7 @@ from sklearn.svm import LinearSVC, SVC, NuSVC
 
 import hummingbird.ml
 from hummingbird.ml import constants
+from hummingbird.ml._utils import tvm_installed
 
 
 class TestSklearnSVC(unittest.TestCase):
@@ -127,24 +128,52 @@ class TestSklearnSVC(unittest.TestCase):
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
+    # Torchscript backend
+    def test_svc_ts(self):
+        self._test_svc(2, backend="torch.jit")
+
+    # SVC linear kernel
+    def test_svc_linear_ts(self):
+        self._test_svc(2, kernel="linear", backend="torch.jit")
+
+    # SVC sigmoid kernel
+    def test_svc_sigmoid_ts(self):
+        self._test_svc(2, kernel="sigmoid", backend="tvtorch.jit")
+
+    # SVC poly kernel
+    def test_svc_poly_ts(self):
+        self._test_svc(2, kernel="poly", backend="torch.jit")
+
+    # NuSVC binary
+    def test_nu_svc_bi_ts(self):
+        self._test_nu_svc(2, backend="torch.jit")
+
+    def test_svc_multi_ts(self):
+        self._test_svc(3, backend="torch.jit")
+
     # TVM backend.
     # SVC binary
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_svc_tvm(self):
         self._test_svc(2, backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     # SVC linear kernel
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_svc_linear_tvm(self):
         self._test_svc(2, kernel="linear", backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     # SVC sigmoid kernel
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_svc_sigmoid_tvm(self):
         self._test_svc(2, kernel="sigmoid", backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     # SVC poly kernel
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_svc_poly_tvm(self):
         self._test_svc(2, kernel="poly", backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     # NuSVC binary
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_nu_svc_bi_tvm(self):
         self._test_nu_svc(2, backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
@@ -167,46 +196,6 @@ class TestSklearnSVC(unittest.TestCase):
     # # SVC with different gamma (default=’scale’)
     # def test_svc_gamma(self):
     #     self._test_svc(3, gamma="auto", backend="tvm")
-
-    # Torchscript backend
-    def test_linear_svc_ts(self):
-        np.random.seed(0)
-        num_classes = 3
-        X = np.random.rand(100, 200)
-        X = np.array(X, dtype=np.float32)
-        y = np.random.randint(num_classes, size=100)
-
-        model = self.model = LinearSVC()
-        model.fit(X, y)
-        torch_model = hummingbird.ml.convert(model, "torch.jit", X)
-        self.assertTrue(torch_model is not None)
-        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
-
-    def test_svc_ts(self):
-        np.random.seed(0)
-        num_classes = 3
-        X = np.random.rand(100, 200)
-        X = np.array(X, dtype=np.float32)
-        y = np.random.randint(num_classes, size=100)
-
-        model = self.model = SVC(probability=True)
-        model.fit(X, y)
-        torch_model = hummingbird.ml.convert(model, "torch.jit", X)
-        self.assertTrue(torch_model is not None)
-        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
-
-    def test_nusvc_ts(self):
-        np.random.seed(0)
-        num_classes = 3
-        X = np.random.rand(100, 200)
-        X = np.array(X, dtype=np.float32)
-        y = np.random.randint(num_classes, size=100)
-
-        model = self.model = NuSVC(probability=True)
-        model.fit(X, y)
-        torch_model = hummingbird.ml.convert(model, "torch.jit", X)
-        self.assertTrue(torch_model is not None)
-        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
 
 if __name__ == "__main__":

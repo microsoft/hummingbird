@@ -10,6 +10,7 @@ from sklearn.preprocessing import Normalizer
 
 import hummingbird.ml
 from hummingbird.ml import constants
+from hummingbird.ml._utils import tvm_installed
 
 
 class TestSklearnNormalizer(unittest.TestCase):
@@ -82,6 +83,7 @@ class TestSklearnNormalizer(unittest.TestCase):
             )
 
     # TVM backend
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_normalizer_converter_tvm(self):
         # Generate a random 2D array with values in [0, 1000)
         np.random.seed(0)

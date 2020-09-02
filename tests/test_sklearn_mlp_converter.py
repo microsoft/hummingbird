@@ -10,6 +10,7 @@ from sklearn.neural_network import MLPClassifier
 
 import hummingbird.ml
 from hummingbird.ml import constants
+from hummingbird.ml._utils import tvm_installed
 
 
 class TestSklearnMLPClassifier(unittest.TestCase):
@@ -53,26 +54,32 @@ class TestSklearnMLPClassifier(unittest.TestCase):
 
     # Test TVM backend
     # MLPClassifier binary
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_mlp_classifer_bi_tvm(self):
         self._test_mlp_classifer(2, backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     # MLPClassifier multi-class
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_mlp_classifer_multi_tvm(self):
         self._test_mlp_classifer(3, backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     # MLPClassifier multi-class w/ shifted labels
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_mlp_classifer_multi_shifted_labels_tvm(self):
         self._test_mlp_classifer(3, labels_shift=3, backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     #  MLPClassifier multi-class w/ tanh activation
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_mlp_classifer_multi_logistic_tvm(self):
         self._test_mlp_classifer(3, activation="tanh", backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     #  MLPClassifier multi-class w/ logistic activation
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_mlp_classifer_multi_tanh_tvm(self):
         self._test_mlp_classifer(3, activation="logistic", backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     #  MLPClassifier multi-class w/ identity activation
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_mlp_classifer_multi_identity_tvm(self):
         self._test_mlp_classifer(3, activation="identity", backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
