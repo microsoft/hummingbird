@@ -43,7 +43,7 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
 
     # PCA n_componenets mle and whiten true
     @unittest.skipIf(
-        LooseVersion(sklearn.__version__) <= LooseVersion("0.23.2"),
+        LooseVersion(sklearn.__version__) < LooseVersion("0.23.2"),
         reason="With Sklearn version < 0.23.2 returns ValueError: math domain error (https://github.com/scikit-learn/scikit-learn/issues/4441)",
     )
     def test_pca_converter_mle_whiten(self):
@@ -51,7 +51,7 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
 
     # PCA n_componenets mle and solver full
     @unittest.skipIf(
-        LooseVersion(sklearn.__version__) <= LooseVersion("0.23.2"),
+        LooseVersion(sklearn.__version__) < LooseVersion("0.23.2"),
         reason="With Sklearn version < 0.23.2 returns ValueError: math domain error (https://github.com/scikit-learn/scikit-learn/issues/4441)",
     )
     def test_pca_converter_mle_full(self):
@@ -103,7 +103,7 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
 
     # FastICA converter with n_components none
     @unittest.skipIf(
-        LooseVersion(sklearn.__version__) <= LooseVersion("0.23.2"),
+        LooseVersion(sklearn.__version__) < LooseVersion("0.23.2"),
         reason="With Sklearn version < 0.23.2 returns ValueError: array must not contain infs or NaNs",
     )
     def test_fast_ica_converter_none(self):
