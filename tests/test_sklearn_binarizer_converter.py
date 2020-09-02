@@ -9,6 +9,7 @@ import torch
 from sklearn.preprocessing import Binarizer
 
 import hummingbird.ml
+from hummingbird.ml._utils import tvm_installed
 
 
 class TestSklearnBinarizer(unittest.TestCase):
@@ -26,6 +27,7 @@ class TestSklearnBinarizer(unittest.TestCase):
                 model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_binarizer_converter_tvm(self):
         data = np.array([[1, 2, -3], [4, -3, 0], [0, 1, 4], [0, -5, 6]], dtype=np.float32)
         data_tensor = torch.from_numpy(data)

@@ -138,7 +138,7 @@ class TestSklearnSVC(unittest.TestCase):
 
     # SVC sigmoid kernel
     def test_svc_sigmoid_ts(self):
-        self._test_svc(2, kernel="sigmoid", backend="tvtorch.jit")
+        self._test_svc(2, kernel="sigmoid", backend="torch.jit")
 
     # SVC poly kernel
     def test_svc_poly_ts(self):
