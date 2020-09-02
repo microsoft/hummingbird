@@ -48,15 +48,33 @@ class KernelPCA(BaseOperator, torch.nn.Module):
         self.scaled_alphas = torch.from_numpy(scaled_alphas).float()
 
     def forward(self, x):
-        x = x.view(-1, 1, self.n_features)
         if self.kernel == "linear":
+            x = x.view(-1, 1, self.n_features)
             k = self.sv * x
+            k = k.sum(2)
         elif self.kernel == "rbf":
-            k = torch.exp(-self.gamma * torch.pow(self.sv - x, 2))
-        else:  # poly kernel
-            k = torch.pow(self.gamma * self.sv * x + self.coef0, self.degree)
-
-        k = k.sum(2)
+            x = x.view(-1, 1, self.n_features)
+            k = torch.pow(self.sv - x, 2)
+            k = k.sum(2)
+            k = torch.exp(-self.gamma * k)
+        elif self.kernel == "poly":
+            k = torch.pow(self.gamma * torch.mm(x, self.sv.t()) + self.coef0, self.degree)
+        elif self.kernel == "sigmoid":
+            k = torch.tanh(self.gamma * torch.mm(x, self.sv.t()) + self.coef0)
+        elif self.kernel == "cosine":
+            norm_x = torch.norm(x, keepdim=True, dim=1)
+            norm_sv = torch.norm(self.sv, keepdim=True, dim=1)
+            norm = torch.mm(norm_x, norm_sv.t())
+            k = torch.mm(x, self.sv.t())
+            k = torch.div(k, norm)
+        elif self.kernel == "precomputed":
+            k = x
+        else:
+            raise NotImplementedError(
+                "Hummingbird does not currently support {} kernel for KernelPCA. The supported kernels are linear, poly, rbf, sigmoid, cosine, and precomputed.".format(
+                    self.kernel
+                )
+            )
 
         k_pred_cols = (torch.sum(k, 1) / self.n_samples).view(-1, 1)
         k -= self.k_fit_rows

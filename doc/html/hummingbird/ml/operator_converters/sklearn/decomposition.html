@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/decomposition.py#L0-L113" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/decomposition.py#L0-L117" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) 2020 Supun Nakandala. All rights reserved.
@@ -77,7 +77,7 @@ def convert_sklearn_kernel_pca(operator, device, extra_config):
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-    if operator.raw_operator.kernel in [&#34;linear&#34;, &#34;poly&#34;, &#34;rbf&#34;]:
+    if operator.raw_operator.kernel in [&#34;linear&#34;, &#34;poly&#34;, &#34;rbf&#34;, &#34;sigmoid&#34;, &#34;cosine&#34;, &#34;precomputed&#34;]:
         kernel = operator.raw_operator.kernel
         degree = operator.raw_operator.degree
         sv = operator.raw_operator.X_fit_
@@ -98,7 +98,11 @@ def convert_sklearn_kernel_pca(operator, device, extra_config):
             device,
         )
     else:
-        raise RuntimeError(&#34;Unsupported kernel for KernelPCA: {}&#34;.format(operator.raw_operator.kernel))
+        raise NotImplementedError(
+            &#34;Hummingbird does not currently support {} kernel for KernelPCA. The supported kernels are linear, poly, rbf, sigmoid, cosine, and precomputed.&#34;.format(
+                operator.raw_operator.kernel
+            )
+        )
 
 
 def convert_sklearn_fast_ica(operator, device, extra_config):
@@ -173,7 +177,7 @@ register_converter(&#34;SklearnTruncatedSVD&#34;, convert_sklearn_truncated_svd)
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/decomposition.py#L74-L92" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/decomposition.py#L78-L96" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_fast_ica(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -218,7 +222,7 @@ register_converter(&#34;SklearnTruncatedSVD&#34;, convert_sklearn_truncated_svd)
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/decomposition.py#L38-L71" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/decomposition.py#L38-L75" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_kernel_pca(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -232,7 +236,7 @@ register_converter(&#34;SklearnTruncatedSVD&#34;, convert_sklearn_truncated_svd)
     Returns:
         A PyTorch model
     &#34;&#34;&#34;
-    if operator.raw_operator.kernel in [&#34;linear&#34;, &#34;poly&#34;, &#34;rbf&#34;]:
+    if operator.raw_operator.kernel in [&#34;linear&#34;, &#34;poly&#34;, &#34;rbf&#34;, &#34;sigmoid&#34;, &#34;cosine&#34;, &#34;precomputed&#34;]:
         kernel = operator.raw_operator.kernel
         degree = operator.raw_operator.degree
         sv = operator.raw_operator.X_fit_
@@ -253,7 +257,11 @@ register_converter(&#34;SklearnTruncatedSVD&#34;, convert_sklearn_truncated_svd)
             device,
         )
     else:
-        raise RuntimeError(&#34;Unsupported kernel for KernelPCA: {}&#34;.format(operator.raw_operator.kernel))</code></pre>
+        raise NotImplementedError(
+            &#34;Hummingbird does not currently support {} kernel for KernelPCA. The supported kernels are linear, poly, rbf, sigmoid, cosine, and precomputed.&#34;.format(
+                operator.raw_operator.kernel
+            )
+        )</code></pre>
 </details>
 </dd>
 <dt id="hummingbird.ml.operator_converters.sklearn.decomposition.convert_sklearn_pca"><code class="name flex">
@@ -322,7 +330,7 @@ register_converter(&#34;SklearnTruncatedSVD&#34;, convert_sklearn_truncated_svd)
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/decomposition.py#L95-L108" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/decomposition.py#L99-L112" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_truncated_svd(operator, device, extra_config):
     &#34;&#34;&#34;

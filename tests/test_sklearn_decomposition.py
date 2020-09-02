@@ -14,17 +14,22 @@ import hummingbird.ml
 
 
 class TestSklearnMatrixDecomposition(unittest.TestCase):
-    def _fit_model_pca(self, model):
+    def _fit_model_pca(self, model, precompute=False):
         data = load_digits()
         X_train, X_test, y_train, y_test = train_test_split(data.data, data.target, test_size=0.2, random_state=42)
-        model.fit(X_train)
         X_test = X_test.astype("float32")
+        if precompute:
+            # For precompute we use a linear kernel
+            model.fit(np.dot(X_train, X_train.T))
+            X_test = np.dot(X_test, X_train.T)
+        else:
+            model.fit(X_train)
 
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertTrue(torch_model is not None)
-        np.testing.assert_allclose(model.transform(X_test), torch_model.transform(X_test), rtol=1e-6, atol=1e-5)
+        np.testing.assert_allclose(model.transform(X_test), torch_model.transform(X_test), rtol=1e-6, atol=2 * 1e-5)
 
-    # PCA n_componenets none
+    # PCA n_components none
     def test_pca_converter_none(self):
         self._fit_model_pca(PCA(n_components=None))
 
@@ -52,33 +57,37 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
     def test_kernel_pca_converter_linear(self):
         self._fit_model_pca(KernelPCA(n_components=5, kernel="linear"))
 
-    # KernelPCA linear kernel with
+    # KernelPCA linear kernel with inverse transform
     def test_kernel_pca_converter_linear_fit_inverse_transform(self):
         self._fit_model_pca(KernelPCA(n_components=5, kernel="linear", fit_inverse_transform=True))
 
-    # # KernelPCA poly kernel
-    # def test_kernel_pca_converter_poly(self):
-    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='poly', degree=3))
+    # KernelPCA poly kernel
+    def test_kernel_pca_converter_poly(self):
+        self._fit_model_pca(KernelPCA(n_components=5, kernel="poly", degree=2))
 
-    # # KernelPCA poly kernel coef0
-    # def test_kernel_pca_converter_poly_coef0(self):
-    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='poly', degree=3, coef0=10))
+    # KernelPCA poly kernel coef0
+    def test_kernel_pca_converter_poly_coef0(self):
+        self._fit_model_pca(KernelPCA(n_components=10, kernel="poly", degree=3, coef0=10))
 
-    # # KernelPCA poly kernel
-    # def test_kernel_pca_converter_rbf(self):
-    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='rbf'))
+    # KernelPCA poly kernel with inverse transform
+    def test_kernel_pca_converter_poly_fit_inverse_transform(self):
+        self._fit_model_pca(KernelPCA(n_components=5, kernel="poly", degree=3, fit_inverse_transform=True))
 
-    # # KernelPCA sigmoid kernel
-    # def test_kernel_pca_converter_sigmoid(self):
-    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='sigmoid'))
+    # KernelPCA poly kernel
+    def test_kernel_pca_converter_rbf(self):
+        self._fit_model_pca(KernelPCA(n_components=5, kernel="rbf"))
 
-    # # KernelPCA cosine kernel
-    # def test_kernel_pca_converter_cosine(self):
-    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='cosine'))
+    # KernelPCA sigmoid kernel
+    def test_kernel_pca_converter_sigmoid(self):
+        self._fit_model_pca(KernelPCA(n_components=5, kernel="sigmoid"))
 
-    # # KernelPCA precomputed kernel
-    # def test_kernel_pca_converter_cosine(self):
-    #     self._fit_model_pca(KernelPCA(n_components=5, kernel='precomputed'))
+    # KernelPCA cosine kernel
+    def test_kernel_pca_converter_cosine(self):
+        self._fit_model_pca(KernelPCA(n_components=5, kernel="cosine"))
+
+    # KernelPCA precomputed kernel
+    def test_kernel_pca_converter_precomputed(self):
+        self._fit_model_pca(KernelPCA(n_components=5, kernel="precomputed"), precompute=True)
 
     # FastICA converter with n_components none
     def test_fast_ica_converter_none(self):

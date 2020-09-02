@@ -47,7 +47,7 @@ def convert_sklearn_kernel_pca(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    if operator.raw_operator.kernel in ["linear", "poly", "rbf"]:
+    if operator.raw_operator.kernel in ["linear", "poly", "rbf", "sigmoid", "cosine", "precomputed"]:
         kernel = operator.raw_operator.kernel
         degree = operator.raw_operator.degree
         sv = operator.raw_operator.X_fit_
@@ -68,7 +68,11 @@ def convert_sklearn_kernel_pca(operator, device, extra_config):
             device,
         )
     else:
-        raise RuntimeError("Unsupported kernel for KernelPCA: {}".format(operator.raw_operator.kernel))
+        raise NotImplementedError(
+            "Hummingbird does not currently support {} kernel for KernelPCA. The supported kernels are linear, poly, rbf, sigmoid, cosine, and precomputed.".format(
+                operator.raw_operator.kernel
+            )
+        )
 
 
 def convert_sklearn_fast_ica(operator, device, extra_config):
