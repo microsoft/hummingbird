@@ -19,7 +19,9 @@ class BernoulliNBModel(BaseOperator, torch.nn.Module):
         super(BernoulliNBModel, self).__init__()
         self.classification = True
         self.binarize = binarize
-        self.jll_calc_bias = torch.nn.Parameter(torch.from_numpy(jll_calc_bias.astype("float32")), requires_grad=False)
+        self.jll_calc_bias = torch.nn.Parameter(
+            torch.from_numpy(jll_calc_bias.astype("float32")).view(-1), requires_grad=False
+        )
         self.feature_log_prob_minus_neg_prob = torch.nn.Parameter(
             torch.from_numpy(feature_log_prob_minus_neg_prob.astype("float32")), requires_grad=False
         )
