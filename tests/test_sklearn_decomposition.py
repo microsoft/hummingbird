@@ -3,12 +3,14 @@ Tests sklearn matrix decomposition converters
 """
 import unittest
 import warnings
+import sys
 
 import numpy as np
 import torch
 from sklearn.decomposition import FastICA, KernelPCA, PCA, TruncatedSVD
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_digits
+
 
 import hummingbird.ml
 
@@ -38,10 +40,12 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
         self._fit_model_pca(PCA(n_components=2))
 
     # PCA n_componenets mlw and whiten true
+    @unittest.skipIf(sys.version_info[1] < 6, reason="With 3.5 Sklearn returns ValueError: math domain error")
     def test_pca_converter_mle_whiten(self):
         self._fit_model_pca(PCA(n_components="mle", whiten=True))
 
     # PCA n_componenets mle and solver full
+    @unittest.skipIf(sys.version_info[1] < 6, reason="With 3.5 Sklearn returns ValueError: math domain error")
     def test_pca_converter_mle_full(self):
         self._fit_model_pca(PCA(n_components="mle", svd_solver="full"))
 
