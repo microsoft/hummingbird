@@ -4,9 +4,11 @@ Tests sklearn matrix decomposition converters
 import unittest
 import warnings
 import sys
+from distutils.version import StrictVersion
 
 import numpy as np
 import torch
+import sklearn
 from sklearn.decomposition import FastICA, KernelPCA, PCA, TruncatedSVD
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_digits
@@ -39,13 +41,19 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
     def test_pca_converter_two(self):
         self._fit_model_pca(PCA(n_components=2))
 
-    # PCA n_componenets mlw and whiten true
-    @unittest.skipIf(sys.version_info[1] < 6, reason="With 3.5 Sklearn returns ValueError: math domain error")
+    # PCA n_componenets mle and whiten true
+    @unittest.skipIf(
+        StrictVersion(sklearn.__version__) <= StrictVersion("0.23.2"),
+        reason="With Sklearn version < 0.23.2 returns ValueError: math domain error (https://github.com/scikit-learn/scikit-learn/issues/4441)",
+    )
     def test_pca_converter_mle_whiten(self):
         self._fit_model_pca(PCA(n_components="mle", whiten=True))
 
     # PCA n_componenets mle and solver full
-    @unittest.skipIf(sys.version_info[1] < 6, reason="With 3.5 Sklearn returns ValueError: math domain error")
+    @unittest.skipIf(
+        StrictVersion(sklearn.__version__) <= StrictVersion("0.23.2"),
+        reason="With Sklearn version < 0.23.2 returns ValueError: math domain error (https://github.com/scikit-learn/scikit-learn/issues/4441)",
+    )
     def test_pca_converter_mle_full(self):
         self._fit_model_pca(PCA(n_components="mle", svd_solver="full"))
 
