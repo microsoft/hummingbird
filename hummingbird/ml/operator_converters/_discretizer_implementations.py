@@ -32,7 +32,7 @@ class KBinsDiscretizer(BaseOperator, torch.nn.Module):
         super(KBinsDiscretizer, self).__init__()
         self.transformer = True
         self.encode = encode
-        # Use DoubleTensors for better precision.
+        # We use DoubleTensors for better precision.
         # We use a small delta value of 1e-9.
         self.ge_tensor = torch.nn.Parameter(torch.DoubleTensor(bin_edges[:, :-1] - 1e-9), requires_grad=False)
         self.lt_tensor = torch.nn.Parameter(torch.DoubleTensor(bin_edges[:, 1:] + 1e-9), requires_grad=False)
