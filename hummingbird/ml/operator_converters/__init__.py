@@ -27,6 +27,7 @@ from .onnx import tree_ensemble  # noqa: E402
 from .sklearn import array_feature_extractor as sklearn_afe  # noqa: E402
 from .sklearn import binarizer  # noqa: E402
 from .sklearn import decision_tree  # noqa: E402
+from .sklearn import decomposition  # noqa: E402
 from .sklearn import gbdt  # noqa: E402
 from .sklearn import iforest  # noqa: E402
 from .sklearn import imputer  # noqa: E402
@@ -45,6 +46,7 @@ from . import xgb  # noqa: E402
 
 __pdoc__ = {}
 __pdoc__["hummingbird.operator_converters._array_feature_extractor_implementations"] = True
+__pdoc__["hummingbird.operator_converters._decomposition_implementations"] = True
 __pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
 __pdoc__["hummingbird.operator_converters._linear_implementations"] = True
 __pdoc__["hummingbird.operator_converters._mlp_implementations"] = True

@@ -19,12 +19,14 @@ DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
+FastICA,
 GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
+KernelPCA,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -36,6 +38,7 @@ MLPClassifier,
 MultinomialNB,
 Normalizer,
 OneHotEncoder,
+PCA,
 PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
@@ -47,6 +50,7 @@ SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,
+TruncatedSVD,
 VarianceThreshold,
 
 LGBMClassifier,
@@ -106,6 +110,9 @@ def _build_sklearn_operator_list():
 
         # Naive Bayes Models
         from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
+
+        # Matrix decomposition transformers
+        from sklearn.decomposition import PCA, KernelPCA, FastICA, TruncatedSVD
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -168,6 +175,11 @@ def _build_sklearn_operator_list():
             PolynomialFeatures,
             RobustScaler,
             StandardScaler,
+            # Matrix Decomposition
+            FastICA,
+            KernelPCA,
+            PCA,
+            TruncatedSVD,
             # Feature selection
             SelectKBest,
             SelectPercentile,
