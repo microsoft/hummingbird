@@ -40,6 +40,7 @@ GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
+KBinsDiscretizer,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -72,7 +73,7 @@ XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L343" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L346" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -101,6 +102,7 @@ GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
+KBinsDiscretizer,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -186,6 +188,7 @@ def _build_sklearn_operator_list():
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
+            KBinsDiscretizer,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -238,6 +241,7 @@ def _build_sklearn_operator_list():
             SimpleImputer,
             # Preprocessing
             Binarizer,
+            KBinsDiscretizer,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -473,7 +477,7 @@ CONTAINER = &#34;container&#34;
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L298-L311" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L301-L314" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_onnxml_api_operator_name(model_type):
     &#34;&#34;&#34;
@@ -510,7 +514,7 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L282-L295" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L285-L298" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_sklearn_api_operator_name(model_type):
     &#34;&#34;&#34;
