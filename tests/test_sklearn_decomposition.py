@@ -102,12 +102,12 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
         self._fit_model_pca(KernelPCA(n_components=5, kernel="precomputed"), precompute=True)
 
     # FastICA converter with n_components none
-    @unittest.skipIf(
-        LooseVersion(sklearn.__version__) < LooseVersion("0.23.2"),
-        reason="With Sklearn version < 0.23.2 returns ValueError: array must not contain infs or NaNs",
-    )
+    # @unittest.skipIf(
+    #     LooseVersion(sklearn.__version__) < LooseVersion("0.23.2"),
+    #     reason="With Sklearn version < 0.23.2 returns ValueError: array must not contain infs or NaNs",
+    # )
     def test_fast_ica_converter_none(self):
-        self._fit_model_pca(FastICA(n_components=None))
+        self._fit_model_pca(FastICA(n_components=None, whiten=True))
 
     # FastICA converter with n_components 3
     def test_fast_ica_converter_3(self):
