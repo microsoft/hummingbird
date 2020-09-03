@@ -27,6 +27,7 @@ HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
 KernelPCA,
+KBinsDiscretizer,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -117,6 +118,7 @@ def _build_sklearn_operator_list():
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
+            KBinsDiscretizer,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -169,6 +171,7 @@ def _build_sklearn_operator_list():
             SimpleImputer,
             # Preprocessing
             Binarizer,
+            KBinsDiscretizer,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
