@@ -15,9 +15,9 @@ from ._base_operator import BaseOperator
 
 
 class MLPModel(BaseOperator, torch.nn.Module):
-    def __init__(self, weights, biases, activation, classes, device):
+    def __init__(self, weights, biases, activation, device):
         super(MLPModel, self).__init__()
-        self.classification = True
+        self.regression = True
         self.weights = torch.nn.ParameterList(
             [torch.nn.Parameter(torch.from_numpy(weight.astype("float32")), requires_grad=False) for weight in weights]
         )
@@ -25,15 +25,6 @@ class MLPModel(BaseOperator, torch.nn.Module):
             [torch.nn.Parameter(torch.from_numpy(bias.astype("float32")), requires_grad=False) for bias in biases]
         )
         self.activation = activation
-        self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
-        self.perform_class_select = False
-
-        if min(classes) != 0 or max(classes) != len(classes) - 1:
-            self.perform_class_select = True
-
-        self.binary_classification = False
-        if len(classes) == 2:
-            self.binary_classification = True
 
     def forward(self, x):
         for i in range(len(self.weights) - 1):
@@ -48,8 +39,26 @@ class MLPModel(BaseOperator, torch.nn.Module):
             elif self.activation != "identity":
                 raise RuntimeError("Unsupported activation {0}".format(self.activation))
 
-        x = torch.addmm(self.biases[-1], x, self.weights[-1])
+        return torch.addmm(self.biases[-1], x, self.weights[-1])
 
+
+class MLPClassificationModel(MLPModel):
+    def __init__(self, weights, biases, activation, classes, device):
+        super(MLPClassificationModel, self).__init__(weights, biases, activation, device)
+        self.regression = False
+        self.classification = True
+        self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
+        self.perform_class_select = False
+
+        if min(classes) != 0 or max(classes) != len(classes) - 1:
+            self.perform_class_select = True
+
+        self.binary_classification = False
+        if len(classes) == 2:
+            self.binary_classification = True
+
+    def forward(self, x):
+        x = super().forward(x)
         if self.binary_classification:
             output = torch.sigmoid(x)
             output = torch.cat([1 - output, output], dim=1)
