@@ -34,12 +34,14 @@ DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
+FastICA,
 GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
+KernelPCA,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -51,6 +53,7 @@ MLPClassifier,
 MultinomialNB,
 Normalizer,
 OneHotEncoder,
+PCA,
 PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
@@ -62,6 +65,7 @@ SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,
+TruncatedSVD,
 VarianceThreshold,</p>
 <p>LGBMClassifier,
 LGBMRanker,
@@ -72,7 +76,7 @@ XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L343" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L355" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -95,12 +99,14 @@ DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
+FastICA,
 GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
+KernelPCA,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -112,6 +118,7 @@ MLPClassifier,
 MultinomialNB,
 Normalizer,
 OneHotEncoder,
+PCA,
 PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
@@ -123,6 +130,7 @@ SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,
+TruncatedSVD,
 VarianceThreshold,
 
 LGBMClassifier,
@@ -182,6 +190,9 @@ def _build_sklearn_operator_list():
 
         # Naive Bayes Models
         from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
+
+        # Matrix decomposition transformers
+        from sklearn.decomposition import PCA, KernelPCA, FastICA, TruncatedSVD
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -244,6 +255,11 @@ def _build_sklearn_operator_list():
             PolynomialFeatures,
             RobustScaler,
             StandardScaler,
+            # Matrix Decomposition
+            FastICA,
+            KernelPCA,
+            PCA,
+            TruncatedSVD,
             # Feature selection
             SelectKBest,
             SelectPercentile,
@@ -473,7 +489,7 @@ CONTAINER = &#34;container&#34;
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L298-L311" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L310-L323" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_onnxml_api_operator_name(model_type):
     &#34;&#34;&#34;
@@ -510,7 +526,7 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L282-L295" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L294-L307" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_sklearn_api_operator_name(model_type):
     &#34;&#34;&#34;
