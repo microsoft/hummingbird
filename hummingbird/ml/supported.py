@@ -20,12 +20,15 @@ DecisionTreeClassifier,
 DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
+FastICA,
 GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
+KernelPCA,
+KBinsDiscretizer,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -34,9 +37,11 @@ MaxAbsScaler,
 MinMaxScaler,
 MissingIndicator,
 MLPClassifier,
+MLPRegressor,
 MultinomialNB,
 Normalizer,
 OneHotEncoder,
+PCA,
 PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
@@ -48,6 +53,7 @@ SGDClassifier,
 StandardScaler,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,
+TruncatedSVD,
 VarianceThreshold,
 
 LGBMClassifier,
@@ -110,14 +116,18 @@ def _build_sklearn_operator_list():
         from sklearn.impute import MissingIndicator, SimpleImputer
 
         # MLP Models
-        from sklearn.neural_network import MLPClassifier
+        from sklearn.neural_network import MLPClassifier, MLPRegressor
 
         # Naive Bayes Models
         from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
 
+        # Matrix decomposition transformers
+        from sklearn.decomposition import PCA, KernelPCA, FastICA, TruncatedSVD
+
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
+            KBinsDiscretizer,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -157,9 +167,10 @@ def _build_sklearn_operator_list():
             LogisticRegressionCV,
             SGDClassifier,
             # Other models
-            MLPClassifier,
             BernoulliNB,
             GaussianNB,
+            MLPClassifier,
+            MLPRegressor,
             MultinomialNB,
             # SVM
             NuSVC,
@@ -170,12 +181,18 @@ def _build_sklearn_operator_list():
             SimpleImputer,
             # Preprocessing
             Binarizer,
+            KBinsDiscretizer,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
             PolynomialFeatures,
             RobustScaler,
             StandardScaler,
+            # Matrix Decomposition
+            FastICA,
+            KernelPCA,
+            PCA,
+            TruncatedSVD,
             # Feature selection
             SelectKBest,
             SelectPercentile,

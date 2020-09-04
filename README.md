@@ -72,7 +72,7 @@ You can also read about Hummingbird in our blog post [here](https://azuredata.mi
 
 For more details on the vision and on the technical details related to Hummingbird, please check our papers:
 
-* [A Tensor-based Approach for One-size-fits-all ML Prediction Serving](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf). Supun Nakandalam, Karla Saur, Gyeong-In Yu, Konstantinos Karanasos, Carlo Curino, Markus Weimer, Matteo Interlandi. To appear at OSDI 2020.
+* [A Tensor-based Approach for One-size-fits-all ML Prediction Serving](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf). Supun Nakandala, Karla Saur, Gyeong-In Yu, Konstantinos Karanasos, Carlo Curino, Markus Weimer, Matteo Interlandi. To appear at OSDI 2020.
 * [Compiling Classical ML Pipelines into Tensor Computations for One-size-fits-all Prediction Serving](http://learningsys.org/neurips19/assets/papers/27_CameraReadySubmission_Hummingbird%20(5).pdf). Supun Nakandala, Gyeong-In Yu, Markus Weimer, Matteo Interlandi. System for ML Workshop. NeurIPS 2019
 
 # Contributing
