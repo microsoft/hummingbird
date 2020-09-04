@@ -36,6 +36,7 @@ MaxAbsScaler,
 MinMaxScaler,
 MissingIndicator,
 MLPClassifier,
+MLPRegressor,
 MultinomialNB,
 Normalizer,
 OneHotEncoder,
@@ -107,7 +108,7 @@ def _build_sklearn_operator_list():
         from sklearn.impute import MissingIndicator, SimpleImputer
 
         # MLP Models
-        from sklearn.neural_network import MLPClassifier
+        from sklearn.neural_network import MLPClassifier, MLPRegressor
 
         # Naive Bayes Models
         from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
@@ -158,9 +159,10 @@ def _build_sklearn_operator_list():
             LogisticRegressionCV,
             SGDClassifier,
             # Other models
-            MLPClassifier,
             BernoulliNB,
             GaussianNB,
+            MLPClassifier,
+            MLPRegressor,
             MultinomialNB,
             # SVM
             NuSVC,

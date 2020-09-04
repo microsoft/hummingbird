@@ -1,12 +1,12 @@
 """
-Tests sklearn MLP models (MLPClassifier) converters.
+Tests sklearn MLP models (MLPClassifier, MLPRegressor) converters.
 """
 import unittest
 import warnings
 
 import numpy as np
 import torch
-from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPClassifier, MLPRegressor
 
 import hummingbird.ml
 
@@ -49,6 +49,35 @@ class TestSklearnMLPClassifier(unittest.TestCase):
     #  MLPClassifier multi-class w/ identity activation
     def test_mlp_classifer_multi_identity(self):
         self._test_mlp_classifer(3, activation="identity")
+
+    # MLPRegressor test function to be parameterized
+    def _test_mlp_regressor(self, activation="relu"):
+        model = MLPRegressor(hidden_layer_sizes=(100, 100, 50,), activation=activation)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.rand(100)
+
+        model.fit(X, y)
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    # MLPRegressor
+    def test_mlp_regressor(self):
+        self._test_mlp_regressor()
+
+    #  MLPRegressor w/ tanh activation
+    def test_mlp_regressor_multi_logistic(self):
+        self._test_mlp_regressor(activation="tanh")
+
+    #  MLPRegressor w/ logistic activation
+    def test_mlp_regressor_multi_tanh(self):
+        self._test_mlp_regressor(activation="logistic")
+
+    #  MLPRegressor multi-class w/ identity activation
+    def test_mlp_regressor_multi_identity(self):
+        self._test_mlp_regressor(activation="identity")
 
 
 if __name__ == "__main__":
