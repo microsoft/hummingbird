@@ -51,6 +51,7 @@ MaxAbsScaler,
 MinMaxScaler,
 MissingIndicator,
 MLPClassifier,
+MLPRegressor,
 MultinomialNB,
 Normalizer,
 OneHotEncoder,
@@ -77,7 +78,7 @@ XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L358" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L360" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -117,6 +118,7 @@ MaxAbsScaler,
 MinMaxScaler,
 MissingIndicator,
 MLPClassifier,
+MLPRegressor,
 MultinomialNB,
 Normalizer,
 OneHotEncoder,
@@ -188,7 +190,7 @@ def _build_sklearn_operator_list():
         from sklearn.impute import MissingIndicator, SimpleImputer
 
         # MLP Models
-        from sklearn.neural_network import MLPClassifier
+        from sklearn.neural_network import MLPClassifier, MLPRegressor
 
         # Naive Bayes Models
         from sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
@@ -239,9 +241,10 @@ def _build_sklearn_operator_list():
             LogisticRegressionCV,
             SGDClassifier,
             # Other models
-            MLPClassifier,
             BernoulliNB,
             GaussianNB,
+            MLPClassifier,
+            MLPRegressor,
             MultinomialNB,
             # SVM
             NuSVC,
@@ -493,7 +496,7 @@ CONTAINER = &#34;container&#34;
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L313-L326" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L315-L328" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_onnxml_api_operator_name(model_type):
     &#34;&#34;&#34;
@@ -530,7 +533,7 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L297-L310" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L299-L312" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def get_sklearn_api_operator_name(model_type):
     &#34;&#34;&#34;
