@@ -113,6 +113,9 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.threshold = extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -121,7 +124,7 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
         if self.final_probability_divider > 1:
             output = output / self.final_probability_divider
         # Further normalize to match "decision_function" in sklearn implementation.
-        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset - self.threshold
         return output
 
 
@@ -148,6 +151,9 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.threshold = extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -156,7 +162,7 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
         if self.final_probability_divider > 1:
             output = output / self.final_probability_divider
         # Further normalize to match "decision_function" in sklearn implementation.
-        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset - self.threshold
         return output
 
 
@@ -183,6 +189,9 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.threshold = extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -191,7 +200,7 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
         if self.final_probability_divider > 1:
             output = output / self.final_probability_divider
         # Further normalize to match "decision_function" in sklearn implementation.
-        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset
+        output = -1.0 * 2 ** (-output / self.average_path_length) - self.offset - self.threshold
         return output
 
 
@@ -214,6 +223,9 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     n_features = operator.raw_operator.n_features_
     # Following constants will be passed in the tree implementation to normalize the anomaly score.
     extra_config[constants.OFFSET] = operator.raw_operator.offset_
+    extra_config[constants.IFOREST_THRESHOLD] = (
+        operator.raw_operator.threshold_ if hasattr(operator.raw_operator, "threshold_") else 0
+    )
     extra_config[constants.MAX_SAMPLES] = operator.raw_operator.max_samples_
 
     # Predict in isolation forest sklearn implementation produce 2 classes: -1 (normal) & 1 (anomaly).

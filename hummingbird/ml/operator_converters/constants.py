@@ -47,5 +47,8 @@ NUM_TREES = "n_trees"
 OFFSET = "offset"
 """offset of the sklearn anomaly detection implementation"""
 
+IFOREST_THRESHOLD = "iforest_threshold"
+"""threshold of the sklearn isolation forest implementation, backward compatibility for sklearn <= 0.21"""
+
 MAX_SAMPLES = "max_samples"
 """max_samples of sklearn isolation forest implementation"""

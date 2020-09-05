@@ -223,7 +223,11 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision function scores.
         """
-        return self.model.forward(*inputs)[1].cpu().numpy().flatten()
+        scores = self.model.forward(*inputs)[1].cpu().numpy().flatten()
+        # backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in self._extra_config:
+            scores += self._extra_config[constants.IFOREST_THRESHOLD]
+        return scores
 
     def score_samples(self, *inputs):
         """
