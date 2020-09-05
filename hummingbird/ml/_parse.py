@@ -231,7 +231,7 @@ def _parse_sklearn_column_transformer(scope, model, inputs):
     transformed_result_names = []
     # Encode each transform as our IR object
     for name, op, column_indices in model.transformers_:
-        if op == "drop" or len(column_indices) == 0:
+        if op == "drop":
             continue
         if isinstance(column_indices, slice):
             column_indices = list(
@@ -243,6 +243,8 @@ def _parse_sklearn_column_transformer(scope, model, inputs):
             )
         elif isinstance(column_indices, (int, str)):
             column_indices = [column_indices]
+        if len(column_indices) == 0:
+            continue
         pt_var, pt_is = _get_column_indices(column_indices, inputs)
         transform_inputs = []
         tr_inputs = _fetch_input_slice(scope, [inputs[pt_var]], pt_is)
