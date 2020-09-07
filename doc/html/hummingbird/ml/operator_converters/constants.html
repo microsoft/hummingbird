@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L50" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L53" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -77,6 +77,9 @@ NUM_TREES = &#34;n_trees&#34;
 OFFSET = &#34;offset&#34;
 &#34;&#34;&#34;offset of the sklearn anomaly detection implementation&#34;&#34;&#34;
 
+IFOREST_THRESHOLD = &#34;iforest_threshold&#34;
+&#34;&#34;&#34;threshold of the sklearn isolation forest implementation, backward compatibility for sklearn &lt;= 0.21&#34;&#34;&#34;
+
 MAX_SAMPLES = &#34;max_samples&#34;
 &#34;&#34;&#34;max_samples of sklearn isolation forest implementation&#34;&#34;&#34;</code></pre>
 </details>
@@ -93,6 +96,10 @@ MAX_SAMPLES = &#34;max_samples&#34;
 <dt id="hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL"><code class="name">var <span class="ident">GET_PARAMETERS_FOR_TREE_TRAVERSAL</span></code></dt>
 <dd>
 <div class="desc"><p>Which function to use to extract the parameters for the tree traversal strategy</p></div>
+</dd>
+<dt id="hummingbird.ml.operator_converters.constants.IFOREST_THRESHOLD"><code class="name">var <span class="ident">IFOREST_THRESHOLD</span></code></dt>
+<dd>
+<div class="desc"><p>threshold of the sklearn isolation forest implementation, backward compatibility for sklearn &lt;= 0.21</p></div>
 </dd>
 <dt id="hummingbird.ml.operator_converters.constants.LEARNING_RATE"><code class="name">var <span class="ident">LEARNING_RATE</span></code></dt>
 <dd>
@@ -168,6 +175,7 @@ MAX_SAMPLES = &#34;max_samples&#34;
 <ul class="">
 <li><code><a title="hummingbird.ml.operator_converters.constants.BASE_PREDICTION" href="#hummingbird.ml.operator_converters.constants.BASE_PREDICTION">BASE_PREDICTION</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL" href="#hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL">GET_PARAMETERS_FOR_TREE_TRAVERSAL</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.IFOREST_THRESHOLD" href="#hummingbird.ml.operator_converters.constants.IFOREST_THRESHOLD">IFOREST_THRESHOLD</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.LEARNING_RATE" href="#hummingbird.ml.operator_converters.constants.LEARNING_RATE">LEARNING_RATE</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.MAX_SAMPLES" href="#hummingbird.ml.operator_converters.constants.MAX_SAMPLES">MAX_SAMPLES</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.NUM_TREES" href="#hummingbird.ml.operator_converters.constants.NUM_TREES">NUM_TREES</a></code></li>
