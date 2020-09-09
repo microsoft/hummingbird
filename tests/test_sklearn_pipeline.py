@@ -5,6 +5,7 @@ from sklearn import datasets
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
@@ -410,6 +411,31 @@ class TestSklearnPipeline(unittest.TestCase):
 
         np.testing.assert_allclose(
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
+        )
+
+    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
+    def test_pipeline_many_inputs(self):
+        n_features = 18
+        X = np.random.rand(100, n_features)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(1000, size=100)
+
+        scaler_transformer = Pipeline(steps=[("scaler", StandardScaler())])
+        preprocessor = ColumnTransformer(transformers=[("scaling", scaler_transformer, list(range(n_features)))])
+        model = RandomForestRegressor(n_estimators=10, max_depth=9)
+        pipeline = Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
+
+        pipeline.fit(X, y)
+
+        X_test = tuple(np.split(X, n_features, axis=1))
+
+        hb_model = hummingbird.ml.convert(pipeline, "onnx", X_test)
+
+        assert len(hb_model.model.graph.input) == n_features
+
+        np.testing.assert_allclose(
+            pipeline.predict(X), np.array(hb_model.predict(X_test)).flatten(), rtol=1e-06, atol=1e-06,
         )
 
 

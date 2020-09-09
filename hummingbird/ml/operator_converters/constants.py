@@ -41,6 +41,9 @@ ONNX_INPUTS = "onnx_inputs"
 TEST_INPUT = "test_input"
 """The test input data for models that need to be traced"""
 
+N_INPUTS = "n_inputs"
+"""Number of inputs expected by the model."""
+
 NUM_TREES = "n_trees"
 """Number of trees composing an ensemble"""
 

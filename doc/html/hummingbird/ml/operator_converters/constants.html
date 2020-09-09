@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L53" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L56" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -71,6 +71,9 @@ ONNX_INPUTS = &#34;onnx_inputs&#34;
 TEST_INPUT = &#34;test_input&#34;
 &#34;&#34;&#34;The test input data for models that need to be traced&#34;&#34;&#34;
 
+N_INPUTS = &#34;n_inputs&#34;
+&#34;&#34;&#34;Number of inputs expected by the model.&#34;&#34;&#34;
+
 NUM_TREES = &#34;n_trees&#34;
 &#34;&#34;&#34;Number of trees composing an ensemble&#34;&#34;&#34;
 
@@ -112,6 +115,10 @@ MAX_SAMPLES = &#34;max_samples&#34;
 <dt id="hummingbird.ml.operator_converters.constants.NUM_TREES"><code class="name">var <span class="ident">NUM_TREES</span></code></dt>
 <dd>
 <div class="desc"><p>Number of trees composing an ensemble</p></div>
+</dd>
+<dt id="hummingbird.ml.operator_converters.constants.N_INPUTS"><code class="name">var <span class="ident">N_INPUTS</span></code></dt>
+<dd>
+<div class="desc"><p>Number of inputs expected by the model.</p></div>
 </dd>
 <dt id="hummingbird.ml.operator_converters.constants.OFFSET"><code class="name">var <span class="ident">OFFSET</span></code></dt>
 <dd>
@@ -179,6 +186,7 @@ MAX_SAMPLES = &#34;max_samples&#34;
 <li><code><a title="hummingbird.ml.operator_converters.constants.LEARNING_RATE" href="#hummingbird.ml.operator_converters.constants.LEARNING_RATE">LEARNING_RATE</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.MAX_SAMPLES" href="#hummingbird.ml.operator_converters.constants.MAX_SAMPLES">MAX_SAMPLES</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.NUM_TREES" href="#hummingbird.ml.operator_converters.constants.NUM_TREES">NUM_TREES</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.N_INPUTS" href="#hummingbird.ml.operator_converters.constants.N_INPUTS">N_INPUTS</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.OFFSET" href="#hummingbird.ml.operator_converters.constants.OFFSET">OFFSET</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS" href="#hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS">ONNX_INITIALIZERS</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.ONNX_INPUTS" href="#hummingbird.ml.operator_converters.constants.ONNX_INPUTS">ONNX_INPUTS</a></code></li>
