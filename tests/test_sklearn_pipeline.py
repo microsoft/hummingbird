@@ -11,7 +11,7 @@ from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
 
 import hummingbird.ml
-from hummingbird.ml._utils import pandas_installed
+from hummingbird.ml._utils import pandas_installed, onnx_runtime_installed
 from hummingbird.ml import constants
 
 if pandas_installed():
@@ -415,6 +415,7 @@ class TestSklearnPipeline(unittest.TestCase):
         )
 
     @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
+    @unittest.skipIf(not onnx_runtime_installed(), reason="Test requires ORT installed")
     def test_pipeline_many_inputs(self):
         n_features = 18
         X = np.random.rand(100, n_features)
@@ -438,6 +439,7 @@ class TestSklearnPipeline(unittest.TestCase):
         )
 
     @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
+    @unittest.skipIf(not onnx_runtime_installed(), reason="Test requires ORT installed")
     def test_pipeline_many_inputs_with_schema(self):
         n_features = 5
         X = np.random.rand(100, n_features)
