@@ -78,7 +78,7 @@ XGBRegressor</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L360" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/supported.py#L0-L366" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -439,6 +439,12 @@ ONNX_INITIAL_TYPES = &#34;onnx_initial_types&#34;
 ONNX_TARGET_OPSET = &#34;onnx_target_opset&#34;
 &#34;&#34;&#34;For ONNX models we can set the target opset to use. 9 by default.&#34;&#34;&#34;
 
+INPUT_NAMES = &#34;input_names&#34;
+&#34;&#34;&#34;Set the names of the inputs. Assume that the numbers onf inputs_names is equal to the number of inputs.&#34;&#34;&#34;
+
+OUTPUT_NAMES = &#34;output_names&#34;
+&#34;&#34;&#34;Set the names of the outputs.&#34;&#34;&#34;
+
 CONTAINER = &#34;container&#34;
 &#34;&#34;&#34;Whether to return the container for Sklearn API or just the model&#34;&#34;&#34;</code></pre>
 </details>
@@ -451,6 +457,10 @@ CONTAINER = &#34;container&#34;
 <dt id="hummingbird.ml.supported.CONTAINER"><code class="name">var <span class="ident">CONTAINER</span></code></dt>
 <dd>
 <div class="desc"><p>Whether to return the container for Sklearn API or just the model</p></div>
+</dd>
+<dt id="hummingbird.ml.supported.INPUT_NAMES"><code class="name">var <span class="ident">INPUT_NAMES</span></code></dt>
+<dd>
+<div class="desc"><p>Set the names of the inputs. Assume that the numbers onf inputs_names is equal to the number of inputs.</p></div>
 </dd>
 <dt id="hummingbird.ml.supported.N_FEATURES"><code class="name">var <span class="ident">N_FEATURES</span></code></dt>
 <dd>
@@ -467,6 +477,10 @@ CONTAINER = &#34;container&#34;
 <dt id="hummingbird.ml.supported.ONNX_TARGET_OPSET"><code class="name">var <span class="ident">ONNX_TARGET_OPSET</span></code></dt>
 <dd>
 <div class="desc"><p>For ONNX models we can set the target opset to use. 9 by default.</p></div>
+</dd>
+<dt id="hummingbird.ml.supported.OUTPUT_NAMES"><code class="name">var <span class="ident">OUTPUT_NAMES</span></code></dt>
+<dd>
+<div class="desc"><p>Set the names of the outputs.</p></div>
 </dd>
 <dt id="hummingbird.ml.supported.TREE_IMPLEMENTATION"><code class="name">var <span class="ident">TREE_IMPLEMENTATION</span></code></dt>
 <dd>
@@ -574,10 +588,12 @@ or an object with scikit-learn API (e.g., LightGBM)</dd>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
 <li><code><a title="hummingbird.ml.supported.CONTAINER" href="#hummingbird.ml.supported.CONTAINER">CONTAINER</a></code></li>
+<li><code><a title="hummingbird.ml.supported.INPUT_NAMES" href="#hummingbird.ml.supported.INPUT_NAMES">INPUT_NAMES</a></code></li>
 <li><code><a title="hummingbird.ml.supported.N_FEATURES" href="#hummingbird.ml.supported.N_FEATURES">N_FEATURES</a></code></li>
 <li><code><a title="hummingbird.ml.supported.ONNX_INITIAL_TYPES" href="#hummingbird.ml.supported.ONNX_INITIAL_TYPES">ONNX_INITIAL_TYPES</a></code></li>
 <li><code><a title="hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME" href="#hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME">ONNX_OUTPUT_MODEL_NAME</a></code></li>
 <li><code><a title="hummingbird.ml.supported.ONNX_TARGET_OPSET" href="#hummingbird.ml.supported.ONNX_TARGET_OPSET">ONNX_TARGET_OPSET</a></code></li>
+<li><code><a title="hummingbird.ml.supported.OUTPUT_NAMES" href="#hummingbird.ml.supported.OUTPUT_NAMES">OUTPUT_NAMES</a></code></li>
 <li><code><a title="hummingbird.ml.supported.TREE_IMPLEMENTATION" href="#hummingbird.ml.supported.TREE_IMPLEMENTATION">TREE_IMPLEMENTATION</a></code></li>
 </ul>
 </li>

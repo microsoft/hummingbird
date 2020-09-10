@@ -5,12 +5,14 @@ from sklearn import datasets
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
 
 import hummingbird.ml
-from hummingbird.ml._utils import pandas_installed
+from hummingbird.ml._utils import pandas_installed, onnx_runtime_installed
+from hummingbird.ml import constants
 
 if pandas_installed():
     import pandas
@@ -411,6 +413,58 @@ class TestSklearnPipeline(unittest.TestCase):
         np.testing.assert_allclose(
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
+
+    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
+    @unittest.skipIf(not onnx_runtime_installed(), reason="Test requires ORT installed")
+    def test_pipeline_many_inputs(self):
+        n_features = 18
+        X = np.random.rand(100, n_features)
+        y = np.random.randint(1000, size=100)
+
+        scaler_transformer = Pipeline(steps=[("scaler", StandardScaler())])
+        preprocessor = ColumnTransformer(transformers=[("scaling", scaler_transformer, list(range(n_features)))])
+        model = RandomForestRegressor(n_estimators=10, max_depth=9)
+        pipeline = Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
+
+        pipeline.fit(X, y)
+
+        X_test = tuple(np.split(X, n_features, axis=1))
+
+        hb_model = hummingbird.ml.convert(pipeline, "onnx", X_test)
+
+        assert len(hb_model.model.graph.input) == n_features
+
+        np.testing.assert_allclose(
+            pipeline.predict(X), np.array(hb_model.predict(X_test)).flatten(), rtol=1e-06, atol=1e-06,
+        )
+
+    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
+    @unittest.skipIf(not onnx_runtime_installed(), reason="Test requires ORT installed")
+    def test_pipeline_many_inputs_with_schema(self):
+        n_features = 5
+        X = np.random.rand(100, n_features)
+        y = np.random.randint(1000, size=100)
+        input_column_names = ["A", "B", "C", "D", "E"]
+        output_column_names = ["score"]
+
+        scaler_transformer = Pipeline(steps=[("scaler", StandardScaler())])
+        preprocessor = ColumnTransformer(transformers=[("scaling", scaler_transformer, list(range(n_features)))])
+        model = RandomForestRegressor(n_estimators=10, max_depth=9)
+        pipeline = Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
+
+        pipeline.fit(X, y)
+
+        X_test = tuple(np.split(X, n_features, axis=1))
+        extra_config = {constants.INPUT_NAMES: input_column_names, constants.OUTPUT_NAMES: output_column_names}
+
+        hb_model = hummingbird.ml.convert(pipeline, "onnx", X_test, extra_config=extra_config)
+
+        graph_inputs = [input.name for input in hb_model.model.graph.input]
+        graph_outputs = [output.name for output in hb_model.model.graph.output]
+
+        assert len(hb_model.model.graph.input) == n_features
+        assert graph_inputs == input_column_names
+        assert graph_outputs == output_column_names
 
 
 if __name__ == "__main__":

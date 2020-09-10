@@ -74,7 +74,7 @@ def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
     # We modify the scikit learn model during translation.
     model = deepcopy(model)
-    topology = parse_sklearn_api_model(model)
+    topology = parse_sklearn_api_model(model, extra_config)
 
     # Convert the Topology object into a PyTorch model.
     hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
@@ -199,6 +199,8 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
                     For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
+                    Multiple inputs can be passed as `tuple` objects.
+                    For the moment only (`numpy`)`arrays` are supported.
         device: The target device the model should be run. This parameter is only used by the *torch** backends, and
                 the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
         extra_config: Extra configurations to be used by the individual operator converters.
@@ -216,7 +218,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     extra_config = deepcopy(extra_config)
 
     # Add test input as extra configuration for conversion.
-    if test_input is not None and constants.TEST_INPUT not in extra_config:
+    if test_input is not None and constants.TEST_INPUT not in extra_config and len(test_input) > 0:
         extra_config[constants.TEST_INPUT] = test_input
 
     # Fix the test_input type
@@ -224,7 +226,10 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         if type(extra_config[constants.TEST_INPUT]) == list:
             extra_config[constants.TEST_INPUT] = np.array(extra_config[constants.TEST_INPUT])
         elif type(extra_config[constants.TEST_INPUT]) == tuple:
-            extra_config[constants.N_FEATURES] = len(extra_config[constants.TEST_INPUT])
+            # We are passing multiple datasets.
+            assert all([len(input.shape) == 2 for input in extra_config[constants.TEST_INPUT]])
+            extra_config[constants.N_FEATURES] = sum([input.shape[1] for input in extra_config[constants.TEST_INPUT]])
+            extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT])
         test_input = extra_config[constants.TEST_INPUT]
 
     # We do some normalization on backends.

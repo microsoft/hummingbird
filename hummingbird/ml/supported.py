@@ -357,5 +357,11 @@ ONNX_INITIAL_TYPES = "onnx_initial_types"
 ONNX_TARGET_OPSET = "onnx_target_opset"
 """For ONNX models we can set the target opset to use. 9 by default."""
 
+INPUT_NAMES = "input_names"
+"""Set the names of the inputs. Assume that the numbers onf inputs_names is equal to the number of inputs."""
+
+OUTPUT_NAMES = "output_names"
+"""Set the names of the outputs."""
+
 CONTAINER = "container"
 """Whether to return the container for Sklearn API or just the model"""

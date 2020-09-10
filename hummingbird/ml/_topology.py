@@ -117,6 +117,44 @@ def convert(topology, backend, device, extra_config={}):
         # Set the ONNX model name if any.
         if onnx_model_name is not None:
             hb_model.graph.name = onnx_model_name
+
+        # Fix the model to use arbitrary batch dimensions
+        def fix_dim(dim):
+            updated = False
+            if dim.HasField("dim_value"):
+                dim.Clear()
+                updated = True
+                dim.dim_param = "sym"
+
+            return updated
+
+        def fix_value_info(value):
+            num_fixed = 0
+            if value.type.HasField("tensor_type"):
+                shape = value.type.tensor_type.shape
+                if shape:
+                    dim = shape.dim[0]
+                    if fix_dim(dim):
+                        num_fixed += 1
+
+            return num_fixed
+
+        def fix_graph(graph):
+            num_fixed = 0
+            for input in graph.input:
+                num_fixed += fix_value_info(input)
+
+            for output in graph.output:
+                num_fixed += fix_value_info(output)
+
+            for node in graph.node:
+                for attr in node.attribute:
+                    if attr.HasField("g"):
+                        num_fixed += fix_graph(attr.g)
+
+            return num_fixed
+
+        fix_graph(hb_model.graph)
     else:
         # Set the device for the model.
         if device != "cpu":
