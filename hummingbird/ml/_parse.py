@@ -55,12 +55,17 @@ def parse_sklearn_api_model(model, extra_config={}):
     # Declare input variables.
     inputs = []
     n_inputs = extra_config[constants.N_INPUTS] if constants.N_INPUTS in extra_config else 1
+    if constants.INPUT_NAMES in extra_config:
+        assert n_inputs == len(extra_config[constants.INPUT_NAMES])
     if constants.TEST_INPUT in extra_config:
         from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
 
         test_input = extra_config[constants.TEST_INPUT] if n_inputs > 1 else [extra_config[constants.TEST_INPUT]]
         for i in range(n_inputs):
             input = test_input[i]
+            input_name = (
+                extra_config[constants.INPUT_NAMES][i] if constants.INPUT_NAMES in extra_config else "input_{}".format(i)
+            )
             if input.dtype == np.float32:
                 input_type = FloatTensorType(input.shape)
             elif input.dtype == np.float64:
@@ -75,11 +80,12 @@ def parse_sklearn_api_model(model, extra_config={}):
                         type(input.dtype)
                     )
                 )
-            inputs.append(scope.declare_local_variable("input_{}".format(i), type=input_type))
+            inputs.append(scope.declare_local_variable(input_name, type=input_type))
     else:
         # We have no information on the input. Sklearn always gets as input a single dataframe,
         # therefore by default we start with a single `input` variable
-        inputs.append(scope.declare_local_variable("input"))
+        input_name = extra_config[constants.INPUT_NAMES][0] if constants.TEST_INPUT in extra_config else "input"
+        inputs.append(scope.declare_local_variable(input_name))
 
     # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the inputs of the scikit-learn's computational graph.
@@ -89,6 +95,12 @@ def parse_sklearn_api_model(model, extra_config={}):
     # Parse the input scikit-learn model into its scope with the topology.
     # Get the outputs of the model.
     outputs = _parse_sklearn_api(scope, model, inputs)
+
+    # Use the output names specified by the user, if any
+    if constants.OUTPUT_NAMES in extra_config:
+        assert len(extra_config[constants.OUTPUT_NAMES]) == len(outputs)
+        for i in range(len(outputs)):
+            outputs[i].raw_name = extra_config[constants.OUTPUT_NAMES][i]
 
     # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the outputs of the scikit-learn's computational graph.

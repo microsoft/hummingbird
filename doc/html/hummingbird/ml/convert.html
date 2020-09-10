@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L0-L249" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L0-L251" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -229,6 +229,8 @@ def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config=
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
                     For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
+                    Multiple inputs can be passed as `tuple` objects.
+                    For the moment only (`numpy`)`arrays` are supported.
         device: The target device the model should be run. This parameter is only used by the *torch** backends, and
                 the devices supported are the one supported by PyTorch, i.e., &#39;cpu&#39; or &#39;cuda&#39;.
         extra_config: Extra configurations to be used by the individual operator converters.
@@ -305,7 +307,9 @@ The <em>torch.jit</em> backend requires a test_input.</p>
 <dd>The target for the conversion</dd>
 <dt><strong><code>test_input</code></strong></dt>
 <dd>Some input data used to trace the model execution.
-For the ONNX backend the test_input size is supposed to be as large as the expected batch size.</dd>
+For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
+Multiple inputs can be passed as <code>tuple</code> objects.
+For the moment only (<code>numpy</code>)<code>arrays</code> are supported.</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>The target device the model should be run. This parameter is only used by the <em>torch</em>* backends, and
 the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.</dd>
@@ -321,7 +325,7 @@ The set of supported extra configurations can be found at <code><a title="hummin
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L182-L250" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/convert.py#L182-L252" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config={}):
     &#34;&#34;&#34;
@@ -343,6 +347,8 @@ The set of supported extra configurations can be found at <code><a title="hummin
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
                     For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
+                    Multiple inputs can be passed as `tuple` objects.
+                    For the moment only (`numpy`)`arrays` are supported.
         device: The target device the model should be run. This parameter is only used by the *torch** backends, and
                 the devices supported are the one supported by PyTorch, i.e., &#39;cpu&#39; or &#39;cuda&#39;.
         extra_config: Extra configurations to be used by the individual operator converters.
