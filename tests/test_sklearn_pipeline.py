@@ -461,6 +461,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         graph_inputs = [input.name for input in hb_model.model.graph.input]
         graph_outputs = [output.name for output in hb_model.model.graph.output]
+
         assert len(hb_model.model.graph.input) == n_features
         assert graph_inputs == input_column_names
         assert graph_outputs == output_column_names
