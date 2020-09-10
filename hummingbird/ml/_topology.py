@@ -124,6 +124,7 @@ def convert(topology, backend, device, extra_config={}):
             if dim.HasField("dim_value"):
                 dim.Clear()
                 updated = True
+                dim.dim_param = "sym"
 
             return updated
 
