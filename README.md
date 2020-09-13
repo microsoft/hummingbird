@@ -14,6 +14,49 @@ Currently, you can use *Hummingbird* to convert your trained traditional ML mode
 
 Hummingbird also provides a convenient uniform "inference" API following the Sklearn API. This allows swapping Sklearn models with Hummingbird-generated ones without having to change the inference code.
 
+## How Hummingbird Works
+
+Hummingbird works by reconfiguring algorithmic operators such that we can perform more regular computations which are amenable to vectorized and GPU execution. Each operator is slightly different, and we incorporate multiple strategies. This example explains one of Hummingbird’s strategies for translating a decision tree into tensors involving GEMM  (GEneric Matrix Multiplication), where we implement the traversal of the tree using matrix multiplications.  (GEMM is one of the three tree conversion strategies we currently support.)
+
+
+<p>
+    <center>
+    <img src="doc/images/1-simple-reg-tree.png" width=600 >
+    <em>Simple decision tree</em>
+    </center>
+</p>
+
+
+In this example, the decision tree has four decision nodes (orange), and five leaf nodes (blue). The tree takes a feature vector with five elements as input. For example, assume that we want to calculate the output of this observation:
+
+
+<p align="center">
+    <img src="doc/images/2-calc-output.png" width=400 >
+</p>
+
+**Step 1:** Multiply the `input tensor` with tensor `A` (computed from the decision tree model above) that captures the relationship between input features and internal nodes. Then compare it with tensor `B` which is set to the value of each internal node (orange) to create the tensor `input path` that represents the path from input to node. In this case, the tree model has 4 conditions and the input vector is 5, therefore, the shape of tensor `A` is 5x4 and tensor B is 1x4.
+
+<p align="center">
+<img src="doc/images/3-matrix.png" width=600 >
+</p>
+
+**Step 2:** The `input path` tensor will be multiplied with tensor `C` that captures whether the internal node is a parent of that internal node, and if so, whether it is in the left or right sub-tree (left = 1, right =-1, otherwise =0) and then check the equals with tensor `D` that captures the count of the left child of its parent in the path from a leaf node to the tree root to create the tenor output path that represents the path from node to output. In this case, this tree model has 5 outputs with 4 conditions, therefore, the shape of tensor `C` is 4x5 and tensor `D` is 1x5.
+
+<p align="center">
+<img src="doc/images/4-matrixnext.png" width=400 >
+</p>
+
+**Step 3:** The `input tensor` will be multiplied with tensor `E` that captures the mapping between leaf nodes to infer the final prediction. In this case, tree model has 5 outputs, therefore, shape of tensor `E` is 5x1.
+
+<p align="center">
+<img src="doc/images/5-singletensor.png" width=400>
+</p>
+
+And now Hummingbird has compiled a tree-based model using the GEMM strategy!
+
+
+_Thank you to [Chien Vu](https://www.linkedin.com/in/vumichien/) for contributing the graphics and descriptions in his [blog](https://towardsdatascience.com/standardizing-traditional-machine-learning-pipelines-to-tensor-computation-using-hummingbird-7a0b3168670) for this example!_  For more details, please see [Figure 3](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf) of our paper.
+
 ## Installation
 
 Hummingbird was tested on Python >= 3.5 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
