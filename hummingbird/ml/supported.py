@@ -118,7 +118,7 @@ def _build_sklearn_operator_list():
         from sklearn.decomposition import PCA, KernelPCA, FastICA, TruncatedSVD
 
         # KNeighbors models
-        from sklearn.neighbors import KNeighborsClassifier
+        from sklearn.neighbors._classification import KNeighborsClassifier
 
         # Preprocessing
         from sklearn.preprocessing import (

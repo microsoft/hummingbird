@@ -31,7 +31,7 @@ from .sklearn import discretizer as sklearn_discretizer  # noqa: E402
 from .sklearn import gbdt  # noqa: E402
 from .sklearn import iforest  # noqa: E402
 from .sklearn import imputer  # noqa: E402
-from .sklearn import kneighbors # noqa: E402
+from .sklearn import kneighbors  # noqa: E402
 from .sklearn import linear as sklearn_linear  # noqa: E402
 from .sklearn import mlp as sklearn_mlp  # noqa: E402
 from .sklearn import nb as sklearn_nb  # noqa: E402
@@ -50,6 +50,7 @@ __pdoc__["hummingbird.operator_converters._array_feature_extractor_implementatio
 __pdoc__["hummingbird.operator_converters._decomposition_implementations"] = True
 __pdoc__["hummingbird.operator_converters._discretizer_implementations"] = True
 __pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
+__pdoc__["hummingbird.operator_converters._kneighbors_implementations"] = True
 __pdoc__["hummingbird.operator_converters._linear_implementations"] = True
 __pdoc__["hummingbird.operator_converters._mlp_implementations"] = True
 __pdoc__["hummingbird.operator_converters._nb_implementations"] = True

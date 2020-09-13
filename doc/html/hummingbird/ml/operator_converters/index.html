@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/__init__.py#L0-L58" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/__init__.py#L0-L60" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -61,6 +61,7 @@ from .sklearn import discretizer as sklearn_discretizer  # noqa: E402
 from .sklearn import gbdt  # noqa: E402
 from .sklearn import iforest  # noqa: E402
 from .sklearn import imputer  # noqa: E402
+from .sklearn import kneighbors  # noqa: E402
 from .sklearn import linear as sklearn_linear  # noqa: E402
 from .sklearn import mlp as sklearn_mlp  # noqa: E402
 from .sklearn import nb as sklearn_nb  # noqa: E402
@@ -79,6 +80,7 @@ __pdoc__[&#34;hummingbird.operator_converters._array_feature_extractor_implement
 __pdoc__[&#34;hummingbird.operator_converters._decomposition_implementations&#34;] = True
 __pdoc__[&#34;hummingbird.operator_converters._discretizer_implementations&#34;] = True
 __pdoc__[&#34;hummingbird.operator_converters._gbdt_commons&#34;] = True
+__pdoc__[&#34;hummingbird.operator_converters._kneighbors_implementations&#34;] = True
 __pdoc__[&#34;hummingbird.operator_converters._linear_implementations&#34;] = True
 __pdoc__[&#34;hummingbird.operator_converters._mlp_implementations&#34;] = True
 __pdoc__[&#34;hummingbird.operator_converters._nb_implementations&#34;] = True

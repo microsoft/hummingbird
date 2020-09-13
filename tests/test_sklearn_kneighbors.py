@@ -1,5 +1,5 @@
 """
-Tests sklearn linear classifiers (LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV) converters.
+Tests sklearn KNeighbor model (KNeighborsClassifier) converters.
 """
 import unittest
 import warnings
@@ -13,23 +13,53 @@ import hummingbird.ml
 
 
 class TestSklearnKNeighborsClassifiers(unittest.TestCase):
+    def _test_kneighbors_classifier(
+        self, n_neighbors=5, algorithm="brute", weights="uniform", metric="minkowski", metric_params={"p": 2}
+    ):
+        model = KNeighborsClassifier(
+            n_neighbors=n_neighbors, algorithm=algorithm, weights=weights, metric=metric, metric_params=metric_params
+        )
 
-    def test_kneighbors_classifier(self, num_classes=2):
-        model = KNeighborsClassifier(n_neighbors=5, algorithm='brute')
+        for data in [datasets.load_breast_cancer(), datasets.load_iris()]:
+            X, y = data.data, data.target
+            X = X.astype(np.float32)
 
-        np.random.seed(0)
-        X = np.random.rand(100, 200)
-        X = np.array(X, dtype=np.float32)
-        y = np.random.randint(num_classes, size=100)
+            n_train_rows = int(X.shape[0] * 0.6)
+            model.fit(X[:n_train_rows, :], y[:n_train_rows])
 
-        model.fit(X, y)
+            torch_model = hummingbird.ml.convert(model, "torch")
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(
+                model.predict_proba(X[n_train_rows:, :]), torch_model.predict_proba(X[n_train_rows:, :]), rtol=1e-6, atol=1e-3
+            )
 
-        print(model.kneighbors(X))
+    # KNeighborsClassifier
+    def test_kneighbors_classifer(self):
+        self._test_kneighbors_classifier()
 
-        # torch_model = hummingbird.ml.convert(model, "torch")
+    # KNeighborsClassifier kdtree algorithm
+    def test_kneighbors_classifer_kdtree(self):
+        self._test_kneighbors_classifier(algorithm="kd_tree")
 
-        # self.assertTrue(torch_model is not None)
-        # np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+    # KNeighborsClassifier ball tree algorithm
+    def test_kneighbors_classifer_balltree(self):
+        self._test_kneighbors_classifier(algorithm="ball_tree")
+
+    # KNeighborsClassifier auto algorithm
+    def test_kneighbors_classifer_auto(self):
+        self._test_kneighbors_classifier(algorithm="auto")
+
+    # KNeighborsClassifier weights distance
+    def test_kneighbors_classifer_distance_weight(self):
+        self._test_kneighbors_classifier(3, weights="distance")
+
+    # KNeighborsClassifier euclidean metric type
+    def test_kneighbors_classifer_euclidean(self):
+        self._test_kneighbors_classifier(3, metric="euclidean")
+
+    # KNeighborsClassifier minkowski metric p = 5
+    def test_kneighbors_classifer_minkowski_p5(self):
+        self._test_kneighbors_classifier(3, metric_params={"p": 5})
 
 
 if __name__ == "__main__":

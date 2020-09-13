@@ -28,6 +28,33 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
         A PyTorch model
     """
 
-    return KNeighborsClassifierModel()
+    classes = operator.raw_operator.classes_.tolist()
+    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
+        raise RuntimeError("Hummingbird supports only integer labels for class labels.")
+
+    metric = operator.raw_operator.metric
+    metric_params = operator.raw_operator.metric_params
+
+    if metric not in ["minkowski", "euclidean"]:
+        raise NotImplementedError(
+            "Hummingbird currently supports only the metric type 'minkowski' and 'euclidean' for KNeighborsClassifier"
+        )
+
+    p = 2
+    if metric == "minkowski" and metric_params is not None and "p" in metric_params:
+        p = metric_params["p"]
+
+    weights = operator.raw_operator.weights
+    if weights not in ["uniform", "distance"]:
+        raise NotImplementedError(
+            "Hummingbird currently supports only the weights type 'uniform' and 'distance' for KNeighborsClassifier"
+        )
+
+    train_data = operator.raw_operator._fit_X
+    train_labels = operator.raw_operator._y
+    n_neighbors = operator.raw_operator.n_neighbors
+
+    return KNeighborsClassifierModel(train_data, train_labels, n_neighbors, weights, classes, p)
+
 
 register_converter("SklearnKNeighborsClassifier", convert_sklearn_kneighbors_classification_model)
