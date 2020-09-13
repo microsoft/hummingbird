@@ -19,11 +19,9 @@ Hummingbird also provides a convenient uniform "inference" API following the Skl
 Hummingbird works by reconfiguring algorithmic operators such that we can perform more regular computations which are amenable to vectorized and GPU execution. Each operator is slightly different, and we incorporate multiple strategies. This example explains one of Hummingbird’s strategies for translating a decision tree into tensors involving GEMM  (GEneric Matrix Multiplication), where we implement the traversal of the tree using matrix multiplications.  (GEMM is one of the three tree conversion strategies we currently support.)
 
 
-<p>
-    <center>
+<p align="center">
     <img src="doc/images/1-simple-reg-tree.png" width=600 >
     <em>Simple decision tree</em>
-    </center>
 </p>
 
 
@@ -52,10 +50,10 @@ In this example, the decision tree has four decision nodes (orange), and five le
 <img src="doc/images/5-singletensor.png" width=400>
 </p>
 
-And now Hummingbird has compiled a tree-based model using the GEMM strategy!
+And now Hummingbird has compiled a tree-based model using the GEMM strategy!  For more details, please see [Figure 3](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf) of our paper.
 
 
-_Thank you to [Chien Vu](https://www.linkedin.com/in/vumichien/) for contributing the graphics and descriptions in his [blog](https://towardsdatascience.com/standardizing-traditional-machine-learning-pipelines-to-tensor-computation-using-hummingbird-7a0b3168670) for this example!_  For more details, please see [Figure 3](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf) of our paper.
+_Thank you to [Chien Vu](https://www.linkedin.com/in/vumichien/) for contributing the graphics and descriptions in his [blog](https://towardsdatascience.com/standardizing-traditional-machine-learning-pipelines-to-tensor-computation-using-hummingbird-7a0b3168670) for this example!_
 
 ## Installation
 
