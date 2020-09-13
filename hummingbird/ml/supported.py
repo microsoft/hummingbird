@@ -28,6 +28,7 @@ HistGradientBoostingRegressor,
 IsolationForest,
 KernelPCA,
 KBinsDiscretizer,
+KNeighborsClassifier,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -116,6 +117,9 @@ def _build_sklearn_operator_list():
         # Matrix decomposition transformers
         from sklearn.decomposition import PCA, KernelPCA, FastICA, TruncatedSVD
 
+        # KNeighbors models
+        from sklearn.neighbors import KNeighborsClassifier
+
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
@@ -161,6 +165,7 @@ def _build_sklearn_operator_list():
             # Other models
             BernoulliNB,
             GaussianNB,
+            KNeighborsClassifier,
             MLPClassifier,
             MLPRegressor,
             MultinomialNB,

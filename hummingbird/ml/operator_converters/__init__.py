@@ -31,6 +31,7 @@ from .sklearn import discretizer as sklearn_discretizer  # noqa: E402
 from .sklearn import gbdt  # noqa: E402
 from .sklearn import iforest  # noqa: E402
 from .sklearn import imputer  # noqa: E402
+from .sklearn import kneighbors # noqa: E402
 from .sklearn import linear as sklearn_linear  # noqa: E402
 from .sklearn import mlp as sklearn_mlp  # noqa: E402
 from .sklearn import nb as sklearn_nb  # noqa: E402
