@@ -14,7 +14,7 @@ import hummingbird.ml
 from hummingbird.ml._utils import pandas_installed, onnx_runtime_installed
 from hummingbird.ml import constants
 
-from skl2onnx.common.data_types import (
+from onnxconverter_common.data_types import (
     FloatTensorType,
     Int64TensorType,
     StringTensorType,
