@@ -209,7 +209,7 @@ class TestSklearnPipeline(unittest.TestCase):
         X_test = X_test.drop(to_drop, axis=1)
 
         clf.fit(X_train, y_train)
-        inputs = convert_dataframe_schema(X_train, to_drop)
+        # inputs = convert_dataframe_schema(X_train, to_drop)
 
         self.assertRaises(NotImplementedError, hummingbird.ml.convert, clf, "torch")
 
