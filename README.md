@@ -21,6 +21,7 @@ Hummingbird works by reconfiguring algorithmic operators such that we can perfor
 
 <p align="center">
     <img src="doc/images/1-simple-reg-tree.png" width=600 >
+    <br>
     <em>Simple decision tree</em>
 </p>
 
