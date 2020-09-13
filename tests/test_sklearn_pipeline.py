@@ -147,7 +147,7 @@ class TestSklearnPipeline(unittest.TestCase):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
         numeric_features = ["age", "fare"]
-        numeric_transformer = Pipeline(steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler()),])
+        numeric_transformer = Pipeline(steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())])
 
         categorical_features = ["embarked", "sex", "pclass"]
         categorical_transformer = Pipeline(
