@@ -45,7 +45,7 @@ In this example, the decision tree has four decision nodes (orange), and five le
 <img src="doc/images/4-matrixnext.png" width=400 >
 </p>
 
-**Step 3:** The `input tensor` will be multiplied with tensor `E` that captures the mapping between leaf nodes to infer the final prediction. In this case, tree model has 5 outputs, therefore, shape of tensor `E` is 5x1.
+**Step 3:** The `output path` will be multiplied with tensor `E` that captures the mapping between leaf nodes to infer the final prediction. In this case, tree model has 5 outputs, therefore, shape of tensor `E` is 5x1.
 
 <p align="center">
 <img src="doc/images/5-singletensor.png" width=400>
