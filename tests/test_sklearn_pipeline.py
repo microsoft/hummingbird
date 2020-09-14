@@ -14,6 +14,17 @@ import hummingbird.ml
 from hummingbird.ml._utils import pandas_installed, onnx_runtime_installed
 from hummingbird.ml import constants
 
+from onnxconverter_common.data_types import (
+    FloatTensorType,
+    Int64TensorType,
+    StringTensorType,
+)
+
+try:
+    from sklearn.impute import SimpleImputer
+except ImportError:
+    from sklearn.preprocessing import Imputer as SimpleImputer
+
 if pandas_installed():
     import pandas
 
@@ -114,6 +125,100 @@ class TestSklearnPipeline(unittest.TestCase):
         np.testing.assert_allclose(
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
+
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
+    def test_pipeline_column_transformer_string(self):
+        """
+        TODO: Hummingbird does not yet support strings in this context. Should raise error.
+        When this feature is complete, change this test.
+        """
+        # fit
+        titanic_url = "https://raw.githubusercontent.com/amueller/scipy-2017-sklearn/091d371/notebooks/datasets/titanic3.csv"
+        data = pandas.read_csv(titanic_url)
+        X = data.drop("survived", axis=1)
+        y = data["survived"]
+
+        # SimpleImputer on string is not available for string
+        # in ONNX-ML specifications.
+        # So we do it beforehand.
+        for cat in ["embarked", "sex", "pclass"]:
+            X[cat].fillna("missing", inplace=True)
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+        numeric_features = ["age", "fare"]
+        numeric_transformer = Pipeline(steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())])
+
+        categorical_features = ["embarked", "sex", "pclass"]
+        categorical_transformer = Pipeline(
+            steps=[
+                # --- SimpleImputer on string is not available
+                # for string in ONNX-ML specifications.
+                # ('imputer',
+                #  SimpleImputer(strategy='constant', fill_value='missing')),
+                ("onehot", OneHotEncoder(handle_unknown="ignore"))
+            ]
+        )
+
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("num", numeric_transformer, numeric_features),
+                ("cat", categorical_transformer, categorical_features),
+            ]
+        )
+
+        clf = Pipeline(
+            steps=[
+                ("preprocessor", preprocessor),
+                # ("classifier", LogisticRegression(solver="lbfgs")),
+            ]
+        )
+
+        # inputs
+
+        def convert_dataframe_schema(df, drop=None):
+            inputs = []
+            for k, v in zip(df.columns, df.dtypes):
+                if drop is not None and k in drop:
+                    continue
+                if v == "int64":
+                    t = Int64TensorType([None, 1])
+                elif v == "float64":
+                    t = FloatTensorType([None, 1])
+                else:
+                    t = StringTensorType([None, 1])
+                inputs.append((k, t))
+            return inputs
+
+        to_drop = {
+            "parch",
+            "sibsp",
+            "cabin",
+            "ticket",
+            "name",
+            "body",
+            "home.dest",
+            "boat",
+        }
+
+        X_train = X_train.copy()
+        X_test = X_test.copy()
+        X_train["pclass"] = X_train["pclass"].astype(np.int64)
+        X_test["pclass"] = X_test["pclass"].astype(np.int64)
+        X_train = X_train.drop(to_drop, axis=1)
+        X_test = X_test.drop(to_drop, axis=1)
+
+        clf.fit(X_train, y_train)
+        # inputs = convert_dataframe_schema(X_train, to_drop)
+
+        self.assertRaises(NotImplementedError, hummingbird.ml.convert, clf, "torch")
+
+        # torch_model = hummingbird.ml.convert(clf, "torch", inputs)
+        # self.assertTrue(torch_model is not None)
+
+        # np.testing.assert_allclose(
+        #    model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
+        # )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer(self):

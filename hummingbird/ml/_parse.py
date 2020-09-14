@@ -75,7 +75,7 @@ def parse_sklearn_api_model(model, extra_config={}):
             elif input.dtype == np.int64:
                 input_type = Int64TensorType(input.shape)
             else:
-                raise RuntimeError(
+                raise NotImplementedError(
                     "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
                         type(input.dtype)
                     )
@@ -515,10 +515,14 @@ def _get_column_index(i, inputs):
                 )
             end += rel_end
     else:
-        for ind, inp in enumerate(inputs):
-            if inp.onnx_name == i:
-                return ind, 0
-        raise RuntimeError("Unable to find column name '{0}'".format(i))
+        # TODO: implement strings
+        # for ind, inp in enumerate(inputs):
+        #    if inp.onnx_name == i:
+        #        return ind, 0
+        # raise RuntimeError("Unable to find column name '{0}'".format(i))
+        raise NotImplementedError(
+            "Type string not supported. Please fill an issue on https://github.com/microsoft/hummingbird/."
+        )
 
 
 def _get_column_indices(indices, inputs, multiple=False):
