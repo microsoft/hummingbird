@@ -14,6 +14,7 @@ import torch
 
 from .. import constants
 from .._base_operator import BaseOperator
+from .._pipeline_implementations import Concat
 
 
 class Cast(BaseOperator, torch.nn.Module):
@@ -29,17 +30,6 @@ class Cast(BaseOperator, torch.nn.Module):
             return x.float()
         if self.to_type == 7:  # Cast to long
             return x.long()
-
-
-class Concat(BaseOperator, torch.nn.Module):
-    def __init__(self):
-        super(Concat, self).__init__()
-
-    def forward(self, *x):
-        if len(x[0].shape) > 1:
-            return torch.cat(x, dim=1)
-        else:
-            return torch.stack(x, dim=1)
 
 
 class Reshape(BaseOperator, torch.nn.Module):

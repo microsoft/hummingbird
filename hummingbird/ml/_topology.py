@@ -193,7 +193,7 @@ def convert(topology, backend, device, extra_config={}):
     tmp_idx = idx
     if operator_map[operators[idx].full_name].transformer:
         while (
-            idx > 0
+            idx >= 0
             and not operator_map[operators[idx].full_name].regression
             and not operator_map[operators[idx].full_name].classification
             and not operator_map[operators[idx].full_name].anomaly_detection

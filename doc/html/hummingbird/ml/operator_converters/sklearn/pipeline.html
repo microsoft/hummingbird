@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L0-L103" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L0-L92" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -45,18 +45,7 @@ import torch
 from .. import constants
 from .._array_feature_extractor_implementations import ArrayFeatureExtractor
 from .._base_operator import BaseOperator
-
-
-class Concat(BaseOperator, torch.nn.Module):
-    &#34;&#34;&#34;
-    Module used to concatenate tensors into a single tensor.
-    &#34;&#34;&#34;
-
-    def __init__(self):
-        super(Concat, self).__init__()
-
-    def forward(self, *x):
-        return torch.cat(x, dim=1)
+from .._pipeline_implementations import Concat
 
 
 class Multiply(BaseOperator, torch.nn.Module):
@@ -163,7 +152,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L46-L63" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L35-L52" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -207,7 +196,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L66-L78" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L55-L67" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_concat(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -246,7 +235,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L81-L99" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L70-L88" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_multiply(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -274,51 +263,6 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.Concat"><code class="flex name class">
-<span>class <span class="ident">Concat</span></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Module used to concatenate tensors into a single tensor.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L20-L29" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">class Concat(BaseOperator, torch.nn.Module):
-    &#34;&#34;&#34;
-    Module used to concatenate tensors into a single tensor.
-    &#34;&#34;&#34;
-
-    def __init__(self):
-        super(Concat, self).__init__()
-
-    def forward(self, *x):
-        return torch.cat(x, dim=1)</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>hummingbird.ml.operator_converters._base_operator.BaseOperator</li>
-<li>abc.ABC</li>
-<li>torch.nn.modules.module.Module</li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="hummingbird.ml.operator_converters.sklearn.pipeline.Concat.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, *x) -> Callable[..., Any]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L28-L29" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">def forward(self, *x):
-    return torch.cat(x, dim=1)</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
 <dt id="hummingbird.ml.operator_converters.sklearn.pipeline.Multiply"><code class="flex name class">
 <span>class <span class="ident">Multiply</span></span>
 <span>(</span><span>score)</span>
@@ -328,7 +272,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L32-L43" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L21-L32" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Multiply(BaseOperator, torch.nn.Module):
     &#34;&#34;&#34;
@@ -359,7 +303,7 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L42-L43" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/pipeline.py#L31-L32" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     return x * self.score</code></pre>
@@ -394,12 +338,6 @@ register_converter(&#34;SklearnMultiply&#34;, convert_sklearn_multiply)</code></
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li>
-<h4><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.Concat" href="#hummingbird.ml.operator_converters.sklearn.pipeline.Concat">Concat</a></code></h4>
-<ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.Concat.forward" href="#hummingbird.ml.operator_converters.sklearn.pipeline.Concat.forward">forward</a></code></li>
-</ul>
-</li>
 <li>
 <h4><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline.Multiply" href="#hummingbird.ml.operator_converters.sklearn.pipeline.Multiply">Multiply</a></code></h4>
 <ul class="">

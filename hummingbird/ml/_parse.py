@@ -455,7 +455,7 @@ def _fetch_input_slice(scope, inputs, column_indices):
         len(inputs) == 1
         and len(column_indices) == 1
         and inputs[0].type is not None
-        and (inputs[0].type.shape == 1 or inputs[0].type.shape[1] == 1)
+        and (len(inputs[0].type.shape) == 1 or inputs[0].type.shape[1] == 1)
     ):
         return inputs
     array_feature_extractor_operator = scope.declare_local_operator("SklearnArrayFeatureExtractor")
@@ -514,12 +514,12 @@ def _get_column_index(i, inputs):
                     "dimension.".format(i, inputs[vi])
                 )
             end += rel_end
+    elif isinstance(i, str):
+        for ind, inp in enumerate(inputs):
+            if inp.onnx_name == i:
+                return ind, 0
+        raise RuntimeError("Unable to find column name '{0}'".format(i))
     else:
-        # TODO: implement strings
-        # for ind, inp in enumerate(inputs):
-        #    if inp.onnx_name == i:
-        #        return ind, 0
-        # raise RuntimeError("Unable to find column name '{0}'".format(i))
         raise NotImplementedError(
             "Type string not supported. Please fill an issue on https://github.com/microsoft/hummingbird/."
         )
