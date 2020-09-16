@@ -78,11 +78,25 @@ class OneHotEncoder(BaseOperator, torch.nn.Module):
             condition_tensors.append(torch.nn.Parameter(torch.LongTensor(arr), requires_grad=False))
         self.condition_tensors = torch.nn.ParameterList(condition_tensors)
 
-    def forward(self, x):
-        if x.dtype != torch.int64:
-            x = x.long()
-
+    def forward(self, *x):
         encoded_tensors = []
-        for i in range(self.num_columns):
-            encoded_tensors.append(torch.eq(x[:, i : i + 1], self.condition_tensors[i]))
+
+        if len(x) > 1:
+            assert len(x) == self.num_columns
+
+            for i in range(self.num_columns):
+                input = x[i]
+                if input.dtype != torch.int64:
+                    input = input.long()
+
+                encoded_tensors.append(torch.eq(input, self.condition_tensors[i]))
+        else:
+            # This is already a tensor.
+            x = x[0]
+            if x.dtype != torch.int64:
+                x = x.long()
+
+            for i in range(self.num_columns):
+                encoded_tensors.append(torch.eq(x[:, i : i + 1], self.condition_tensors[i]))
+
         return torch.cat(encoded_tensors, dim=1).float()
