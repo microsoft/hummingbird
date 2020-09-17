@@ -34,6 +34,17 @@ from .exceptions import MissingConverter
 from .operator_converters import constants
 
 
+def _get_trace_input_from_test_input(input):
+    """
+    Utility function used to properly put the inputs into a format understandable by torch.
+    """
+    if type(input) is tuple:
+        trace_input = tuple([torch.from_numpy(i) for i in input])
+    else:
+        trace_input = torch.from_numpy(input)
+    return trace_input
+
+
 def convert(topology, backend, device, extra_config={}):
     """
     This function is used to convert a `onnxconverter_common.topology.Topology` object into a *backend* model.
@@ -94,11 +105,7 @@ def convert(topology, backend, device, extra_config={}):
             output_model_name = str(uuid4().hex) + ".onnx"
 
         # Put the tracing test input into the right format.
-        trace_input = extra_config[constants.TEST_INPUT]
-        if type(trace_input) is tuple:
-            trace_input = tuple([torch.from_numpy(i) for i in trace_input])
-        else:
-            trace_input = torch.from_numpy(trace_input)
+        trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT])
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -163,10 +170,10 @@ def convert(topology, backend, device, extra_config={}):
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
-            test_data = torch.from_numpy(extra_config[constants.TEST_INPUT])
+            trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT])
             if device != "cpu":
-                test_data.to(device)
-            torch_model = torch.jit.trace(torch_model, test_data).eval()
+                trace_input.to(device)
+            torch_model = torch.jit.trace(torch_model, trace_input).eval()
             torch.jit.optimized_execution(torch_model)
         hb_model = torch_model
 
@@ -193,7 +200,7 @@ def convert(topology, backend, device, extra_config={}):
     tmp_idx = idx
     if operator_map[operators[idx].full_name].transformer:
         while (
-            idx > 0
+            idx >= 0
             and not operator_map[operators[idx].full_name].regression
             and not operator_map[operators[idx].full_name].classification
             and not operator_map[operators[idx].full_name].anomaly_detection

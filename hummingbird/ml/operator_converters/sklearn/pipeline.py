@@ -15,18 +15,7 @@ import torch
 from .. import constants
 from .._array_feature_extractor_implementations import ArrayFeatureExtractor
 from .._base_operator import BaseOperator
-
-
-class Concat(BaseOperator, torch.nn.Module):
-    """
-    Module used to concatenate tensors into a single tensor.
-    """
-
-    def __init__(self):
-        super(Concat, self).__init__()
-
-    def forward(self, *x):
-        return torch.cat(x, dim=1)
+from .._pipeline_implementations import Concat
 
 
 class Multiply(BaseOperator, torch.nn.Module):

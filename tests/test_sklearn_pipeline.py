@@ -137,28 +137,18 @@ class TestSklearnPipeline(unittest.TestCase):
         data = pandas.read_csv(titanic_url)
         X = data.drop("survived", axis=1)
         y = data["survived"]
-
         # SimpleImputer on string is not available for string
         # in ONNX-ML specifications.
         # So we do it beforehand.
-        for cat in ["embarked", "sex", "pclass"]:
-            X[cat].fillna("missing", inplace=True)
+        X["pclass"].fillna("missing", inplace=True)
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
         numeric_features = ["age", "fare"]
         numeric_transformer = Pipeline(steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())])
 
-        categorical_features = ["embarked", "sex", "pclass"]
-        categorical_transformer = Pipeline(
-            steps=[
-                # --- SimpleImputer on string is not available
-                # for string in ONNX-ML specifications.
-                # ('imputer',
-                #  SimpleImputer(strategy='constant', fill_value='missing')),
-                ("onehot", OneHotEncoder(handle_unknown="ignore"))
-            ]
-        )
+        categorical_features = ["pclass"]
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -167,39 +157,9 @@ class TestSklearnPipeline(unittest.TestCase):
             ]
         )
 
-        clf = Pipeline(
-            steps=[
-                ("preprocessor", preprocessor),
-                # ("classifier", LogisticRegression(solver="lbfgs")),
-            ]
-        )
+        clf = Pipeline(steps=[("preprocessor", preprocessor), ("classifier", LogisticRegression(solver="liblinear"))])
 
-        # inputs
-
-        def convert_dataframe_schema(df, drop=None):
-            inputs = []
-            for k, v in zip(df.columns, df.dtypes):
-                if drop is not None and k in drop:
-                    continue
-                if v == "int64":
-                    t = Int64TensorType([None, 1])
-                elif v == "float64":
-                    t = FloatTensorType([None, 1])
-                else:
-                    t = StringTensorType([None, 1])
-                inputs.append((k, t))
-            return inputs
-
-        to_drop = {
-            "parch",
-            "sibsp",
-            "cabin",
-            "ticket",
-            "name",
-            "body",
-            "home.dest",
-            "boat",
-        }
+        to_drop = {"parch", "sibsp", "cabin", "ticket", "name", "body", "home.dest", "boat", "sex", "embarked"}
 
         X_train = X_train.copy()
         X_test = X_test.copy()
@@ -209,16 +169,14 @@ class TestSklearnPipeline(unittest.TestCase):
         X_test = X_test.drop(to_drop, axis=1)
 
         clf.fit(X_train, y_train)
-        # inputs = convert_dataframe_schema(X_train, to_drop)
 
-        self.assertRaises(NotImplementedError, hummingbird.ml.convert, clf, "torch")
+        torch_model = hummingbird.ml.convert(clf, "torch", X_test)
 
-        # torch_model = hummingbird.ml.convert(clf, "torch", inputs)
-        # self.assertTrue(torch_model is not None)
+        self.assertTrue(torch_model is not None)
 
-        # np.testing.assert_allclose(
-        #    model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
-        # )
+        np.testing.assert_allclose(
+            clf.predict(X_test), torch_model.predict(X_test), rtol=1e-06, atol=1e-06,
+        )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer(self):
@@ -262,6 +220,47 @@ class TestSklearnPipeline(unittest.TestCase):
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
+    def test_pipeline_column_transformer_pandas(self):
+        iris = datasets.load_iris()
+        X = iris.data[:, :3]
+        y = iris.target
+        X_train = pandas.DataFrame(X, columns=["vA", "vB", "vC"])
+        X_train["vcat"] = X_train["vA"].apply(lambda x: 1 if x > 0.5 else 2)
+        X_train["vcat2"] = X_train["vB"].apply(lambda x: 3 if x > 0.5 else 4)
+        y_train = y % 2
+        numeric_features = [0, 1, 2]  # ["vA", "vB", "vC"]
+        categorical_features = [3, 4]  # ["vcat", "vcat2"]
+
+        classifier = LogisticRegression(
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
+        )
+
+        numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
+
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("num", numeric_transformer, numeric_features),
+                ("cat", categorical_transformer, categorical_features),
+            ]
+        )
+
+        model = Pipeline(steps=[("precprocessor", preprocessor), ("classifier", classifier)])
+
+        model.fit(X_train, y_train)
+
+        X_test = X_train[:11]
+
+        torch_model = hummingbird.ml.convert(model, "torch", X_test)
+
+        self.assertTrue(torch_model is not None)
+
+        np.testing.assert_allclose(
+            model.predict_proba(X_test), torch_model.predict_proba(X_test), rtol=1e-06, atol=1e-06,
+        )
+
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_weights(self):
         iris = datasets.load_iris()
         X = iris.data[:, :3]
@@ -301,6 +300,48 @@ class TestSklearnPipeline(unittest.TestCase):
 
         np.testing.assert_allclose(
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
+        )
+
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
+    def test_pipeline_column_transformer_weights_pandas(self):
+        iris = datasets.load_iris()
+        X = iris.data[:, :3]
+        y = iris.target
+        X_train = pandas.DataFrame(X, columns=["vA", "vB", "vC"])
+        X_train["vcat"] = X_train["vA"].apply(lambda x: 1 if x > 0.5 else 2)
+        X_train["vcat2"] = X_train["vB"].apply(lambda x: 3 if x > 0.5 else 4)
+        y_train = y % 2
+        numeric_features = [0, 1, 2]  # ["vA", "vB", "vC"]
+        categorical_features = [3, 4]  # ["vcat", "vcat2"]
+
+        classifier = LogisticRegression(
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
+        )
+
+        numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
+
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("num", numeric_transformer, numeric_features),
+                ("cat", categorical_transformer, categorical_features),
+            ],
+            transformer_weights={"num": 2, "cat": 3},
+        )
+
+        model = Pipeline(steps=[("precprocessor", preprocessor), ("classifier", classifier)])
+
+        model.fit(X_train, y_train)
+
+        X_test = X_train[:11]
+
+        torch_model = hummingbird.ml.convert(model, "torch", X_test)
+
+        self.assertTrue(torch_model is not None)
+
+        np.testing.assert_allclose(
+            model.predict_proba(X_test), torch_model.predict_proba(X_test), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")

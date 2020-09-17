@@ -13,7 +13,7 @@ import numpy as np
 from .operator_converters import constants
 from ._parse import parse_sklearn_api_model, parse_onnx_api_model
 from ._topology import convert as topology_converter
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed, pandas_installed
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
 
@@ -149,14 +149,18 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
             ), "Cannot generate test input data. Initial_types do not contain shape information."
             assert len(initial_types[0][1].shape) == 2, "Hummingbird currently support only inputs with len(shape) == 2."
 
-            from onnxconverter_common.data_types import FloatTensorType, Int32TensorType
+            from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
 
             test_input = np.random.rand(initial_types[0][1].shape[0], initial_types[0][1].shape[1])
             extra_config[constants.N_FEATURES] = initial_types[0][1].shape[1]
             if type(initial_types[0][1]) is FloatTensorType:
                 test_input = np.array(test_input, dtype=np.float32)
+            elif type(initial_types[0][1]) is DoubleTensorType:
+                test_input = np.array(test_input, dtype=np.float64)
             elif type(initial_types[0][1]) is Int32TensorType:
                 test_input = np.array(test_input, dtype=np.int32)
+            elif type(initial_types[0][1]) is Int64TensorType:
+                test_input = np.array(test_input, dtype=np.int64)
             else:
                 raise RuntimeError(
                     "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
@@ -198,9 +202,8 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         model: An input model
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
-                    For the ONNX backend the test_input size is supposed to be as large as the expected batch size.
-                    Multiple inputs can be passed as `tuple` objects.
-                    For the moment only (`numpy`)`arrays` are supported.
+                    Multiple inputs can be passed as `tuple` objects or pandas Dataframes.
+                    When possible, (`numpy`)`arrays` are suggesed.
         device: The target device the model should be run. This parameter is only used by the *torch** backends, and
                 the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
         extra_config: Extra configurations to be used by the individual operator converters.
@@ -227,9 +230,26 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
             extra_config[constants.TEST_INPUT] = np.array(extra_config[constants.TEST_INPUT])
         elif type(extra_config[constants.TEST_INPUT]) == tuple:
             # We are passing multiple datasets.
+            assert all(
+                [type(input) == np.ndarray for input in extra_config[constants.TEST_INPUT]]
+            ), "When passing multiple inputs only ndarrays are supported."
             assert all([len(input.shape) == 2 for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_FEATURES] = sum([input.shape[1] for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT])
+        elif pandas_installed():
+            # We split the input dataframe into columnar ndarrays
+            import pandas as pd
+
+            if type(extra_config[constants.TEST_INPUT]) == pd.DataFrame:
+                extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT].columns)
+                extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
+                input_names = list(extra_config[constants.TEST_INPUT].columns)
+                splits = [
+                    extra_config[constants.TEST_INPUT][input_names[idx]] for idx in range(extra_config[constants.N_INPUTS])
+                ]
+                splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+                extra_config[constants.TEST_INPUT] = tuple(splits)
+                extra_config[constants.INPUT_NAMES] = input_names
         test_input = extra_config[constants.TEST_INPUT]
 
     # We do some normalization on backends.
