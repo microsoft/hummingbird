@@ -514,15 +514,14 @@ def _get_column_index(i, inputs):
                     "dimension.".format(i, inputs[vi])
                 )
             end += rel_end
-    elif isinstance(i, str):
+    else:
+        assert isinstance(
+            i, str
+        ), "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(type(i))
         for ind, inp in enumerate(inputs):
             if inp.onnx_name == i:
                 return ind, 0
         raise RuntimeError("Unable to find column name '{0}'".format(i))
-    else:
-        raise NotImplementedError(
-            "Type string not supported. Please fill an issue on https://github.com/microsoft/hummingbird/."
-        )
 
 
 def _get_column_indices(indices, inputs, multiple=False):

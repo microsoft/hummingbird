@@ -14,7 +14,10 @@ from onnxconverter_common.container import CommonSklearnModelContainer
 import torch
 
 from .operator_converters import constants
-from ._utils import onnx_runtime_installed
+from ._utils import onnx_runtime_installed, pandas_installed
+
+if pandas_installed():
+    import pandas as pd
 
 
 class CommonONNXModelContainer(CommonSklearnModelContainer):
@@ -83,12 +86,12 @@ class PyTorchBackendModel(torch.nn.Module):
     def forward(self, *inputs):
         with torch.no_grad():
             assert len(self._input_names) == len(inputs) or (
-                hasattr(inputs[0], "columns") and len(self._input_names) == len(inputs[0].columns)
-            ), "numer of inputs or number of collumns in the dataframe do not match with the expected number of inputs {}".format(
+                type(inputs[0]) == pd.DataFrame and len(self._input_names) == len(inputs[0].columns)
+            ), "number of inputs or number of columns in the dataframe do not match with the expected number of inputs {}".format(
                 self._input_names
             )
 
-            if hasattr(inputs[0], "columns"):  # This is a pandas dataframe
+            if type(inputs[0]) == pd.DataFrame:
                 # Split the dataframe into column ndarrays
                 inputs = inputs[0]
                 input_names = list(inputs.columns)
@@ -257,6 +260,14 @@ def _torchscript_wrapper(device, function, *inputs):
     inputs = [*inputs]
 
     with torch.no_grad():
+        if type(inputs) == pd.DataFrame:
+            # Split the dataframe into column ndarrays
+            inputs = inputs[0]
+            input_names = list(inputs.columns)
+            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+            inputs = tuple(splits)
+
         # Maps data inputs to the expected type and device.
         for i in range(len(inputs)):
             if type(inputs[i]) is np.ndarray:

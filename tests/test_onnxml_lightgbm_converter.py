@@ -248,6 +248,28 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         model.fit(X, y)
         self._test_classifier(X, model)
 
+    # Binary classication test with float64.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_onnxml_model_binary_float64(self):
+        warnings.filterwarnings("ignore")
+        n_features = 28
+        n_total = 100
+        np.random.seed(0)
+        X = np.random.rand(n_total, n_features)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=n_total)
+
+        # Create LightGBM model
+        model = lgb.LGBMClassifier()
+        model.fit(X, y)
+
+        onnx_model = convert(model, "onnx", X)
+
+        np.testing.assert_allclose(model.predict(X), onnx_model.predict(X))
+
     # Binary classification test with 3 estimators (taken from ONNXMLTOOLS).
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
