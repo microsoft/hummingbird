@@ -11,11 +11,12 @@ import torch
 from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, lightgbm_installed
 from hummingbird.ml import convert
 
-from onnxmltools import convert_sklearn
-from onnxmltools.convert.common.data_types import Int32TensorType as IntTensorType_onnx
-from onnxmltools.convert.common.data_types import Int64TensorType as LongTensorType_onnx
-from onnxmltools.convert.common.data_types import StringTensorType as StringTensorType_onnx
-from onnxmltools.convert.common.data_types import FloatTensorType as FloatTensorType_onnx
+if onnx_ml_tools_installed:
+    from onnxmltools import convert_sklearn
+    from onnxmltools.convert.common.data_types import Int32TensorType as IntTensorType_onnx
+    from onnxmltools.convert.common.data_types import Int64TensorType as LongTensorType_onnx
+    from onnxmltools.convert.common.data_types import StringTensorType as StringTensorType_onnx
+    from onnxmltools.convert.common.data_types import FloatTensorType as FloatTensorType_onnx
 
 if onnx_runtime_installed():
     import onnxruntime as ort
