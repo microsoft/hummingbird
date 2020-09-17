@@ -17,7 +17,9 @@ from .operator_converters import constants
 from ._utils import onnx_runtime_installed, pandas_installed
 
 if pandas_installed():
-    import pandas as pd
+    from pandas import DataFrame
+else:
+    DataFrame = None
 
 
 class CommonONNXModelContainer(CommonSklearnModelContainer):
@@ -86,12 +88,12 @@ class PyTorchBackendModel(torch.nn.Module):
     def forward(self, *inputs):
         with torch.no_grad():
             assert len(self._input_names) == len(inputs) or (
-                type(inputs[0]) == pd.DataFrame and len(self._input_names) == len(inputs[0].columns)
+                type(inputs[0]) == DataFrame and DataFrame is not None and len(self._input_names) == len(inputs[0].columns)
             ), "number of inputs or number of columns in the dataframe do not match with the expected number of inputs {}".format(
                 self._input_names
             )
 
-            if type(inputs[0]) == pd.DataFrame:
+            if type(inputs[0]) == DataFrame and DataFrame is not None:
                 # Split the dataframe into column ndarrays
                 inputs = inputs[0]
                 input_names = list(inputs.columns)
@@ -260,7 +262,7 @@ def _torchscript_wrapper(device, function, *inputs):
     inputs = [*inputs]
 
     with torch.no_grad():
-        if type(inputs) == pd.DataFrame:
+        if type(inputs) == DataFrame and DataFrame is not None:
             # Split the dataframe into column ndarrays
             inputs = inputs[0]
             input_names = list(inputs.columns)
