@@ -15,6 +15,7 @@ from onnxconverter_common.registration import register_converter
 from .._kneighbors_implementations import KNeighborsClassifierModel
 from ..constants import BATCH_SIZE
 
+
 def convert_sklearn_kneighbors_classification_model(operator, device, extra_config):
     """
     Converter for `sklearn.neighbors.KNeighborsClassifier`
@@ -29,7 +30,7 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
     """
 
     if BATCH_SIZE not in extra_config:
-        raise RuntimeError("Hummingbird requires explicit specification of "+BATCH_SIZE+" parameter when compiling KNeighborsClassifier")
+        raise RuntimeError("Hummingbird requires explicit specification of " + BATCH_SIZE + " parameter when compiling KNeighborsClassifier")
 
     classes = operator.raw_operator.classes_.tolist()
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):

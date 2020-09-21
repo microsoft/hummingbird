@@ -18,8 +18,6 @@ class KNeighborsClassifierModel(BaseOperator, torch.nn.Module):
         super(KNeighborsClassifierModel, self).__init__()
         self.classification = True
         self.train_data = torch.nn.Parameter(torch.from_numpy(train_data.astype("float32")), requires_grad=False)
-        self.train_data_t = torch.nn.Parameter(torch.transpose(self.train_data, 0, 1), requires_grad=False)
-        self.train_data_norm = torch.nn.Parameter((self.train_data ** 2).sum(1).view(1, -1), requires_grad=False)
         self.train_labels = torch.nn.Parameter(torch.from_numpy(train_labels.astype("int64")), requires_grad=False)
         self.n_neighbors = n_neighbors
         self.p = float(p)
