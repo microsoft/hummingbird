@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>hummingbird.ml.operator_converters.sklearn.kneighbors API documentation</title>
-<meta name="description" content="Converters for scikit-learn k neighbor models: KNeighborsClassifier." />
+<meta name="description" content="Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -22,11 +22,11 @@
 <h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.kneighbors</code></h1>
 </header>
 <section id="section-intro">
-<p>Converters for scikit-learn k neighbor models: KNeighborsClassifier.</p>
+<p>Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L0-L59" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L0-L92" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) 2020 Supun Nakandala. All rights reserved.
@@ -36,13 +36,30 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Converters for scikit-learn k neighbor models: KNeighborsClassifier.
+Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor.
 &#34;&#34;&#34;
 
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .._kneighbors_implementations import KNeighborsClassifierModel
+from .._kneighbors_implementations import KNeighborsModel
+from ..constants import BATCH_SIZE
+
+
+def convert_sklearn_kneighbors_regression_model(operator, device, extra_config):
+    &#34;&#34;&#34;
+    Converter for `sklearn.neighbors.KNeighborsRegressor`
+
+    Args:
+        operator: An operator wrapping a `sklearn.neighbors.KNeighborsRegressor` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
+
+    return _convert_kneighbors_model(operator, device, extra_config, False)
 
 
 def convert_sklearn_kneighbors_classification_model(operator, device, extra_config):
@@ -58,16 +75,29 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
         A PyTorch model
     &#34;&#34;&#34;
 
-    classes = operator.raw_operator.classes_.tolist()
-    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
-        raise RuntimeError(&#34;Hummingbird supports only integer labels for class labels.&#34;)
+    return _convert_kneighbors_model(operator, device, extra_config, True)
+
+
+def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
+    if BATCH_SIZE not in extra_config:
+        raise RuntimeError(
+            &#34;Hummingbird requires explicit specification of &#34; + BATCH_SIZE + &#34; parameter when compiling KNeighborsClassifier&#34;
+        )
+
+    classes = None
+    if is_classifier:
+        classes = operator.raw_operator.classes_.tolist()
+        if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
+            raise RuntimeError(&#34;Hummingbird supports only integer labels for class labels.&#34;)
 
     metric = operator.raw_operator.metric
     metric_params = operator.raw_operator.metric_params
 
     if metric not in [&#34;minkowski&#34;, &#34;euclidean&#34;]:
         raise NotImplementedError(
-            &#34;Hummingbird currently supports only the metric type &#39;minkowski&#39; and &#39;euclidean&#39; for KNeighborsClassifier&#34;
+            &#34;Hummingbird currently supports only the metric type &#39;minkowski&#39; and &#39;euclidean&#39; for KNeighbors&#34; + &#34;Classifier&#34;
+            if is_classifier
+            else &#34;Regressor&#34;
         )
 
     p = 2
@@ -77,17 +107,20 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
     weights = operator.raw_operator.weights
     if weights not in [&#34;uniform&#34;, &#34;distance&#34;]:
         raise NotImplementedError(
-            &#34;Hummingbird currently supports only the weights type &#39;uniform&#39; and &#39;distance&#39; for KNeighborsClassifier&#34;
+            &#34;Hummingbird currently supports only the weights type &#39;uniform&#39; and &#39;distance&#39; for KNeighbors&#34; + &#34;Classifier&#34;
+            if is_classifier
+            else &#34;Regressor&#34;
         )
 
     train_data = operator.raw_operator._fit_X
     train_labels = operator.raw_operator._y
     n_neighbors = operator.raw_operator.n_neighbors
 
-    return KNeighborsClassifierModel(train_data, train_labels, n_neighbors, weights, classes, p)
+    return KNeighborsModel(train_data, train_labels, n_neighbors, weights, classes, p, extra_config[BATCH_SIZE], is_classifier)
 
 
-register_converter(&#34;SklearnKNeighborsClassifier&#34;, convert_sklearn_kneighbors_classification_model)</code></pre>
+register_converter(&#34;SklearnKNeighborsClassifier&#34;, convert_sklearn_kneighbors_classification_model)
+register_converter(&#34;SklearnKNeighborsRegressor&#34;, convert_sklearn_kneighbors_regression_model)</code></pre>
 </details>
 </section>
 <section>
@@ -119,7 +152,7 @@ register_converter(&#34;SklearnKNeighborsClassifier&#34;, convert_sklearn_kneigh
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L18-L57" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L35-L48" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_kneighbors_classification_model(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -134,33 +167,47 @@ register_converter(&#34;SklearnKNeighborsClassifier&#34;, convert_sklearn_kneigh
         A PyTorch model
     &#34;&#34;&#34;
 
-    classes = operator.raw_operator.classes_.tolist()
-    if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
-        raise RuntimeError(&#34;Hummingbird supports only integer labels for class labels.&#34;)
+    return _convert_kneighbors_model(operator, device, extra_config, True)</code></pre>
+</details>
+</dd>
+<dt id="hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_regression_model"><code class="name flex">
+<span>def <span class="ident">convert_sklearn_kneighbors_regression_model</span></span>(<span>operator, device, extra_config)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Converter for <code>sklearn.neighbors.KNeighborsRegressor</code></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>operator</code></strong></dt>
+<dd>An operator wrapping a <code>sklearn.neighbors.KNeighborsRegressor</code> model</dd>
+<dt><strong><code>device</code></strong></dt>
+<dd>String defining the type of device the converted operator should be run on</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to select the best conversion strategy</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A PyTorch model</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L19-L32" class="git-link">Browse git</a>
+</summary>
+<pre><code class="python">def convert_sklearn_kneighbors_regression_model(operator, device, extra_config):
+    &#34;&#34;&#34;
+    Converter for `sklearn.neighbors.KNeighborsRegressor`
 
-    metric = operator.raw_operator.metric
-    metric_params = operator.raw_operator.metric_params
+    Args:
+        operator: An operator wrapping a `sklearn.neighbors.KNeighborsRegressor` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    if metric not in [&#34;minkowski&#34;, &#34;euclidean&#34;]:
-        raise NotImplementedError(
-            &#34;Hummingbird currently supports only the metric type &#39;minkowski&#39; and &#39;euclidean&#39; for KNeighborsClassifier&#34;
-        )
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
 
-    p = 2
-    if metric == &#34;minkowski&#34; and metric_params is not None and &#34;p&#34; in metric_params:
-        p = metric_params[&#34;p&#34;]
-
-    weights = operator.raw_operator.weights
-    if weights not in [&#34;uniform&#34;, &#34;distance&#34;]:
-        raise NotImplementedError(
-            &#34;Hummingbird currently supports only the weights type &#39;uniform&#39; and &#39;distance&#39; for KNeighborsClassifier&#34;
-        )
-
-    train_data = operator.raw_operator._fit_X
-    train_labels = operator.raw_operator._y
-    n_neighbors = operator.raw_operator.n_neighbors
-
-    return KNeighborsClassifierModel(train_data, train_labels, n_neighbors, weights, classes, p)</code></pre>
+    return _convert_kneighbors_model(operator, device, extra_config, False)</code></pre>
 </details>
 </dd>
 </dl>
@@ -186,6 +233,7 @@ register_converter(&#34;SklearnKNeighborsClassifier&#34;, convert_sklearn_kneigh
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_classification_model" href="#hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_classification_model">convert_sklearn_kneighbors_classification_model</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_regression_model" href="#hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_regression_model">convert_sklearn_kneighbors_regression_model</a></code></li>
 </ul>
 </li>
 </ul>
