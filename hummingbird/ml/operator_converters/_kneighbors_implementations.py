@@ -32,7 +32,7 @@ class KNeighborsClassifierModel(BaseOperator, torch.nn.Module):
         self.weights = weights
 
     def forward(self, x):
-        k = torch.cdist(x, self.train_data, p=float(self.p), compute_mode="use_mm_for_euclid_dist_if_necessary")
+        k = torch.cdist(x, self.train_data, p=float(self.p), compute_mode="donot_use_mm_for_euclid_dist")
         d, k = torch.topk(k, self.n_neighbors, dim=1, largest=False)
         output = torch.index_select(self.train_labels, 0, k.view(-1)).view(-1, self.n_neighbors)
 

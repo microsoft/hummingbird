@@ -14,7 +14,13 @@ import hummingbird.ml
 
 class TestSklearnKNeighborsClassifiers(unittest.TestCase):
     def _test_kneighbors_classifier(
-        self, n_neighbors=5, algorithm="brute", weights="uniform", metric="minkowski", metric_params={"p": 2}
+        self,
+        n_neighbors=5,
+        algorithm="brute",
+        weights="uniform",
+        metric="minkowski",
+        metric_params={"p": 2},
+        score_w_train_data=False,
     ):
         model = KNeighborsClassifier(
             n_neighbors=n_neighbors, algorithm=algorithm, weights=weights, metric=metric, metric_params=metric_params
@@ -29,9 +35,15 @@ class TestSklearnKNeighborsClassifiers(unittest.TestCase):
 
             torch_model = hummingbird.ml.convert(model, "torch")
             self.assertTrue(torch_model is not None)
-            np.testing.assert_allclose(
-                model.predict_proba(X[n_train_rows:, :]), torch_model.predict_proba(X[n_train_rows:, :]), rtol=1e-6, atol=1e-3
-            )
+            if score_w_train_data:
+                np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-6, atol=1e-5)
+            else:
+                np.testing.assert_allclose(
+                    model.predict_proba(X[n_train_rows:, :]),
+                    torch_model.predict_proba(X[n_train_rows:, :]),
+                    rtol=1e-6,
+                    atol=1e-5,
+                )
 
     # KNeighborsClassifier
     def test_kneighbors_classifer(self):
@@ -52,6 +64,10 @@ class TestSklearnKNeighborsClassifiers(unittest.TestCase):
     # KNeighborsClassifier weights distance
     def test_kneighbors_classifer_distance_weight(self):
         self._test_kneighbors_classifier(3, weights="distance")
+
+    # KNeighborsClassifier weights distance w train data
+    def test_kneighbors_classifer_distance_weight_train_data(self):
+        self._test_kneighbors_classifier(3, weights="distance", score_w_train_data=True)
 
     # KNeighborsClassifier euclidean metric type
     def test_kneighbors_classifer_euclidean(self):
