@@ -133,9 +133,9 @@ class TestSklearnKNeighbors(unittest.TestCase):
     def test_kneighbors_regressor_euclidean(self):
         self._test_kneighbors_regressor(3, metric="euclidean")
 
-    # # KNeighborsRegressor minkowski metric p = 5
-    # def test_kneighbors_regressor_minkowski_p5(self):
-    #     self._test_kneighbors_regressor(3, metric_params={"p": 5})
+    # KNeighborsRegressor minkowski metric p = 3
+    def test_kneighbors_regressor_minkowski_p3(self):
+        self._test_kneighbors_regressor(3, metric_params={"p": 3})
 
 
 if __name__ == "__main__":
