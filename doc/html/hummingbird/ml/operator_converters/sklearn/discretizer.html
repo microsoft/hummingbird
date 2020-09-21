@@ -61,16 +61,16 @@ def convert_sklearn_binarizer(operator, device, extra_config):
 
 def convert_sklearn_k_bins_discretizer(operator, device, extra_config):
     &#34;&#34;&#34;
-        Converter for `sklearn.preprocessing.KBinsDiscretizer`
+    Converter for `sklearn.preprocessing.KBinsDiscretizer`
 
-        Args:
-            operator: An operator wrapping a `sklearn.preprocessing.KBinsDiscretizer` model
-            device: String defining the type of device the converted operator should be run on
-            extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping a `sklearn.preprocessing.KBinsDiscretizer` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-        Returns:
-            A PyTorch model
-        &#34;&#34;&#34;
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
     bin_edges = []
     max_bin_edges = 0
     labels = []
@@ -167,16 +167,16 @@ register_converter(&#34;SklearnKBinsDiscretizer&#34;, convert_sklearn_k_bins_dis
 </summary>
 <pre><code class="python">def convert_sklearn_k_bins_discretizer(operator, device, extra_config):
     &#34;&#34;&#34;
-        Converter for `sklearn.preprocessing.KBinsDiscretizer`
+    Converter for `sklearn.preprocessing.KBinsDiscretizer`
 
-        Args:
-            operator: An operator wrapping a `sklearn.preprocessing.KBinsDiscretizer` model
-            device: String defining the type of device the converted operator should be run on
-            extra_config: Extra configuration used to select the best conversion strategy
+    Args:
+        operator: An operator wrapping a `sklearn.preprocessing.KBinsDiscretizer` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-        Returns:
-            A PyTorch model
-        &#34;&#34;&#34;
+    Returns:
+        A PyTorch model
+    &#34;&#34;&#34;
     bin_edges = []
     max_bin_edges = 0
     labels = []

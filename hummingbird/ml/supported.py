@@ -29,6 +29,7 @@ IsolationForest,
 KernelPCA,
 KBinsDiscretizer,
 KNeighborsClassifier,
+KNeighborsRegressor,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -119,6 +120,7 @@ def _build_sklearn_operator_list():
 
         # KNeighbors models
         from sklearn.neighbors._classification import KNeighborsClassifier
+        from sklearn.neighbors._regression import KNeighborsRegressor
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -166,6 +168,7 @@ def _build_sklearn_operator_list():
             BernoulliNB,
             GaussianNB,
             KNeighborsClassifier,
+            KNeighborsRegressor,
             MLPClassifier,
             MLPRegressor,
             MultinomialNB,
