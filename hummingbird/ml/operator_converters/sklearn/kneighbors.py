@@ -50,7 +50,9 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
 
 def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
     if BATCH_SIZE not in extra_config:
-        raise RuntimeError("Hummingbird requires explicit specification of " + BATCH_SIZE + " parameter when compiling KNeighborsClassifier")
+        raise RuntimeError(
+            "Hummingbird requires explicit specification of " + BATCH_SIZE + " parameter when compiling KNeighborsClassifier"
+        )
 
     classes = None
     if is_classifier:

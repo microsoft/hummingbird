@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>hummingbird.ml.operator_converters.sklearn.kneighbors API documentation</title>
-<meta name="description" content="Converters for scikit-learn k neighbor models: KNeighborsClassifier." />
+<meta name="description" content="Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -22,11 +22,11 @@
 <h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.kneighbors</code></h1>
 </header>
 <section id="section-intro">
-<p>Converters for scikit-learn k neighbor models: KNeighborsClassifier.</p>
+<p>Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L0-L86" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L0-L92" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) 2020 Supun Nakandala. All rights reserved.
@@ -36,13 +36,14 @@
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Converters for scikit-learn k neighbor models: KNeighborsClassifier.
+Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor.
 &#34;&#34;&#34;
 
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
 from .._kneighbors_implementations import KNeighborsModel
+from ..constants import BATCH_SIZE
 
 
 def convert_sklearn_kneighbors_regression_model(operator, device, extra_config):
@@ -78,6 +79,11 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
 
 
 def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
+    if BATCH_SIZE not in extra_config:
+        raise RuntimeError(
+            &#34;Hummingbird requires explicit specification of &#34; + BATCH_SIZE + &#34; parameter when compiling KNeighborsClassifier&#34;
+        )
+
     classes = None
     if is_classifier:
         classes = operator.raw_operator.classes_.tolist()
@@ -110,7 +116,7 @@ def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
     train_labels = operator.raw_operator._y
     n_neighbors = operator.raw_operator.n_neighbors
 
-    return KNeighborsModel(train_data, train_labels, n_neighbors, weights, classes, p, is_classifier)
+    return KNeighborsModel(train_data, train_labels, n_neighbors, weights, classes, p, extra_config[BATCH_SIZE], is_classifier)
 
 
 register_converter(&#34;SklearnKNeighborsClassifier&#34;, convert_sklearn_kneighbors_classification_model)
@@ -146,7 +152,7 @@ register_converter(&#34;SklearnKNeighborsRegressor&#34;, convert_sklearn_kneighb
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L34-L47" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L35-L48" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_kneighbors_classification_model(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -186,7 +192,7 @@ register_converter(&#34;SklearnKNeighborsRegressor&#34;, convert_sklearn_kneighb
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L18-L31" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L19-L32" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_kneighbors_regression_model(operator, device, extra_config):
     &#34;&#34;&#34;

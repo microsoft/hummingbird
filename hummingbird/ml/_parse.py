@@ -75,7 +75,7 @@ def parse_sklearn_api_model(model, extra_config={}):
             elif input.dtype == np.int64:
                 input_type = Int64TensorType(input.shape)
             else:
-                raise RuntimeError(
+                raise NotImplementedError(
                     "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
                         type(input.dtype)
                     )
@@ -455,7 +455,7 @@ def _fetch_input_slice(scope, inputs, column_indices):
         len(inputs) == 1
         and len(column_indices) == 1
         and inputs[0].type is not None
-        and (inputs[0].type.shape == 1 or inputs[0].type.shape[1] == 1)
+        and (len(inputs[0].type.shape) == 1 or inputs[0].type.shape[1] == 1)
     ):
         return inputs
     array_feature_extractor_operator = scope.declare_local_operator("SklearnArrayFeatureExtractor")
@@ -515,6 +515,9 @@ def _get_column_index(i, inputs):
                 )
             end += rel_end
     else:
+        assert isinstance(
+            i, str
+        ), "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(type(i))
         for ind, inp in enumerate(inputs):
             if inp.onnx_name == i:
                 return ind, 0

@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L0-L120" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L0-L110" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -44,6 +44,7 @@ import torch
 
 from .. import constants
 from .._base_operator import BaseOperator
+from .._pipeline_implementations import Concat
 
 
 class Cast(BaseOperator, torch.nn.Module):
@@ -59,17 +60,6 @@ class Cast(BaseOperator, torch.nn.Module):
             return x.float()
         if self.to_type == 7:  # Cast to long
             return x.long()
-
-
-class Concat(BaseOperator, torch.nn.Module):
-    def __init__(self):
-        super(Concat, self).__init__()
-
-    def forward(self, *x):
-        if len(x[0].shape) &gt; 1:
-            return torch.cat(x, dim=1)
-        else:
-            return torch.stack(x, dim=1)
 
 
 class Reshape(BaseOperator, torch.nn.Module):
@@ -180,7 +170,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L55-L76" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L45-L66" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_cast(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -228,7 +218,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L79-L94" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L69-L84" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_concat(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -270,7 +260,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L97-L116" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L87-L106" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_onnx_reshape(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
@@ -308,7 +298,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L19-L31" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L20-L32" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Cast(BaseOperator, torch.nn.Module):
     def __init__(self, to_type):
@@ -340,60 +330,13 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L27-L31" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L28-L32" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     if self.to_type == 1:  # Cast to float
         return x.float()
     if self.to_type == 7:  # Cast to long
         return x.long()</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Concat"><code class="flex name class">
-<span>class <span class="ident">Concat</span></span>
-</code></dt>
-<dd>
-<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L34-L42" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">class Concat(BaseOperator, torch.nn.Module):
-    def __init__(self):
-        super(Concat, self).__init__()
-
-    def forward(self, *x):
-        if len(x[0].shape) &gt; 1:
-            return torch.cat(x, dim=1)
-        else:
-            return torch.stack(x, dim=1)</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>hummingbird.ml.operator_converters._base_operator.BaseOperator</li>
-<li>abc.ABC</li>
-<li>torch.nn.modules.module.Module</li>
-</ul>
-<h3>Methods</h3>
-<dl>
-<dt id="hummingbird.ml.operator_converters.onnx.onnx_operator.Concat.forward"><code class="name flex">
-<span>def <span class="ident">forward</span></span>(<span>self, *x) -> Callable[..., Any]</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L38-L42" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">def forward(self, *x):
-    if len(x[0].shape) &gt; 1:
-        return torch.cat(x, dim=1)
-    else:
-        return torch.stack(x, dim=1)</code></pre>
 </details>
 </dd>
 </dl>
@@ -407,7 +350,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L45-L52" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L35-L42" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class Reshape(BaseOperator, torch.nn.Module):
     def __init__(self, shape):
@@ -434,7 +377,7 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L51-L52" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnx_operator.py#L41-L42" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def forward(self, x):
     return torch.reshape(x, self.shape)</code></pre>
@@ -473,12 +416,6 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <h4><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Cast" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Cast">Cast</a></code></h4>
 <ul class="">
 <li><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Cast.forward" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Cast.forward">forward</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Concat" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Concat">Concat</a></code></h4>
-<ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator.Concat.forward" href="#hummingbird.ml.operator_converters.onnx.onnx_operator.Concat.forward">forward</a></code></li>
 </ul>
 </li>
 <li>
