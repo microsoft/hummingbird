@@ -96,12 +96,12 @@ class TestSklearnKNeighbors(unittest.TestCase):
             torch_model = hummingbird.ml.convert(model, "torch")
             self.assertTrue(torch_model is not None)
             if score_w_train_data:
-                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-5)
+                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5)
             else:
                 np.testing.assert_allclose(
                     model.predict(X[n_train_rows:, :]),
                     torch_model.predict(X[n_train_rows:, :]),
-                    rtol=1e-6,
+                    rtol=1e-5,
                     atol=1e-5,
                 )
 
@@ -125,9 +125,9 @@ class TestSklearnKNeighbors(unittest.TestCase):
     def test_kneighbors_regressor_distance_weight(self):
         self._test_kneighbors_regressor(3, weights="distance")
 
-    # # KNeighborsRegressor weights distance w train data
-    # def test_kneighbors_regressor_distance_weight_train_data(self):
-    #     self._test_kneighbors_regressor(3, weights="distance", score_w_train_data=True)
+    # KNeighborsRegressor weights distance w train data
+    def test_kneighbors_regressor_distance_weight_train_data(self):
+        self._test_kneighbors_regressor(3, weights="distance", score_w_train_data=True)
 
     # KNeighborsRegressor euclidean metric type
     def test_kneighbors_regressor_euclidean(self):
