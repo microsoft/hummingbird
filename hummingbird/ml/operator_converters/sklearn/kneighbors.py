@@ -13,7 +13,7 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 
 from .._kneighbors_implementations import KNeighborsClassifierModel
-
+from ..constants import BATCH_SIZE
 
 def convert_sklearn_kneighbors_classification_model(operator, device, extra_config):
     """
@@ -27,6 +27,9 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
     Returns:
         A PyTorch model
     """
+
+    if BATCH_SIZE not in extra_config:
+        raise RuntimeError("Hummingbird requires explicit specification of "+BATCH_SIZE+" parameter when compiling KNeighborsClassifier")
 
     classes = operator.raw_operator.classes_.tolist()
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
@@ -54,7 +57,7 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
     train_labels = operator.raw_operator._y
     n_neighbors = operator.raw_operator.n_neighbors
 
-    return KNeighborsClassifierModel(train_data, train_labels, n_neighbors, weights, classes, p)
+    return KNeighborsClassifierModel(train_data, train_labels, n_neighbors, weights, classes, p, extra_config[BATCH_SIZE])
 
 
 register_converter("SklearnKNeighborsClassifier", convert_sklearn_kneighbors_classification_model)

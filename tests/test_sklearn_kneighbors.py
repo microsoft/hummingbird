@@ -33,17 +33,13 @@ class TestSklearnKNeighborsClassifiers(unittest.TestCase):
             n_train_rows = int(X.shape[0] * 0.6)
             model.fit(X[:n_train_rows, :], y[:n_train_rows])
 
-            torch_model = hummingbird.ml.convert(model, "torch")
+            if not score_w_train_data:
+                X = X[n_train_rows:, :]
+
+            extra_config = {hummingbird.ml.operator_converters.constants.BATCH_SIZE: X.shape[0]}
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
             self.assertTrue(torch_model is not None)
-            if score_w_train_data:
-                np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-6, atol=1e-5)
-            else:
-                np.testing.assert_allclose(
-                    model.predict_proba(X[n_train_rows:, :]),
-                    torch_model.predict_proba(X[n_train_rows:, :]),
-                    rtol=1e-6,
-                    atol=1e-5,
-                )
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-6, atol=1e-5)
 
     # KNeighborsClassifier
     def test_kneighbors_classifer(self):
