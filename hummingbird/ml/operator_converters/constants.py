@@ -55,3 +55,6 @@ IFOREST_THRESHOLD = "iforest_threshold"
 
 MAX_SAMPLES = "max_samples"
 """max_samples of sklearn isolation forest implementation"""
+
+BATCH_SIZE = "batch_size"
+"""Batch size expected by the compiled model"""
