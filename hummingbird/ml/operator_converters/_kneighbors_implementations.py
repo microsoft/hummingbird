@@ -12,6 +12,7 @@ Base classes for KNeighbors model implementations: (KNeighborsClassifier, KNeigh
 import torch
 from ._base_operator import BaseOperator
 
+
 class KNeighborsModel(BaseOperator, torch.nn.Module):
     def __init__(self, train_data, train_labels, n_neighbors, weights, classes, p, batch_size, is_classifier):
         super(KNeighborsModel, self).__init__()
@@ -31,13 +32,13 @@ class KNeighborsModel(BaseOperator, torch.nn.Module):
 
             if min(classes) != 0 or max(classes) != len(classes) - 1:
                 self.perform_class_select = True
+            self.one_tensor = torch.FloatTensor([1.0])
+            self.proba_tensor = torch.zeros((batch_size, self.n_classes), dtype=torch.float32)
         else:
             # regression
             self.train_labels = torch.nn.Parameter(torch.from_numpy(train_labels.astype("float32")), requires_grad=False)
 
         self.weights = weights
-        self.one_tensor = torch.FloatTensor([1.0])
-        self.proba_tensor = torch.zeros((batch_size, self.n_classes), dtype=torch.float32)
 
     def forward(self, x):
         k = torch.cdist(x, self.train_data, p=self.p, compute_mode="donot_use_mm_for_euclid_dist")
@@ -54,9 +55,9 @@ class KNeighborsModel(BaseOperator, torch.nn.Module):
 
         if self.classification:
             # classification
-            output = torch.scatter_add(torch.zeros((x.size()[0], self.n_classes), dtype=torch.float32), 1, output, d)
+            output = torch.scatter_add(self.proba_tensor, 1, output, d)
             proba_sum = output.sum(1, keepdim=True)
-            proba_sum = torch.where(proba_sum == 0, torch.FloatTensor([1.0]), proba_sum)
+            proba_sum = torch.where(proba_sum == 0, self.one_tensor, proba_sum)
             output = torch.pow(proba_sum, -1) * output
 
             if self.perform_class_select:

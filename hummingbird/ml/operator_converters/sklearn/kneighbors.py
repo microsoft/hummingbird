@@ -6,13 +6,13 @@
 # --------------------------------------------------------------------------
 
 """
-Converters for scikit-learn k neighbor models: KNeighborsClassifier.
+Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor.
 """
 
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .._kneighbors_implementations import KNeighborsClassifierModel
+from .._kneighbors_implementations import KNeighborsModel
 from ..constants import BATCH_SIZE
 
 
@@ -84,7 +84,7 @@ def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
     train_labels = operator.raw_operator._y
     n_neighbors = operator.raw_operator.n_neighbors
 
-    return KNeighborsClassifierModel(train_data, train_labels, n_neighbors, weights, classes, p, extra_config[BATCH_SIZE], is_classifier)
+    return KNeighborsModel(train_data, train_labels, n_neighbors, weights, classes, p, extra_config[BATCH_SIZE], is_classifier)
 
 
 register_converter("SklearnKNeighborsClassifier", convert_sklearn_kneighbors_classification_model)
