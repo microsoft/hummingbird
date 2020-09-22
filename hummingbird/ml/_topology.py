@@ -175,7 +175,8 @@ def convert(topology, backend, device, extra_config={}):
 
         # Generate the model.
         with tvm.transform.PassContext(opt_level=3, config=config):
-            graph, lib, params = relay.build(model, target=target, params=params)
+            opt_mod, opt_params = relay.optimize(model, target=target, params=params)
+            graph, lib, params = relay.build(opt_mod, target=target, params=opt_params)
         tvm_model = graph_runtime.create(graph, lib, ctx)
         tvm_model.set_input(**params)
 
