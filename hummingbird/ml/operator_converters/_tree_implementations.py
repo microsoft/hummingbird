@@ -337,11 +337,9 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         for nodes, biases in zip(self.nodes, self.biases):
             gather_indices = torch.index_select(nodes, 0, prev_indices).view(-1, self.num_trees)
             features = torch.gather(x, 1, gather_indices).view(-1)
-            prev_indices = factor * prev_indices + torch.ge(features, torch.index_select(biases, 0, prev_indices)).long().view(
-                -1
-            )
+            prev_indices = factor * prev_indices + torch.ge(features, torch.index_select(biases, 0, prev_indices)).long()
 
-        output = torch.index_select(self.leaf_nodes, 0, prev_indices.view(-1)).view(-1, self.num_trees, self.n_classes)
+        output = torch.index_select(self.leaf_nodes, 0, prev_indices).view(-1, self.num_trees, self.n_classes)
 
         output = self.aggregation(output)
 
