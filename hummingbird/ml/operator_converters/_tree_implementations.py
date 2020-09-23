@@ -309,10 +309,10 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.biases = []
         for i in range(1, max_depth):
             nodes = torch.nn.Parameter(
-                torch.from_numpy(weight_0[:, list(sorted(node_by_levels[i]))].flatten().astype("int64")), requires_grad=False
+                torch.from_numpy(weight_0[:, list(sorted(node_by_levels[i]))].reshape(1, -1).astype("int64")), requires_grad=False
             )
             biases = torch.nn.Parameter(
-                torch.from_numpy(-1 * bias_0[:, list(sorted(node_by_levels[i]))].flatten().astype("float32")),
+                torch.from_numpy(-1 * bias_0[:, list(sorted(node_by_levels[i]))].reshape(1, -1).astype("float32")),
                 requires_grad=False,
             )
             self.nodes.append(nodes)
@@ -322,24 +322,32 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.biases = torch.nn.ParameterList(self.biases)
 
         self.leaf_nodes = torch.nn.Parameter(
-            torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype("float32")), requires_grad=False
+            torch.from_numpy(weight_1.reshape((1, -1, self.n_classes)).astype("float32")), requires_grad=False
         )
 
     def aggregation(self, x):
         return x
 
     def forward(self, x):
+        # TODO: obtain batch size at compile time
+        batch_size = x.shape[0]
+
         prev_indices = (torch.ge(torch.index_select(x, 1, self.root_nodes), self.root_biases)).long()
         prev_indices = prev_indices + self.tree_indices
-        prev_indices = prev_indices.view(-1)
+        # prev_indices = prev_indices.view(-1)
+        prev_indices = prev_indices
 
         factor = 2
         for nodes, biases in zip(self.nodes, self.biases):
-            gather_indices = torch.index_select(nodes, 0, prev_indices).view(-1, self.num_trees)
-            features = torch.gather(x, 1, gather_indices).view(-1)
-            prev_indices = factor * prev_indices + torch.ge(features, torch.index_select(biases, 0, prev_indices)).long()
+            # gather_indices = torch.index_select(nodes, 0, prev_indices).view(-1, self.num_trees)
+            gather_indices = torch.gather(nodes.expand(batch_size, -1), 1, prev_indices)
+            # features = torch.gather(x, 1, gather_indices).view(-1)
+            features = torch.gather(x, 1, gather_indices)
+            # prev_indices = factor * prev_indices + torch.ge(features, torch.index_select(biases, 0, prev_indices)).long().view(-1)
+            prev_indices = factor * prev_indices + torch.ge(features, torch.gather(biases.expand(batch_size, -1), 1, prev_indices)).long()
 
-        output = torch.index_select(self.leaf_nodes, 0, prev_indices).view(-1, self.num_trees, self.n_classes)
+        # output = torch.index_select(self.leaf_nodes, 0, prev_indices.view(-1)).view(-1, self.num_trees, self.n_classes)
+        output = torch.gather(self.leaf_nodes.expand(batch_size, -1, -1), 1, prev_indices.unsqueeze(-1))
 
         output = self.aggregation(output)
 
