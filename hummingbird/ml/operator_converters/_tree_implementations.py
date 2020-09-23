@@ -322,7 +322,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.biases = torch.nn.ParameterList(self.biases)
 
         self.leaf_nodes = torch.nn.Parameter(
-            torch.from_numpy(weight_1.reshape((1, -1, self.n_classes)).astype("float32")), requires_grad=False
+            torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype("float32")), requires_grad=False
         )
 
     def aggregation(self, x):
@@ -346,8 +346,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             # prev_indices = factor * prev_indices + torch.ge(features, torch.index_select(biases, 0, prev_indices)).long().view(-1)
             prev_indices = factor * prev_indices + torch.ge(features, torch.gather(biases.expand(batch_size, -1), 1, prev_indices)).long()
 
-        # output = torch.index_select(self.leaf_nodes, 0, prev_indices.view(-1)).view(-1, self.num_trees, self.n_classes)
-        output = torch.gather(self.leaf_nodes.expand(batch_size, -1, -1), 1, prev_indices.unsqueeze(-1))
+        output = torch.index_select(self.leaf_nodes, 0, prev_indices.view(-1)).view(-1, self.num_trees, self.n_classes)
 
         output = self.aggregation(output)
 
