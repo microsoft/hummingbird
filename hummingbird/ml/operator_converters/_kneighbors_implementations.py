@@ -9,19 +9,58 @@
 Base classes for KNeighbors model implementations: (KNeighborsClassifier, KNeighborsRegressor).
 """
 
+from enum import Enum
 import torch
+import numpy as np
 from ._base_operator import BaseOperator
 
 
+class MetricType(Enum):
+    minkowski = 1
+    wminkowski = 2
+    seuclidean = 3
+    mahalanobis = 4
+
+
 class KNeighborsModel(BaseOperator, torch.nn.Module):
-    def __init__(self, train_data, train_labels, n_neighbors, weights, classes, p, batch_size, is_classifier):
+    def __init__(
+        self, train_data, train_labels, n_neighbors, weights, classes, batch_size, is_classifier, metric_type, metric_params
+    ):
         super(KNeighborsModel, self).__init__()
         self.classification = is_classifier
         self.regression = not is_classifier
         self.train_data = torch.nn.Parameter(torch.from_numpy(train_data.astype("float32")), requires_grad=False)
         self.train_labels = torch.nn.Parameter(torch.from_numpy(train_labels.astype("int64")), requires_grad=False)
         self.n_neighbors = n_neighbors
-        self.p = float(p)
+        self.metric_type = metric_type
+
+        if self.metric_type == MetricType.minkowski:
+            self.p = float(metric_params["p"])
+        elif self.metric_type == MetricType.wminkowski:
+            self.p = float(metric_params["p"])
+            self.w = torch.nn.Parameter(
+                torch.from_numpy(metric_params["w"].astype("float32").reshape(1, -1)), requires_grad=False
+            )
+            self.train_data = torch.nn.Parameter(
+                torch.from_numpy(metric_params["w"].astype("float32").reshape(1, -1) * train_data.astype("float32")),
+                requires_grad=False,
+            )
+        elif self.metric_type == MetricType.seuclidean:
+            self.V = torch.nn.Parameter(
+                torch.from_numpy(np.power(metric_params["V"].astype("float32").reshape(1, -1), -0.5)), requires_grad=False
+            )
+            self.train_data = torch.nn.Parameter(
+                torch.from_numpy(
+                    np.power(metric_params["V"].astype("float32").reshape(1, -1), -0.5) * train_data.astype("float32")
+                ),
+                requires_grad=False,
+            )
+        elif self.metric_type == MetricType.mahalanobis:
+            cholesky_l = np.linalg.cholesky(metric_params["VI"]).astype("float32")
+            self.L = torch.nn.Parameter(torch.from_numpy(cholesky_l), requires_grad=False)
+            self.train_data = torch.nn.Parameter(
+                torch.from_numpy(np.matmul(train_data.astype("float32"), cholesky_l)), requires_grad=False
+            )
 
         if is_classifier:
             # classification
@@ -41,7 +80,21 @@ class KNeighborsModel(BaseOperator, torch.nn.Module):
         self.weights = weights
 
     def forward(self, x):
-        k = torch.cdist(x, self.train_data, p=self.p, compute_mode="donot_use_mm_for_euclid_dist")
+        if self.metric_type == MetricType.minkowski:
+            k = torch.cdist(x, self.train_data, p=self.p, compute_mode="donot_use_mm_for_euclid_dist")
+        elif self.metric_type == MetricType.wminkowski:
+            k = torch.cdist(self.w * x, self.train_data, p=self.p, compute_mode="donot_use_mm_for_euclid_dist")
+        elif self.metric_type == MetricType.seuclidean:
+            k = torch.cdist(self.V * x, self.train_data, p=2, compute_mode="donot_use_mm_for_euclid_dist")
+        elif self.metric_type == MetricType.mahalanobis:
+            # We use the Cholesky decompositio and quadratic exapansion to calculate the Mahalanobis distance
+            # Mahalanobis distance d^2(x, x') = (x - x')T VI (x - x')
+            # usiing Cholesky decomposition we have VI = LT L
+            # then:
+            #                      d^2(x, x') = (x - x')T (LT L) (x - x')
+            #                                 = (Lx - Lx')T (Lx - Lx')
+            k = torch.cdist(torch.mm(x, self.L), self.train_data, p=2, compute_mode="donot_use_mm_for_euclid_dist")
+
         d, k = torch.topk(k, self.n_neighbors, dim=1, largest=False)
         output = torch.index_select(self.train_labels, 0, k.view(-1)).view(-1, self.n_neighbors)
 

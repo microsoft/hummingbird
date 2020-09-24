@@ -12,7 +12,7 @@ Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsR
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .._kneighbors_implementations import KNeighborsModel
+from .._kneighbors_implementations import KNeighborsModel, MetricType
 from ..constants import BATCH_SIZE
 
 
@@ -61,18 +61,47 @@ def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
             raise RuntimeError("Hummingbird supports only integer labels for class labels.")
 
     metric = operator.raw_operator.metric
-    metric_params = operator.raw_operator.metric_params
+    params = operator.raw_operator.metric_params
 
-    if metric not in ["minkowski", "euclidean"]:
+    if metric not in ["minkowski", "euclidean", "manhattan", "chebyshev", "wminkowski", "seuclidean", "mahalanobis"]:
         raise NotImplementedError(
-            "Hummingbird currently supports only the metric type 'minkowski' and 'euclidean' for KNeighbors" + "Classifier"
+            "Hummingbird currently supports only the metric type 'minkowski', 'wminkowski', 'manhattan', 'chebyshev', 'mahalanobis', 'euclidean', and 'seuclidean' for KNeighbors"
+            + "Classifier"
             if is_classifier
             else "Regressor"
         )
 
-    p = 2
-    if metric == "minkowski" and metric_params is not None and "p" in metric_params:
-        p = metric_params["p"]
+    metric_type = None
+    metric_params = None
+    if metric in ["minkowski", "euclidean", "manhattan", "chebyshev"]:
+        metric_type = MetricType.minkowski
+        p = 2
+        if metric == "minkowski" and params is not None and "p" in params:
+            p = params["p"]
+        elif metric == "manhattan":
+            p = 1
+        elif metric == "chebyshev":
+            p = float("inf")
+        metric_params = {"p": p}
+    elif metric == "wminkowski":
+        metric_type = MetricType.wminkowski
+        p = 2
+        if params is not None and "p" in params:
+            p = params["p"]
+        w = params["w"]
+        metric_params = {"p": p, "w": w}
+    elif metric == "seuclidean":
+        metric_type = MetricType.seuclidean
+        V = params["V"]
+        metric_params = {"V": V}
+    elif metric == "mahalanobis":
+        metric_type = MetricType.mahalanobis
+        if "VI" in params:
+            VI = params["VI"]
+        else:
+            VI = np.linalg.inv(params["V"])
+
+        metric_params = {"VI": VI}
 
     weights = operator.raw_operator.weights
     if weights not in ["uniform", "distance"]:
@@ -86,7 +115,17 @@ def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
     train_labels = operator.raw_operator._y
     n_neighbors = operator.raw_operator.n_neighbors
 
-    return KNeighborsModel(train_data, train_labels, n_neighbors, weights, classes, p, extra_config[BATCH_SIZE], is_classifier)
+    return KNeighborsModel(
+        train_data,
+        train_labels,
+        n_neighbors,
+        weights,
+        classes,
+        extra_config[BATCH_SIZE],
+        is_classifier,
+        metric_type,
+        metric_params,
+    )
 
 
 register_converter("SklearnKNeighborsClassifier", convert_sklearn_kneighbors_classification_model)

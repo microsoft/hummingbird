@@ -22,13 +22,21 @@ class TestSklearnKNeighbors(unittest.TestCase):
         metric_params={"p": 2},
         score_w_train_data=False,
     ):
-        model = KNeighborsClassifier(
-            n_neighbors=n_neighbors, algorithm=algorithm, weights=weights, metric=metric, metric_params=metric_params
-        )
-
         for data in [datasets.load_breast_cancer(), datasets.load_iris()]:
             X, y = data.data, data.target
             X = X.astype(np.float32)
+
+            if metric == "wminkowski":
+                metric_params["w"] = np.random.rand(X.shape[1])
+            elif metric == "seuclidean":
+                metric_params["V"] = np.random.rand(X.shape[1])
+            elif metric == "mahalanobis":
+                V = np.cov(X.T)
+                metric_params["V"] = V
+
+            model = KNeighborsClassifier(
+                n_neighbors=n_neighbors, algorithm=algorithm, weights=weights, metric=metric, metric_params=metric_params
+            )
 
             n_train_rows = int(X.shape[0] * 0.6)
             model.fit(X[:n_train_rows, :], y[:n_train_rows])
@@ -69,6 +77,27 @@ class TestSklearnKNeighbors(unittest.TestCase):
     def test_kneighbors_classifer_euclidean(self):
         self._test_kneighbors_classifier(3, metric="euclidean")
 
+    # KNeighborsClassifier manhattan metric type
+    def test_kneighbors_classifer_manhattan(self):
+        self._test_kneighbors_classifier(3, metric="manhattan", metric_params={})
+
+    # FIXME: Facing some issues from how pytorch handle cdist with infinity norm
+    # # KNeighborsClassifier chebyshev metric type
+    # def test_kneighbors_classifer_chebyshev(self):
+    #     self._test_kneighbors_classifier(3, metric="chebyshev", metric_params={})
+
+    # KNeighborsClassifier wminkowski metric type
+    def test_kneighbors_classifer_wminkowski(self):
+        self._test_kneighbors_classifier(3, metric="wminkowski")
+
+    # KNeighborsClassifier seuclidean metric type
+    def test_kneighbors_classifer_seuclidean(self):
+        self._test_kneighbors_classifier(3, metric="seuclidean")
+
+    # KNeighborsClassifier mahalanobis metric type
+    def test_kneighbors_classifer_mahalanobis(self):
+        self._test_kneighbors_classifier(3, metric="mahalanobis")
+
     # KNeighborsClassifier minkowski metric p = 5
     def test_kneighbors_classifer_minkowski_p5(self):
         self._test_kneighbors_classifier(3, metric_params={"p": 5})
@@ -82,13 +111,21 @@ class TestSklearnKNeighbors(unittest.TestCase):
         metric_params={"p": 2},
         score_w_train_data=False,
     ):
-        model = KNeighborsRegressor(
-            n_neighbors=n_neighbors, algorithm=algorithm, weights=weights, metric=metric, metric_params=metric_params
-        )
-
         for data in [datasets.load_boston(), datasets.load_diabetes()]:
             X, y = data.data, data.target
             X = X.astype(np.float32)
+
+            if metric == "wminkowski":
+                metric_params["w"] = np.random.rand(X.shape[1])
+            elif metric == "seuclidean":
+                metric_params["V"] = np.random.rand(X.shape[1])
+            elif metric == "mahalanobis":
+                V = np.cov(X.T)
+                metric_params["VI"] = np.linalg.inv(V)
+
+            model = KNeighborsRegressor(
+                n_neighbors=n_neighbors, algorithm=algorithm, weights=weights, metric=metric, metric_params=metric_params
+            )
 
             n_train_rows = int(X.shape[0] * 0.6)
             model.fit(X[:n_train_rows, :], y[:n_train_rows])
@@ -128,6 +165,27 @@ class TestSklearnKNeighbors(unittest.TestCase):
     # KNeighborsRegressor euclidean metric type
     def test_kneighbors_regressor_euclidean(self):
         self._test_kneighbors_regressor(3, metric="euclidean")
+
+    # KNeighborsRegressor manhattan metric type
+    def test_kneighbors_regressor_manhattan(self):
+        self._test_kneighbors_regressor(3, metric="manhattan", metric_params={})
+
+    # FIXME: Facing some issues from how pytorch handle cdist with infinity norm
+    # # KNeighborsRegressor chebyshev metric type
+    # def test_kneighbors_regressor_chebyshev(self):
+    #     self._test_kneighbors_regressor(3, metric="chebyshev", metric_params={})
+
+    # KNeighborsRegressor wminkowski metric type
+    def test_kneighbors_regressor_wminkowski(self):
+        self._test_kneighbors_regressor(3, metric="wminkowski")
+
+    # KNeighborsRegressor seuclidean metric type
+    def test_kneighbors_regressor_seuclidean(self):
+        self._test_kneighbors_regressor(3, metric="seuclidean")
+
+    # KNeighborsRegressor mahalanobis metric type
+    def test_kneighbors_regressor_mahalanobis(self):
+        self._test_kneighbors_regressor(3, metric="mahalanobis")
 
     # KNeighborsRegressor minkowski metric p = 3
     def test_kneighbors_regressor_minkowski_p3(self):
