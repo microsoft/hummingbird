@@ -89,7 +89,7 @@ class KNeighborsModel(BaseOperator, torch.nn.Module):
         elif self.metric_type == MetricType.mahalanobis:
             # We use the Cholesky decomposition to calculate the Mahalanobis distance
             # Mahalanobis distance d^2(x, x') = (x - x')T VI (x - x')
-            # usiing Cholesky decomposition we have VI = LT L
+            # using Cholesky decomposition we have VI = LT L
             # then:
             #                      d^2(x, x') = (x - x')T (LT L) (x - x')
             #                                 = (Lx - Lx')T (Lx - Lx')
