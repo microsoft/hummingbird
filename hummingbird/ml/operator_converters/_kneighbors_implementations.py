@@ -87,7 +87,7 @@ class KNeighborsModel(BaseOperator, torch.nn.Module):
         elif self.metric_type == MetricType.seuclidean:
             k = torch.cdist(self.V * x, self.train_data, p=2, compute_mode="donot_use_mm_for_euclid_dist")
         elif self.metric_type == MetricType.mahalanobis:
-            # We use the Cholesky decompositio and quadratic exapansion to calculate the Mahalanobis distance
+            # We use the Cholesky decomposition to calculate the Mahalanobis distance
             # Mahalanobis distance d^2(x, x') = (x - x')T VI (x - x')
             # usiing Cholesky decomposition we have VI = LT L
             # then:
