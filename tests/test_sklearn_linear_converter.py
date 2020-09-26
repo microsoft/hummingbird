@@ -240,7 +240,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         model.fit(X, y)
 
-        tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
+        tvm_model = hummingbird.ml.convert(model, "tvm", X)
         self.assertTrue(tvm_model is not None)
         np.testing.assert_allclose(model.predict(X), tvm_model.predict(X), rtol=1e-6, atol=1e-6)
         np.testing.assert_allclose(model.predict_proba(X), tvm_model.predict_proba(X), rtol=1e-6, atol=1e-6)
@@ -260,6 +260,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
         self.assertTrue(tvm_model is not None)
+
         np.testing.assert_allclose(model.predict(X), tvm_model.predict(X), rtol=1e-6, atol=1e-3)
 
 

@@ -38,11 +38,17 @@ ONNX_INITIALIZERS = "onnx_initializers"
 TEST_INPUT = "test_input"
 """The test input data for models that need to be traced"""
 
+N_INPUTS = "n_inputs"
+"""Number of inputs expected by the model."""
+
 NUM_TREES = "n_trees"
 """Number of trees composing an ensemble"""
 
 OFFSET = "offset"
 """Offset of the sklearn anomaly detection implementation"""
+
+IFOREST_THRESHOLD = "iforest_threshold"
+"""threshold of the sklearn isolation forest implementation, backward compatibility for sklearn <= 0.21"""
 
 MAX_SAMPLES = "max_samples"
 """Max_samples of sklearn isolation forest implementation"""
@@ -52,3 +58,6 @@ BATCH_SIZE = "batch_size"
 
 TVM_CONTEXT = "tvm_context"
 """The context for TVM containing information on the target"""
+
+TVM_INPUT_NAMES = "tvm_input_names"
+"""TVM expects named inputs. This is used to set the names for the inputs"""

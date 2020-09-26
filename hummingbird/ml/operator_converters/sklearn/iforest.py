@@ -113,6 +113,9 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # Backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.offset += extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -148,6 +151,9 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # Backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.offset += extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -183,6 +189,9 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # Backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.offset += extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -214,6 +223,8 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     n_features = operator.raw_operator.n_features_
     # Following constants will be passed in the tree implementation to normalize the anomaly score.
     extra_config[constants.OFFSET] = operator.raw_operator.offset_
+    if hasattr(operator.raw_operator, "threshold_"):
+        extra_config[constants.IFOREST_THRESHOLD] = operator.raw_operator.threshold_
     extra_config[constants.MAX_SAMPLES] = operator.raw_operator.max_samples_
 
     # Predict in isolation forest sklearn implementation produce 2 classes: -1 (normal) & 1 (anomaly).

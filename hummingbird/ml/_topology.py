@@ -40,14 +40,24 @@ from .exceptions import MissingConverter
 from .operator_converters import constants
 
 
-def _jit_model(torch_model, device, extra_config):
+def _jit_model(torch_model, trace_input, device, extra_config):
     """
     Function used to convert an input pytorch model into torchscript.
     """
-    test_data = torch.from_numpy(extra_config[constants.TEST_INPUT])
     if device != "cpu":
-        test_data.to(device)
-    return torch.jit.trace(torch_model, test_data).eval()
+        trace_input.to(device)
+    return torch.jit.trace(torch_model, trace_input).eval()
+
+
+def _get_trace_input_from_test_input(inputs):
+    """
+    Utility function used to properly put the inputs into a format understandable by torch.
+    """
+    if type(inputs) is tuple:
+        trace_input = tuple([torch.from_numpy(i) for i in inputs])
+    else:
+        trace_input = torch.from_numpy(inputs)
+    return trace_input
 
 
 def convert(topology, backend, device, extra_config={}):
@@ -118,11 +128,7 @@ def convert(topology, backend, device, extra_config={}):
             output_model_name = str(uuid4().hex) + ".onnx"
 
         # Put the tracing test input into the right format.
-        trace_input = extra_config[constants.TEST_INPUT]
-        if type(trace_input) is tuple:
-            trace_input = tuple([torch.from_numpy(i) for i in trace_input])
-        else:
-            trace_input = torch.from_numpy(trace_input)
+        trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT])
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -141,14 +147,52 @@ def convert(topology, backend, device, extra_config={}):
         # Set the ONNX model name if any.
         if onnx_model_name is not None:
             hb_model.graph.name = onnx_model_name
+
+        # Fix the model to use arbitrary batch dimensions
+        def fix_dim(dim):
+            updated = False
+            if dim.HasField("dim_value"):
+                dim.Clear()
+                updated = True
+                dim.dim_param = "sym"
+
+            return updated
+
+        def fix_value_info(value):
+            num_fixed = 0
+            if value.type.HasField("tensor_type"):
+                shape = value.type.tensor_type.shape
+                if shape:
+                    dim = shape.dim[0]
+                    if fix_dim(dim):
+                        num_fixed += 1
+
+            return num_fixed
+
+        def fix_graph(graph):
+            num_fixed = 0
+            for input in graph.input:
+                num_fixed += fix_value_info(input)
+
+            for output in graph.output:
+                num_fixed += fix_value_info(output)
+
+            for node in graph.node:
+                for attr in node.attribute:
+                    if attr.HasField("g"):
+                        num_fixed += fix_graph(attr.g)
+
+            return num_fixed
+
+        fix_graph(hb_model.graph)
     elif backend == tvm_backend:
         # First we need to generate the torchscript model.
-        ts_model = _jit_model(torch_model, device, extra_config)
+        trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT])
+        ts_model = _jit_model(torch_model, trace_input, "cpu", extra_config)
 
         # Generate the test input in the TVM format.
         test_input = [
-            (topology.raw_model.input_names[i], extra_config[constants.TEST_INPUT].shape)
-            for i in range(len(topology.raw_model.input_names))
+            (topology.raw_model.input_names[i], trace_input.shape) for i in range(len(topology.raw_model.input_names))
         ]
 
         # Create the relay version of the model.
@@ -169,9 +213,12 @@ def convert(topology, backend, device, extra_config={}):
 
         # Get configuration parameters.
         config = {}
-
         if constants.TVM_MAX_FUSE_DEPTH in extra_config:
             config["relay.FuseOps.max_depth"] = extra_config[constants.TVM_MAX_FUSE_DEPTH]
+        else:
+            # 50 is a good depth for operator fusion. More than that will probably hurt performance.
+            # https://github.com/microsoft/hummingbird/issues/232#issuecomment-697979508
+            config["relay.FuseOps.max_depth"] = 50
 
         # Generate the model.
         with tvm.transform.PassContext(opt_level=3, config=config):
@@ -182,6 +229,7 @@ def convert(topology, backend, device, extra_config={}):
 
         # In the container we will be using the context to properly configure the input tensors.
         extra_config[constants.TVM_CONTEXT] = ctx
+        extra_config[constants.TVM_INPUT_NAMES] = topology.raw_model.input_names
 
         hb_model = tvm_model
     else:
@@ -192,10 +240,8 @@ def convert(topology, backend, device, extra_config={}):
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
-            test_data = torch.from_numpy(extra_config[constants.TEST_INPUT])
-            if device != "cpu":
-                test_data.to(device)
-            torch_model = torch.jit.trace(torch_model, test_data).eval()
+            trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT])
+            torch_model = _jit_model(torch_model, trace_input, device, extra_config)
             torch.jit.optimized_execution(torch_model)
 
         hb_model = torch_model
@@ -219,7 +265,7 @@ def convert(topology, backend, device, extra_config={}):
     tmp_idx = idx
     if operator_map[operators[idx].full_name].transformer:
         while (
-            idx > 0
+            idx >= 0
             and not operator_map[operators[idx].full_name].regression
             and not operator_map[operators[idx].full_name].classification
             and not operator_map[operators[idx].full_name].anomaly_detection

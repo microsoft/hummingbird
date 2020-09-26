@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L53" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/constants.py#L0-L62" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -68,11 +68,17 @@ ONNX_INITIALIZERS = &#34;onnx_initializers&#34;
 TEST_INPUT = &#34;test_input&#34;
 &#34;&#34;&#34;The test input data for models that need to be traced&#34;&#34;&#34;
 
+N_INPUTS = &#34;n_inputs&#34;
+&#34;&#34;&#34;Number of inputs expected by the model.&#34;&#34;&#34;
+
 NUM_TREES = &#34;n_trees&#34;
 &#34;&#34;&#34;Number of trees composing an ensemble&#34;&#34;&#34;
 
 OFFSET = &#34;offset&#34;
 &#34;&#34;&#34;Offset of the sklearn anomaly detection implementation&#34;&#34;&#34;
+
+IFOREST_THRESHOLD = &#34;iforest_threshold&#34;
+&#34;&#34;&#34;threshold of the sklearn isolation forest implementation, backward compatibility for sklearn &lt;= 0.21&#34;&#34;&#34;
 
 MAX_SAMPLES = &#34;max_samples&#34;
 &#34;&#34;&#34;Max_samples of sklearn isolation forest implementation&#34;&#34;&#34;
@@ -81,7 +87,10 @@ BATCH_SIZE = &#34;batch_size&#34;
 &#34;&#34;&#34;Batch size expected by the compiled model&#34;&#34;&#34;
 
 TVM_CONTEXT = &#34;tvm_context&#34;
-&#34;&#34;&#34;The context for TVM containing information on the target&#34;&#34;&#34;</code></pre>
+&#34;&#34;&#34;The context for TVM containing information on the target&#34;&#34;&#34;
+
+TVM_INPUT_NAMES = &#34;tvm_input_names&#34;
+&#34;&#34;&#34;TVM expects named inputs. This is used to set the names for the inputs&#34;&#34;&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -101,6 +110,10 @@ TVM_CONTEXT = &#34;tvm_context&#34;
 <dd>
 <div class="desc"><p>Which function to use to extract the parameters for the tree traversal strategy</p></div>
 </dd>
+<dt id="hummingbird.ml.operator_converters.constants.IFOREST_THRESHOLD"><code class="name">var <span class="ident">IFOREST_THRESHOLD</span></code></dt>
+<dd>
+<div class="desc"><p>threshold of the sklearn isolation forest implementation, backward compatibility for sklearn &lt;= 0.21</p></div>
+</dd>
 <dt id="hummingbird.ml.operator_converters.constants.LEARNING_RATE"><code class="name">var <span class="ident">LEARNING_RATE</span></code></dt>
 <dd>
 <div class="desc"><p>Learning Rate</p></div>
@@ -112,6 +125,10 @@ TVM_CONTEXT = &#34;tvm_context&#34;
 <dt id="hummingbird.ml.operator_converters.constants.NUM_TREES"><code class="name">var <span class="ident">NUM_TREES</span></code></dt>
 <dd>
 <div class="desc"><p>Number of trees composing an ensemble</p></div>
+</dd>
+<dt id="hummingbird.ml.operator_converters.constants.N_INPUTS"><code class="name">var <span class="ident">N_INPUTS</span></code></dt>
+<dd>
+<div class="desc"><p>Number of inputs expected by the model.</p></div>
 </dd>
 <dt id="hummingbird.ml.operator_converters.constants.OFFSET"><code class="name">var <span class="ident">OFFSET</span></code></dt>
 <dd>
@@ -145,6 +162,10 @@ TVM_CONTEXT = &#34;tvm_context&#34;
 <dd>
 <div class="desc"><p>The context for TVM containing information on the target</p></div>
 </dd>
+<dt id="hummingbird.ml.operator_converters.constants.TVM_INPUT_NAMES"><code class="name">var <span class="ident">TVM_INPUT_NAMES</span></code></dt>
+<dd>
+<div class="desc"><p>TVM expects named inputs. This is used to set the names for the inputs</p></div>
+</dd>
 <dt id="hummingbird.ml.operator_converters.constants.TWEEDIE"><code class="name">var <span class="ident">TWEEDIE</span></code></dt>
 <dd>
 <div class="desc"><p>Tweedie post transform</p></div>
@@ -176,9 +197,11 @@ TVM_CONTEXT = &#34;tvm_context&#34;
 <li><code><a title="hummingbird.ml.operator_converters.constants.BASE_PREDICTION" href="#hummingbird.ml.operator_converters.constants.BASE_PREDICTION">BASE_PREDICTION</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.BATCH_SIZE" href="#hummingbird.ml.operator_converters.constants.BATCH_SIZE">BATCH_SIZE</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL" href="#hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL">GET_PARAMETERS_FOR_TREE_TRAVERSAL</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.IFOREST_THRESHOLD" href="#hummingbird.ml.operator_converters.constants.IFOREST_THRESHOLD">IFOREST_THRESHOLD</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.LEARNING_RATE" href="#hummingbird.ml.operator_converters.constants.LEARNING_RATE">LEARNING_RATE</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.MAX_SAMPLES" href="#hummingbird.ml.operator_converters.constants.MAX_SAMPLES">MAX_SAMPLES</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.NUM_TREES" href="#hummingbird.ml.operator_converters.constants.NUM_TREES">NUM_TREES</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.N_INPUTS" href="#hummingbird.ml.operator_converters.constants.N_INPUTS">N_INPUTS</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.OFFSET" href="#hummingbird.ml.operator_converters.constants.OFFSET">OFFSET</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS" href="#hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS">ONNX_INITIALIZERS</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.POST_TRANSFORM" href="#hummingbird.ml.operator_converters.constants.POST_TRANSFORM">POST_TRANSFORM</a></code></li>
@@ -187,6 +210,7 @@ TVM_CONTEXT = &#34;tvm_context&#34;
 <li><code><a title="hummingbird.ml.operator_converters.constants.SOFTMAX" href="#hummingbird.ml.operator_converters.constants.SOFTMAX">SOFTMAX</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.TEST_INPUT" href="#hummingbird.ml.operator_converters.constants.TEST_INPUT">TEST_INPUT</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.TVM_CONTEXT" href="#hummingbird.ml.operator_converters.constants.TVM_CONTEXT">TVM_CONTEXT</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.constants.TVM_INPUT_NAMES" href="#hummingbird.ml.operator_converters.constants.TVM_INPUT_NAMES">TVM_INPUT_NAMES</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.constants.TWEEDIE" href="#hummingbird.ml.operator_converters.constants.TWEEDIE">TWEEDIE</a></code></li>
 </ul>
 </li>

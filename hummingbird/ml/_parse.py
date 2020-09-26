@@ -10,8 +10,10 @@ Some code here have been copied from https://github.com/onnx/sklearn-onnx/.
 """
 from collections import OrderedDict
 from copy import deepcopy
+import pprint
 from uuid import uuid4
 
+import numpy as np
 from onnxconverter_common.container import CommonSklearnModelContainer
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 from onnxconverter_common.topology import Topology
@@ -19,13 +21,15 @@ from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 
-from . import constants
 from ._container import CommonONNXModelContainer
 from ._utils import sklearn_installed
+from .operator_converters import constants
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name
 
+do_not_merge_columns = tuple(filter(lambda op: op is not None, [OneHotEncoder, ColumnTransformer]))
 
-def parse_sklearn_api_model(model):
+
+def parse_sklearn_api_model(model, extra_config={}):
     """
     Puts *scikit-learn* object into an abstract representation so that our framework can work seamlessly on models created
     with different machine learning tools.
@@ -48,10 +52,42 @@ def parse_sklearn_api_model(model):
     # One global scope is enough for parsing scikit-learn models.
     scope = topology.declare_scope("__root__")
 
-    # Declare input variables. Sklearn always gets as input a single dataframe,
-    # therefore by default we start with a single `input` variable
+    # Declare input variables.
     inputs = []
-    inputs.append(scope.declare_local_variable("input"))
+    n_inputs = extra_config[constants.N_INPUTS] if constants.N_INPUTS in extra_config else 1
+    if constants.TEST_INPUT in extra_config:
+        assert n_inputs == len(extra_config[constants.INPUT_NAMES]) if constants.INPUT_NAMES in extra_config else True
+
+        from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
+
+        test_input = extra_config[constants.TEST_INPUT] if n_inputs > 1 else [extra_config[constants.TEST_INPUT]]
+        for i in range(n_inputs):
+            input = test_input[i]
+            input_name = (
+                extra_config[constants.INPUT_NAMES][i] if constants.INPUT_NAMES in extra_config else "input_{}".format(i)
+            )
+            if input.dtype == np.float32:
+                input_type = FloatTensorType(input.shape)
+            elif input.dtype == np.float64:
+                input_type = DoubleTensorType(input.shape)
+            elif input.dtype == np.int32:
+                input_type = Int32TensorType(input.shape)
+            elif input.dtype == np.int64:
+                input_type = Int64TensorType(input.shape)
+            else:
+                raise NotImplementedError(
+                    "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
+                        type(input.dtype)
+                    )
+                )
+            inputs.append(scope.declare_local_variable(input_name, type=input_type))
+    else:
+        # We have no information on the input. Sklearn always gets as input a single dataframe,
+        # therefore by default we start with a single `input` variable
+        assert len(constants.INPUT_NAMES) == 1 if constants.INPUT_NAMES in extra_config else True
+
+        input_name = extra_config[constants.INPUT_NAMES][0] if constants.INPUT_NAMES in extra_config else "input"
+        inputs.append(scope.declare_local_variable(input_name))
 
     # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the inputs of the scikit-learn's computational graph.
@@ -61,6 +97,12 @@ def parse_sklearn_api_model(model):
     # Parse the input scikit-learn model into its scope with the topology.
     # Get the outputs of the model.
     outputs = _parse_sklearn_api(scope, model, inputs)
+
+    # Use the output names specified by the user, if any
+    if constants.OUTPUT_NAMES in extra_config:
+        assert len(extra_config[constants.OUTPUT_NAMES]) == len(outputs)
+        for i in range(len(outputs)):
+            outputs[i].raw_name = extra_config[constants.OUTPUT_NAMES][i]
 
     # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the outputs of the scikit-learn's computational graph.
@@ -224,9 +266,6 @@ def _parse_sklearn_column_transformer(scope, model, inputs):
     :param inputs: A list of Variable objects
     :return: A list of output variables produced by column transformer
     """
-    assert (
-        len(inputs) < 2
-    ), "Hummingbird currently supports ColumnTransformer over single inputs. Please fill an issue at https://github.com/microsoft/hummingbird."
     # Output variable name of each transform. It's a list of string.
     transformed_result_names = []
     # Encode each transform as our IR object
@@ -243,10 +282,31 @@ def _parse_sklearn_column_transformer(scope, model, inputs):
             )
         elif isinstance(column_indices, (int, str)):
             column_indices = [column_indices]
-        pt_var, pt_is = _get_column_indices(column_indices, inputs)
+        if len(column_indices) == 0:
+            continue
+        names = _get_column_indices(column_indices, inputs, len(inputs) > 1)
         transform_inputs = []
-        tr_inputs = _fetch_input_slice(scope, [inputs[pt_var]], pt_is)
-        transform_inputs.extend(tr_inputs)
+        for onnx_var, onnx_is in names.items():
+            tr_inputs = _fetch_input_slice(scope, [inputs[onnx_var]], onnx_is)
+            transform_inputs.extend(tr_inputs)
+
+        merged_cols = False
+        if len(transform_inputs) > 1:
+            if isinstance(op, pipeline.Pipeline):
+                if not isinstance(op.steps[0][1], do_not_merge_columns):
+                    merged_cols = True
+            elif not isinstance(op, do_not_merge_columns):
+                merged_cols = True
+
+        if merged_cols:
+            # Many ONNX operators expect one input vector, the default behaviour is to merge columns.
+            ty = transform_inputs[0].type.__class__([None, None])
+
+            conc_op = scope.declare_local_operator("SklearnConcat")
+            conc_op.inputs = transform_inputs
+            conc_names = scope.declare_local_variable("merged_columns", ty)
+            conc_op.outputs.append(conc_names)
+            transform_inputs = [conc_names]
 
         model_obj = model.named_transformers_[name]
         if isinstance(model_obj, str):
@@ -393,7 +453,13 @@ def _fetch_input_slice(scope, inputs, column_indices):
         raise RuntimeError("Operator ArrayFeatureExtractor requires at least one inputs.")
     if len(inputs) != 1:
         raise RuntimeError("Operator ArrayFeatureExtractor does not support multiple input tensors.")
-
+    if (
+        len(inputs) == 1
+        and len(column_indices) == 1
+        and inputs[0].type is not None
+        and (len(inputs[0].type.shape) == 1 or inputs[0].type.shape[1] == 1)
+    ):
+        return inputs
     array_feature_extractor_operator = scope.declare_local_operator("SklearnArrayFeatureExtractor")
     array_feature_extractor_operator.inputs = inputs
     array_feature_extractor_operator.column_indices = column_indices
@@ -424,13 +490,43 @@ def _get_column_index(i, inputs):
             # Useful shortcut, skips the case when end is None
             # (unknown dimension)
             return 0, 0
+        if inputs[0].type is None:
+            return 0, i
         vi = 0
-        return (vi, i)
+        pos = 0
+        end = inputs[0].type.shape[1]
+        if end is None:
+            raise RuntimeError(
+                "Cannot extract a specific column {0} when " "one input ('{1}') has unknown " "dimension.".format(i, inputs[0])
+            )
+        while True:
+            if pos <= i < end:
+                return (vi, i - pos)
+            vi += 1
+            pos = end
+            if vi >= len(inputs):
+                raise RuntimeError(
+                    "Input {} (i={}, end={}) is not available in\n{}".format(vi, i, end, pprint.pformat(inputs))
+                )
+            rel_end = inputs[vi].type.shape[1]
+            if rel_end is None:
+                raise RuntimeError(
+                    "Cannot extract a specific column {0} when "
+                    "one input ('{1}') has unknown "
+                    "dimension.".format(i, inputs[vi])
+                )
+            end += rel_end
     else:
-        raise RuntimeError("Hummingbird currently support only int columns, {} is not supported.".format(i))
+        assert isinstance(
+            i, str
+        ), "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(type(i))
+        for ind, inp in enumerate(inputs):
+            if inp.onnx_name == i:
+                return ind, 0
+        raise RuntimeError("Unable to find column name '{0}'".format(i))
 
 
-def _get_column_indices(indices, inputs):
+def _get_column_indices(indices, inputs, multiple=False):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/common/utils.py#L105.
     Returns the requested graph inpudes based on their indices or names. See `_parse._get_column_index`.
@@ -442,20 +538,29 @@ def _get_column_indices(indices, inputs):
         a tuple *(variable name, list of requested indices)* if *multiple* is False, a dictionary *{ var_index: [ list of
         requested indices ] }* if *multiple* is True
     """
-    pt_var = None
-    pt_is = []
-    for p in indices:
-        pt_v, pt_i = _get_column_index(p, inputs)
-        pt_is.append(pt_i)
-        if pt_var is None:
-            pt_var = pt_v
-        elif pt_var != pt_v:
-            raise NotImplementedError(
-                "Hummingbird is not able to merge multiple columns from "
-                "multiple variables ({0}). You should think about merging "
-                "initial types.".format([pt_var, pt_v])
-            )
-    return pt_var, pt_is
+    if multiple:
+        res = OrderedDict()
+        for p in indices:
+            pt_var, pt_i = _get_column_index(p, inputs)
+            if pt_var not in res:
+                res[pt_var] = []
+            res[pt_var].append(pt_i)
+        return res
+    else:
+        pt_var = None
+        pt_is = []
+        for p in indices:
+            pt_v, pt_i = _get_column_index(p, inputs)
+            pt_is.append(pt_i)
+            if pt_var is None:
+                pt_var = pt_v
+            elif pt_var != pt_v:
+                raise NotImplementedError(
+                    "Hummingbird is not able to merge multiple columns from "
+                    "multiple variables ({0}). You should think about merging "
+                    "initial types.".format([pt_var, pt_v])
+                )
+        return {pt_var: pt_is}
 
 
 # Registered API parsers.

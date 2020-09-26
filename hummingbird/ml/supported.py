@@ -29,6 +29,8 @@ HistGradientBoostingRegressor,
 IsolationForest,
 KernelPCA,
 KBinsDiscretizer,
+KNeighborsClassifier,
+KNeighborsRegressor,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -124,6 +126,10 @@ def _build_sklearn_operator_list():
         # Matrix decomposition transformers
         from sklearn.decomposition import PCA, KernelPCA, FastICA, TruncatedSVD
 
+        # KNeighbors models
+        from sklearn.neighbors.classification import KNeighborsClassifier
+        from sklearn.neighbors.regression import KNeighborsRegressor
+
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
@@ -169,6 +175,8 @@ def _build_sklearn_operator_list():
             # Other models
             BernoulliNB,
             GaussianNB,
+            KNeighborsClassifier,
+            KNeighborsRegressor,
             MLPClassifier,
             MLPRegressor,
             MultinomialNB,
@@ -373,4 +381,13 @@ ONNX_TARGET_OPSET = "onnx_target_opset"
 TVM_MAX_FUSE_DEPTH = "tvm_max_fuse_depth"
 """For TVM we can fix the number of operations that will be fused.
 If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232).
-A good number trading off compilation time with performance is 30."""
+By default Hummingbird uses a max_fuse_depth of 50, but this can be override using this parameter."""
+
+INPUT_NAMES = "input_names"
+"""Set the names of the inputs. Assume that the numbers onf inputs_names is equal to the number of inputs."""
+
+OUTPUT_NAMES = "output_names"
+"""Set the names of the outputs."""
+
+CONTAINER = "container"
+"""Whether to return the container for Sklearn API or just the model."""

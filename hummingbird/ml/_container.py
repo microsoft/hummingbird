@@ -14,7 +14,12 @@ from onnxconverter_common.container import CommonSklearnModelContainer
 import torch
 
 from .operator_converters import constants
-from ._utils import onnx_runtime_installed, tvm_installed
+from ._utils import onnx_runtime_installed, pandas_installed, tvm_installed
+
+if pandas_installed():
+    from pandas import DataFrame
+else:
+    DataFrame = None
 
 
 class CommonONNXModelContainer(CommonSklearnModelContainer):
@@ -82,8 +87,19 @@ class PyTorchBackendModel(torch.nn.Module):
 
     def forward(self, *inputs):
         with torch.no_grad():
-            assert len(self._input_names) == len(inputs)
+            assert len(self._input_names) == len(inputs) or (
+                type(inputs[0]) == DataFrame and DataFrame is not None and len(self._input_names) == len(inputs[0].columns)
+            ), "number of inputs or number of columns in the dataframe do not match with the expected number of inputs {}".format(
+                self._input_names
+            )
 
+            if type(inputs[0]) == DataFrame and DataFrame is not None:
+                # Split the dataframe into column ndarrays
+                inputs = inputs[0]
+                input_names = list(inputs.columns)
+                splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+                splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+                inputs = tuple(splits)
             inputs = [*inputs]
             variable_map = {}
             device = _get_device(self)
@@ -185,9 +201,9 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
         if self._is_regression:
-            return self.model.forward(*inputs).cpu().numpy().flatten()
+            return self.model.forward(*inputs).cpu().numpy().ravel()
         elif self._is_anomaly_detection:
-            return self.model.forward(*inputs)[0].cpu().numpy().flatten()
+            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
         else:
             return self.model.forward(*inputs)[0].cpu().numpy()
 
@@ -223,7 +239,11 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision function scores.
         """
-        return self.model.forward(*inputs)[1].cpu().numpy().flatten()
+        scores = self.model.forward(*inputs)[1].cpu().numpy().ravel()
+        # Backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in self._extra_config:
+            scores += self._extra_config[constants.IFOREST_THRESHOLD]
+        return scores
 
     def score_samples(self, *inputs):
         """
@@ -242,6 +262,14 @@ def _torchscript_wrapper(device, function, *inputs):
     inputs = [*inputs]
 
     with torch.no_grad():
+        if type(inputs) == DataFrame and DataFrame is not None:
+            # Split the dataframe into column ndarrays
+            inputs = inputs[0]
+            input_names = list(inputs.columns)
+            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+            inputs = tuple(splits)
+
         # Maps data inputs to the expected type and device.
         for i in range(len(inputs)):
             if type(inputs[i]) is np.ndarray:
@@ -380,7 +408,7 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
         """
         named_inputs = self._get_named_inputs(inputs)
 
-        return np.array(self._session.run(self._output_names, named_inputs)).squeeze()
+        return self._session.run(self._output_names, named_inputs)[0]
 
 
 class ONNXSklearnContainerRegression(ONNXSklearnContainer):
@@ -408,11 +436,11 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         named_inputs = self._get_named_inputs(inputs)
 
         if self._is_regression:
-            return np.array(self._session.run(self._output_names, named_inputs)).reshape(-1)
+            return np.array(self._session.run(self._output_names, named_inputs)).ravel()
         elif self._is_anomaly_detection:
-            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].reshape(-1)
+            return np.array(self._session.run([self._output_names[0]], named_inputs)[0]).ravel()
         else:
-            return self._session.run([self._output_names[0]], named_inputs)[0].reshape(-1)
+            return np.array(self._session.run([self._output_names[0]], named_inputs)[0]).ravel()
 
 
 class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
@@ -454,7 +482,11 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         """
         named_inputs = self._get_named_inputs(inputs)
 
-        return np.array(self._session.run([self._output_names[1]], named_inputs)[0]).reshape(-1)
+        scores = self._session.run([self._output_names[1]], named_inputs)[0].ravel()
+        # Backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in self._extra_config:
+            scores += self._extra_config[constants.IFOREST_THRESHOLD]
+        return scores
 
     def score_samples(self, *inputs):
         """
@@ -482,12 +514,16 @@ class TVMSklearnContainer(ABC):
 
         self._model = model
         self._extra_config = extra_config
-
-        self._to_tvm_tensor = lambda x: tvm.nd.array(x, self._extra_config[constants.TVM_CONTEXT])
+        self._ctx = self._extra_config[constants.TVM_CONTEXT]
+        self._input_names = self._extra_config[constants.TVM_INPUT_NAMES]
+        self._to_tvm_array = lambda x: tvm.nd.array(x, self._ctx)
 
     @property
     def model(self):
         return self._model
+
+    def _to_tvm_tensor(self, *inputs):
+        return {self._input_names[0]: self._to_tvm_array(inputs[i]) for i in range(len(inputs))}
 
 
 class TVMSklearnContainerTransformer(TVMSklearnContainer):
@@ -500,7 +536,7 @@ class TVMSklearnContainerTransformer(TVMSklearnContainer):
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        self.model.run(input=self._to_tvm_tensor(*inputs))
+        self.model.run(**self._to_tvm_tensor(*inputs))
         return self.model.get_output(0).asnumpy().squeeze()
 
 
@@ -524,11 +560,11 @@ class TVMSklearnContainerRegression(TVMSklearnContainer):
         On classification tasks returns the predicted class labels for the input data.
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
-        self.model.run(input=self._to_tvm_tensor(*inputs))
+        self.model.run(**self._to_tvm_tensor(*inputs))
         if self._is_regression or self._is_anomaly_detection:
-            return self.model.get_output(0).asnumpy().reshape(-1)
+            return self.model.get_output(0).asnumpy().ravel()
         else:
-            return self.model.get_output(0).asnumpy().reshape(-1)
+            return self.model.get_output(0).asnumpy().ravel()
 
 
 class TVMSklearnContainerClassification(TVMSklearnContainerRegression):
@@ -544,7 +580,7 @@ class TVMSklearnContainerClassification(TVMSklearnContainerRegression):
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
         """
-        self.model.run(input=self._to_tvm_tensor(*inputs))
+        self.model.run(**self._to_tvm_tensor(*inputs))
         return self.model.get_output(1).asnumpy()
 
 
@@ -563,13 +599,18 @@ class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression):
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision function scores.
         """
-        self.model.run(input=self._to_tvm_tensor(*inputs))
-        return self.model.get_output(1).asnumpy()
+        self.model.run(**self._to_tvm_tensor(*inputs))
+        scores = self.model.get_output(1).asnumpy().ravel()
+
+        # Backward compatibility for sklearn <= 0.21
+        if constants.IFOREST_THRESHOLD in self._extra_config:
+            scores += self._extra_config[constants.IFOREST_THRESHOLD]
+        return scores
 
     def score_samples(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
         """
-        self.model.run(input=self._to_tvm_tensor(*inputs))
+        self.model.run(**self._to_tvm_tensor(*inputs))
         return self.decision_function(inputs) + self._extra_config[constants.OFFSET]

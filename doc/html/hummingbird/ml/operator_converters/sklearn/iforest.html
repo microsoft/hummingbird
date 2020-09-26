@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L0-L250" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L0-L261" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -143,6 +143,9 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # Backward compatibility for sklearn &lt;= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.offset += extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -178,6 +181,9 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # Backward compatibility for sklearn &lt;= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.offset += extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -213,6 +219,9 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # Backward compatibility for sklearn &lt;= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.offset += extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -244,6 +253,8 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     n_features = operator.raw_operator.n_features_
     # Following constants will be passed in the tree implementation to normalize the anomaly score.
     extra_config[constants.OFFSET] = operator.raw_operator.offset_
+    if hasattr(operator.raw_operator, &#34;threshold_&#34;):
+        extra_config[constants.IFOREST_THRESHOLD] = operator.raw_operator.threshold_
     extra_config[constants.MAX_SAMPLES] = operator.raw_operator.max_samples_
 
     # Predict in isolation forest sklearn implementation produce 2 classes: -1 (normal) &amp; 1 (anomaly).
@@ -310,7 +321,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L198-L247" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L207-L258" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def convert_sklearn_isolation_forest(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -331,6 +342,8 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
     n_features = operator.raw_operator.n_features_
     # Following constants will be passed in the tree implementation to normalize the anomaly score.
     extra_config[constants.OFFSET] = operator.raw_operator.offset_
+    if hasattr(operator.raw_operator, &#34;threshold_&#34;):
+        extra_config[constants.IFOREST_THRESHOLD] = operator.raw_operator.threshold_
     extra_config[constants.MAX_SAMPLES] = operator.raw_operator.max_samples_
 
     # Predict in isolation forest sklearn implementation produce 2 classes: -1 (normal) &amp; 1 (anomaly).
@@ -389,7 +402,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L96-L125" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L96-L128" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class GEMMIsolationForestImpl(GEMMTreeImpl):
     &#34;&#34;&#34;
@@ -411,6 +424,9 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # Backward compatibility for sklearn &lt;= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.offset += extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -451,7 +467,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L119-L125" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L122-L128" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def aggregation(self, x):
     output = x.sum(0).t()
@@ -486,7 +502,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L163-L195" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L169-L204" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
     &#34;&#34;&#34;
@@ -511,6 +527,9 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # Backward compatibility for sklearn &lt;= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.offset += extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -551,7 +570,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L189-L195" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L198-L204" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def aggregation(self, x):
     output = x.sum(1)
@@ -586,7 +605,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L128-L160" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L131-L166" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
     &#34;&#34;&#34;
@@ -611,6 +630,9 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
             self.offset = extra_config[constants.OFFSET]
         if constants.MAX_SAMPLES in extra_config:
             self.max_samples = extra_config[constants.MAX_SAMPLES]
+        # Backward compatibility for sklearn &lt;= 0.21
+        if constants.IFOREST_THRESHOLD in extra_config:
+            self.offset += extra_config[constants.IFOREST_THRESHOLD]
         self.final_probability_divider = len(tree_parameters)
         self.average_path_length = _average_path_length(np.array([self.max_samples]))[0]
 
@@ -651,7 +673,7 @@ register_converter(&#34;SklearnIsolationForest&#34;, convert_sklearn_isolation_f
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L154-L160" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/iforest.py#L160-L166" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python">def aggregation(self, x):
     output = x.sum(1)
