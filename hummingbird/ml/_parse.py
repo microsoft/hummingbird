@@ -21,7 +21,7 @@ from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 
-from ._container import CommonONNXModelContainer
+from ._container import CommonONNXModelContainer, CommonSparkMLModelContainer
 from ._utils import sklearn_installed
 from .operator_converters import constants
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name, get_sparkml_api_operator_name
@@ -104,6 +104,87 @@ def parse_sklearn_api_model(model, extra_config={}):
 
     # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the outputs of the scikit-learn's computational graph.
+    for variable in outputs:
+        raw_model_container.add_output(variable)
+
+    return topology
+
+
+def parse_sparkml_api_model(model, extra_config={}):
+    """
+    Puts *Spark-ML* object into an abstract representation so that our framework can work seamlessly on models created
+    with different machine learning tools.
+
+    Args:
+        model: A model object in Spark-ML format
+
+    Returns:
+        A `onnxconverter_common.topology.Topology` object representing the input model
+    """
+    assert model is not None, "Cannot convert a mode of type None."
+
+    raw_model_container = CommonSparkMLModelContainer(model)
+
+    # Declare a computational graph. It will become a representation of
+    # the input Spark-ML model after parsing.
+    topology = Topology(raw_model_container)
+
+    # Declare an object to provide variables' and operators' naming mechanism.
+    # One global scope is enough for parsing Spark-ML models.
+    scope = topology.declare_scope("__root__")
+
+    # Declare input variables.
+    inputs = []
+    n_inputs = extra_config[constants.N_INPUTS] if constants.N_INPUTS in extra_config else 1
+    if constants.INPUT_NAMES in extra_config:
+        assert n_inputs == len(extra_config[constants.INPUT_NAMES])
+    if constants.TEST_INPUT in extra_config:
+        from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
+
+        test_input = extra_config[constants.TEST_INPUT] if n_inputs > 1 else [extra_config[constants.TEST_INPUT]]
+        for i in range(n_inputs):
+            input = test_input[i]
+            input_name = (
+                extra_config[constants.INPUT_NAMES][i] if constants.INPUT_NAMES in extra_config else "input_{}".format(i)
+            )
+            if input.dtype == np.float32:
+                input_type = FloatTensorType(input.shape)
+            elif input.dtype == np.float64:
+                input_type = DoubleTensorType(input.shape)
+            elif input.dtype == np.int32:
+                input_type = Int32TensorType(input.shape)
+            elif input.dtype == np.int64:
+                input_type = Int64TensorType(input.shape)
+            else:
+                raise NotImplementedError(
+                    "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
+                        type(input.dtype)
+                    )
+                )
+            inputs.append(scope.declare_local_variable(input_name, type=input_type))
+    else:
+        # We have no information on the input. Spark-ML always gets as input a single dataframe,
+        # therefore by default we start with a single `input` variable
+        input_name = extra_config[constants.INPUT_NAMES][0] if constants.TEST_INPUT in extra_config else "input"
+        inputs.append(scope.declare_local_variable(input_name))
+
+    # The object raw_model_container is a part of the topology we're going to return.
+    # We use it to store the inputs of the Spark-ML's computational graph.
+    for variable in inputs:
+        raw_model_container.add_input(variable)
+
+    # Parse the input Spark-ML model into its scope with the topology.
+    # Get the outputs of the model.
+    outputs = _parse_sparkml_api(scope, model, inputs)
+
+    # Use the output names specified by the user, if any
+    if constants.OUTPUT_NAMES in extra_config:
+        assert len(extra_config[constants.OUTPUT_NAMES]) == len(outputs)
+        for i in range(len(outputs)):
+            outputs[i].raw_name = extra_config[constants.OUTPUT_NAMES][i]
+
+    # The object raw_model_container is a part of the topology we're going to return.
+    # We use it to store the outputs of the Spark-ML's computational graph.
     for variable in outputs:
         raw_model_container.add_output(variable)
 
@@ -406,6 +487,49 @@ def _parse_onnx_single_operator(scope, operator):
         variable = scope.declare_local_variable(output)
         this_operator.outputs.append(variable)
 
+
+def _parse_sparkml_api(scope, model, inputs):
+    """
+    This function handles all input Spark-ML models.
+
+    Args:
+        scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
+        model: A Spark-ML model object
+        inputs: A list of `onnxconverter_common.topology.Variable`s
+
+    Returns:
+        A list of output `onnxconverter_common.topology.Variable` which will be passed to next stage
+    """
+    # FIXME: TODO(scnakandala)
+    # tmodel = type(model)
+    # if tmodel in sklearn_api_parsers_map:
+    #     outputs = sklearn_api_parsers_map[tmodel](scope, model, inputs)
+    # else:
+    outputs = _parse_sparkml_single_operator(scope, model, inputs)
+    return outputs
+
+
+def _parse_sparkml_single_operator(scope, operator, inputs):
+    """
+    This function handles the parsing of all Spark-ML operators.
+
+    Args:
+        scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
+        model: A Spark-ML operator
+        inputs: A list of `onnxconverter_common.topology.Variable`s
+    """
+    if isinstance(operator, str):
+        raise RuntimeError("Parameter operator must be an object not a " "string '{0}'.".format(operator))
+
+    alias = get_sparkml_api_operator_name(type(operator))
+    this_operator = scope.declare_local_operator(alias, operator)
+    this_operator.inputs = inputs
+
+    # We assume that all sparkml operators produce a single output.
+    variable = scope.declare_local_variable("variable")
+    this_operator.outputs.append(variable)
+
+    return this_operator.outputs
 
 def _remove_zipmap(node_list):
     """

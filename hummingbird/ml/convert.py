@@ -11,9 +11,9 @@ from copy import deepcopy
 import numpy as np
 
 from .operator_converters import constants
-from ._parse import parse_sklearn_api_model, parse_onnx_api_model
+from ._parse import parse_sklearn_api_model, parse_onnx_api_model, parse_sparkml_api_model
 from ._topology import convert as topology_converter
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed, pandas_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed, pandas_installed, sparkml_installed
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
 
@@ -31,6 +31,16 @@ def _is_onnx_model(model):
     """
     return type(model).__name__ == "ModelProto"
 
+
+def _is_sparkml_model(model):
+    """
+    Function returning whether the input model is a Spark-ML model or not.
+    """
+    if sparkml_installed():
+        from pyspark.ml import Model, PipelineModel
+        return isinstance(model, Model) or isinstance(model, PipelineModel)
+    else:
+        return False
 
 def _supported_backend_check(backend):
     """
@@ -182,11 +192,30 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
     return hb_model
 
+def _convert_sparkml(model, backend, test_input, device, extra_config={}):
+    """
+    This function converts the specified *Spark-ML* (API) model into its *backend* counterpart.
+    The supported operators and backends can be found at `hummingbird.ml.supported`.
+    """
+    assert model is not None
+    assert torch_installed(), "To use Hummingbird you need to install torch."
+
+    import torch
+
+    # Parse Spark-ML model as our internal data structure (i.e., Topology)
+    # We modify the Spark-ML model during translation.
+    model = model.copy()
+    topology = parse_sparkml_api_model(model, extra_config)
+
+    # Convert the Topology object into a PyTorch model.
+    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
+    return hb_model
+
 
 def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     """
     This function converts the specified input *model* into an implementation targeting *backend*.
-    *Convert* supports [Sklearn], [LightGBM], [XGBoost] and [ONNX] models.
+    *Convert* supports [Sklearn], [LightGBM], [XGBoost], [ONNX], and [SparkML] models.
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
@@ -197,6 +226,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     [ONNX]: https://onnx.ai/
     [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
     [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
+    [Spark-ML]: https://spark.apache.org/docs/latest/api/python/pyspark.ml.html
 
     Args:
         model: An input model
@@ -268,5 +298,8 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
 
     if _is_onnx_model(model):
         return _convert_onnxml(model, backend, test_input, device, extra_config)
+
+    if _is_sparkml_model(model):
+        return _convert_sparkml(model, backend, test_input, device, extra_config)
 
     return _convert_sklearn(model, backend, test_input, device, extra_config)

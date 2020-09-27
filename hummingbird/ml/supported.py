@@ -316,8 +316,8 @@ def _build_onnxml_api_operator_name_map():
 
 def _build_sparkml_api_operator_name_map():
     """
-    Associate SPARKML with the operator class names.
-    If two SPARKML models share a single name, it means they are equivalent in terms of conversion.
+    Associate Spark-ML with the operator class names.
+    If two Spark-ML models share a single name, it means they are equivalent in terms of conversion.
     """
     return {k: "SPARKML" + k for k in sparkml_operator_list if k is not None}
 
