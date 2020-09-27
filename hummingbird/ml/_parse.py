@@ -24,7 +24,7 @@ from sklearn.preprocessing import OneHotEncoder
 from ._container import CommonONNXModelContainer
 from ._utils import sklearn_installed
 from .operator_converters import constants
-from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name
+from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name, get_sparkml_api_operator_name
 
 do_not_merge_columns = tuple(filter(lambda op: op is not None, [OneHotEncoder, ColumnTransformer]))
 

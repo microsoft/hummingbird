@@ -39,6 +39,7 @@ setup(
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
         "docs": ["pdoc3==0.8.1"],
         "onnx": ["onnxruntime>=1.0.0", "onnxmltools>=1.6.0"],
+        "sparkml": ["pyspark>=3.0.0"],
         "extra": [
             # The need each for these depends on which libraries you plan to convert from
             "xgboost>=0.90",
