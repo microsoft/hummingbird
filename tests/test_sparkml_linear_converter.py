@@ -30,8 +30,8 @@ class TestSparkMLLinear(unittest.TestCase):
         X = np.array(X, dtype=np.float32)
         y = np.random.randint(classes, size=(n_total,1))
 
-        df = np.concatenate([y, X], axis=1).reshape(n_total,-1)
-        df = map(lambda x: (int(x[0]), Vectors.dense(x[1:])), df)
+        arr = np.concatenate([y, X], axis=1).reshape(n_total,-1)
+        df = map(lambda x: (int(x[0]), Vectors.dense(x[1:])), arr)
         df = sql.createDataFrame(df,schema=["label", "features"])
 
         model = LogisticRegression()
@@ -39,11 +39,21 @@ class TestSparkMLLinear(unittest.TestCase):
 
         torch_model = convert(model, "torch")
         self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(
+            np.array(model.transform(df).select("probability").collect()).reshape(-1, classes),
+            torch_model.predict_proba(X), rtol=1e-06, atol=1e-06
+        )
 
-    # test pyspark.ml.LogisticRegression with two classes
+    # pyspark.ml.LogisticRegression with two classes
     @unittest.skipIf((not sparkml_installed) or (not pandas_installed), reason="Spark-ML test requires pyspark and pandas")
     def test_logistic_regression_binary(self):
         self._test_linear(2, model_class=LogisticRegression)
+
+    # pyspark.ml.LogisticRegression with multi_class
+    @unittest.skipIf((not sparkml_installed) or (not pandas_installed), reason="Spark-ML test requires pyspark and pandas")
+    def test_logistic_regression_multi_class(self):
+        self._test_linear(5, model_class=LogisticRegression)
+
 
 if __name__ == "__main__":
     unittest.main()

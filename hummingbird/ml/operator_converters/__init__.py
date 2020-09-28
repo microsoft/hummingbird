@@ -43,7 +43,7 @@ from .sklearn import scaler as sklearn_scaler  # noqa: E402
 from .sklearn import sv  # noqa: E402
 from . import lightgbm  # noqa: E402
 from . import xgb  # noqa: E402
-
+from .sparkml import linear  # noqa: E402
 
 __pdoc__ = {}
 __pdoc__["hummingbird.operator_converters._array_feature_extractor_implementations"] = True

@@ -210,7 +210,8 @@ def _build_sparkml_operator_list():
     List all suported SparkML operators.
     """
     if sparkml_installed():
-        return []
+        from pyspark.ml.classification import LogisticRegressionModel
+        return [LogisticRegressionModel]
 
     return []
 
@@ -319,7 +320,7 @@ def _build_sparkml_api_operator_name_map():
     Associate Spark-ML with the operator class names.
     If two Spark-ML models share a single name, it means they are equivalent in terms of conversion.
     """
-    return {k: "SPARKML" + k for k in sparkml_operator_list if k is not None}
+    return {k: "SparkML" + k.__name__ if hasattr(k, "__name__") else k for k in sparkml_operator_list if k is not None}
 
 
 def get_sklearn_api_operator_name(model_type):
