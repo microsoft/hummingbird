@@ -45,12 +45,12 @@ class TestSparkMLLinear(unittest.TestCase):
         )
 
     # pyspark.ml.LogisticRegression with two classes
-    @unittest.skipIf((not sparkml_installed) or (not pandas_installed), reason="Spark-ML test requires pyspark and pandas")
+    @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     def test_logistic_regression_binary(self):
         self._test_linear(2, model_class=LogisticRegression)
 
     # pyspark.ml.LogisticRegression with multi_class
-    @unittest.skipIf((not sparkml_installed) or (not pandas_installed), reason="Spark-ML test requires pyspark and pandas")
+    @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     def test_logistic_regression_multi_class(self):
         self._test_linear(5, model_class=LogisticRegression)
 
