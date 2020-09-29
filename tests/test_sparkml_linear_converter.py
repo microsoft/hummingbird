@@ -21,7 +21,7 @@ if sparkml_installed() and pandas_installed():
     sql = SQLContext(sc)
 
 class TestSparkMLLinear(unittest.TestCase):
-    def _test_linear(self, classes, model_class=LogisticRegression):        
+    def _test_linear(self, classes, model_class):        
         n_features = 20
         n_total = 100
         np.random.seed(0)
