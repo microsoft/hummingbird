@@ -50,6 +50,7 @@ def onnx_runtime_installed():
     except ImportError:
         return False
 
+
 def sparkml_installed():
     """
     Checks that *Spark ML/PySpark* is available.

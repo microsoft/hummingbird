@@ -531,6 +531,7 @@ def _parse_sparkml_single_operator(scope, operator, inputs):
 
     return this_operator.outputs
 
+
 def _remove_zipmap(node_list):
     """
     Method used to remove ZipMap operators in the graph.

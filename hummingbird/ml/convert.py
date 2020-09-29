@@ -42,6 +42,7 @@ def _is_sparkml_model(model):
     else:
         return False
 
+
 def _supported_backend_check(backend):
     """
     Function used to check whether the specified backend is supported or not.
@@ -191,6 +192,7 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     # Convert the Topology object into a PyTorch model.
     hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
     return hb_model
+
 
 def _convert_sparkml(model, backend, test_input, device, extra_config={}):
     """

@@ -16,23 +16,24 @@ if sparkml_installed() and pandas_installed():
     from pyspark.sql import SQLContext
     from pyspark.ml.linalg import Vectors
     from pyspark.ml.classification import LogisticRegression
-    
+
     sc = SparkContext.getOrCreate()
     sql = SQLContext(sc)
 
+
 class TestSparkMLLinear(unittest.TestCase):
-    def _test_linear(self, classes, model_class):        
+    def _test_linear(self, classes, model_class):
         n_features = 20
         n_total = 100
         np.random.seed(0)
         warnings.filterwarnings("ignore")
         X = np.random.rand(n_total, n_features)
         X = np.array(X, dtype=np.float32)
-        y = np.random.randint(classes, size=(n_total,1))
+        y = np.random.randint(classes, size=(n_total, 1))
 
-        arr = np.concatenate([y, X], axis=1).reshape(n_total,-1)
+        arr = np.concatenate([y, X], axis=1).reshape(n_total, -1)
         df = map(lambda x: (int(x[0]), Vectors.dense(x[1:])), arr)
-        df = sql.createDataFrame(df,schema=["label", "features"])
+        df = sql.createDataFrame(df, schema=["label", "features"])
 
         model = LogisticRegression()
         model = model.fit(df)
