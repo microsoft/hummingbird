@@ -253,7 +253,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     extra_config = deepcopy(extra_config)
 
     # Add test input as extra configuration for conversion.
-    if test_input is not None and constants.TEST_INPUT not in extra_config and len(test_input) > 0:
+    if test_input is not None and constants.TEST_INPUT not in extra_config:
         extra_config[constants.TEST_INPUT] = test_input
 
     # Fix the test_input type
@@ -268,20 +268,58 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
             assert all([len(input.shape) == 2 for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_FEATURES] = sum([input.shape[1] for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT])
-        elif pandas_installed():
+        elif pandas_installed() and _is_pandas_dataframe(extra_config[constants.TEST_INPUT]):
             # We split the input dataframe into columnar ndarrays
-            import pandas as pd
+            extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT].columns)
+            extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
+            input_names = list(extra_config[constants.TEST_INPUT].columns)
+            splits = [
+                extra_config[constants.TEST_INPUT][input_names[idx]] for idx in range(extra_config[constants.N_INPUTS])
+            ]
+            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+            extra_config[constants.TEST_INPUT] = tuple(splits) if len(splits) > 1 else splits[0]
+            extra_config[constants.INPUT_NAMES] = input_names
+        elif sparkml_installed() and _is_spark_dataframe(extra_config[constants.TEST_INPUT]):
+            from pyspark.ml.linalg import DenseVector, SparseVector
+            from pyspark.sql.types import ArrayType, FloatType, DoubleType, IntegerType, LongType
 
-            if type(extra_config[constants.TEST_INPUT]) == pd.DataFrame:
-                extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT].columns)
-                extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
-                input_names = list(extra_config[constants.TEST_INPUT].columns)
-                splits = [
-                    extra_config[constants.TEST_INPUT][input_names[idx]] for idx in range(extra_config[constants.N_INPUTS])
-                ]
-                splits = [df.to_numpy().reshape(-1, 1) for df in splits]
-                extra_config[constants.TEST_INPUT] = tuple(splits)
-                extra_config[constants.INPUT_NAMES] = input_names
+            df = extra_config[constants.TEST_INPUT]
+            input_names = [field.name for field in df.schema.fields]
+            extra_config[constants.N_INPUTS] = len(input_names)
+            extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
+
+            size = df.count()
+            row_dict = df.take(1)[0].asDict()
+            splits = []
+            for field in df.schema.fields:
+                data_col = row_dict[field.name]
+                spark_dtype = type(data_col)
+                shape = 1
+                if spark_dtype == DenseVector:
+                    np_dtype = np.float64
+                    shape = data_col.array.shape[0]
+                elif spark_dtype == SparseVector:
+                    np_dtype = np.float64
+                    shape = data_col.size
+                elif spark_dtype == ArrayType:
+                    np_dtype = np.float64
+                    shape = len(data_col)
+                elif spark_dtype == IntegerType:
+                    np_dtype = np.int32
+                elif spark_dtype == FloatType:
+                    np_dtype = np.float32
+                elif spark_dtype == DoubleType:
+                    np_dtype = np.float64
+                elif spark_dtype == LongType:
+                    np_dtype = np.int64
+                else:
+                    raise ValueError('Unrecognized data type: {}'.format(spark_dtype))
+
+                splits.append(np.zeros((size, shape), np_dtype))
+
+            extra_config[constants.TEST_INPUT] = tuple(splits) if len(splits) > 1 else splits[0]
+            extra_config[constants.INPUT_NAMES] = input_names
+
         test_input = extra_config[constants.TEST_INPUT]
 
     # We do some normalization on backends.
@@ -305,3 +343,19 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         return _convert_sparkml(model, backend, test_input, device, extra_config)
 
     return _convert_sklearn(model, backend, test_input, device, extra_config)
+
+
+def _is_pandas_dataframe(df):
+    import pandas as pd
+    if type(df) == pd.DataFrame:
+        return True
+    else:
+        return False
+
+
+def _is_spark_dataframe(df):
+    import pyspark
+    if type(df) == pyspark.sql.DataFrame:
+        return True
+    else:
+        return False

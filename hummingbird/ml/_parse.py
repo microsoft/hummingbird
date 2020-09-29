@@ -53,44 +53,7 @@ def parse_sklearn_api_model(model, extra_config={}):
     scope = topology.declare_scope("__root__")
 
     # Declare input variables.
-    inputs = []
-    n_inputs = extra_config[constants.N_INPUTS] if constants.N_INPUTS in extra_config else 1
-    if constants.INPUT_NAMES in extra_config:
-        assert n_inputs == len(extra_config[constants.INPUT_NAMES])
-    if constants.TEST_INPUT in extra_config:
-        from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
-
-        test_input = extra_config[constants.TEST_INPUT] if n_inputs > 1 else [extra_config[constants.TEST_INPUT]]
-        for i in range(n_inputs):
-            input = test_input[i]
-            input_name = (
-                extra_config[constants.INPUT_NAMES][i] if constants.INPUT_NAMES in extra_config else "input_{}".format(i)
-            )
-            if input.dtype == np.float32:
-                input_type = FloatTensorType(input.shape)
-            elif input.dtype == np.float64:
-                input_type = DoubleTensorType(input.shape)
-            elif input.dtype == np.int32:
-                input_type = Int32TensorType(input.shape)
-            elif input.dtype == np.int64:
-                input_type = Int64TensorType(input.shape)
-            else:
-                raise NotImplementedError(
-                    "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
-                        type(input.dtype)
-                    )
-                )
-            inputs.append(scope.declare_local_variable(input_name, type=input_type))
-    else:
-        # We have no information on the input. Sklearn always gets as input a single dataframe,
-        # therefore by default we start with a single `input` variable
-        input_name = extra_config[constants.INPUT_NAMES][0] if constants.TEST_INPUT in extra_config else "input"
-        inputs.append(scope.declare_local_variable(input_name))
-
-    # The object raw_model_container is a part of the topology we're going to return.
-    # We use it to store the inputs of the scikit-learn's computational graph.
-    for variable in inputs:
-        raw_model_container.add_input(variable)
+    inputs = _declare_input_variables(raw_model_container, extra_config)
 
     # Parse the input scikit-learn model into its scope with the topology.
     # Get the outputs of the model.
@@ -134,6 +97,20 @@ def parse_sparkml_api_model(model, extra_config={}):
     scope = topology.declare_scope("__root__")
 
     # Declare input variables.
+    inputs = _declare_input_variables(scope, raw_model_container, extra_config)
+
+    # Parse the input Spark-ML model into its scope with the topology.
+    # Get the outputs of the model.
+    outputs = _parse_sparkml_api(scope, model, inputs)
+
+    # Declare output variables.
+    _declare_output_variables(raw_model_container, extra_config, outputs)
+
+    return topology
+
+
+def _declare_input_variables(scope, raw_model_container, extra_config):
+    # Declare input variables.
     inputs = []
     n_inputs = extra_config[constants.N_INPUTS] if constants.N_INPUTS in extra_config else 1
     if constants.INPUT_NAMES in extra_config:
@@ -158,25 +135,26 @@ def parse_sparkml_api_model(model, extra_config={}):
             else:
                 raise NotImplementedError(
                     "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
-                        type(input.dtype)
+                        input.dtype
                     )
                 )
             inputs.append(scope.declare_local_variable(input_name, type=input_type))
     else:
-        # We have no information on the input. Spark-ML always gets as input a single dataframe,
+        # We have no information on the input. Sklearn/Spark-ML always gets as input a single dataframe,
         # therefore by default we start with a single `input` variable
         input_name = extra_config[constants.INPUT_NAMES][0] if constants.TEST_INPUT in extra_config else "input"
         inputs.append(scope.declare_local_variable(input_name))
 
     # The object raw_model_container is a part of the topology we're going to return.
-    # We use it to store the inputs of the Spark-ML's computational graph.
+    # We use it to store the inputs of the Sklearn/Spark-ML's computational graph.
     for variable in inputs:
         raw_model_container.add_input(variable)
 
-    # Parse the input Spark-ML model into its scope with the topology.
-    # Get the outputs of the model.
-    outputs = _parse_sparkml_api(scope, model, inputs)
+    return inputs
 
+
+def _declare_output_variables(raw_model_container, extra_config, outputs):
+    # Declare output variables.
     # Use the output names specified by the user, if any
     if constants.OUTPUT_NAMES in extra_config:
         assert len(extra_config[constants.OUTPUT_NAMES]) == len(outputs)
@@ -187,8 +165,6 @@ def parse_sparkml_api_model(model, extra_config={}):
     # We use it to store the outputs of the Spark-ML's computational graph.
     for variable in outputs:
         raw_model_container.add_output(variable)
-
-    return topology
 
 
 def parse_onnx_api_model(model):

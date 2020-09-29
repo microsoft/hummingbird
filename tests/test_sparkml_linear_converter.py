@@ -7,10 +7,10 @@ import warnings
 import numpy as np
 import torch
 
-from hummingbird.ml._utils import sparkml_installed, pandas_installed
+from hummingbird.ml._utils import sparkml_installed
 from hummingbird.ml import convert
 
-if sparkml_installed() and pandas_installed():
+if sparkml_installed():
     import pandas as pd
     from pyspark import SparkContext
     from pyspark.sql import SQLContext
@@ -23,7 +23,7 @@ if sparkml_installed() and pandas_installed():
 
 class TestSparkMLLinear(unittest.TestCase):
     def _test_linear(self, classes, model_class):
-        n_features = 20
+        n_features = 10
         n_total = 100
         np.random.seed(0)
         warnings.filterwarnings("ignore")
@@ -38,7 +38,8 @@ class TestSparkMLLinear(unittest.TestCase):
         model = LogisticRegression()
         model = model.fit(df)
 
-        torch_model = convert(model, "torch")
+        test_df = df.select("features").limit(1)
+        torch_model = convert(model, "torch", test_df)
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(
             np.array(model.transform(df).select("probability").collect()).reshape(-1, classes),
@@ -46,12 +47,12 @@ class TestSparkMLLinear(unittest.TestCase):
         )
 
     # pyspark.ml.LogisticRegression with two classes
-    @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
+    @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
     def test_logistic_regression_binary(self):
         self._test_linear(2, model_class=LogisticRegression)
 
     # pyspark.ml.LogisticRegression with multi_class
-    @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
+    @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
     def test_logistic_regression_multi_class(self):
         self._test_linear(5, model_class=LogisticRegression)
 
