@@ -53,7 +53,7 @@ def parse_sklearn_api_model(model, extra_config={}):
     scope = topology.declare_scope("__root__")
 
     # Declare input variables.
-    inputs = _declare_input_variables(raw_model_container, extra_config)
+    inputs = _declare_input_variables(scope, raw_model_container, extra_config)
 
     # Parse the input scikit-learn model into its scope with the topology.
     # Get the outputs of the model.
