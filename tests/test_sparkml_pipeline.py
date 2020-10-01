@@ -1,5 +1,5 @@
 """
-Tests Spark-ML Linear converters
+Tests Spark-ML Pipeline converters
 """
 import unittest
 import warnings
@@ -14,6 +14,7 @@ if sparkml_installed():
     import pandas as pd
     from pyspark import SparkContext
     from pyspark.sql import SQLContext
+    from pyspark.ml import Pipeline
     from pyspark.ml.linalg import Vectors
     from pyspark.ml.classification import LogisticRegression
 
@@ -21,10 +22,12 @@ if sparkml_installed():
     sql = SQLContext(sc)
 
 
-class TestSparkMLLinear(unittest.TestCase):
-    def _test_linear(self, classes, model_class):
+class TestSparkMLPipeline(unittest.TestCase):
+    @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
+    def test_pipeline_1(self):
         n_features = 10
         n_total = 100
+        classes = 2
         np.random.seed(0)
         warnings.filterwarnings("ignore")
         X = np.random.rand(n_total, n_features)
@@ -35,8 +38,8 @@ class TestSparkMLLinear(unittest.TestCase):
         df = map(lambda x: (int(x[0]), Vectors.dense(x[1:])), arr)
         df = sql.createDataFrame(df, schema=["label", "features"])
 
-        model = model_class()
-        model = model.fit(df)
+        pipeline = Pipeline(stages=[LogisticRegression()])
+        model = pipeline.fit(df)
 
         test_df = df.select("features").limit(1)
         torch_model = convert(model, "torch", test_df)
@@ -45,16 +48,6 @@ class TestSparkMLLinear(unittest.TestCase):
             np.array(model.transform(df).select("probability").collect()).reshape(-1, classes),
             torch_model.predict_proba(X), rtol=1e-06, atol=1e-06
         )
-
-    # pyspark.ml.LogisticRegression with two classes
-    @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
-    def test_logistic_regression_binary(self):
-        self._test_linear(2, model_class=LogisticRegression)
-
-    # pyspark.ml.LogisticRegression with multi_class
-    @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
-    def test_logistic_regression_multi_class(self):
-        self._test_linear(5, model_class=LogisticRegression)
 
 
 if __name__ == "__main__":

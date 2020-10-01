@@ -37,7 +37,8 @@ def _is_sparkml_model(model):
     Function returning whether the input model is a Spark-ML model or not.
     """
     if sparkml_installed():
-        from pyspark.ml import Model, PipelineModel
+        from pyspark.ml import Model
+        from pyspark.ml.pipeline import PipelineModel
         return isinstance(model, Model) or isinstance(model, PipelineModel)
     else:
         return False

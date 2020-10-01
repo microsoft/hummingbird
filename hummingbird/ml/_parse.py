@@ -22,7 +22,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 
 from ._container import CommonONNXModelContainer, CommonSparkMLModelContainer
-from ._utils import sklearn_installed
+from ._utils import sklearn_installed, sparkml_installed
 from .operator_converters import constants
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name, get_sparkml_api_operator_name
 
@@ -59,16 +59,8 @@ def parse_sklearn_api_model(model, extra_config={}):
     # Get the outputs of the model.
     outputs = _parse_sklearn_api(scope, model, inputs)
 
-    # Use the output names specified by the user, if any
-    if constants.OUTPUT_NAMES in extra_config:
-        assert len(extra_config[constants.OUTPUT_NAMES]) == len(outputs)
-        for i in range(len(outputs)):
-            outputs[i].raw_name = extra_config[constants.OUTPUT_NAMES][i]
-
-    # The object raw_model_container is a part of the topology we're going to return.
-    # We use it to store the outputs of the scikit-learn's computational graph.
-    for variable in outputs:
-        raw_model_container.add_output(variable)
+    # Declare output variables.
+    _declare_output_variables(raw_model_container, extra_config, outputs)
 
     return topology
 
@@ -162,7 +154,7 @@ def _declare_output_variables(raw_model_container, extra_config, outputs):
             outputs[i].raw_name = extra_config[constants.OUTPUT_NAMES][i]
 
     # The object raw_model_container is a part of the topology we're going to return.
-    # We use it to store the outputs of the Spark-ML's computational graph.
+    # We use it to store the outputs of the Sklearn/Spark-ML's computational graph.
     for variable in outputs:
         raw_model_container.add_output(variable)
 
@@ -276,6 +268,23 @@ def _parse_sklearn_pipeline(scope, model, inputs):
     """
     for step in model.steps:
         inputs = _parse_sklearn_api(scope, step[1], inputs)
+    return inputs
+
+
+def _parse_sparkml_pipeline(scope, model, inputs):
+    """
+    The basic ideas of Spark-ML parsing:
+        1. Sequentially go though all stages defined in the considered
+           Spark-ML pipeline
+        2. The output variables of one stage will be fed into its next
+           stage as the inputs.
+    :param scope: Scope object defined in _topology.py
+    :param model: Spark-ML pipeline object
+    :param inputs: A list of Variable objects
+    :return: A list of output variables produced by the input pipeline
+    """
+    for step in model.stages:
+        inputs = _parse_sparkml_api(scope, step, inputs)
     return inputs
 
 
@@ -409,6 +418,17 @@ def _build_sklearn_api_parsers_map():
     return map_parser
 
 
+def _build_sparkml_api_parsers_map():
+    # Parsers for edge cases are going here.
+    from pyspark.ml.pipeline import PipelineModel
+    map_parser = {
+        PipelineModel: _parse_sparkml_pipeline,
+        # More parsers will go here
+    }
+
+    return map_parser
+
+
 def _parse_onnx_api(scope, model, inputs):
     """
     This function handles all input ONNX models.
@@ -476,12 +496,11 @@ def _parse_sparkml_api(scope, model, inputs):
     Returns:
         A list of output `onnxconverter_common.topology.Variable` which will be passed to next stage
     """
-    # FIXME: TODO(scnakandala)
-    # tmodel = type(model)
-    # if tmodel in sklearn_api_parsers_map:
-    #     outputs = sklearn_api_parsers_map[tmodel](scope, model, inputs)
-    # else:
-    outputs = _parse_sparkml_single_operator(scope, model, inputs)
+    tmodel = type(model)
+    if tmodel in sparkml_api_parsers_map:
+        outputs = sparkml_api_parsers_map[tmodel](scope, model, inputs)
+    else:
+        outputs = _parse_sparkml_single_operator(scope, model, inputs)
     return outputs
 
 
@@ -665,3 +684,5 @@ def _get_column_indices(indices, inputs, multiple=False):
 # Registered API parsers.
 if sklearn_installed():
     sklearn_api_parsers_map = _build_sklearn_api_parsers_map()
+if sparkml_installed():
+    sparkml_api_parsers_map = _build_sparkml_api_parsers_map()
