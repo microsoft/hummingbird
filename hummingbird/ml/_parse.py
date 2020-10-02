@@ -523,14 +523,14 @@ def _parse_sparkml_single_operator(scope, operator, inputs):
     this_operator.inputs = inputs
 
     # We assume that all sparkml transformers will add new column to the existing input.
-    # The name of this column will be resolved at corresponding operator conversion time.
+    # The raw_name of this column will be resolved at corresponding operator conversion time.
     # For Estimators we assume there will be only one output.
     if isinstance(operator, Transformer):
         for input in this_operator.inputs:
             variable = scope.declare_local_variable(input.full_name)
             this_operator.outputs.append(variable)
 
-        variable = scope.declare_local_variable("to-be-changed")
+        variable = scope.declare_local_variable("variable")
         this_operator.outputs.append(variable)
     else:
         variable = scope.declare_local_variable("variable")

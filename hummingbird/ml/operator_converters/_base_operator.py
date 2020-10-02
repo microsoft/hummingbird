@@ -29,6 +29,8 @@ class BaseOperator(ABC):
                 x = tuple([x[i] for i in self.input_indices])
             else:
                 x = x[self.input_indices[0]]
+        elif isinstance(x, tuple) and len(x) == 1:
+            x = x[0]
 
         return x
 
