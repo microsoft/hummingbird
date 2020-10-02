@@ -38,7 +38,7 @@ class TestSparkMLLinear(unittest.TestCase):
         model = model_class()
         model = model.fit(df)
 
-        test_df = df.select("features").limit(1)
+        test_df = df.select("features").limit(10)
         torch_model = convert(model, "torch", test_df)
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(
