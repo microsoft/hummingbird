@@ -11,7 +11,6 @@ from hummingbird.ml._utils import sparkml_installed
 from hummingbird.ml import convert
 
 if sparkml_installed():
-    import pandas as pd
     from pyspark import SparkContext
     from pyspark.sql import SQLContext
     from pyspark.ml.linalg import Vectors

@@ -15,14 +15,13 @@ from ._base_operator import BaseOperator
 
 class LinearModel(BaseOperator, torch.nn.Module):
     def __init__(self, coefficients, intercepts, device, classes=[0], multi_class=None, is_linear_regression=False, input_indices=None):
-        super(LinearModel, self).__init__()
+        super(LinearModel, self).__init__(input_indices=input_indices)
         self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients), requires_grad=False)
         self.intercepts = torch.nn.Parameter(torch.from_numpy(intercepts), requires_grad=False)
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
         self.multi_class = multi_class
         self.regression = is_linear_regression
         self.classification = not is_linear_regression
-        self.input_indices = input_indices
 
         self.perform_class_select = False
         if min(classes) != 0 or max(classes) != len(classes) - 1:
@@ -32,9 +31,8 @@ class LinearModel(BaseOperator, torch.nn.Module):
         if len(classes) == 2:
             self.binary_classification = True
 
-    def forward(self, x):
-        if self.input_indices is not None and (isinstance(x, list) or isinstance(x, tuple)):
-            x = tuple([x[i] for i in self.input_indices])
+    def forward(self, *x):
+        x = self.select_input_if_needed(x)
 
         output = torch.addmm(self.intercepts, x, self.coefficients)
         if self.multi_class == "multinomial":

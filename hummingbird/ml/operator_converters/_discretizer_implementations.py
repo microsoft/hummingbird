@@ -28,8 +28,8 @@ class Binarizer(BaseOperator, torch.nn.Module):
 
 
 class KBinsDiscretizer(BaseOperator, torch.nn.Module):
-    def __init__(self, encode, bin_edges, labels, device):
-        super(KBinsDiscretizer, self).__init__()
+    def __init__(self, encode, bin_edges, labels, device, input_indices=None, append_output=False):
+        super(KBinsDiscretizer, self).__init__(input_indices=input_indices, append_output=append_output)
         self.transformer = True
         self.encode = encode
         # We use DoubleTensors for better precision.
@@ -38,7 +38,9 @@ class KBinsDiscretizer(BaseOperator, torch.nn.Module):
         self.lt_tensor = torch.nn.Parameter(torch.DoubleTensor(bin_edges[:, 1:] + 1e-9), requires_grad=False)
         self.ohe = OneHotEncoder(labels, device)
 
-    def forward(self, x):
+    def forward(self, *x):
+        x = self.select_input_if_needed(x)
+
         x = torch.unsqueeze(x, 2)
         x = torch.ge(x, self.ge_tensor) & torch.lt(x, self.lt_tensor)
         x = x.float()
@@ -47,4 +49,4 @@ class KBinsDiscretizer(BaseOperator, torch.nn.Module):
         if self.encode in ["onehot-dense", "onehot"]:
             x = self.ohe(x)
 
-        return x
+        return self.get_appended_output_if_needed(x)

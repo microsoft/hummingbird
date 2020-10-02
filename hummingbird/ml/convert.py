@@ -37,9 +37,9 @@ def _is_sparkml_model(model):
     Function returning whether the input model is a Spark-ML model or not.
     """
     if sparkml_installed():
-        from pyspark.ml import Model
+        from pyspark.ml import Model, Transformer
         from pyspark.ml.pipeline import PipelineModel
-        return isinstance(model, Model) or isinstance(model, PipelineModel)
+        return isinstance(model, Model) or isinstance(model, PipelineModel) or isinstance(model, Transformer)
     else:
         return False
 
@@ -281,7 +281,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
             extra_config[constants.TEST_INPUT] = tuple(splits) if len(splits) > 1 else splits[0]
             extra_config[constants.INPUT_NAMES] = input_names
         elif sparkml_installed() and _is_spark_dataframe(extra_config[constants.TEST_INPUT]):
-            from pyspark.ml.linalg import DenseVector, SparseVector
+            from pyspark.ml.linalg import DenseVector, SparseVector, VectorUDT
             from pyspark.sql.types import ArrayType, FloatType, DoubleType, IntegerType, LongType
 
             df = extra_config[constants.TEST_INPUT]
@@ -294,9 +294,9 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
             splits = []
             for field in df.schema.fields:
                 data_col = row_dict[field.name]
-                spark_dtype = type(data_col)
+                spark_dtype = type(field.dataType)
                 shape = 1
-                if spark_dtype == DenseVector:
+                if spark_dtype in [DenseVector, VectorUDT]:
                     np_dtype = np.float64
                     shape = data_col.array.shape[0]
                 elif spark_dtype == SparseVector:

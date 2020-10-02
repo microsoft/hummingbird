@@ -513,6 +513,8 @@ def _parse_sparkml_single_operator(scope, operator, inputs):
         model: A Spark-ML operator
         inputs: A list of `onnxconverter_common.topology.Variable`s
     """
+    from pyspark.ml import Transformer
+
     if isinstance(operator, str):
         raise RuntimeError("Parameter operator must be an object not a " "string '{0}'.".format(operator))
 
@@ -520,9 +522,19 @@ def _parse_sparkml_single_operator(scope, operator, inputs):
     this_operator = scope.declare_local_operator(alias, operator)
     this_operator.inputs = inputs
 
-    # We assume that all sparkml operators produce a single output.
-    variable = scope.declare_local_variable("variable")
-    this_operator.outputs.append(variable)
+    # We assume that all sparkml transformers will add new column to the existing input.
+    # The name of this column will be resolved at corresponding operator conversion time.
+    # For Estimators we assume there will be only one output.
+    if isinstance(operator, Transformer):
+        for input in this_operator.inputs:
+            variable = scope.declare_local_variable(input.full_name)
+            this_operator.outputs.append(variable)
+
+        variable = scope.declare_local_variable("to-be-changed")
+        this_operator.outputs.append(variable)
+    else:
+        variable = scope.declare_local_variable("variable")
+        this_operator.outputs.append(variable)
 
     return this_operator.outputs
 

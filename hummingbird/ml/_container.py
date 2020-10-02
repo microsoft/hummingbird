@@ -186,7 +186,11 @@ class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer):
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        return self.model.forward(*inputs).cpu().numpy()
+        output = self.model.forward(*inputs)
+        if isinstance(output, list):
+            return tuple([x.cpu().numpy() for x in output])
+        else:
+            return output.cpu().numpy()
 
 
 class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):

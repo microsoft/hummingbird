@@ -211,7 +211,9 @@ def _build_sparkml_operator_list():
     """
     if sparkml_installed():
         from pyspark.ml.classification import LogisticRegressionModel
-        return [LogisticRegressionModel]
+        from pyspark.ml.feature import Bucketizer
+
+        return [Bucketizer, LogisticRegressionModel]
 
     return []
 
