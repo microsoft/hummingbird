@@ -211,9 +211,18 @@ def _build_sparkml_operator_list():
     """
     if sparkml_installed():
         from pyspark.ml.classification import LogisticRegressionModel
-        from pyspark.ml.feature import Bucketizer
+        from pyspark.ml.feature import Bucketizer, VectorAssembler
 
-        return [Bucketizer, LogisticRegressionModel]
+        supported_ops = [
+            # Featurizers
+            Bucketizer,
+            VectorAssembler,
+
+            # Linear Models
+            LogisticRegressionModel
+        ]
+
+        return supported_ops
 
     return []
 

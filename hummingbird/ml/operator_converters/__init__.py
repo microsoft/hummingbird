@@ -45,6 +45,7 @@ from . import lightgbm  # noqa: E402
 from . import xgb  # noqa: E402
 from .sparkml import discretizer  # noqa: E402
 from .sparkml import linear  # noqa: E402
+from .sparkml import vector_assembler  # noqa: E402
 
 __pdoc__ = {}
 __pdoc__["hummingbird.operator_converters._array_feature_extractor_implementations"] = True
