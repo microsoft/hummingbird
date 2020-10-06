@@ -5,6 +5,7 @@
 ![](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7%20%7C%203.8-blue)
 [![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/master/graph/badge.svg)](https://codecov.io/github/microsoft/hummingbird?branch=master)
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Downloads](https://pepy.tech/badge/hummingbird-ml)](https://pepy.tech/project/hummingbird-ml)
 
 ## Introduction
 *Hummingbird* is a library for compiling trained traditional ML models into tensor computations. *Hummingbird* allows users to seamlessly leverage neural network frameworks (such as [PyTorch](https://pytorch.org/)) to accelerate traditional ML models. Thanks to *Hummingbird*, users can benefit from: (1) all the current and future optimizations implemented in neural network frameworks; (2) native hardware acceleration; (3) having a unique platform to support for both traditional and neural network models; and have all of this (4) without having to re-engineer their models.
