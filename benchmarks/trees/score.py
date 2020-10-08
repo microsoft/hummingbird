@@ -113,8 +113,7 @@ class PytorchBackend(ScoreBackend):
         self.configure(data, model, args)
 
         with Timer() as t:
-            self.model = convert(model, "torch")
-            self.model.to(self.params["device"])
+            self.model = convert(model, "torch", device=self.params["device"])
 
         return t.interval
 
