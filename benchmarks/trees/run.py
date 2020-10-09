@@ -71,6 +71,7 @@ def print_sys_info(args):
     import lightgbm
     import sklearn
     import torch
+    import tvm
 
     print("System  : %s" % sys.version)
     print("OS  : %s" % sys.platform)
@@ -78,6 +79,7 @@ def print_sys_info(args):
     print("LightGBM: %s" % lightgbm.__version__)
     print("Sklearn : %s" % sklearn.__version__)
     print("PyTorch : %s" % torch.__version__)
+    print("TVM : %s" % tvm.__version__)
 
     try:
         import onnxruntime
