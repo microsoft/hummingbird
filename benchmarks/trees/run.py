@@ -163,7 +163,7 @@ def parse_args():
             "predefined train/test splits."
         ),
     )
-    parser.add_argument("-niters", default=1, type=int, help=("Number of iterations for each experiment"))
+    parser.add_argument("-niters", default=5, type=int, help=("Number of iterations for each experiment"))
     parser.add_argument("-maxdepth", default=None, type=int, help=("Maxmimum number of levels in the trees"))
     parser.add_argument(
         "-validate", default=False, action="store_true", help="Validate prediction output and fails accordigly."
@@ -226,7 +226,7 @@ def benchmark(args, dataset_folder, model_folder, dataset):
             args.operator = op
 
             if args.backend == "all":
-                args.backend = "onnx-ml,hb-pytorch,hb-torchscript"
+                args.backend = "onnx-ml,hb-pytorch,hb-torchscript,hb-tvm"
             for backend in args.backend.split(","):
                 print("Running '%s' ..." % backend)
                 scorer = score.ScoreBackend.create(backend)
