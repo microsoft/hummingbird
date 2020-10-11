@@ -132,6 +132,9 @@ def is_pandas_dataframe(df):
 
 
 def is_spark_dataframe(df):
+    if not sparkml_installed():
+        return False
+
     import pyspark
     if type(df) == pyspark.sql.DataFrame:
         return True
