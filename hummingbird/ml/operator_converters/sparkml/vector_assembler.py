@@ -37,14 +37,6 @@ def convert_sparkml_vector_assembler(operator, device, extra_config):
 
     input_indices = [find_column_idx(col_name) for col_name in operator.raw_operator.getInputCols()]
 
-    # fix the output names
-    assert len(operator.inputs) == len(operator.outputs) - 1, "Invalid input ouypuy numbers for Spark-ML VectorAssembler operator"
-    for input, output in zip(operator.inputs, operator.outputs):
-        output.raw_name = input.raw_name
-
-    new_output_name = operator.raw_operator.getOutputCol()
-    operator.outputs[-1].raw_name = new_output_name
-
     return VectorAssemblerModel(input_indices=input_indices, append_output=True)
 
 

@@ -42,7 +42,7 @@ class VectorAssemblerModel(BaseOperator, torch.nn.Module):
     """
     Class implementing ArrayFeatureExtractor in PyTorch
 
-    This is used by Spark0=-ML VectorAssembler
+    This is used by Spark-ML VectorAssembler
     """
 
     def __init__(self, input_indices=None, append_output=False):

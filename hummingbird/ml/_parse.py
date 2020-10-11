@@ -522,17 +522,20 @@ def _parse_sparkml_single_operator(scope, operator, inputs):
     this_operator = scope.declare_local_operator(alias, operator)
     this_operator.inputs = inputs
 
-    # We assume that all sparkml feature transformers (pyspark.ml.feature.*) will add new
-    # column to the existing input. The raw_name of this column will be resolved at
-    # corresponding operator conversion time. For models (pyspark.ml.classification.*, pyspark.ml.regression.*)
-    # we assume there will be only one output.
+    # Spark-ML feature transformers (pyspark.ml.feature.*) will keep propagating all input columns
+    # as output columns.
     if inspect.getmodule(operator).__name__ == "pyspark.ml.feature":
         for input in this_operator.inputs:
             variable = scope.declare_local_variable(input.raw_name)
             this_operator.outputs.append(variable)
 
-        variable = scope.declare_local_variable("variable")
+    if hasattr(operator, "getOutputCol") and callable(operator.getOutputCol):
+        variable = scope.declare_local_variable(operator.getOutputCol())
         this_operator.outputs.append(variable)
+    elif hasattr(operator, "getOutputCols") and callable(operator.getOutputCols):
+        for output_col in operator.getOutputCols():
+            variable = scope.declare_local_variable(output_col)
+            this_operator.outputs.append(variable)
     else:
         variable = scope.declare_local_variable("variable")
         this_operator.outputs.append(variable)

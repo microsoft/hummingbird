@@ -21,7 +21,7 @@ def convert_sparkml_bucketizer(operator, device, extra_config):
     Converter for `pyspark.ml.feature.Bucketizer`
 
     Args:
-        operator: An operator wrapping a `pyspark.ml.feature.QuantileDiscretize` model
+        operator: An operator wrapping a `pyspark.ml.feature.QuantileDiscretizer` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -42,14 +42,6 @@ def convert_sparkml_bucketizer(operator, device, extra_config):
                 + [np.inf for _ in range((max_bin_edges - len(bin_edges[i])))]
                 + [bin_edges[i][-1]]
             )
-
-    # fix the output names
-    assert len(operator.inputs) == len(operator.outputs) - 1, "Invalid input ouypuy numbers for Spark-ML Bucketizer operator"
-    for input, output in zip(operator.inputs, operator.outputs):
-        output.raw_name = input.raw_name
-
-    new_output_name = operator.raw_operator.getOutputCol()
-    operator.outputs[-1].raw_name = new_output_name
 
     return KBinsDiscretizer(None, np.array(bin_edges), labels, device, input_indices=input_indices, append_output=True)
 

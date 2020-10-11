@@ -123,6 +123,22 @@ def pandas_installed():
     return True
 
 
+def is_pandas_dataframe(df):
+    import pandas as pd
+    if type(df) == pd.DataFrame:
+        return True
+    else:
+        return False
+
+
+def is_spark_dataframe(df):
+    import pyspark
+    if type(df) == pyspark.sql.DataFrame:
+        return True
+    else:
+        return False
+
+
 class _Constants(object):
     """
     Class enabling the proper definition of constants.

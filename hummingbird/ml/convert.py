@@ -13,7 +13,7 @@ import numpy as np
 from .operator_converters import constants
 from ._parse import parse_sklearn_api_model, parse_onnx_api_model, parse_sparkml_api_model
 from ._topology import convert as topology_converter
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed, pandas_installed, sparkml_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed, pandas_installed, sparkml_installed, is_pandas_dataframe, is_spark_dataframe
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
 
@@ -80,8 +80,6 @@ def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     """
     assert model is not None
     assert torch_installed(), "To use Hummingbird you need to install torch."
-
-    import torch
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
     # We modify the scikit learn model during translation.
@@ -203,8 +201,6 @@ def _convert_sparkml(model, backend, test_input, device, extra_config={}):
     assert model is not None
     assert torch_installed(), "To use Hummingbird you need to install torch."
 
-    import torch
-
     # Parse Spark-ML model as our internal data structure (i.e., Topology)
     # We modify the Spark-ML model during translation.
     model = model.copy()
@@ -258,7 +254,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         extra_config[constants.TEST_INPUT] = test_input
 
     # Fix the test_input type
-    if constants.TEST_INPUT in extra_config:
+    if constants.TEST_INPUT in extra_config and (is_spark_dataframe(extra_config[constants.TEST_INPUT]) or len(test_input) > 0):
         if type(extra_config[constants.TEST_INPUT]) == list:
             extra_config[constants.TEST_INPUT] = np.array(extra_config[constants.TEST_INPUT])
         elif type(extra_config[constants.TEST_INPUT]) == tuple:
@@ -269,7 +265,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
             assert all([len(input.shape) == 2 for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_FEATURES] = sum([input.shape[1] for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT])
-        elif pandas_installed() and _is_pandas_dataframe(extra_config[constants.TEST_INPUT]):
+        elif pandas_installed() and is_pandas_dataframe(extra_config[constants.TEST_INPUT]):
             # We split the input dataframe into columnar ndarrays
             extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT].columns)
             extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
@@ -280,7 +276,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
             splits = [df.to_numpy().reshape(-1, 1) for df in splits]
             extra_config[constants.TEST_INPUT] = tuple(splits) if len(splits) > 1 else splits[0]
             extra_config[constants.INPUT_NAMES] = input_names
-        elif sparkml_installed() and _is_spark_dataframe(extra_config[constants.TEST_INPUT]):
+        elif sparkml_installed() and is_spark_dataframe(extra_config[constants.TEST_INPUT]):
             from pyspark.ml.linalg import DenseVector, SparseVector, VectorUDT
             from pyspark.sql.types import ArrayType, FloatType, DoubleType, IntegerType, LongType
 
@@ -344,19 +340,3 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         return _convert_sparkml(model, backend, test_input, device, extra_config)
 
     return _convert_sklearn(model, backend, test_input, device, extra_config)
-
-
-def _is_pandas_dataframe(df):
-    import pandas as pd
-    if type(df) == pd.DataFrame:
-        return True
-    else:
-        return False
-
-
-def _is_spark_dataframe(df):
-    import pyspark
-    if type(df) == pyspark.sql.DataFrame:
-        return True
-    else:
-        return False
