@@ -250,11 +250,11 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     extra_config = deepcopy(extra_config)
 
     # Add test input as extra configuration for conversion.
-    if test_input is not None and constants.TEST_INPUT not in extra_config:
+    if test_input is not None and constants.TEST_INPUT not in extra_config and (is_spark_dataframe(test_input) or len(test_input) > 0):
         extra_config[constants.TEST_INPUT] = test_input
 
     # Fix the test_input type
-    if constants.TEST_INPUT in extra_config and (is_spark_dataframe(test_input) or len(test_input) > 0):
+    if constants.TEST_INPUT in extra_config:
         if type(extra_config[constants.TEST_INPUT]) == list:
             extra_config[constants.TEST_INPUT] = np.array(extra_config[constants.TEST_INPUT])
         elif type(extra_config[constants.TEST_INPUT]) == tuple:
