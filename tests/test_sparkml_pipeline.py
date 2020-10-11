@@ -10,6 +10,7 @@ from sklearn.datasets import load_iris
 
 from hummingbird.ml._utils import sparkml_installed, pandas_installed
 from hummingbird.ml import convert
+from distutils.version import LooseVersion
 
 if sparkml_installed():
     from pyspark import SparkContext
@@ -28,6 +29,7 @@ if pandas_installed():
 
 class TestSparkMLPipeline(unittest.TestCase):
     @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.16.0"), reason="Spark-ML test requires torch >= 1.16.0")
     def test_pipeline_1(self):
         n_features = 10
         n_total = 100
@@ -59,6 +61,7 @@ class TestSparkMLPipeline(unittest.TestCase):
             torch_model.predict_proba(X), rtol=1e-06, atol=1e-06
         )
 
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.16.0"), reason="Spark-ML test requires torch >= 1.16.0")
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     def test_pipeline2(self):
         iris = load_iris()
@@ -87,6 +90,7 @@ class TestSparkMLPipeline(unittest.TestCase):
         )
 
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.16.0"), reason="Spark-ML test requires torch >= 1.16.0")
     def test_pipeline3(self):
         iris = load_iris()
         features = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
