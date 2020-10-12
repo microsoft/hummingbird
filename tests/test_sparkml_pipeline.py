@@ -92,7 +92,7 @@ class TestSparkMLPipeline(unittest.TestCase):
         )
 
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
-    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.16.0"), reason="Spark-ML test requires torch >= 1.16.0")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
     def test_pipeline3(self):
         iris = load_iris()
         features = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
