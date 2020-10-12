@@ -534,13 +534,6 @@ def _parse_sparkml_single_operator(scope, operator, all_inputs):
         print(operator.getParam('featuresCol'))
         raise RuntimeError('Unable to determine inputs for the Spark-ML operator: {}'.format(type(operator)))
 
-    # Spark-ML feature transformers (pyspark.ml.feature.*) will keep propagating all input columns
-    # # as output columns.
-    # if inspect.getmodule(operator).__name__ == "pyspark.ml.feature":
-    #     for input in this_operator.inputs:
-    #         variable = scope.declare_local_variable(input.raw_name)
-    #         this_operator.outputs.append(variable)
-
     if hasattr(operator, "getOutputCol") and callable(operator.getOutputCol):
         variable = scope.declare_local_variable(operator.getOutputCol())
         this_operator.outputs.append(variable)
