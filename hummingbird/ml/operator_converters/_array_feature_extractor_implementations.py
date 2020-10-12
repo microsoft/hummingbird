@@ -36,18 +36,3 @@ class ArrayFeatureExtractor(BaseOperator, torch.nn.Module):
             return x[:, self.min : self.max]
         else:
             return torch.index_select(x, 1, self.column_indices)
-
-
-class VectorAssemblerModel(BaseOperator, torch.nn.Module):
-    """
-    Class implementing ArrayFeatureExtractor in PyTorch
-
-    This is used by Spark-ML VectorAssembler
-    """
-
-    def __init__(self):
-        super(VectorAssemblerModel, self).__init__(transformer=True)
-
-    def forward(self, *x):
-        x = torch.cat(x, 1)
-        return x

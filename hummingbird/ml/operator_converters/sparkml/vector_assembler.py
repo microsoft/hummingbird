@@ -13,7 +13,7 @@ import numpy as np
 from onnxconverter_common.topology import Variable
 from onnxconverter_common.registration import register_converter
 from .._base_operator import BaseOperator
-from .._array_feature_extractor_implementations import VectorAssemblerModel
+from .._pipeline_implementations import Concat
 
 
 def convert_sparkml_vector_assembler(operator, device, extra_config):
@@ -29,7 +29,7 @@ def convert_sparkml_vector_assembler(operator, device, extra_config):
         A PyTorch model
     """
 
-    return VectorAssemblerModel()
+    return Concat()
 
 
 register_converter("SparkMLVectorAssembler", convert_sparkml_vector_assembler)
