@@ -61,7 +61,7 @@ class TestSparkMLPipeline(unittest.TestCase):
             torch_model.predict_proba(X), rtol=1e-06, atol=1e-06
         )
 
-    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.16.0"), reason="Spark-ML test requires torch >= 1.16.0")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     def test_pipeline2(self):
         iris = load_iris()
@@ -76,6 +76,8 @@ class TestSparkMLPipeline(unittest.TestCase):
         pipeline = Pipeline(stages=[quantile, assembler, LogisticRegression()])
         model = pipeline.fit(df)
 
+        df = df.select(["sepal_length", "sepal_width", "petal_length", "petal_width"])
+        pd_df = pd_df[["sepal_length", "sepal_width", "petal_length", "petal_width"]]
         torch_model = convert(model, "torch", df)
         self.assertTrue(torch_model is not None)
 
@@ -105,6 +107,8 @@ class TestSparkMLPipeline(unittest.TestCase):
         pipeline = Pipeline(stages=[quantile1, quantile2, assembler, LogisticRegression()])
         model = pipeline.fit(df)
 
+        df = df.select(["sepal_length", "sepal_width", "petal_length", "petal_width"])
+        pd_df = pd_df[["sepal_length", "sepal_width", "petal_length", "petal_width"]]
         torch_model = convert(model, "torch", df)
         self.assertTrue(torch_model is not None)
 

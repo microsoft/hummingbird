@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import torch
 
-from hummingbird.ml._utils import sparkml_installed
+from hummingbird.ml._utils import sparkml_installed, pandas_installed
 from hummingbird.ml import convert
 from distutils.version import LooseVersion
 
@@ -47,14 +47,14 @@ class TestSparkMLLinear(unittest.TestCase):
         )
 
     # pyspark.ml.LogisticRegression with two classes
-    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.16.0"), reason="Spark-ML test requires torch >= 1.16.0")
-    @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
+    @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     def test_logistic_regression_binary(self):
         self._test_linear(2, model_class=LogisticRegression)
 
     # pyspark.ml.LogisticRegression with multi_class
-    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.16.0"), reason="Spark-ML test requires torch >= 1.16.0")
-    @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
+    @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     def test_logistic_regression_multi_class(self):
         self._test_linear(5, model_class=LogisticRegression)
 

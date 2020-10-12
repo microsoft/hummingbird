@@ -30,7 +30,7 @@ class TestSparkMLVectorAssembler(unittest.TestCase):
         iris = load_iris()
         features = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
 
-        pd_df = pd.DataFrame(data=np.c_[iris['data'], iris['target']], columns=features + ['target'])
+        pd_df = pd.DataFrame(data=np.c_[iris['data'], iris['target']], columns=features + ['target'])[["sepal_length", "sepal_width", "petal_length", "petal_width"]]
         df = sql.createDataFrame(pd_df)
 
         model = VectorAssembler(inputCols=features, outputCol='features')
@@ -41,15 +41,10 @@ class TestSparkMLVectorAssembler(unittest.TestCase):
 
         spark_output = model.transform(test_df).toPandas()
         spark_output['features'] = spark_output['features'].map(lambda x: np.array(x.toArray()))
-        spark_output_np = tuple([spark_output[col_name].to_numpy() for col_name in spark_output.columns])
+        spark_output_np = spark_output['features'].to_numpy()
         torch_output_np = torch_model.transform(pd_df)
 
-        # Testing original input columns are correct.
-        for i in range(len(features)):
-            np.testing.assert_allclose(spark_output_np[i].reshape(-1, 1), torch_output_np[i], rtol=1e-06, atol=1e-06)
-
-        # Testing the assembled output columns ('features') is correct.
-        np.testing.assert_allclose(np.vstack(spark_output_np[-1].tolist()), torch_output_np[-1], rtol=1e-06, atol=1e-06)
+        np.testing.assert_allclose(np.vstack(spark_output_np), torch_output_np, rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":

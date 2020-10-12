@@ -45,10 +45,9 @@ class VectorAssemblerModel(BaseOperator, torch.nn.Module):
     This is used by Spark-ML VectorAssembler
     """
 
-    def __init__(self, input_indices=None, append_output=False):
-        super(VectorAssemblerModel, self).__init__(input_indices=input_indices, append_output=append_output, transformer=True)
+    def __init__(self):
+        super(VectorAssemblerModel, self).__init__(transformer=True)
 
     def forward(self, *x):
-        x = self.select_input_if_needed(x)
         x = torch.cat(x, 1)
-        return self.get_appended_output_if_needed(x)
+        return x

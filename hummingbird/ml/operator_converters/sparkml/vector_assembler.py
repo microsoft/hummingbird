@@ -29,15 +29,7 @@ def convert_sparkml_vector_assembler(operator, device, extra_config):
         A PyTorch model
     """
 
-    def find_column_idx(col_name):
-        for i in range(len(operator.inputs)):
-            if operator.inputs[i].raw_name == col_name:
-                return i
-        raise RuntimeError('Column {} not found in the input data'.format(col_name))
-
-    input_indices = [find_column_idx(col_name) for col_name in operator.raw_operator.getInputCols()]
-
-    return VectorAssemblerModel(input_indices=input_indices, append_output=True)
+    return VectorAssemblerModel()
 
 
 register_converter("SparkMLVectorAssembler", convert_sparkml_vector_assembler)

@@ -34,15 +34,12 @@ def convert_sparkml_linear_model(operator, device, extra_config):
     coefficients = operator.raw_operator.coefficientMatrix.toArray().transpose().astype("float32")
     intercepts = operator.raw_operator.interceptVector.reshape(1, -1).astype("float32")
 
-    params = {param[0].name: param[1] for param in operator.raw_operator.extractParamMap().items()}
-    input_indices = [i for i in range(len(operator.inputs)) if operator.inputs[i].raw_name == params['featuresCol']]
-
     if num_classes > 2:
         multi_class = "multinomial"
     else:
         multi_class = None
 
-    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class, input_indices=input_indices)
+    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)
 
 
 register_converter("SparkMLLogisticRegressionModel", convert_sparkml_linear_model)

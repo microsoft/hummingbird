@@ -27,13 +27,13 @@ if pandas_installed():
 class TestSparkMLDiscretizers(unittest.TestCase):
     # Test QuantileDiscretizer
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
-    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.16.0"), reason="Spark-ML test requires torch >= 1.16.0")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
     def test_quantilediscretizer_converter(self):
         iris = load_iris()
         features = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
 
         pd_df = pd.DataFrame(data=np.c_[iris['data'], iris['target']], columns=features + ['target'])
-        df = sql.createDataFrame(pd_df)
+        df = sql.createDataFrame(pd_df).select('sepal_length')
 
         quantile = QuantileDiscretizer(inputCol='sepal_length', outputCol='sepal_length_bucket', numBuckets=2)
         model = quantile.fit(df)
@@ -42,10 +42,9 @@ class TestSparkMLDiscretizers(unittest.TestCase):
         torch_model = convert(model, "torch", test_df)
         self.assertTrue(torch_model is not None)
 
-        spark_output = model.transform(test_df).toPandas()
-        spark_output_np = tuple([spark_output[col_name].to_numpy().reshape(-1, 1) for col_name in spark_output.columns])
+        spark_output = model.transform(test_df).select('sepal_length_bucket').toPandas()
         torch_output_np = torch_model.transform(pd_df)
-        np.testing.assert_allclose(spark_output_np, torch_output_np, rtol=1e-06, atol=1e-06)
+        np.testing.assert_allclose(spark_output.to_numpy(), torch_output_np, rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":

@@ -14,8 +14,8 @@ from ._base_operator import BaseOperator
 
 
 class LinearModel(BaseOperator, torch.nn.Module):
-    def __init__(self, coefficients, intercepts, device, classes=[0], multi_class=None, is_linear_regression=False, input_indices=None):
-        super(LinearModel, self).__init__(input_indices=input_indices)
+    def __init__(self, coefficients, intercepts, device, classes=[0], multi_class=None, is_linear_regression=False):
+        super(LinearModel, self).__init__()
         self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients), requires_grad=False)
         self.intercepts = torch.nn.Parameter(torch.from_numpy(intercepts), requires_grad=False)
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
@@ -31,9 +31,7 @@ class LinearModel(BaseOperator, torch.nn.Module):
         if len(classes) == 2:
             self.binary_classification = True
 
-    def forward(self, *x):
-        x = self.select_input_if_needed(x)
-
+    def forward(self, x):
         output = torch.addmm(self.intercepts, x, self.coefficients)
         if self.multi_class == "multinomial":
             output = torch.softmax(output, dim=1)

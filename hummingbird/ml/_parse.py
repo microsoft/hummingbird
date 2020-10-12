@@ -93,10 +93,10 @@ def parse_sparkml_api_model(model, extra_config={}):
 
     # Parse the input Spark-ML model into its scope with the topology.
     # Get the outputs of the model.
-    outputs = _parse_sparkml_api(scope, model, inputs)
+    current_op_outputs, _ = _parse_sparkml_api(scope, model, inputs)
 
     # Declare output variables.
-    _declare_output_variables(raw_model_container, extra_config, outputs)
+    _declare_output_variables(raw_model_container, extra_config, current_op_outputs)
 
     return topology
 
@@ -271,21 +271,22 @@ def _parse_sklearn_pipeline(scope, model, inputs):
     return inputs
 
 
-def _parse_sparkml_pipeline(scope, model, inputs):
+def _parse_sparkml_pipeline(scope, model, all_outputs):
     """
     The basic ideas of Spark-ML parsing:
         1. Sequentially go though all stages defined in the considered
-           Spark-ML pipeline
+           Spark-ML pipeline passing all outputs that has been generated so far
+           as the input. Operator will pick which inputs to operates on.
         2. The output variables of one stage will be fed into its next
            stage as the inputs.
     :param scope: Scope object defined in _topology.py
     :param model: Spark-ML pipeline object
-    :param inputs: A list of Variable objects
+    :param all_outputs: A list of Variable objects
     :return: A list of output variables produced by the input pipeline
     """
     for step in model.stages:
-        inputs = _parse_sparkml_api(scope, step, inputs)
-    return inputs
+        current_op_outputs, all_outputs = _parse_sparkml_api(scope, step, all_outputs)
+    return current_op_outputs, all_outputs
 
 
 def _parse_sklearn_feature_union(scope, model, inputs):
@@ -504,14 +505,14 @@ def _parse_sparkml_api(scope, model, inputs):
     return outputs
 
 
-def _parse_sparkml_single_operator(scope, operator, inputs):
+def _parse_sparkml_single_operator(scope, operator, all_inputs):
     """
     This function handles the parsing of all Spark-ML operators.
 
     Args:
         scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
         model: A Spark-ML operator
-        inputs: A list of `onnxconverter_common.topology.Variable`s
+        all_inputs: A list of `onnxconverter_common.topology.Variable`s
     """
     import inspect
 
@@ -520,14 +521,25 @@ def _parse_sparkml_single_operator(scope, operator, inputs):
 
     alias = get_sparkml_api_operator_name(type(operator))
     this_operator = scope.declare_local_operator(alias, operator)
-    this_operator.inputs = inputs
+
+    if hasattr(operator, "getInputCol") and callable(operator.getInputCol):
+        this_operator.inputs = [i for i in all_inputs if i.raw_name == operator.getInputCol()]
+    elif hasattr(operator, "getInputCols") and callable(operator.getInputCols):
+        temp = {i.raw_name: i for i in all_inputs if i.raw_name in operator.getInputCols()}
+        this_operator.inputs = [temp[i] for i in operator.getInputCols()]
+    elif operator.hasParam('featuresCol'):
+        col_name = [param[1] for param in operator.extractParamMap().items() if param[0].name == 'featuresCol'][0]
+        this_operator.inputs = [i for i in all_inputs if i.raw_name == col_name]
+    else:
+        print(operator.getParam('featuresCol'))
+        raise RuntimeError('Unable to determine inputs for the Spark-ML operator: {}'.format(type(operator)))
 
     # Spark-ML feature transformers (pyspark.ml.feature.*) will keep propagating all input columns
-    # as output columns.
-    if inspect.getmodule(operator).__name__ == "pyspark.ml.feature":
-        for input in this_operator.inputs:
-            variable = scope.declare_local_variable(input.raw_name)
-            this_operator.outputs.append(variable)
+    # # as output columns.
+    # if inspect.getmodule(operator).__name__ == "pyspark.ml.feature":
+    #     for input in this_operator.inputs:
+    #         variable = scope.declare_local_variable(input.raw_name)
+    #         this_operator.outputs.append(variable)
 
     if hasattr(operator, "getOutputCol") and callable(operator.getOutputCol):
         variable = scope.declare_local_variable(operator.getOutputCol())
@@ -540,7 +552,7 @@ def _parse_sparkml_single_operator(scope, operator, inputs):
         variable = scope.declare_local_variable("variable")
         this_operator.outputs.append(variable)
 
-    return this_operator.outputs
+    return this_operator.outputs, all_inputs + this_operator.outputs
 
 
 def _remove_zipmap(node_list):
