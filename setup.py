@@ -21,7 +21,7 @@ with open(README) as f:
     if start_pos >= 0:
         long_description = long_description[start_pos:]
 
-install_requires = ["numpy>=1.15", "onnxconverter-common>=1.6.0", "scikit-learn>=0.21.3", "torch>=1.4.*"]
+install_requires = ["numpy>=1.15", "onnxconverter-common>=1.6.0", "scikit-learn>=0.21.3", "torch>=1.4.*", "psutil"]
 onnx_requires = [
     "onnxruntime>=1.0.0",
     "onnxmltools>=1.6.0",

@@ -2,11 +2,7 @@
 Tests extra configurations.
 """
 from distutils.version import LooseVersion
-
-try:
-    import psutil
-except ImportError:
-    psutil = None
+import psutil
 import unittest
 import warnings
 import sys
@@ -26,7 +22,6 @@ class TestExtraConf(unittest.TestCase):
         sys.platform == "darwin" and LooseVersion(torch.__version__) <= LooseVersion("1.6.0"),
         reason="PyTorch has a bug on mac related to multi-threading",
     )
-    @unittest.skipIf(psutil is None, reason="psutil is not installed")
     def test_torch_deafault_n_threads(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
