@@ -35,19 +35,20 @@ import sys
 import argparse
 import json
 import ast
+import gc
 import psutil
 import signal
-import train
-import score
 import pickle
 import numpy as np
 import warnings
 from pathlib import Path
 from scipy import stats
-from metrics import get_metrics
-from datasets import prepare_dataset, LearningTask
 from memory_profiler import memory_usage
-import gc
+
+import benchmarks.trees.train as train
+import benchmarks.trees.score as score
+from benchmarks.trees.metrics import get_metrics
+from benchmarks.datasets import prepare_dataset, LearningTask
 
 
 ROOT_PATH = Path(__file__).absolute().parent.parent.parent

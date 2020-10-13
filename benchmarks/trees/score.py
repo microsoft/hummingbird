@@ -25,25 +25,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from abc import ABC, abstractmethod
-import time
 import numpy as np
 
-from datasets import LearningTask
-
-
-class Timer:
-    def __init__(self):
-        self.start = None
-        self.end = None
-        self.interval = None
-
-    def __enter__(self):
-        self.start = time.clock()
-        return self
-
-    def __exit__(self, *args):
-        self.end = time.clock()
-        self.interval = self.end - self.start
+from benchmarks.timer import Timer
+from benchmarks.datasets import LearningTask
 
 
 class ScoreBackend(ABC):
@@ -53,8 +38,6 @@ class ScoreBackend(ABC):
             return PytorchBackend()
         if name == "hb-torchscript":
             return TorchScriptBackend()
-        if name == "hb-tvm":
-            return TVMBackend()
         if name == "onnx-ml":
             return ONNXMLBackend()
         raise ValueError("Unknown backend: " + name)
@@ -111,8 +94,11 @@ class PytorchBackend(ScoreBackend):
 
     def convert(self, model, data, args, model_name):
         from hummingbird.ml import convert
+        import torch
 
         self.configure(data, model, args)
+        torch.set_num_threads(self.params["nthread"])
+        torch.set_num_interop_threads(self.params["nthread"])
 
         with Timer() as t:
             self.model = convert(model, "torch", device=self.params["device"])
@@ -120,12 +106,13 @@ class PytorchBackend(ScoreBackend):
         return t.interval
 
     def predict(self, data):
+        assert self.model is not None
         import torch
 
-        assert self.model is not None
+        print(torch.get_num_threads())
+        print(torch.get_num_interop_threads())
 
         batch_size = self.params["batch_size"]
-        torch.set_num_threads(self.params["nthread"])
         is_regression = data.learning_task == LearningTask.REGRESSION
 
         with Timer() as t:
@@ -169,7 +156,7 @@ class TorchScriptBackend(PytorchBackend):
         return t.interval
 
 
-class TVMBackend(ScoreBackend):
+class ONNXBackend(ScoreBackend):
     def __init__(self):
         super().__init__()
         self.remainder_model = None  # for batch inference in case we have remainder records

@@ -25,17 +25,17 @@
 import os
 import sys
 from enum import Enum
+import pandas as pd
 import pickle
 import numpy as np
+
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_svmlight_file
 
-import pandas as pd
-
 if sys.version_info[0] >= 3:
-    from urllib.request import urlretrieve  # pylint: disable=import-error,no-name-in-module
+    from urllib.request import urlretrieve
 else:
-    from urllib import urlretrieve  # pylint: disable=import-error,no-name-in-module
+    from urllib import urlretrieve
 
 
 class LearningTask(Enum):
@@ -44,7 +44,7 @@ class LearningTask(Enum):
     MULTICLASS_CLASSIFICATION = 3
 
 
-class Data:  # pylint: disable=too-few-public-methods,too-many-arguments
+class Data:
     def __init__(self, X_train, X_test, y_train, y_test, learning_task, qid_train=None, qid_test=None):
         self.X_train = X_train
         self.X_test = X_test
@@ -233,7 +233,7 @@ def prepare_epsilon(dataset_folder, nrows):
     return data
 
 
-def prepare_covtype(dataset_folder, nrows):  # pylint: disable=unused-argument
+def prepare_covtype(dataset_folder, nrows=None):
     from sklearn.datasets import fetch_covtype
 
     print("Preparing dataset ...")
@@ -244,3 +244,94 @@ def prepare_covtype(dataset_folder, nrows):  # pylint: disable=unused-argument
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
     return Data(X_train.astype("|f4"), X_test.astype("|f4"), y_train, y_test, LearningTask.MULTICLASS_CLASSIFICATION)
+
+
+def prepare_iris(dataset_folder, nrows):
+    from sklearn.datasets import load_iris
+
+    data = load_iris()
+    X, y = data.data, data.target
+    X = _modify_dimension(X, 20)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+
+    X_test, y_test = _make_n_rows(X, nrows, y)
+
+    return Data(
+        X_train.astype("|f4"),
+        X_test.astype("|f4"),
+        y_train.astype("|i4"),
+        y_test.astype("|i4"),
+        LearningTask.MULTICLASS_CLASSIFICATION,
+    )
+
+
+def _modify_dimension(X, n_features):
+    """
+    Modifies the number of features to increase
+    or reduce the number of features.
+    """
+    if n_features is None or n_features == X.shape[1]:
+        return X
+    if n_features < X.shape[1]:
+        return X[:, :n_features]
+    res = np.empty((X.shape[0], n_features), dtype=X.dtype)
+    res[:, : X.shape[1]] = X[:, :]
+    div = max((n_features // X.shape[1]) + 1, 2)
+    for i in range(X.shape[1], res.shape[1]):
+        j = i % X.shape[1]
+        col = X[:, j]
+        if X.dtype in (np.float32, np.float64):
+            sigma = np.var(col) ** 0.5
+            rnd = np.random.randn(len(col)) * sigma / div
+            col2 = col + rnd
+            res[:, j] -= col2 / div
+            res[:, i] = col2
+        elif X.dtype in (np.int32, np.int64):
+            perm = np.random.permutation(col)
+            h = np.random.randint(0, div) % X.shape[0]
+            col2 = col.copy()
+            col2[h::div] = perm[h::div]  # pylint: disable=E1136
+            res[:, i] = col2
+            h = (h + 1) % X.shape[0]
+            res[h, j] = perm[h]  # pylint: disable=E1136
+        else:
+            raise NotImplementedError("Unable to add noise to a feature for this type {}".format(X.dtype))
+    return res
+
+
+def _make_n_rows(x, n, y=None):
+    """
+    Multiplies or reduces the rows of x to get
+    exactly *n* rows.
+    """
+    if n < x.shape[0]:
+        if y is None:
+            return x[:n].copy()
+        return x[:n].copy(), y[:n].copy()
+    if len(x.shape) < 2:
+        r = np.empty((n,), dtype=x.dtype)
+        if y is not None:
+            ry = np.empty((n,), dtype=y.dtype)
+        for i in range(0, n, x.shape[0]):
+            end = min(i + x.shape[0], n)
+            r[i:end] = x[0 : end - i]
+            if y is not None:
+                ry[i:end] = y[0 : end - i]
+    else:
+        r = np.empty((n, x.shape[1]), dtype=x.dtype)
+        if y is not None:
+            if len(y.shape) < 2:
+                ry = np.empty((n,), dtype=y.dtype)
+            else:
+                ry = np.empty((n, y.shape[1]), dtype=y.dtype)
+        for i in range(0, n, x.shape[0]):
+            end = min(i + x.shape[0], n)
+            r[i:end, :] = x[0 : end - i, :]
+            if y is not None:
+                if len(y.shape) < 2:
+                    ry[i:end] = y[0 : end - i]
+                else:
+                    ry[i:end, :] = y[0 : end - i, :]
+    if y is None:
+        return r
+    return r, ry

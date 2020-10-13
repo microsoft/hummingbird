@@ -33,7 +33,8 @@
 
 import numpy as np
 import sklearn.metrics as sklm
-from datasets import LearningTask
+
+from benchmarks.datasets import LearningTask
 
 
 def get_metrics(data, pred):
