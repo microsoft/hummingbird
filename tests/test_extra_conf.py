@@ -102,24 +102,24 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(hb_model._session.get_session_options().intra_op_num_threads == 1)
         self.assertTrue(hb_model._session.get_session_options().inter_op_num_threads == 1)
 
-    # # Test one thread in pytorch.
-    # def test_torch_one_thread(self):
-    #     warnings.filterwarnings("ignore")
-    #     max_depth = 10
-    #     num_classes = 2
-    #     model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
-    #     np.random.seed(0)
-    #     X = np.random.rand(100, 200)
-    #     X = np.array(X, dtype=np.float32)
-    #     y = np.random.randint(num_classes, size=100)
+    # Test one thread in pytorch.
+    def test_torch_batch(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
 
-    #     model.fit(X, y)
+        model.fit(X, y)
 
-    #     hb_model = hummingbird.ml.convert(model, "torch", extra_config={constants.BATCH_SIZE: 10})
+        hb_model = hummingbird.ml.convert(model, "torch", extra_config={constants.BATCH_SIZE: 10})
 
-    #     self.assertIsNotNone(hb_model)
+        self.assertIsNotNone(hb_model)
 
-    #     hb_model.predict(X)
+        hb_model.predict(X)
 
 
 if __name__ == "__main__":

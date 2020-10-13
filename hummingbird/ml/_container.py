@@ -119,7 +119,17 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         On classification tasks returns the predicted class labels for the input data.
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
-        total_size = len(inputs)
+        if type(inputs) == DataFrame and DataFrame is not None:
+            # Split the dataframe into column ndarrays.
+            inputs = inputs[0]
+            input_names = list(inputs.columns)
+            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+            inputs = tuple(splits)
+        elif type(inputs) is not np.ndarray:
+            inputs = np.array(inputs)
+
+        total_size = inputs.shape[1]
         iterations = total_size // self._batch_size
         iterations += 1 if total_size % self._batch_size > 0 else 0
         iterations = max(1, iterations)
@@ -196,14 +206,6 @@ def _torchscript_wrapper(device, function, *inputs):
     inputs = [*inputs]
 
     with torch.no_grad():
-        if type(inputs) == DataFrame and DataFrame is not None:
-            # Split the dataframe into column ndarrays.
-            inputs = inputs[0]
-            input_names = list(inputs.columns)
-            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
-            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
-            inputs = tuple(splits)
-
         # Maps data inputs to the expected type and device.
         for i in range(len(inputs)):
             if type(inputs[i]) is np.ndarray:
