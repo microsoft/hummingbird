@@ -12,8 +12,8 @@ Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsR
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .._kneighbors_implementations import KNeighborsModel, MetricType
-from ..constants import BATCH_SIZE
+from hummingbird.ml.operator_converters._kneighbors_implementations import KNeighborsModel, MetricType
+from hummingbird.ml.operator_converters import constants
 
 
 def convert_sklearn_kneighbors_regression_model(operator, device, extra_config):
@@ -49,9 +49,11 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
 
 
 def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
-    if BATCH_SIZE not in extra_config:
+    if constants.BATCH_SIZE not in extra_config:
         raise RuntimeError(
-            "Hummingbird requires explicit specification of " + BATCH_SIZE + " parameter when compiling KNeighborsClassifier"
+            "Hummingbird requires explicit specification of "
+            + constants.BATCH_SIZE
+            + " parameter when compiling KNeighborsClassifier"
         )
 
     classes = None
@@ -121,7 +123,7 @@ def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
         n_neighbors,
         weights,
         classes,
-        extra_config[BATCH_SIZE],
+        extra_config[constants.BATCH_SIZE],
         is_classifier,
         metric_type,
         metric_params,

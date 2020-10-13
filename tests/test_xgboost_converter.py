@@ -8,7 +8,7 @@ import numpy as np
 
 import hummingbird.ml
 from hummingbird.ml._utils import xgboost_installed
-from tree_utils import gbdt_implementation_map
+from tests.tree_utils import gbdt_implementation_map
 
 if xgboost_installed():
     import xgboost as xgb

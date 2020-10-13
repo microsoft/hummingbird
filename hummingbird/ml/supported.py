@@ -69,7 +69,14 @@ XGBRegressor
 from collections import defaultdict
 
 from .exceptions import MissingConverter
-from ._utils import torch_installed, sklearn_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed, sparkml_installed
+from ._utils import (
+    torch_installed,
+    sklearn_installed,
+    lightgbm_installed,
+    xgboost_installed,
+    onnx_runtime_installed,
+    sparkml_installed,
+)
 
 
 def _build_sklearn_operator_list():
@@ -217,9 +224,8 @@ def _build_sparkml_operator_list():
             # Featurizers
             Bucketizer,
             VectorAssembler,
-
             # Linear Models
-            LogisticRegressionModel
+            LogisticRegressionModel,
         ]
 
         return supported_ops
@@ -419,4 +425,11 @@ OUTPUT_NAMES = "output_names"
 """Set the names of the outputs."""
 
 CONTAINER = "container"
-"""Whether to return the container for Sklearn API or just the model"""
+"""Boolean used to chose whether to return the container for Sklearn API or just the model"""
+
+N_THREADS = "n_threads"
+"""Select how many threads to use for scoring. This paremeter will set the number of intra-op threads.
+Inter-op threads are by default set to 1 in Hummingbird. Check `tests.test_extra_conf.py` for usage examples."""
+
+BATCH_SIZE = "batch_size"
+"""Select whether to partition the input dataset at inference time in N batch_size partitions."""

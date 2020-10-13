@@ -8,12 +8,21 @@
 Hummingbird main (converters) API.
 """
 from copy import deepcopy
+import psutil
 import numpy as np
 
 from .operator_converters import constants
 from ._parse import parse_sklearn_api_model, parse_onnx_api_model, parse_sparkml_api_model
 from ._topology import convert as topology_converter
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed, pandas_installed, sparkml_installed, is_pandas_dataframe, is_spark_dataframe
+from ._utils import (
+    torch_installed,
+    lightgbm_installed,
+    xgboost_installed,
+    pandas_installed,
+    sparkml_installed,
+    is_pandas_dataframe,
+    is_spark_dataframe,
+)
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
 
@@ -39,6 +48,7 @@ def _is_sparkml_model(model):
     if sparkml_installed():
         from pyspark.ml import Model, Transformer
         from pyspark.ml.pipeline import PipelineModel
+
         return isinstance(model, Model) or isinstance(model, PipelineModel) or isinstance(model, Transformer)
     else:
         return False
@@ -249,9 +259,20 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     # We destroy extra_config during conversion, we create a copy here.
     extra_config = deepcopy(extra_config)
 
+    # Set some default configurations.
     # Add test input as extra configuration for conversion.
-    if test_input is not None and constants.TEST_INPUT not in extra_config and (is_spark_dataframe(test_input) or len(test_input) > 0):
+    if (
+        test_input is not None
+        and constants.TEST_INPUT not in extra_config
+        and (is_spark_dataframe(test_input) or len(test_input) > 0)
+    ):
         extra_config[constants.TEST_INPUT] = test_input
+    # By default we return the converted model wrapped into a `hummingbird.ml._container.SklearnContainer` object.
+    if constants.CONTAINER not in extra_config:
+        extra_config[constants.CONTAINER] = True
+    # By default we set num of intra-op parallelism to be the number of physical cores available
+    if constants.N_THREADS not in extra_config:
+        extra_config[constants.N_THREADS] = psutil.cpu_count(logical=False)
 
     # Fix the test_input type
     if constants.TEST_INPUT in extra_config:
@@ -270,9 +291,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
             extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT].columns)
             extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
             input_names = list(extra_config[constants.TEST_INPUT].columns)
-            splits = [
-                extra_config[constants.TEST_INPUT][input_names[idx]] for idx in range(extra_config[constants.N_INPUTS])
-            ]
+            splits = [extra_config[constants.TEST_INPUT][input_names[idx]] for idx in range(extra_config[constants.N_INPUTS])]
             splits = [df.to_numpy().reshape(-1, 1) for df in splits]
             extra_config[constants.TEST_INPUT] = tuple(splits) if len(splits) > 1 else splits[0]
             extra_config[constants.INPUT_NAMES] = input_names
@@ -310,7 +329,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
                 elif spark_dtype == LongType:
                     np_dtype = np.int64
                 else:
-                    raise ValueError('Unrecognized data type: {}'.format(spark_dtype))
+                    raise ValueError("Unrecognized data type: {}".format(spark_dtype))
 
                 splits.append(np.zeros((size, shape), np_dtype))
 
