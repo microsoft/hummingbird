@@ -22,14 +22,15 @@ with open(README) as f:
         long_description = long_description[start_pos:]
 
 install_requires = ["numpy>=1.15", "onnxconverter-common>=1.6.0", "scikit-learn>=0.21.3", "torch>=1.4.*"]
-onnx_requires = (["onnxruntime>=1.0.0", "onnxmltools>=1.6.0"],)
-extra_requires = (
-    [
-        # The need each for these depends on which libraries you plan to convert from
-        "xgboost>=0.90",
-        "lightgbm>=2.2,<3",
-    ],
-)
+onnx_requires = [
+    "onnxruntime>=1.0.0",
+    "onnxmltools>=1.6.0",
+]
+extra_requires = [
+    # The need each for these depends on which libraries you plan to convert from
+    "xgboost>=0.90",
+    "lightgbm>=2.2,<3",
+]
 setup(
     name="hummingbird-ml",
     version=version_str,
