@@ -119,12 +119,25 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         On classification tasks returns the predicted class labels for the input data.
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
+        total_size = len(inputs)
+        iterations = total_size // self._batch_size
+        iterations += 1 if total_size % self._batch_size > 0 else 0
+        iterations = max(1, iterations)
+
+        predictions = np.empty([total_size], dtype="f4")
+
+        predict = None
         if self._is_regression:
-            return self.model.forward(*inputs).cpu().numpy().flatten()
+            predict = lambda x: self.model.forward(*x).cpu().numpy().flatten()  # noqa: E731
         elif self._is_anomaly_detection:
-            return self.model.forward(*inputs)[0].cpu().numpy().flatten()
+            predict = lambda x: self.model.forward(*x)[0].cpu().numpy().flatten()  # noqa: E731
         else:
-            return self.model.forward(*inputs)[0].cpu().numpy()
+            predict = lambda x: self.model.forward(*x)[0].cpu().numpy()  # noqa: E731
+
+        for i in range(0, iterations):
+            start = i * self._batch_size
+            end = min(start + self._batch_size, total_size)
+            predictions[start:end, :] = predict(inputs[start:end])
 
 
 class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
