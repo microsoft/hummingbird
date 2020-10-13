@@ -60,6 +60,9 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(torch.get_num_interop_threads() == 1)
 
     # Test default number of threads onnx.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_onnx_deafault_n_threads(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -79,6 +82,9 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(hb_model._session.get_session_options().inter_op_num_threads == 1)
 
     # Test one thread onnx.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_onnx_one_thread(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
