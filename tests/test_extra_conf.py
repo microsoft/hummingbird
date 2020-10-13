@@ -102,7 +102,7 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(hb_model._session.get_session_options().intra_op_num_threads == 1)
         self.assertTrue(hb_model._session.get_session_options().inter_op_num_threads == 1)
 
-    # Test one thread in pytorch.
+    # Test pytorch inference with batching.
     def test_torch_batch(self):
         warnings.filterwarnings("ignore")
         max_depth = 10

@@ -67,6 +67,33 @@ class SklearnContainer(ABC):
     def model(self):
         return self._model
 
+    def _run_batch_inference(self, function, *inputs):
+        """
+        This function contains the code to enabling batched inference.
+        """
+        if DataFrame is not None and type(inputs[0]) == DataFrame:
+            # Split the dataframe into column ndarrays.
+            inputs = inputs[0]
+            input_names = list(inputs.columns)
+            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+            inputs = tuple(splits)
+        elif type(inputs) is tuple:
+            inputs = np.array(*inputs)
+
+        total_size = inputs.shape[0]
+        iterations = total_size // self._batch_size
+        iterations += 1 if total_size % self._batch_size > 0 else 0
+        iterations = max(1, iterations)
+        predictions = []
+
+        for i in range(0, iterations):
+            start = i * self._batch_size
+            end = min(start + self._batch_size, total_size)
+            predictions.append(function(inputs[start:end, :]))
+
+        return np.array(predictions).ravel()
+
 
 class PyTorchTorchscriptSklearnContainer(SklearnContainer):
     """
@@ -119,35 +146,18 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         On classification tasks returns the predicted class labels for the input data.
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
-        if type(inputs) == DataFrame and DataFrame is not None:
-            # Split the dataframe into column ndarrays.
-            inputs = inputs[0]
-            input_names = list(inputs.columns)
-            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
-            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
-            inputs = tuple(splits)
-        elif type(inputs) is not np.ndarray:
-            inputs = np.array(inputs)
-
-        total_size = inputs.shape[1]
-        iterations = total_size // self._batch_size
-        iterations += 1 if total_size % self._batch_size > 0 else 0
-        iterations = max(1, iterations)
-
-        predictions = np.empty([total_size], dtype="f4")
-
-        predict = None
+        f = None
         if self._is_regression:
-            predict = lambda x: self.model.forward(*x).cpu().numpy().flatten()  # noqa: E731
+            f = lambda x: self.model.forward(x).cpu().numpy()  # noqa: E731
         elif self._is_anomaly_detection:
-            predict = lambda x: self.model.forward(*x)[0].cpu().numpy().flatten()  # noqa: E731
+            f = lambda x: self.model.forward(x)[0].cpu().numpy()  # noqa: E731
         else:
-            predict = lambda x: self.model.forward(*x)[0].cpu().numpy()  # noqa: E731
+            f = lambda x: self.model.forward(x)[0].cpu().numpy()  # noqa: E731
 
-        for i in range(0, iterations):
-            start = i * self._batch_size
-            end = min(start + self._batch_size, total_size)
-            predictions[start:end, :] = predict(inputs[start:end])
+        if self._batch_size is None:
+            return f(*inputs).ravel()
+        else:
+            return self._run_batch_inference(f, *inputs)
 
 
 class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
@@ -198,11 +208,13 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
 
 
 # TorchScript containers.
+
+
 def _torchscript_wrapper(device, function, *inputs):
     """
-    This function contains the code to enable predictions over torchscript models.
-    It is used to wrap pytorch container functions.
-    """
+        This function contains the code to enable predictions over torchscript models.
+        It is used to translates inputs in the proper torch format.
+        """
     inputs = [*inputs]
 
     with torch.no_grad():
