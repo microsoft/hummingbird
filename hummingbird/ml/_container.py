@@ -31,6 +31,15 @@ class CommonONNXModelContainer(CommonSklearnModelContainer):
         super(CommonONNXModelContainer, self).__init__(onnx_model)
 
 
+class CommonSparkMLModelContainer(CommonSklearnModelContainer):
+    """
+    Common container for input Spark-ML operators.
+    """
+
+    def __init__(self, sparkml_model):
+        super(CommonSparkMLModelContainer, self).__init__(sparkml_model)
+
+
 def _get_device(model):
     """
     Convenient function used to get the runtime device for the model.

@@ -11,9 +11,9 @@ from copy import deepcopy
 import numpy as np
 
 from .operator_converters import constants
-from ._parse import parse_sklearn_api_model, parse_onnx_api_model
+from ._parse import parse_sklearn_api_model, parse_onnx_api_model, parse_sparkml_api_model
 from ._topology import convert as topology_converter
-from ._utils import torch_installed, lightgbm_installed, xgboost_installed, pandas_installed
+from ._utils import torch_installed, lightgbm_installed, xgboost_installed, pandas_installed, sparkml_installed, is_pandas_dataframe, is_spark_dataframe
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
 
@@ -30,6 +30,18 @@ def _is_onnx_model(model):
     Function returning whether the input model is an ONNX model or not.
     """
     return type(model).__name__ == "ModelProto"
+
+
+def _is_sparkml_model(model):
+    """
+    Function returning whether the input model is a Spark-ML model or not.
+    """
+    if sparkml_installed():
+        from pyspark.ml import Model, Transformer
+        from pyspark.ml.pipeline import PipelineModel
+        return isinstance(model, Model) or isinstance(model, PipelineModel) or isinstance(model, Transformer)
+    else:
+        return False
 
 
 def _supported_backend_check(backend):
@@ -68,8 +80,6 @@ def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     """
     assert model is not None
     assert torch_installed(), "To use Hummingbird you need to install torch."
-
-    import torch
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
     # We modify the scikit learn model during translation.
@@ -183,10 +193,28 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     return hb_model
 
 
+def _convert_sparkml(model, backend, test_input, device, extra_config={}):
+    """
+    This function converts the specified *Spark-ML* (API) model into its *backend* counterpart.
+    The supported operators and backends can be found at `hummingbird.ml.supported`.
+    """
+    assert model is not None
+    assert torch_installed(), "To use Hummingbird you need to install torch."
+
+    # Parse Spark-ML model as our internal data structure (i.e., Topology)
+    # We modify the Spark-ML model during translation.
+    model = model.copy()
+    topology = parse_sparkml_api_model(model, extra_config)
+
+    # Convert the Topology object into a PyTorch model.
+    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
+    return hb_model
+
+
 def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     """
     This function converts the specified input *model* into an implementation targeting *backend*.
-    *Convert* supports [Sklearn], [LightGBM], [XGBoost] and [ONNX] models.
+    *Convert* supports [Sklearn], [LightGBM], [XGBoost], [ONNX], and [SparkML] models.
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
@@ -197,6 +225,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     [ONNX]: https://onnx.ai/
     [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
     [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
+    [Spark-ML]: https://spark.apache.org/docs/latest/api/python/pyspark.ml.html
 
     Args:
         model: An input model
@@ -221,7 +250,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     extra_config = deepcopy(extra_config)
 
     # Add test input as extra configuration for conversion.
-    if test_input is not None and constants.TEST_INPUT not in extra_config and len(test_input) > 0:
+    if test_input is not None and constants.TEST_INPUT not in extra_config and (is_spark_dataframe(test_input) or len(test_input) > 0):
         extra_config[constants.TEST_INPUT] = test_input
 
     # Fix the test_input type
@@ -236,20 +265,58 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
             assert all([len(input.shape) == 2 for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_FEATURES] = sum([input.shape[1] for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT])
-        elif pandas_installed():
+        elif pandas_installed() and is_pandas_dataframe(extra_config[constants.TEST_INPUT]):
             # We split the input dataframe into columnar ndarrays
-            import pandas as pd
+            extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT].columns)
+            extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
+            input_names = list(extra_config[constants.TEST_INPUT].columns)
+            splits = [
+                extra_config[constants.TEST_INPUT][input_names[idx]] for idx in range(extra_config[constants.N_INPUTS])
+            ]
+            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+            extra_config[constants.TEST_INPUT] = tuple(splits) if len(splits) > 1 else splits[0]
+            extra_config[constants.INPUT_NAMES] = input_names
+        elif sparkml_installed() and is_spark_dataframe(extra_config[constants.TEST_INPUT]):
+            from pyspark.ml.linalg import DenseVector, SparseVector, VectorUDT
+            from pyspark.sql.types import ArrayType, FloatType, DoubleType, IntegerType, LongType
 
-            if type(extra_config[constants.TEST_INPUT]) == pd.DataFrame:
-                extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT].columns)
-                extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
-                input_names = list(extra_config[constants.TEST_INPUT].columns)
-                splits = [
-                    extra_config[constants.TEST_INPUT][input_names[idx]] for idx in range(extra_config[constants.N_INPUTS])
-                ]
-                splits = [df.to_numpy().reshape(-1, 1) for df in splits]
-                extra_config[constants.TEST_INPUT] = tuple(splits)
-                extra_config[constants.INPUT_NAMES] = input_names
+            df = extra_config[constants.TEST_INPUT]
+            input_names = [field.name for field in df.schema.fields]
+            extra_config[constants.N_INPUTS] = len(input_names)
+            extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
+
+            size = df.count()
+            row_dict = df.take(1)[0].asDict()
+            splits = []
+            for field in df.schema.fields:
+                data_col = row_dict[field.name]
+                spark_dtype = type(field.dataType)
+                shape = 1
+                if spark_dtype in [DenseVector, VectorUDT]:
+                    np_dtype = np.float64
+                    shape = data_col.array.shape[0]
+                elif spark_dtype == SparseVector:
+                    np_dtype = np.float64
+                    shape = data_col.size
+                elif spark_dtype == ArrayType:
+                    np_dtype = np.float64
+                    shape = len(data_col)
+                elif spark_dtype == IntegerType:
+                    np_dtype = np.int32
+                elif spark_dtype == FloatType:
+                    np_dtype = np.float32
+                elif spark_dtype == DoubleType:
+                    np_dtype = np.float64
+                elif spark_dtype == LongType:
+                    np_dtype = np.int64
+                else:
+                    raise ValueError('Unrecognized data type: {}'.format(spark_dtype))
+
+                splits.append(np.zeros((size, shape), np_dtype))
+
+            extra_config[constants.TEST_INPUT] = tuple(splits) if len(splits) > 1 else splits[0]
+            extra_config[constants.INPUT_NAMES] = input_names
+
         test_input = extra_config[constants.TEST_INPUT]
 
     # We do some normalization on backends.
@@ -268,5 +335,8 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
 
     if _is_onnx_model(model):
         return _convert_onnxml(model, backend, test_input, device, extra_config)
+
+    if _is_sparkml_model(model):
+        return _convert_sparkml(model, backend, test_input, device, extra_config)
 
     return _convert_sklearn(model, backend, test_input, device, extra_config)

@@ -51,6 +51,18 @@ def onnx_runtime_installed():
         return False
 
 
+def sparkml_installed():
+    """
+    Checks that *Spark ML/PySpark* is available.
+    """
+    try:
+        import pyspark
+
+        return True
+    except ImportError:
+        return False
+
+
 def sklearn_installed():
     """
     Checks that *Sklearn* is available.
@@ -109,6 +121,25 @@ def pandas_installed():
     except ImportError:
         return False
     return True
+
+
+def is_pandas_dataframe(df):
+    import pandas as pd
+    if type(df) == pd.DataFrame:
+        return True
+    else:
+        return False
+
+
+def is_spark_dataframe(df):
+    if not sparkml_installed():
+        return False
+
+    import pyspark
+    if type(df) == pyspark.sql.DataFrame:
+        return True
+    else:
+        return False
 
 
 class _Constants(object):
