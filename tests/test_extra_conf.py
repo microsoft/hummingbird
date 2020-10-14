@@ -245,8 +245,9 @@ class TestExtraConf(unittest.TestCase):
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
+        np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
-    # Test torchscript regression with batching.
+    # Test torchscript iforest with batching.
     def test_torchscript_iforest_batch(self):
         warnings.filterwarnings("ignore")
         num_classes = 2
@@ -279,6 +280,77 @@ class TestExtraConf(unittest.TestCase):
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
+
+    # Test onnx transform with batching and uneven rows.
+    def test_onnx_batch_transform(self):
+        warnings.filterwarnings("ignore")
+        model = StandardScaler(with_mean=True, with_std=True)
+        np.random.seed(0)
+        X = np.random.rand(101, 200)
+        X = np.array(X, dtype=np.float32)
+
+        model.fit(X)
+
+        hb_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
+
+    # Test onnx regression with batching.
+    def test_onnx_regression_batch(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingRegressor(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(103, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=103)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Test onnx classification with batching.
+    def test_onnx_classification_batch(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(103, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=103)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
+        np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+    # Test onnx iforest with batching.
+    def test_onnx_iforest_batch(self):
+        warnings.filterwarnings("ignore")
+        num_classes = 2
+        model = IsolationForest(n_estimators=10, max_samples=2)
+        np.random.seed(0)
+        X = np.random.rand(103, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=103)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
+        np.testing.assert_allclose(model.decision_function(X), hb_model.decision_function(X), rtol=1e-06, atol=1e-06)
+        np.testing.assert_allclose(model.score_samples(X), hb_model.score_samples(X), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":

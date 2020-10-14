@@ -375,14 +375,17 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
 
         assert len(self._output_names) == 1
 
+    def _transform(self, *inputs):
+        named_inputs = self._get_named_inputs(inputs)
+
+        return np.array(self._session.run(self._output_names, named_inputs)).ravel()
+
     def transform(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        named_inputs = self._get_named_inputs(inputs)
-
-        return self._session.run(self._output_names, named_inputs)
+        return self._run(self._transform, *inputs, reshape=True)
 
 
 class ONNXSklearnContainerRegression(ONNXSklearnContainer):
@@ -402,7 +405,7 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         self._is_regression = is_regression
         self._is_anomaly_detection = is_anomaly_detection
 
-    def predict(self, *inputs):
+    def _predict(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On regression returns the predicted values.
@@ -412,11 +415,18 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         named_inputs = self._get_named_inputs(inputs)
 
         if self._is_regression:
-            return self._session.run(self._output_names, named_inputs)
+            return np.array(self._session.run(self._output_names, named_inputs)).ravel()
         elif self._is_anomaly_detection:
-            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].flatten()
+            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].ravel()
         else:
-            return self._session.run([self._output_names[0]], named_inputs)[0]
+            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].ravel()
+
+    def predict(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On data transformers it returns transformed output data
+        """
+        return self._run(self._predict, *inputs)
 
 
 class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
@@ -431,7 +441,7 @@ class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
 
         assert len(self._output_names) == 2
 
-    def predict_proba(self, *inputs):
+    def _predict_proba(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
@@ -439,6 +449,13 @@ class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
         named_inputs = self._get_named_inputs(inputs)
 
         return self._session.run([self._output_names[1]], named_inputs)[0]
+
+    def predict_proba(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On data transformers it returns transformed output data
+        """
+        return self._run(self._predict_proba, *inputs, reshape=True)
 
 
 class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
@@ -453,7 +470,7 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
 
         assert len(self._output_names) == 2
 
-    def decision_function(self, *inputs):
+    def _decision_function(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision function scores.
@@ -465,6 +482,13 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         if constants.IFOREST_THRESHOLD in self._extra_config:
             scores += self._extra_config[constants.IFOREST_THRESHOLD]
         return scores
+
+    def decision_function(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On data transformers it returns transformed output data
+        """
+        return self._run(self._decision_function, *inputs)
 
     def score_samples(self, *inputs):
         """
