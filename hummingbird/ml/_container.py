@@ -101,7 +101,7 @@ class SklearnContainer(ABC):
         for i in range(0, iterations):
             start = i * self._batch_size
             end = min(start + self._batch_size, total_size)
-            predictions.extend(function(inputs[start:end, :]))
+            predictions.extend(function(inputs[start:end, :]).ravel())
 
         if reshape:
             return np.array(predictions).ravel().reshape(total_size, -1)
@@ -158,11 +158,11 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
 
     def _predict(self, inputs):
         if self._is_regression:
-            return self.model.forward(inputs).cpu().numpy()
+            return self.model.forward(inputs).cpu().numpy().ravel()
         elif self._is_anomaly_detection:
-            return self.model.forward(inputs)[0].cpu().numpy()
+            return self.model.forward(inputs)[0].cpu().numpy().ravel()
         else:
-            return self.model.forward(inputs)[0].cpu().numpy()
+            return self.model.forward(inputs)[0].cpu().numpy().ravel()
 
     def predict(self, *inputs):
         """
@@ -378,7 +378,7 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
     def _transform(self, *inputs):
         named_inputs = self._get_named_inputs(inputs)
 
-        return np.array(self._session.run(self._output_names, named_inputs)).ravel()
+        return np.array(self._session.run(self._output_names, named_inputs))
 
     def transform(self, *inputs):
         """
@@ -415,11 +415,11 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         named_inputs = self._get_named_inputs(inputs)
 
         if self._is_regression:
-            return np.array(self._session.run(self._output_names, named_inputs)).ravel()
+            return np.array(self._session.run(self._output_names, named_inputs))
         elif self._is_anomaly_detection:
             return np.array(self._session.run([self._output_names[0]], named_inputs))[0].ravel()
         else:
-            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].ravel()
+            return np.array(self._session.run([self._output_names[0]], named_inputs))[0]
 
     def predict(self, *inputs):
         """

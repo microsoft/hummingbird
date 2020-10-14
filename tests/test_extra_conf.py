@@ -27,7 +27,6 @@ class TestExtraConf(unittest.TestCase):
         sys.platform == "darwin" and LooseVersion(torch.__version__) <= LooseVersion("1.6.0"),
         reason="PyTorch has a bug on mac related to multi-threading",
     )
-    @unittest.skipIf(psutil is None, reason="psutil is not installed")
     def test_torch_deafault_n_threads(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -66,6 +65,9 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(torch.get_num_interop_threads() == 1)
 
     # Test default number of threads onnx.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_onnx_deafault_n_threads(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -85,6 +87,9 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(hb_model._session.get_session_options().inter_op_num_threads == 1)
 
     # Test one thread onnx.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_onnx_one_thread(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -282,6 +287,9 @@ class TestExtraConf(unittest.TestCase):
         np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
 
     # Test onnx transform with batching and uneven rows.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_onnx_batch_transform(self):
         warnings.filterwarnings("ignore")
         model = StandardScaler(with_mean=True, with_std=True)
@@ -297,6 +305,9 @@ class TestExtraConf(unittest.TestCase):
         np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
 
     # Test onnx regression with batching.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_onnx_regression_batch(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -315,6 +326,9 @@ class TestExtraConf(unittest.TestCase):
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Test onnx classification with batching.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_onnx_classification_batch(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -334,6 +348,9 @@ class TestExtraConf(unittest.TestCase):
         np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Test onnx iforest with batching.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_onnx_iforest_batch(self):
         warnings.filterwarnings("ignore")
         num_classes = 2
