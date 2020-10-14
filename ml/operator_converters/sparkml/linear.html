@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.exceptions API documentation</title>
-<meta name="description" content="Common errors." />
+<title>hummingbird.ml.operator_converters.sparkml.linear API documentation</title>
+<meta name="description" content="Converters for SparkML linear models: LogisticRegressionModel" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -13,69 +13,66 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/exceptions.html">
+<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/sparkml/linear.html">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.exceptions</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.sparkml.linear</code></h1>
 </header>
 <section id="section-intro">
-<p>Common errors.</p>
+<p>Converters for SparkML linear models: LogisticRegressionModel</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/exceptions.py#L0-L47" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sparkml/linear.py#L0-L44" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
+# Copyright (c) 2020 Supun Nakandala. All rights reserved.
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
 
 &#34;&#34;&#34;
-Common errors.
-&#34;&#34;&#34;
-_missing_converter = &#34;&#34;&#34;
-It usually means the pipeline being converted contains a
-transformer or a predictor with no corresponding converter implemented.
-Please fill an issue at https://github.com/microsoft/hummingbird.
-&#34;&#34;&#34;
-_missing_backend = &#34;&#34;&#34;
-It usually means the backend is not currently supported.
-Please check the spelling or fill an issue at https://github.com/microsoft/hummingbird.
-&#34;&#34;&#34;
-_constant_error = &#34;&#34;&#34;
-It usually means a constant is not available or you are trying to override a constant value.
+Converters for SparkML linear models: LogisticRegressionModel
 &#34;&#34;&#34;
 
+import numpy as np
+from onnxconverter_common.registration import register_converter
 
-class MissingConverter(RuntimeError):
+from .._linear_implementations import LinearModel
+
+
+def convert_sparkml_linear_model(operator, device, extra_config):
     &#34;&#34;&#34;
-    Raised when there is no registered converter for a machine learning operator.
+    Converter for `pyspark.ml.classification.LogisticRegressionModel`
+
+    Args:
+        operator: An operator wrapping a `pyspark.ml.classification.LogisticRegressionModel`
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
     &#34;&#34;&#34;
+    num_classes = operator.raw_operator.numClasses
+    # Spark ML assumes the label column is encoded such that labels start from zero.
+    classes = [i for i in range(num_classes)]
 
-    def __init__(self, msg):
-        super().__init__(msg + _missing_converter)
+    coefficients = operator.raw_operator.coefficientMatrix.toArray().transpose().astype(&#34;float32&#34;)
+    intercepts = operator.raw_operator.interceptVector.reshape(1, -1).astype(&#34;float32&#34;)
+
+    if num_classes &gt; 2:
+        multi_class = &#34;multinomial&#34;
+    else:
+        multi_class = None
+
+    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)
 
 
-class MissingBackend(RuntimeError):
-    &#34;&#34;&#34;
-    Raised when the selected backend is not supported.
-    &#34;&#34;&#34;
-
-    def __init__(self, msg):
-        super().__init__(msg + _missing_backend)
-
-
-class ConstantError(TypeError):
-    &#34;&#34;&#34;
-    Raised when a constant is not available or it get overwritten.
-    &#34;&#34;&#34;
-
-    def __init__(self, msg):
-        super().__init__(msg + _constant_error)</code></pre>
+register_converter(&#34;SparkMLLogisticRegressionModel&#34;, convert_sparkml_linear_model)</code></pre>
 </details>
 </section>
 <section>
@@ -83,89 +80,62 @@ class ConstantError(TypeError):
 <section>
 </section>
 <section>
-</section>
-<section>
-<h2 class="section-title" id="header-classes">Classes</h2>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.exceptions.ConstantError"><code class="flex name class">
-<span>class <span class="ident">ConstantError</span></span>
-<span>(</span><span>msg)</span>
+<dt id="hummingbird.ml.operator_converters.sparkml.linear.convert_sparkml_linear_model"><code class="name flex">
+<span>def <span class="ident">convert_sparkml_linear_model</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Raised when a constant is not available or it get overwritten.</p></div>
+<div class="desc"><p>Converter for <code>pyspark.ml.classification.LogisticRegressionModel</code></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>operator</code></strong></dt>
+<dd>An operator wrapping a <code>pyspark.ml.classification.LogisticRegressionModel</code></dd>
+<dt><strong><code>device</code></strong></dt>
+<dd>String defining the type of device the converted operator should be run on</dd>
+<dt><strong><code>extra_config</code></strong></dt>
+<dd>Extra configuration used to select the best conversion strategy</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>A PyTorch model</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/exceptions.py#L42-L48" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sparkml/linear.py#L18-L42" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">class ConstantError(TypeError):
+<pre><code class="python">def convert_sparkml_linear_model(operator, device, extra_config):
     &#34;&#34;&#34;
-    Raised when a constant is not available or it get overwritten.
-    &#34;&#34;&#34;
+    Converter for `pyspark.ml.classification.LogisticRegressionModel`
 
-    def __init__(self, msg):
-        super().__init__(msg + _constant_error)</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.TypeError</li>
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-</dd>
-<dt id="hummingbird.ml.exceptions.MissingBackend"><code class="flex name class">
-<span>class <span class="ident">MissingBackend</span></span>
-<span>(</span><span>msg)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Raised when the selected backend is not supported.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/exceptions.py#L33-L39" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">class MissingBackend(RuntimeError):
-    &#34;&#34;&#34;
-    Raised when the selected backend is not supported.
-    &#34;&#34;&#34;
+    Args:
+        operator: An operator wrapping a `pyspark.ml.classification.LogisticRegressionModel`
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
 
-    def __init__(self, msg):
-        super().__init__(msg + _missing_backend)</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.RuntimeError</li>
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
-</dd>
-<dt id="hummingbird.ml.exceptions.MissingConverter"><code class="flex name class">
-<span>class <span class="ident">MissingConverter</span></span>
-<span>(</span><span>msg)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Raised when there is no registered converter for a machine learning operator.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/exceptions.py#L24-L30" class="git-link">Browse git</a>
-</summary>
-<pre><code class="python">class MissingConverter(RuntimeError):
+    Returns:
+        A PyTorch model
     &#34;&#34;&#34;
-    Raised when there is no registered converter for a machine learning operator.
-    &#34;&#34;&#34;
+    num_classes = operator.raw_operator.numClasses
+    # Spark ML assumes the label column is encoded such that labels start from zero.
+    classes = [i for i in range(num_classes)]
 
-    def __init__(self, msg):
-        super().__init__(msg + _missing_converter)</code></pre>
+    coefficients = operator.raw_operator.coefficientMatrix.toArray().transpose().astype(&#34;float32&#34;)
+    intercepts = operator.raw_operator.interceptVector.reshape(1, -1).astype(&#34;float32&#34;)
+
+    if num_classes &gt; 2:
+        multi_class = &#34;multinomial&#34;
+    else:
+        multi_class = None
+
+    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)</code></pre>
 </details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>builtins.RuntimeError</li>
-<li>builtins.Exception</li>
-<li>builtins.BaseException</li>
-</ul>
 </dd>
 </dl>
+</section>
+<section>
 </section>
 </article>
 <nav id="sidebar">
@@ -180,20 +150,12 @@ class ConstantError(TypeError):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.ml" href="index.html">hummingbird.ml</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sparkml" href="index.html">hummingbird.ml.operator_converters.sparkml</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="hummingbird.ml.exceptions.ConstantError" href="#hummingbird.ml.exceptions.ConstantError">ConstantError</a></code></h4>
-</li>
-<li>
-<h4><code><a title="hummingbird.ml.exceptions.MissingBackend" href="#hummingbird.ml.exceptions.MissingBackend">MissingBackend</a></code></h4>
-</li>
-<li>
-<h4><code><a title="hummingbird.ml.exceptions.MissingConverter" href="#hummingbird.ml.exceptions.MissingConverter">MissingConverter</a></code></h4>
-</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="hummingbird.ml.operator_converters.sparkml.linear.convert_sparkml_linear_model" href="#hummingbird.ml.operator_converters.sparkml.linear.convert_sparkml_linear_model">convert_sparkml_linear_model</a></code></li>
 </ul>
 </li>
 </ul>

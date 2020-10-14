@@ -13,8 +13,7 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/sklearn/">
-<link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
+<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/sklearn/">
 </head>
 <body>
 <main>
@@ -43,50 +42,74 @@ All scikit-learn operators converters are stored under this package.
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.lightgbm" href="lightgbm.html">hummingbird.ml.operator_converters.sklearn.lightgbm</a></code></dt>
-<dd>
-<div class="desc"><p>Converters for LightGBM models.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor" href="skl_array_feature_extractor.html">hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor" href="array_feature_extractor.html">hummingbird.ml.operator_converters.sklearn.array_feature_extractor</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for scikit-learn feature selectors: SelectKBest, SelectPercentile, VarianceThreshold.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_decision_tree" href="skl_decision_tree.html">hummingbird.ml.operator_converters.sklearn.skl_decision_tree</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.decision_tree" href="decision_tree.html">hummingbird.ml.operator_converters.sklearn.decision_tree</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_gbdt" href="skl_gbdt.html">hummingbird.ml.operator_converters.sklearn.skl_gbdt</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.decomposition" href="decomposition.html">hummingbird.ml.operator_converters.sklearn.decomposition</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn matrix decomposition transformers: PCA, KernelPCA, TruncatedSVD, FastICA.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.discretizer" href="discretizer.html">hummingbird.ml.operator_converters.sklearn.discretizer</a></code></dt>
+<dd>
+<div class="desc"><p>Converter for scikit-learn discretizers: Binarizer and KBinsDiscretizer.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.gbdt" href="gbdt.html">hummingbird.ml.operator_converters.sklearn.gbdt</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for Sklearn's GradientBoosting models.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest" href="skl_iforest.html">hummingbird.ml.operator_converters.sklearn.skl_iforest</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.iforest" href="iforest.html">hummingbird.ml.operator_converters.sklearn.iforest</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for scikit-learn isolation forest.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_linear" href="skl_linear.html">hummingbird.ml.operator_converters.sklearn.skl_linear</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.imputer" href="imputer.html">hummingbird.ml.operator_converters.sklearn.imputer</a></code></dt>
+<dd>
+<div class="desc"><p>Converter for scikit-learn Imputers: SimpleImputer and MissingIndicator</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.kneighbors" href="kneighbors.html">hummingbird.ml.operator_converters.sklearn.kneighbors</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.linear" href="linear.html">hummingbird.ml.operator_converters.sklearn.linear</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for scikit-learn linear models: LinearRegression, LogisticRegression, LinearSVC, SGDClassifier, LogisticRegressionCV.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_normalizer" href="skl_normalizer.html">hummingbird.ml.operator_converters.sklearn.skl_normalizer</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.mlp" href="mlp.html">hummingbird.ml.operator_converters.sklearn.mlp</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn MLP models: MLPClassifier, MLPRegressor</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.nb" href="nb.html">hummingbird.ml.operator_converters.sklearn.nb</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for scikit-learn Naive Bayes models: BernoulliNB, GaussianNB, MultinomialNB</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.normalizer" href="normalizer.html">hummingbird.ml.operator_converters.sklearn.normalizer</a></code></dt>
 <dd>
 <div class="desc"><p>Converter for scikit-learn Normalizer.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder" href="skl_one_hot_encoder.html">hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.one_hot_encoder" href="one_hot_encoder.html">hummingbird.ml.operator_converters.sklearn.one_hot_encoder</a></code></dt>
 <dd>
 <div class="desc"><p>Converter for scikit-learn one hot encoder.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_scaler" href="skl_scaler.html">hummingbird.ml.operator_converters.sklearn.skl_scaler</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.pipeline" href="pipeline.html">hummingbird.ml.operator_converters.sklearn.pipeline</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for operators necessary for supporting scikit-learn Pipelines.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.poly_features" href="poly_features.html">hummingbird.ml.operator_converters.sklearn.poly_features</a></code></dt>
+<dd>
+<div class="desc"><p>Converter for scikit-learn PolynomialFeatures.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.scaler" href="scaler.html">hummingbird.ml.operator_converters.sklearn.scaler</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for scikit-learn scalers: RobustScaler, MaxAbsScaler, MinMaxScaler, StandardScaler.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.skl_sv" href="skl_sv.html">hummingbird.ml.operator_converters.sklearn.skl_sv</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.sv" href="sv.html">hummingbird.ml.operator_converters.sklearn.sv</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for scikit-learn SV models: SVC, NuSVC.
 (LinearSVC is covered by linear_classifier.py).</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.sklearn.xgb" href="xgb.html">hummingbird.ml.operator_converters.sklearn.xgb</a></code></dt>
-<dd>
-<div class="desc"><p>Converters for XGBoost models.</p></div>
 </dd>
 </dl>
 </section>
@@ -114,24 +137,29 @@ All scikit-learn operators converters are stored under this package.
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.lightgbm" href="lightgbm.html">hummingbird.ml.operator_converters.sklearn.lightgbm</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor" href="skl_array_feature_extractor.html">hummingbird.ml.operator_converters.sklearn.skl_array_feature_extractor</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_decision_tree" href="skl_decision_tree.html">hummingbird.ml.operator_converters.sklearn.skl_decision_tree</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_gbdt" href="skl_gbdt.html">hummingbird.ml.operator_converters.sklearn.skl_gbdt</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_iforest" href="skl_iforest.html">hummingbird.ml.operator_converters.sklearn.skl_iforest</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_linear" href="skl_linear.html">hummingbird.ml.operator_converters.sklearn.skl_linear</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_normalizer" href="skl_normalizer.html">hummingbird.ml.operator_converters.sklearn.skl_normalizer</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder" href="skl_one_hot_encoder.html">hummingbird.ml.operator_converters.sklearn.skl_one_hot_encoder</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_scaler" href="skl_scaler.html">hummingbird.ml.operator_converters.sklearn.skl_scaler</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_sv" href="skl_sv.html">hummingbird.ml.operator_converters.sklearn.skl_sv</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.sklearn.xgb" href="xgb.html">hummingbird.ml.operator_converters.sklearn.xgb</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor" href="array_feature_extractor.html">hummingbird.ml.operator_converters.sklearn.array_feature_extractor</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.decision_tree" href="decision_tree.html">hummingbird.ml.operator_converters.sklearn.decision_tree</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.decomposition" href="decomposition.html">hummingbird.ml.operator_converters.sklearn.decomposition</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.discretizer" href="discretizer.html">hummingbird.ml.operator_converters.sklearn.discretizer</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.gbdt" href="gbdt.html">hummingbird.ml.operator_converters.sklearn.gbdt</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.iforest" href="iforest.html">hummingbird.ml.operator_converters.sklearn.iforest</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.imputer" href="imputer.html">hummingbird.ml.operator_converters.sklearn.imputer</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.kneighbors" href="kneighbors.html">hummingbird.ml.operator_converters.sklearn.kneighbors</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.linear" href="linear.html">hummingbird.ml.operator_converters.sklearn.linear</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.mlp" href="mlp.html">hummingbird.ml.operator_converters.sklearn.mlp</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.nb" href="nb.html">hummingbird.ml.operator_converters.sklearn.nb</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.normalizer" href="normalizer.html">hummingbird.ml.operator_converters.sklearn.normalizer</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.one_hot_encoder" href="one_hot_encoder.html">hummingbird.ml.operator_converters.sklearn.one_hot_encoder</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.pipeline" href="pipeline.html">hummingbird.ml.operator_converters.sklearn.pipeline</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.poly_features" href="poly_features.html">hummingbird.ml.operator_converters.sklearn.poly_features</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.scaler" href="scaler.html">hummingbird.ml.operator_converters.sklearn.scaler</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sklearn.sv" href="sv.html">hummingbird.ml.operator_converters.sklearn.sv</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p><span style="color:#ddd">&#21328;</span></p>
 <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>

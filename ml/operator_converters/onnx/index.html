@@ -13,8 +13,7 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/onnx/">
-<link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
+<link rel="canonical" href="https://microsoft.github.io/hummingbird/ml/operator_converters/onnx/">
 </head>
 <body>
 <main>
@@ -43,31 +42,31 @@ All onnx operators converters are stored under this package.
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.array_feature_extractor" href="array_feature_extractor.html">hummingbird.ml.operator_converters.onnx.array_feature_extractor</a></code></dt>
+<dd>
+<div class="desc"><p>Converter for ONNX-ML Array Feature Extractor.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.linear" href="linear.html">hummingbird.ml.operator_converters.onnx.linear</a></code></dt>
+<dd>
+<div class="desc"><p>Converters for ONNX-ML linear models.</p></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.normalizer" href="normalizer.html">hummingbird.ml.operator_converters.onnx.normalizer</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.one_hot_encoder" href="one_hot_encoder.html">hummingbird.ml.operator_converters.onnx.one_hot_encoder</a></code></dt>
+<dd>
+<div class="desc"><p>Converter for ONNX-ML One Hot Encoder.</p></div>
+</dd>
 <dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.onnx_operator" href="onnx_operator.html">hummingbird.ml.operator_converters.onnx.onnx_operator</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for ONNX operators.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.onnxml_array_feature_extractor" href="onnxml_array_feature_extractor.html">hummingbird.ml.operator_converters.onnx.onnxml_array_feature_extractor</a></code></dt>
-<dd>
-<div class="desc"><p>Converter for ONNX-ML Array Feature Extractor.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.onnxml_linear" href="onnxml_linear.html">hummingbird.ml.operator_converters.onnx.onnxml_linear</a></code></dt>
-<dd>
-<div class="desc"><p>Converters for ONNX-ML linear models.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.onnxml_normalizer" href="onnxml_normalizer.html">hummingbird.ml.operator_converters.onnx.onnxml_normalizer</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.onnxml_one_hot_encoder" href="onnxml_one_hot_encoder.html">hummingbird.ml.operator_converters.onnx.onnxml_one_hot_encoder</a></code></dt>
-<dd>
-<div class="desc"><p>Converter for ONNX-ML One Hot Encoder.</p></div>
-</dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.onnxml_scaler" href="onnxml_scaler.html">hummingbird.ml.operator_converters.onnx.onnxml_scaler</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.scaler" href="scaler.html">hummingbird.ml.operator_converters.onnx.scaler</a></code></dt>
 <dd>
 <div class="desc"><p>Converter for ONNX-ML Scaler.</p></div>
 </dd>
-<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble" href="onnxml_tree_ensemble.html">hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble</a></code></dt>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.onnx.tree_ensemble" href="tree_ensemble.html">hummingbird.ml.operator_converters.onnx.tree_ensemble</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for ONNX-ML tree-ensemble models.</p></div>
 </dd>
@@ -97,20 +96,19 @@ All onnx operators converters are stored under this package.
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
+<li><code><a title="hummingbird.ml.operator_converters.onnx.array_feature_extractor" href="array_feature_extractor.html">hummingbird.ml.operator_converters.onnx.array_feature_extractor</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnx.linear" href="linear.html">hummingbird.ml.operator_converters.onnx.linear</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnx.normalizer" href="normalizer.html">hummingbird.ml.operator_converters.onnx.normalizer</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnx.one_hot_encoder" href="one_hot_encoder.html">hummingbird.ml.operator_converters.onnx.one_hot_encoder</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.onnx.onnx_operator" href="onnx_operator.html">hummingbird.ml.operator_converters.onnx.onnx_operator</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnxml_array_feature_extractor" href="onnxml_array_feature_extractor.html">hummingbird.ml.operator_converters.onnx.onnxml_array_feature_extractor</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnxml_linear" href="onnxml_linear.html">hummingbird.ml.operator_converters.onnx.onnxml_linear</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnxml_normalizer" href="onnxml_normalizer.html">hummingbird.ml.operator_converters.onnx.onnxml_normalizer</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnxml_one_hot_encoder" href="onnxml_one_hot_encoder.html">hummingbird.ml.operator_converters.onnx.onnxml_one_hot_encoder</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnxml_scaler" href="onnxml_scaler.html">hummingbird.ml.operator_converters.onnx.onnxml_scaler</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble" href="onnxml_tree_ensemble.html">hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnx.scaler" href="scaler.html">hummingbird.ml.operator_converters.onnx.scaler</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnx.tree_ensemble" href="tree_ensemble.html">hummingbird.ml.operator_converters.onnx.tree_ensemble</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p><span style="color:#ddd">&#21328;</span></p>
 <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
