@@ -67,7 +67,7 @@ class SklearnContainer(ABC):
     def model(self):
         return self._model
 
-    def _run(self, function, *inputs, use_n_classes=False):
+    def _run(self, function, *inputs, reshape=False):
         """
         This function either score the full dataset at once or triggers batch inference.
         """
@@ -75,9 +75,9 @@ class SklearnContainer(ABC):
         if self._batch_size is None:
             return function(*inputs)
         else:
-            return self._run_batch_inference(function, *inputs, use_n_classes=use_n_classes)
+            return self._run_batch_inference(function, *inputs, reshape=reshape)
 
-    def _run_batch_inference(self, function, *inputs, use_n_classes=False):
+    def _run_batch_inference(self, function, *inputs, reshape=False):
         """
         This function contains the code to run batched inference.
         """
@@ -101,12 +101,10 @@ class SklearnContainer(ABC):
         for i in range(0, iterations):
             start = i * self._batch_size
             end = min(start + self._batch_size, total_size)
-            tmp_pred = function(inputs[start:end, :])
-            predictions.extend(tmp_pred)
+            predictions.extend(function(inputs[start:end, :]))
 
-        if use_n_classes:
-            n_classes = tmp_pred.shape[1]
-            return np.array(predictions).ravel().reshape(-1, n_classes)
+        if reshape:
+            return np.array(predictions).ravel().reshape(total_size, -1)
         return np.array(predictions).ravel()
 
 
@@ -140,7 +138,7 @@ class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer):
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        return self._run(self._transform, *inputs)
+        return self._run(self._transform, *inputs, reshape=True)
 
 
 class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
@@ -194,7 +192,7 @@ class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
         """
-        return self._run(self._predict_proba, *inputs, use_n_classes=True)
+        return self._run(self._predict_proba, *inputs, reshape=True)
 
 
 class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression):
@@ -260,7 +258,7 @@ class TorchScriptSklearnContainerTransformer(PyTorchSklearnContainerTransformer)
         f = super(TorchScriptSklearnContainerTransformer, self)._transform
         f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return self._run(f_wrapped, *inputs)
+        return self._run(f_wrapped, *inputs, reshape=True)
 
 
 class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
@@ -293,7 +291,7 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
         f = super(TorchScriptSklearnContainerClassification, self)._predict_proba
         f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return self._run(f_wrapped, *inputs, use_n_classes=True)
+        return self._run(f_wrapped, *inputs, reshape=True)
 
 
 class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomalyDetection):

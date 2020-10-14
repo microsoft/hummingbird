@@ -13,6 +13,7 @@ import sys
 
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, IsolationForest
+from sklearn.preprocessing import StandardScaler
 import torch
 
 import hummingbird.ml
@@ -194,6 +195,21 @@ class TestExtraConf(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
 
+    # Test pytorch transform with batching and uneven rows.
+    def test_torch_batch_transform(self):
+        warnings.filterwarnings("ignore")
+        model = StandardScaler(with_mean=True, with_std=True)
+        np.random.seed(0)
+        X = np.random.rand(105, 200)
+        X = np.array(X, dtype=np.float32)
+
+        model.fit(X)
+
+        hb_model = hummingbird.ml.convert(model, "torch", extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
+
     # Test torchscript regression with batching.
     def test_torchscript_regression_batch(self):
         warnings.filterwarnings("ignore")
@@ -248,6 +264,21 @@ class TestExtraConf(unittest.TestCase):
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
         np.testing.assert_allclose(model.decision_function(X), hb_model.decision_function(X), rtol=1e-06, atol=1e-06)
         np.testing.assert_allclose(model.score_samples(X), hb_model.score_samples(X), rtol=1e-06, atol=1e-06)
+
+    # Test torchscript transform with batching and uneven rows.
+    def test_torchscript_batch_transform(self):
+        warnings.filterwarnings("ignore")
+        model = StandardScaler(with_mean=True, with_std=True)
+        np.random.seed(0)
+        X = np.random.rand(101, 200)
+        X = np.array(X, dtype=np.float32)
+
+        model.fit(X)
+
+        hb_model = hummingbird.ml.convert(model, "torch.jit", X, extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":
