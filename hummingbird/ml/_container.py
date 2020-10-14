@@ -67,10 +67,21 @@ class SklearnContainer(ABC):
     def model(self):
         return self._model
 
-    def _run_batch_inference(self, function, *inputs):
+    def _run(self, function, *inputs, use_n_classes=False):
         """
-        This function contains the code to enabling batched inference.
+        This function either score the full dataset at once or triggers batch inference.
         """
+
+        if self._batch_size is None:
+            return function(*inputs)
+        else:
+            return self._run_batch_inference(function, *inputs, use_n_classes=use_n_classes)
+
+    def _run_batch_inference(self, function, *inputs, use_n_classes=False):
+        """
+        This function contains the code to run batched inference.
+        """
+
         if DataFrame is not None and type(inputs[0]) == DataFrame:
             # Split the dataframe into column ndarrays.
             inputs = inputs[0]
@@ -90,8 +101,12 @@ class SklearnContainer(ABC):
         for i in range(0, iterations):
             start = i * self._batch_size
             end = min(start + self._batch_size, total_size)
-            predictions.append(function(inputs[start:end, :]))
+            tmp_pred = function(inputs[start:end, :])
+            predictions.extend(tmp_pred)
 
+        if use_n_classes:
+            n_classes = tmp_pred.shape[1]
+            return np.array(predictions).ravel().reshape(-1, n_classes)
         return np.array(predictions).ravel()
 
 
@@ -105,6 +120,7 @@ class PyTorchTorchscriptSklearnContainer(SklearnContainer):
 
         assert self._n_threads is not None
 
+        # Set the number of used threads.
         if torch.get_num_interop_threads() != 1:
             torch.set_num_interop_threads(1)
         torch.set_num_threads(self._n_threads)
@@ -116,12 +132,15 @@ class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer):
     Container mirroring Sklearn transformers API.
     """
 
+    def _transform(self, inputs):
+        return self.model.forward(inputs).cpu().numpy()
+
     def transform(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        return self.model.forward(*inputs).cpu().numpy()
+        return self._run(self._transform, *inputs)
 
 
 class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
@@ -139,6 +158,14 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         self._is_regression = is_regression
         self._is_anomaly_detection = is_anomaly_detection
 
+    def _predict(self, inputs):
+        if self._is_regression:
+            return self.model.forward(inputs).cpu().numpy()
+        elif self._is_anomaly_detection:
+            return self.model.forward(inputs)[0].cpu().numpy()
+        else:
+            return self.model.forward(inputs)[0].cpu().numpy()
+
     def predict(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
@@ -146,18 +173,7 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         On classification tasks returns the predicted class labels for the input data.
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
-        f = None
-        if self._is_regression:
-            f = lambda x: self.model.forward(x).cpu().numpy()  # noqa: E731
-        elif self._is_anomaly_detection:
-            f = lambda x: self.model.forward(x)[0].cpu().numpy()  # noqa: E731
-        else:
-            f = lambda x: self.model.forward(x)[0].cpu().numpy()  # noqa: E731
-
-        if self._batch_size is None:
-            return f(*inputs).ravel()
-        else:
-            return self._run_batch_inference(f, *inputs)
+        return self._run(self._predict, *inputs)
 
 
 class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
@@ -170,12 +186,15 @@ class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
             model, n_threads, batch_size, is_regression=False, extra_config=extra_config
         )
 
+    def _predict_proba(self, input):
+        return self.model.forward(input)[1].cpu().numpy()
+
     def predict_proba(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
         """
-        return self.model.forward(*inputs)[1].cpu().numpy()
+        return self._run(self._predict_proba, *inputs, use_n_classes=True)
 
 
 class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression):
@@ -188,12 +207,16 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
             model, n_threads, batch_size, is_regression=False, is_anomaly_detection=True, extra_config=extra_config
         )
 
+    def _decision_function(self, inputs):
+        return self.model.forward(inputs)[1].cpu().numpy().ravel()
+
     def decision_function(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision function scores.
         """
-        scores = self.model.forward(*inputs)[1].cpu().numpy().flatten()
+        scores = self._run(self._decision_function, *inputs)
+
         # Backward compatibility for sklearn <= 0.21
         if constants.IFOREST_THRESHOLD in self._extra_config:
             scores += self._extra_config[constants.IFOREST_THRESHOLD]
@@ -208,13 +231,11 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
 
 
 # TorchScript containers.
-
-
 def _torchscript_wrapper(device, function, *inputs):
     """
-        This function contains the code to enable predictions over torchscript models.
-        It is used to translates inputs in the proper torch format.
-        """
+    This function contains the code to enable predictions over torchscript models.
+    It is used to translates inputs in the proper torch format.
+    """
     inputs = [*inputs]
 
     with torch.no_grad():
@@ -236,9 +257,10 @@ class TorchScriptSklearnContainerTransformer(PyTorchSklearnContainerTransformer)
 
     def transform(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerTransformer, self).transform
+        f = super(TorchScriptSklearnContainerTransformer, self)._transform
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs)
 
 
 class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
@@ -248,9 +270,10 @@ class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
 
     def predict(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerRegression, self).predict
+        f = super(TorchScriptSklearnContainerRegression, self)._predict
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs)
 
 
 class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassification):
@@ -260,15 +283,17 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
 
     def predict(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerClassification, self).predict
+        f = super(TorchScriptSklearnContainerClassification, self)._predict
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs)
 
     def predict_proba(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerClassification, self).predict_proba
+        f = super(TorchScriptSklearnContainerClassification, self)._predict_proba
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs, use_n_classes=True)
 
 
 class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomalyDetection):
@@ -278,21 +303,24 @@ class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomaly
 
     def predict(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerAnomalyDetection, self).predict
+        f = super(TorchScriptSklearnContainerAnomalyDetection, self)._predict
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs)
 
     def decision_function(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerAnomalyDetection, self).decision_function
+        f = super(TorchScriptSklearnContainerAnomalyDetection, self)._decision_function
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs)
 
     def score_samples(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerAnomalyDetection, self).score_samples
+        f = self.decision_function
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs) + self._extra_config[constants.OFFSET]
 
 
 # ONNX containers.
