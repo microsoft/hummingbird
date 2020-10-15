@@ -50,6 +50,14 @@ import benchmarks.trees.score as score
 from benchmarks.trees.metrics import get_metrics
 from benchmarks.datasets import prepare_dataset, LearningTask
 
+from hummingbird.ml._utils import (
+    xgboost_installed,
+    lightgbm_installed,
+    sklearn_installed,
+    onnx_ml_tools_installed,
+    onnx_runtime_installed,
+)
+
 
 ROOT_PATH = Path(__file__).absolute().parent.parent.parent
 
@@ -291,4 +299,9 @@ def main():
 
 
 if __name__ == "__main__":
+    assert xgboost_installed, "benchmark requires XGBoost"
+    assert lightgbm_installed, "benchmark requires LightGBM"
+    assert sklearn_installed, "benchmark requires sklearn"
+    assert onnx_ml_tools_installed and onnx_runtime_installed, "benchmark requires ORT and ONNXMLTOOLS"
+
     main()
