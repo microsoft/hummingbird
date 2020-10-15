@@ -229,7 +229,20 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <span>(</span><span>sklearn_missing_indicator, device)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Class implementing Imputer operators in MissingIndicator.</p></div>
+<div class="desc"><p>Class implementing Imputer operators in MissingIndicator.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>regression</code></strong></dt>
+<dd>Whether operator is a regression model.</dd>
+<dt><strong><code>classification</code></strong></dt>
+<dd>Whether the operator is a classification model.</dd>
+<dt><strong><code>transformer</code></strong></dt>
+<dd>Whether the operator is a feature transformer.</dd>
+<dt><strong><code>anomaly_detection</code></strong></dt>
+<dd>Whether the operator is an anomaly detection model.</dd>
+<dt><strong><code>kwargs</code></strong></dt>
+<dd>Other keyword arguments.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -300,7 +313,20 @@ register_converter(&#34;SklearnMissingIndicator&#34;, convert_sklearn_missing_in
 <span>(</span><span>sklearn_imputer, device)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Class implementing SimpleImputer operators in PyTorch.</p></div>
+<div class="desc"><p>Class implementing SimpleImputer operators in PyTorch.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>regression</code></strong></dt>
+<dd>Whether operator is a regression model.</dd>
+<dt><strong><code>classification</code></strong></dt>
+<dd>Whether the operator is a classification model.</dd>
+<dt><strong><code>transformer</code></strong></dt>
+<dd>Whether the operator is a feature transformer.</dd>
+<dt><strong><code>anomaly_detection</code></strong></dt>
+<dd>Whether the operator is an anomaly detection model.</dd>
+<dt><strong><code>kwargs</code></strong></dt>
+<dd>Other keyword arguments.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>

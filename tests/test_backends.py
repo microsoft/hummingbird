@@ -1,5 +1,5 @@
 """
-Tests Sklearn GradientBoostingClassifier converters.
+Tests Hummingbird's backends.
 """
 import unittest
 import warnings
