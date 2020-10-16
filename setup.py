@@ -56,7 +56,7 @@ setup(
         "sparkml": ["pyspark>=2.4.4"],
         "onnx": onnx_requires,
         "extra": extra_requires,
-        "benchmark": onnx_requires + extra_requires + ["memory-profiler", "psutil"],
+        "benchmark": onnx_requires + extra_requires + ["memory-profiler", "openml"],
     },
     classifiers=[
         "Environment :: Console",
