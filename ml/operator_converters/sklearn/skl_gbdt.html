@@ -4,15 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
 <title>hummingbird.ml.operator_converters.sklearn.skl_gbdt API documentation</title>
-=======
-<title>hummingbird.ml.operator_converters.skl_gbdt API documentation</title>
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-<title>hummingbird.ml.operator_converters.sklearn.skl_gbdt API documentation</title>
->>>>>>> origin/gh-pages
 <meta name="description" content="Converters for Sklearn&#39;s GradientBoosting models." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -21,30 +13,14 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
 <link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/sklearn/skl_gbdt.html">
-=======
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/skl_gbdt.html">
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/sklearn/skl_gbdt.html">
->>>>>>> origin/gh-pages
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
 <h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.skl_gbdt</code></h1>
-=======
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.skl_gbdt</code></h1>
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.sklearn.skl_gbdt</code></h1>
->>>>>>> origin/gh-pages
 </header>
 <section id="section-intro">
 <p>Converters for Sklearn's GradientBoosting models.</p>
@@ -243,37 +219,7 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
     tree_infos = operator.raw_operator._predictors
     tree_infos = [tree_infos[i][0] for i in range(len(tree_infos))]
     n_features = operator.raw_operator.n_features_
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
-=======
 
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-    extra_config[constants.BASE_PREDICTION] = [[operator.raw_operator._baseline_prediction]]
-
-    return convert_gbdt_common(tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)
-
-
-def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
-    &#34;&#34;&#34;
-    Converter for `sklearn.ensemble.HistGradientBoostingRegressor`
-
-    Args:
-        operator: An operator wrapping a `sklearn.ensemble.HistGradientBoostingRegressor` model
-        device: String defining the type of device the converted operator should be run on
-        extra_config: Extra configuration used to select the best conversion strategy
-
-    Returns:
-        A PyTorch model
-    &#34;&#34;&#34;
-    assert operator is not None
-
-    # Get tree information out of the operator.
-    tree_infos = operator.raw_operator._predictors
-    tree_infos = [tree_infos[i][0] for i in range(len(tree_infos))]
-    n_features = operator.raw_operator.n_features_
-
->>>>>>> origin/gh-pages
     extra_config[constants.BASE_PREDICTION] = [[operator.raw_operator._baseline_prediction]]
 
     return convert_gbdt_common(tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)
@@ -293,15 +239,7 @@ register_converter(&#34;SklearnHistGradientBoostingRegressor&#34;, convert_sklea
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
 <dt id="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_gbdt_classifier"><code class="name flex">
-=======
-<dt id="hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_gbdt_classifier"><code class="name flex">
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-<dt id="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_gbdt_classifier"><code class="name flex">
->>>>>>> origin/gh-pages
 <span>def <span class="ident">convert_sklearn_gbdt_classifier</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
@@ -388,15 +326,7 @@ or <code>sklearn.ensemble.HistGradientBoostingClassifier</code> model</dd>
     )</code></pre>
 </details>
 </dd>
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
 <dt id="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_gbdt_regressor"><code class="name flex">
-=======
-<dt id="hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_gbdt_regressor"><code class="name flex">
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-<dt id="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_gbdt_regressor"><code class="name flex">
->>>>>>> origin/gh-pages
 <span>def <span class="ident">convert_sklearn_gbdt_regressor</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
@@ -456,15 +386,7 @@ or <code>sklearn.ensemble.HistGradientBoostingClassifier</code> model</dd>
     return convert_gbdt_common(tree_infos, get_parameters_for_sklearn_common, n_features, None, extra_config)</code></pre>
 </details>
 </dd>
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
 <dt id="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_hist_gbdt_classifier"><code class="name flex">
-=======
-<dt id="hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_hist_gbdt_classifier"><code class="name flex">
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-<dt id="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_hist_gbdt_classifier"><code class="name flex">
->>>>>>> origin/gh-pages
 <span>def <span class="ident">convert_sklearn_hist_gbdt_classifier</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
@@ -529,15 +451,7 @@ or <code>sklearn.ensemble.HistGradientBoostingClassifier</code> model</dd>
     return convert_gbdt_classifier_common(tree_infos, _get_parameters_hist_gbdt, n_features, n_classes, classes, extra_config)</code></pre>
 </details>
 </dd>
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
 <dt id="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_hist_gbdt_regressor"><code class="name flex">
-=======
-<dt id="hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_hist_gbdt_regressor"><code class="name flex">
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-<dt id="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_hist_gbdt_regressor"><code class="name flex">
->>>>>>> origin/gh-pages
 <span>def <span class="ident">convert_sklearn_hist_gbdt_regressor</span></span>(<span>operator, device, extra_config)</span>
 </code></dt>
 <dd>
@@ -559,66 +473,7 @@ or <code>sklearn.ensemble.HistGradientBoostingClassifier</code> model</dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
 <a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_gbdt.py#L173-L193" class="git-link">Browse git</a>
-=======
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/skl_gbdt.py#L173-L193" class="git-link">Browse git</a>
->>>>>>> origin/gh-pages
-</summary>
-<pre><code class="python">def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
-    &#34;&#34;&#34;
-    Converter for `sklearn.ensemble.HistGradientBoostingRegressor`
-
-    Args:
-        operator: An operator wrapping a `sklearn.ensemble.HistGradientBoostingRegressor` model
-        device: String defining the type of device the converted operator should be run on
-        extra_config: Extra configuration used to select the best conversion strategy
-
-    Returns:
-        A PyTorch model
-    &#34;&#34;&#34;
-    assert operator is not None
-
-    # Get tree information out of the operator.
-    tree_infos = operator.raw_operator._predictors
-    tree_infos = [tree_infos[i][0] for i in range(len(tree_infos))]
-    n_features = operator.raw_operator.n_features_
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
-=======
-
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
-    extra_config[constants.BASE_PREDICTION] = [[operator.raw_operator._baseline_prediction]]
-
-    return convert_gbdt_common(tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)</code></pre>
-</details>
-</dd>
-<dt id="hummingbird.ml.operator_converters.gbdt.convert_sklearn_hist_gbdt_regressor"><code class="name flex">
-<span>def <span class="ident">convert_sklearn_hist_gbdt_regressor</span></span>(<span>operator, device, extra_config)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Converter for <code>sklearn.ensemble.HistGradientBoostingRegressor</code></p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>sklearn.ensemble.HistGradientBoostingRegressor</code> model</dd>
-<dt><strong><code>device</code></strong></dt>
-<dd>String defining the type of device the converted operator should be run on</dd>
-<dt><strong><code>extra_config</code></strong></dt>
-<dd>Extra configuration used to select the best conversion strategy</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>A PyTorch model</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
 </summary>
 <pre><code class="python">def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
     &#34;&#34;&#34;
@@ -639,7 +494,6 @@ or <code>sklearn.ensemble.HistGradientBoostingClassifier</code> model</dd>
     tree_infos = [tree_infos[i][0] for i in range(len(tree_infos))]
     n_features = operator.raw_operator.n_features_
 
->>>>>>> origin/gh-pages
     extra_config[constants.BASE_PREDICTION] = [[operator.raw_operator._baseline_prediction]]
 
     return convert_gbdt_common(tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)</code></pre>
@@ -667,30 +521,16 @@ or <code>sklearn.ensemble.HistGradientBoostingClassifier</code> model</dd>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<<<<<<< HEAD
-<<<<<<< HEAD:ml/operator_converters/sklearn/skl_gbdt.html
-=======
->>>>>>> origin/gh-pages
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_gbdt_classifier" href="#hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_gbdt_classifier">convert_sklearn_gbdt_classifier</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_gbdt_regressor" href="#hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_gbdt_regressor">convert_sklearn_gbdt_regressor</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_hist_gbdt_classifier" href="#hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_hist_gbdt_classifier">convert_sklearn_hist_gbdt_classifier</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_hist_gbdt_regressor" href="#hummingbird.ml.operator_converters.sklearn.skl_gbdt.convert_sklearn_hist_gbdt_regressor">convert_sklearn_hist_gbdt_regressor</a></code></li>
-<<<<<<< HEAD
-=======
-<li><code><a title="hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_gbdt_classifier" href="#hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_gbdt_classifier">convert_sklearn_gbdt_classifier</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_gbdt_regressor" href="#hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_gbdt_regressor">convert_sklearn_gbdt_regressor</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_hist_gbdt_classifier" href="#hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_hist_gbdt_classifier">convert_sklearn_hist_gbdt_classifier</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_hist_gbdt_regressor" href="#hummingbird.ml.operator_converters.skl_gbdt.convert_sklearn_hist_gbdt_regressor">convert_sklearn_hist_gbdt_regressor</a></code></li>
->>>>>>> origin/gh-pages:ml/operator_converters/skl_gbdt.html
-=======
->>>>>>> origin/gh-pages
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
-<p><span style="color:#ddd">&#21328;</span></p>
 <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>

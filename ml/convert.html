@@ -216,6 +216,10 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
     return hb_model
 
+    # Convert the Topology object into a PyTorch model.
+    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
+    return hb_model
+
 def convert(model, backend, test_input=None, device=&#34;cpu&#34;, extra_config={}):
     &#34;&#34;&#34;
     This function converts the specified input *model* into an implementation targeting *backend*.
