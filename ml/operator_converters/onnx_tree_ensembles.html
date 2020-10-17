@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble API documentation</title>
+<title>hummingbird.ml.operator_converters.onnx_tree_ensembles API documentation</title>
 <meta name="description" content="Converters for ONNX-ML tree-ensemble models." />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -13,21 +13,20 @@
 <style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
 <style>.homelink{display:block;font-size:2em;font-weight:bold;color:#555;padding-bottom:.5em;border-bottom:1px solid silver}.homelink:hover{color:inherit}.homelink img{max-width:20%;max-height:5em;margin:auto;margin-bottom:.3em}</style>
-<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.html">
+<link rel="canonical" href="https://pdoc3.github.io/pdoc/doc/hummingbird/ml/operator_converters/onnx_tree_ensembles.html">
 <link rel="icon" href="https://pdoc.github.io/pdoc/logo.png">
 </head>
 <body>
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble</code></h1>
+<h1 class="title">Module <code>hummingbird.ml.operator_converters.onnx_tree_ensembles</code></h1>
 </header>
 <section id="section-intro">
 <p>Converters for ONNX-ML tree-ensemble models.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.py#L0-L245" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -42,9 +41,9 @@ Converters for ONNX-ML tree-ensemble models.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .. import constants
-from .._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
-from .._tree_commons import TreeParameters, convert_decision_ensemble_tree_common, get_parameters_for_tree_trav_common
+from . import constants
+from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
+from ._tree_commons import TreeParameters
 
 
 def _get_tree_infos_from_onnx_ml_operator(model):
@@ -82,9 +81,9 @@ def _get_tree_infos_from_onnx_ml_operator(model):
         elif attr.name == &#34;classlabels_strings &#34;:
             if len(attr.strings) &gt; 0:
                 raise AssertionError(&#34;String class labels not supported yet.&#34;)
-        elif attr.name == &#34;post_transform&#34;:
-            post_transform = attr.s.decode(&#34;utf-8&#34;)
-            if post_transform not in [&#34;NONE&#34;, &#34;LOGISTIC&#34;, &#34;SOFTMAX&#34;]:
+        elif attr.name == &#34;post_transform_transform&#34;:
+            post_transform = attr.s
+            if post_transform not in [None, b&#34;LOGISTIC&#34;, b&#34;SOFTMAX&#34;]:
                 raise AssertionError(&#34;Post transform {} not supported&#34;.format(post_transform))
         elif attr.name == &#34;nodes_modes&#34;:
             modes = attr.strings
@@ -92,10 +91,8 @@ def _get_tree_infos_from_onnx_ml_operator(model):
                 if (not mode == b&#34;BRANCH_LEQ&#34;) and (not mode == b&#34;LEAF&#34;):
                     raise AssertionError(&#34;Modality {} not supported&#34;.format(mode))
 
-    is_decision_tree = post_transform == &#34;NONE&#34;
     # Order values based on target node and tree ids.
     new_values = []
-    n_classes = 1 if classes is None or not is_decision_tree else len(classes)
     j = 0
     for i in range(max(target_tree_ids) + 1):
         k = j
@@ -104,13 +101,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
         target_ids = target_node_ids[j:k]
         target_ids_zipped = dict(zip(target_ids, range(len(target_ids))))
         for key in sorted(target_ids_zipped):
-            if is_decision_tree and n_classes &gt; 2:  # For multiclass we have 2d arrays.
-                tmp_values = []
-                for c in range(n_classes):
-                    tmp_values.append(values[j + c + (target_ids_zipped[key] - (n_classes - 1))])
-                new_values.append(tmp_values)
-            else:
-                new_values.append(values[j + target_ids_zipped[key]])
+            new_values.append(values[j + target_ids_zipped[key]])
         j = k
 
     values = new_values
@@ -129,35 +120,12 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             t_right = right[prev_id:count]
             t_features = features[prev_id:count]
             t_threshold = threshold[prev_id:count]
-            t_values = np.zeros((len(t_left), n_classes)) if is_decision_tree else np.zeros(len(t_left))
-            if len(t_left) == 1:
-                # Model creating trees with just a single leaf node. We transform it
-                # to a model with one internal node.
-                t_left = [1, -1, -1]
-                t_right = [2, -1, -1]
-                t_features = [0, 0, 0]
-                t_threshold = [0, -1, -1]
-                if l_count &lt; len(values):
-                    t_values[0] = values[l_count]
+            t_values = [0] * len(t_left)
+            for j in range(len(t_left)):
+                if t_threshold[j] == -1 and l_count &lt; len(values):
+                    t_values[j] = values[l_count]
                     l_count += 1
-            else:
-                for j in range(len(t_left)):
-                    if t_threshold[j] == -1 and l_count &lt; len(values):
-                        t_values[j] = values[l_count]
-                        l_count += 1
-            if t_values.shape[0] == 1:
-                # Model creating trees with just a single leaf node. We fix the values here.
-                n_classes = t_values.shape[1]
-                t_values = np.array([np.array([0.0]), t_values[0], t_values[0]])
-                t_values.reshape(3, n_classes)
-            if is_decision_tree and n_classes == 2:  # We need to fix the probabilities in this case.
-                for k in range(len(t_left)):
-                    prob = (1 / (max(tree_ids) + 1)) - t_values[k][1]
-                    t_values[k][0] = prob
-
-            tree_infos.append(
-                TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, n_classes))
-            )
+            tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, 1)))
             prev_id = count
             i += 1
         count += 1
@@ -166,32 +134,14 @@ def _get_tree_infos_from_onnx_ml_operator(model):
     t_right = right[prev_id:count]
     t_features = features[prev_id:count]
     t_threshold = threshold[prev_id:count]
-    t_values = np.zeros((len(t_left), n_classes)) if is_decision_tree else np.zeros(len(t_left))
-    if len(t_left) == 1:
-        # Model creating trees with just a single leaf node. We transform it
-        # to a model with one internal node.
-        t_left = [1, -1, -1]
-        t_right = [2, -1, -1]
-        t_features = [0, 0, 0]
-        t_threshold = [0, -1, -1]
-        if l_count &lt; len(values):
-            t_values[0] = values[l_count]
+    t_values = [0] * len(t_left)
+    for i in range(len(t_left)):
+        if t_threshold[i] == -1 and l_count &lt; len(values):
+            t_values[i] = values[l_count]
             l_count += 1
-    else:
-        for j in range(len(t_left)):
-            if t_threshold[j] == -1 and l_count &lt; len(values):
-                t_values[j] = values[l_count]
-                l_count += 1
-    if t_values.shape[0] == 1:
-        # Model creating trees with just a single leaf node. We fix the values here.
-        n_classes = t_values.shape[1]
-        t_values = np.array([np.array([0.0]), t_values[0], t_values[0]])
-        t_values.reshape(3, n_classes)
-    if is_decision_tree and n_classes == 2:  # We need to fix the probabilities in this case.
-        for k in range(len(t_left)):
-            prob = (1 / (max(tree_ids) + 1)) - t_values[k][1]
-            t_values[k][0] = prob
-    tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, n_classes)))
+        else:
+            t_values[i] = 0
+    tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, 1)))
     return tree_infos, classes, post_transform
 
 
@@ -202,9 +152,9 @@ def _dummy_get_parameter(tree_info):
     return tree_info
 
 
-def _get_tree_infos_from_tree_ensemble(operator, device=None, extra_config={}):
+def _get_tree_infos_from_onnx_tree_enseble(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Base method for extracting parameters from `ai.onnx.ml.TreeEnsemble`s.
+    Base method for extracting parameters from `onnxml.TreeEnsemble`s.
     &#34;&#34;&#34;
     assert constants.ONNX_INPUTS in extra_config or constants.N_FEATURES in extra_config
 
@@ -224,12 +174,12 @@ def _get_tree_infos_from_tree_ensemble(operator, device=None, extra_config={}):
     return n_features, tree_infos, classes, post_transform
 
 
-def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}):
+def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.ml.TreeEnsembleClassifier`.
+    Converter for `onnxml.TreeEnsembleClassifier`.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.ml.TreeEnsembleClassifier` model
+        operator: An operator wrapping a `onnxml.TreeEnsembleClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -239,25 +189,18 @@ def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_tree_ensemble(
-        operator.raw_operator, device, extra_config
-    )
+    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
 
     # Generate the model.
-    if post_transform == &#34;NONE&#34;:
-        return convert_decision_ensemble_tree_common(
-            tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, classes, extra_config
-        )
-    extra_config[constants.POST_TRANSFORM] = post_transform
     return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)
 
 
-def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={}):
+def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.ml.TreeEnsembleRegressor`.
+    Converter for `onnxml.TreeEnsembleRegressor`.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.ml.TreeEnsembleRegressor` model
+        operator: An operator wrapping a `onnxml.TreeEnsembleRegressor` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -267,14 +210,14 @@ def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={})
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, _, _ = _get_tree_infos_from_tree_ensemble(operator.raw_operator, device, extra_config)
+    n_features, tree_infos, _, _ = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
 
     # Generate the model.
     return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)
 
 
-register_converter(&#34;ONNXMLTreeEnsembleClassifier&#34;, convert_onnx_tree_ensemble_classifier)
-register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_ensemble_regressor)</code></pre>
+register_converter(&#34;ONNXMLTreeEnsembleClassifier&#34;, convert_onnx_tree_enseble_classifier)
+register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_enseble_regressor)</code></pre>
 </details>
 </section>
 <section>
@@ -284,15 +227,15 @@ register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_ense
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble.convert_onnx_tree_ensemble_classifier"><code class="name flex">
-<span>def <span class="ident">convert_onnx_tree_ensemble_classifier</span></span>(<span>operator, device=None, extra_config={})</span>
+<dt id="hummingbird.ml.operator_converters.onnx_tree_ensembles.convert_onnx_tree_enseble_classifier"><code class="name flex">
+<span>def <span class="ident">convert_onnx_tree_enseble_classifier</span></span>(<span>operator, device=None, extra_config={})</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>ai.onnx.ml.TreeEnsembleClassifier</code>.</p>
+<div class="desc"><p>Converter for <code>onnxml.TreeEnsembleClassifier</code>.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>ai.onnx.ml.TreeEnsembleClassifier</code> model</dd>
+<dd>An operator wrapping a <code>onnxml.TreeEnsembleClassifier</code> model</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -306,14 +249,13 @@ register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_ense
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.py#L196-L221" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}):
+<pre><code class="python">def convert_onnx_tree_enseble_classifier(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.ml.TreeEnsembleClassifier`.
+    Converter for `onnxml.TreeEnsembleClassifier`.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.ml.TreeEnsembleClassifier` model
+        operator: An operator wrapping a `onnxml.TreeEnsembleClassifier` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -323,28 +265,21 @@ register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_ense
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_tree_ensemble(
-        operator.raw_operator, device, extra_config
-    )
+    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
 
     # Generate the model.
-    if post_transform == &#34;NONE&#34;:
-        return convert_decision_ensemble_tree_common(
-            tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, classes, extra_config
-        )
-    extra_config[constants.POST_TRANSFORM] = post_transform
     return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)</code></pre>
 </details>
 </dd>
-<dt id="hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble.convert_onnx_tree_ensemble_regressor"><code class="name flex">
-<span>def <span class="ident">convert_onnx_tree_ensemble_regressor</span></span>(<span>operator, device=None, extra_config={})</span>
+<dt id="hummingbird.ml.operator_converters.onnx_tree_ensembles.convert_onnx_tree_enseble_regressor"><code class="name flex">
+<span>def <span class="ident">convert_onnx_tree_enseble_regressor</span></span>(<span>operator, device=None, extra_config={})</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Converter for <code>ai.onnx.ml.TreeEnsembleRegressor</code>.</p>
+<div class="desc"><p>Converter for <code>onnxml.TreeEnsembleRegressor</code>.</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>operator</code></strong></dt>
-<dd>An operator wrapping a <code>ai.onnx.ml.TreeEnsembleRegressor</code> model</dd>
+<dd>An operator wrapping a <code>onnxml.TreeEnsembleRegressor</code> model</dd>
 <dt><strong><code>device</code></strong></dt>
 <dd>String defining the type of device the converted operator should be run on</dd>
 <dt><strong><code>extra_config</code></strong></dt>
@@ -358,14 +293,13 @@ register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_ense
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/onnx/onnxml_tree_ensemble.py#L224-L242" class="git-link">Browse git</a>
 </summary>
-<pre><code class="python">def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={}):
+<pre><code class="python">def convert_onnx_tree_enseble_regressor(operator, device=None, extra_config={}):
     &#34;&#34;&#34;
-    Converter for `ai.onnx.ml.TreeEnsembleRegressor`.
+    Converter for `onnxml.TreeEnsembleRegressor`.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.ml.TreeEnsembleRegressor` model
+        operator: An operator wrapping a `onnxml.TreeEnsembleRegressor` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -375,7 +309,7 @@ register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_ense
     assert operator is not None
 
     # Get tree informations from the operator.
-    n_features, tree_infos, _, _ = _get_tree_infos_from_tree_ensemble(operator.raw_operator, device, extra_config)
+    n_features, tree_infos, _, _ = _get_tree_infos_from_onnx_tree_enseble(operator, device, extra_config)
 
     # Generate the model.
     return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)</code></pre>
@@ -398,19 +332,20 @@ register_converter(&#34;ONNXMLTreeEnsembleRegressor&#34;, convert_onnx_tree_ense
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="hummingbird.ml.operator_converters.onnx" href="index.html">hummingbird.ml.operator_converters.onnx</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters" href="index.html">hummingbird.ml.operator_converters</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble.convert_onnx_tree_ensemble_classifier" href="#hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble.convert_onnx_tree_ensemble_classifier">convert_onnx_tree_ensemble_classifier</a></code></li>
-<li><code><a title="hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble.convert_onnx_tree_ensemble_regressor" href="#hummingbird.ml.operator_converters.onnx.onnxml_tree_ensemble.convert_onnx_tree_ensemble_regressor">convert_onnx_tree_ensemble_regressor</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnx_tree_ensembles.convert_onnx_tree_enseble_classifier" href="#hummingbird.ml.operator_converters.onnx_tree_ensembles.convert_onnx_tree_enseble_classifier">convert_onnx_tree_enseble_classifier</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.onnx_tree_ensembles.convert_onnx_tree_enseble_regressor" href="#hummingbird.ml.operator_converters.onnx_tree_ensembles.convert_onnx_tree_enseble_regressor">convert_onnx_tree_enseble_regressor</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
+<p><span style="color:#ddd">&#21328;</span></p>
 <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
