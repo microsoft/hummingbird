@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/__init__.py#L0-L60" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/__init__.py#L0-L62" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -73,7 +73,9 @@ from .sklearn import scaler as sklearn_scaler  # noqa: E402
 from .sklearn import sv  # noqa: E402
 from . import lightgbm  # noqa: E402
 from . import xgb  # noqa: E402
-
+from .sparkml import discretizer  # noqa: E402
+from .sparkml import linear  # noqa: E402
+from .sparkml import vector_assembler  # noqa: E402
 
 __pdoc__ = {}
 __pdoc__[&#34;hummingbird.operator_converters._array_feature_extractor_implementations&#34;] = True
@@ -110,6 +112,10 @@ __pdoc__[&#34;hummingbird.operator_converters._tree_implementations&#34;] = True
 <dd>
 <div class="desc"><p>All scikit-learn operators converters are stored under this package.</p></div>
 </dd>
+<dt><code class="name"><a title="hummingbird.ml.operator_converters.sparkml" href="sparkml/index.html">hummingbird.ml.operator_converters.sparkml</a></code></dt>
+<dd>
+<div class="desc"><p>All Spark-ML operators converters are stored under this package.</p></div>
+</dd>
 <dt><code class="name"><a title="hummingbird.ml.operator_converters.xgb" href="xgb.html">hummingbird.ml.operator_converters.xgb</a></code></dt>
 <dd>
 <div class="desc"><p>Converters for XGBoost models.</p></div>
@@ -144,6 +150,7 @@ __pdoc__[&#34;hummingbird.operator_converters._tree_implementations&#34;] = True
 <li><code><a title="hummingbird.ml.operator_converters.lightgbm" href="lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.onnx" href="onnx/index.html">hummingbird.ml.operator_converters.onnx</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.sklearn" href="sklearn/index.html">hummingbird.ml.operator_converters.sklearn</a></code></li>
+<li><code><a title="hummingbird.ml.operator_converters.sparkml" href="sparkml/index.html">hummingbird.ml.operator_converters.sparkml</a></code></li>
 <li><code><a title="hummingbird.ml.operator_converters.xgb" href="xgb.html">hummingbird.ml.operator_converters.xgb</a></code></li>
 </ul>
 </li>
