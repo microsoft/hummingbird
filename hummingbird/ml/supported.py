@@ -403,9 +403,7 @@ sparkml_api_operator_name_map = _build_sparkml_api_operator_name_map()
 backends = _build_backend_map()
 
 # Supported configurations settings accepted by Hummingbird are defined below.
-N_FEATURES = "n_features"
-"""Number of features expected in the input data."""
-
+# Please check `test.test_extra_conf.py` for examples on how to use these.
 TREE_IMPLEMENTATION = "tree_implementation"
 """Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav."""
 
