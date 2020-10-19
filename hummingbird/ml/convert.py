@@ -146,64 +146,58 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     import onnx
 
     # The conversion requires some test input for tracing.
-    # Test inputs can be either provided or generate from the inital types.
-    # Get the initial types if any.
-    initial_types = None
-    if constants.ONNX_INITIAL_TYPES in extra_config:
-        initial_types = extra_config[constants.ONNX_INITIAL_TYPES]
-
+    # Test inputs can be either provided or generate from the input schema of the model.
     # Generate some test input if necessary.
     if test_input is None:
         if backend == onnx.__name__:
             from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
 
-            if initial_types is None:
-                # Generate inputs from the ONNX schema.
-                initial_types = []
-                for input in model.graph.input:
-                    name = input.name if hasattr(input, "name") else None
-                    data_type = (
-                        input.type.tensor_type.elem_type
-                        if hasattr(input, "type")
-                        and hasattr(input.type, "tensor_type")
-                        and hasattr(input.type.tensor_type, "elem_type")
-                        else None
+            # Generate inputs from the ONNX schema.
+            initial_types = []
+            for input in model.graph.input:
+                name = input.name if hasattr(input, "name") else None
+                data_type = (
+                    input.type.tensor_type.elem_type
+                    if hasattr(input, "type")
+                    and hasattr(input.type, "tensor_type")
+                    and hasattr(input.type.tensor_type, "elem_type")
+                    else None
+                )
+                if name is None:
+                    raise RuntimeError(
+                        "Cannot fetch input name or data_type from the ONNX schema. Please provide some test input."
                     )
-                    if name is None:
-                        raise RuntimeError(
-                            "Cannot fetch input name or data_type from the ONNX schema. Please provide some test input."
-                        )
-                    if data_type is None:
-                        raise RuntimeError(
-                            "Cannot fetch input data_type from the ONNX schema, or data type is not tensor_type. Please provide some test input."
-                        )
-                    if not hasattr(input.type.tensor_type, "shape"):
-                        raise RuntimeError("Cannot fetch input shape from ONNX schema. Please provide some test input.")
-                    shape = [dim.dim_value for dim in input.type.tensor_type.shape.dim]
+                if data_type is None:
+                    raise RuntimeError(
+                        "Cannot fetch input data_type from the ONNX schema, or data type is not tensor_type. Please provide some test input."
+                    )
+                if not hasattr(input.type.tensor_type, "shape"):
+                    raise RuntimeError("Cannot fetch input shape from ONNX schema. Please provide some test input.")
+                shape = [dim.dim_value for dim in input.type.tensor_type.shape.dim]
 
-                    if data_type == 1:
-                        initial_types.append((name, FloatTensorType(shape)))
-                    elif data_type == 11:
-                        initial_types.append((name, DoubleTensorType(shape)))
-                    elif data_type == 6:
-                        initial_types.append((name, Int32TensorType(shape)))
-                    elif data_type == 7:
-                        initial_types.append((name, Int64TensorType(shape)))
-                    else:
-                        raise RuntimeError(
-                            "Input data type {} not supported. Please fill an issue at https://github.com/microsoft/hummingbird/.".format(
-                                data_type
-                            )
+                if data_type == 1:
+                    initial_types.append((name, FloatTensorType(shape)))
+                elif data_type == 11:
+                    initial_types.append((name, DoubleTensorType(shape)))
+                elif data_type == 6:
+                    initial_types.append((name, Int32TensorType(shape)))
+                elif data_type == 7:
+                    initial_types.append((name, Int64TensorType(shape)))
+                else:
+                    raise RuntimeError(
+                        "Input data type {} not supported. Please fill an issue at https://github.com/microsoft/hummingbird/.".format(
+                            data_type
                         )
+                    )
 
             assert all(
                 map(lambda x: len(x[1].shape) == 2, initial_types)
-            ), "Hummingbird currently support only inputs with len(shape) == 2."
+            ), "Hummingbird currently supports only inputs with len(shape) == 2."
             first_shape = initial_types[0][1].shape
             first_type = type(initial_types[0][1])
             assert all(
                 map(lambda x: x[1].shape == first_shape, initial_types)
-            ), "Hummingbird currently support only inputs with same shape."
+            ), "Hummingbird currently supports only inputs with same shape."
 
             test_input = np.random.rand(first_shape[0], first_shape[1])
             extra_config[constants.N_FEATURES] = initial_types[0][1].shape[1]
