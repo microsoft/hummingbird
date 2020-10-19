@@ -2,11 +2,7 @@
 Tests extra configurations.
 """
 from distutils.version import LooseVersion
-
-try:
-    import psutil
-except ImportError:
-    psutil = None
+import psutil
 import unittest
 import warnings
 import sys
