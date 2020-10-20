@@ -115,23 +115,22 @@ def _convert_xgboost(model, backend, test_input, device, extra_config={}):
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
-    if constants.N_FEATURES not in extra_config:
-        if "_features_count" in dir(model):
-            extra_config[constants.N_FEATURES] = model._features_count
-        elif test_input is not None:
-            if type(test_input) is np.ndarray and len(test_input.shape) == 2:
-                extra_config[constants.N_FEATURES] = test_input.shape[1]
-            else:
-                raise RuntimeError(
-                    "XGBoost converter is not able to infer the number of input features.\
-                        Apparently test_input is not an ndarray. \
-                        Please fill an issue at https://github.com/microsoft/hummingbird/."
-                )
+    if "_features_count" in dir(model):
+        extra_config[constants.N_FEATURES] = model._features_count
+    elif test_input is not None:
+        if type(test_input) is np.ndarray and len(test_input.shape) == 2:
+            extra_config[constants.N_FEATURES] = test_input.shape[1]
         else:
             raise RuntimeError(
                 "XGBoost converter is not able to infer the number of input features.\
-                    Please pass some test_input to the converter."
+                    Please pass a test_input to convert or \
+                    fill an issue at https://github.com/microsoft/hummingbird/."
             )
+    else:
+        raise RuntimeError(
+            "XGBoost converter is not able to infer the number of input features.\
+                Please pass some test_input to the converter."
+        )
     return _convert_sklearn(model, backend, test_input, device, extra_config)
 
 
