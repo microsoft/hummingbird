@@ -109,7 +109,7 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(hb_model._session.get_session_options().intra_op_num_threads == 1)
         self.assertTrue(hb_model._session.get_session_options().inter_op_num_threads == 1)
 
-    # Check converter whit model name set as extra_config.
+    # Check converter with model name set as extra_config.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
