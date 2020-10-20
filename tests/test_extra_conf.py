@@ -9,11 +9,17 @@ import sys
 
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
+from onnxconverter_common.data_types import FloatTensorType
 import torch
 
 import hummingbird.ml
-from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed
+from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, lightgbm_installed
 from hummingbird.ml import constants
+
+if lightgbm_installed():
+    import lightgbm as lgb
+if onnx_ml_tools_installed():
+    from onnxmltools.convert import convert_lightgbm
 
 
 class TestExtraConf(unittest.TestCase):
@@ -102,6 +108,30 @@ class TestExtraConf(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         self.assertTrue(hb_model._session.get_session_options().intra_op_num_threads == 1)
         self.assertTrue(hb_model._session.get_session_options().inter_op_num_threads == 1)
+
+    # Check converter with model name set as extra_config.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lightgbm_pytorch_extra_config(self):
+        warnings.filterwarnings("ignore")
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = np.array([100, -10, 50], dtype=np.float32)
+        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
+        model.fit(X, y)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_lightgbm(
+            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+        )
+
+        # Create ONNX model
+        model_name = "hummingbird.ml.test.lightgbm"
+        onnx_model = hummingbird.ml.convert(onnx_ml_model, "onnx", extra_config={constants.ONNX_OUTPUT_MODEL_NAME: model_name})
+
+        assert onnx_model.model.graph.name == model_name
 
 
 if __name__ == "__main__":
