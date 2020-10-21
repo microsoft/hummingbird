@@ -73,15 +73,6 @@ def _supported_backend_check_config(model, backend, extra_config):
     if backend is torch.jit.__name__ and constants.TEST_INPUT not in extra_config:
         raise RuntimeError("Backend {} requires test inputs. Please pass some test input to the convert.".format(backend))
 
-    if backend is onnx.__name__:
-        if constants.ONNX_INITIAL_TYPES not in extra_config and constants.TEST_INPUT not in extra_config:
-            raise RuntimeError("Cannot generate test input data for ONNX. Either pass some input data or the initial_types")
-
-    if _is_onnx_model(model) and constants.ONNX_INITIAL_TYPES not in extra_config and constants.TEST_INPUT not in extra_config:
-        raise RuntimeError(
-            "Cannot extract number of input features from the ONNX. Either pass some input data or the initial_types"
-        )
-
 
 def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     """
@@ -124,23 +115,22 @@ def _convert_xgboost(model, backend, test_input, device, extra_config={}):
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
-    if constants.N_FEATURES not in extra_config:
-        if "_features_count" in dir(model):
-            extra_config[constants.N_FEATURES] = model._features_count
-        elif test_input is not None:
-            if type(test_input) is np.ndarray and len(test_input.shape) == 2:
-                extra_config[constants.N_FEATURES] = test_input.shape[1]
-            else:
-                raise RuntimeError(
-                    "XGBoost converter is not able to infer the number of input features.\
-                        Apparently test_input is not an ndarray. \
-                        Please fill an issue at https://github.com/microsoft/hummingbird/."
-                )
+    if "_features_count" in dir(model):
+        extra_config[constants.N_FEATURES] = model._features_count
+    elif test_input is not None:
+        if type(test_input) is np.ndarray and len(test_input.shape) == 2:
+            extra_config[constants.N_FEATURES] = test_input.shape[1]
         else:
             raise RuntimeError(
                 "XGBoost converter is not able to infer the number of input features.\
-                    Please pass some test_input to the converter."
+                    Please pass a test_input to convert or \
+                    fill an issue at https://github.com/microsoft/hummingbird/."
             )
+    else:
+        raise RuntimeError(
+            "XGBoost converter is not able to infer the number of input features.\
+                Please pass some test_input to the converter."
+        )
     return _convert_sklearn(model, backend, test_input, device, extra_config)
 
 
@@ -155,42 +145,80 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     import onnx
 
     # The conversion requires some test input for tracing.
-    # Test inputs can be either provided or generate from the inital types.
-    # Get the initial types if any.
-    initial_types = None
-    if constants.ONNX_INITIAL_TYPES in extra_config:
-        initial_types = extra_config[constants.ONNX_INITIAL_TYPES]
-
+    # Test inputs can be either provided or generate from the input schema of the model.
     # Generate some test input if necessary.
     if test_input is None:
         if backend == onnx.__name__:
-            assert (
-                initial_types is not None and not initial_types[0][1].shape is None
-            ), "Cannot generate test input data. Initial_types do not contain shape information."
-            assert len(initial_types[0][1].shape) == 2, "Hummingbird currently support only inputs with len(shape) == 2."
-
             from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
 
-            test_input = np.random.rand(initial_types[0][1].shape[0], initial_types[0][1].shape[1])
+            # Generate inputs from the ONNX schema.
+            initial_types = []
+            for input in model.graph.input:
+                name = input.name if hasattr(input, "name") else None
+                data_type = (
+                    input.type.tensor_type.elem_type
+                    if hasattr(input, "type")
+                    and hasattr(input.type, "tensor_type")
+                    and hasattr(input.type.tensor_type, "elem_type")
+                    else None
+                )
+                if name is None:
+                    raise RuntimeError(
+                        "Cannot fetch input name or data_type from the ONNX schema. Please provide some test input."
+                    )
+                if data_type is None:
+                    raise RuntimeError(
+                        "Cannot fetch input data_type from the ONNX schema, or data type is not tensor_type. Please provide some test input."
+                    )
+                if not hasattr(input.type.tensor_type, "shape"):
+                    raise RuntimeError("Cannot fetch input shape from ONNX schema. Please provide some test input.")
+                shape = [dim.dim_value for dim in input.type.tensor_type.shape.dim]
+
+                if data_type == 1:
+                    initial_types.append((name, FloatTensorType(shape)))
+                elif data_type == 11:
+                    initial_types.append((name, DoubleTensorType(shape)))
+                elif data_type == 6:
+                    initial_types.append((name, Int32TensorType(shape)))
+                elif data_type == 7:
+                    initial_types.append((name, Int64TensorType(shape)))
+                else:
+                    raise RuntimeError(
+                        "Input data type {} not supported. Please fill an issue at https://github.com/microsoft/hummingbird/.".format(
+                            data_type
+                        )
+                    )
+
+            assert all(
+                map(lambda x: len(x[1].shape) == 2, initial_types)
+            ), "Hummingbird currently supports only inputs with len(shape) == 2."
+            first_shape = initial_types[0][1].shape
+            first_type = type(initial_types[0][1])
+            assert all(
+                map(lambda x: x[1].shape == first_shape, initial_types)
+            ), "Hummingbird currently supports only inputs with same shape."
+
+            test_input = np.random.rand(first_shape[0], first_shape[1])
             extra_config[constants.N_FEATURES] = initial_types[0][1].shape[1]
-            if type(initial_types[0][1]) is FloatTensorType:
+            if first_type is FloatTensorType:
                 test_input = np.array(test_input, dtype=np.float32)
-            elif type(initial_types[0][1]) is DoubleTensorType:
+            elif first_type is DoubleTensorType:
                 test_input = np.array(test_input, dtype=np.float64)
-            elif type(initial_types[0][1]) is Int32TensorType:
+            elif first_type is Int32TensorType:
                 test_input = np.array(test_input, dtype=np.int32)
-            elif type(initial_types[0][1]) is Int64TensorType:
+            elif first_type is Int64TensorType:
                 test_input = np.array(test_input, dtype=np.int64)
             else:
                 raise RuntimeError(
                     "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
-                        type(initial_types[0][1])
+                        first_type
                     )
                 )
             extra_config[constants.TEST_INPUT] = test_input
-    elif constants.N_FEATURES not in extra_config:
-        extra_config[constants.N_FEATURES] = test_input.shape[1]
 
+    # Set the number of features. Some converter requires to know in advance the number of features.
+    if constants.N_FEATURES not in extra_config:
+        extra_config[constants.N_FEATURES] = test_input.shape[1]
     # Set the initializers. Some converter requires the access to initializers.
     initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
     extra_config[constants.ONNX_INITIALIZERS] = initializers
