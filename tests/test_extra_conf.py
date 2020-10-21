@@ -8,7 +8,7 @@ import warnings
 import sys
 
 import numpy as np
-from onnxconverter_common.data_types import FloatTensorType
+from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType
 from sklearn import datasets
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, IsolationForest
 from sklearn.preprocessing import StandardScaler
@@ -440,9 +440,7 @@ class TestExtraConf(unittest.TestCase):
 
     # Test batch with pandas.
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNXML test require ONNX and ORT")
     def test_pandas_batch_onnx(self):
         import pandas
 
@@ -463,6 +461,49 @@ class TestExtraConf(unittest.TestCase):
         pipeline.fit(X_train, y)
 
         hb_model = hummingbird.ml.convert(pipeline, "onnx", X_train, extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertTrue(hb_model is not None)
+
+        np.testing.assert_allclose(
+            pipeline.predict_proba(X_train), hb_model.predict_proba(X_train), rtol=1e-06, atol=1e-06,
+        )
+
+    # Test batch with pandas.
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_pandas_batch_onnxml(self):
+        import pandas
+
+        max_depth = 10
+        iris = datasets.load_iris()
+        X = iris.data[:, :3]
+        y = iris.target
+        columns = ["vA", "vB", "vC"]
+        X_train = pandas.DataFrame(X, columns=columns)
+
+        pipeline = Pipeline(
+            steps=[
+                ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
+                ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
+            ]
+        )
+
+        pipeline.fit(X_train, y)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_sklearn(
+            pipeline,
+            initial_types=[
+                ("vA", DoubleTensorType([X.shape[0], 1])),
+                ("vB", DoubleTensorType([X.shape[0], 1])),
+                ("vC", DoubleTensorType([X.shape[0], 1])),
+            ],
+            target_opset=9,
+        )
+
+        hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx", extra_config={constants.BATCH_SIZE: 10})
 
         self.assertTrue(hb_model is not None)
 

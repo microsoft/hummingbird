@@ -23,13 +23,21 @@ class Cast(BaseOperator, torch.nn.Module):
 
         assert to_type is not None
 
-        self.to_type = to_type
+        self._to_type = to_type
 
     def forward(self, x):
-        if self.to_type == 1:  # Cast to float
+        if self._to_type == 1:  # Cast to float
             return x.float()
-        if self.to_type == 7:  # Cast to long
+        elif self._to_type == 7:  # Cast to long
             return x.long()
+        elif self._to_type == 11:  # Cast to double
+            return x.double()
+        else:
+            raise RuntimeError(
+                "Cast to ONNX type {} not supported yet. Please fill an issue at https://github.com/microsoft/hummingbird".format(
+                    self._to_type
+                )
+            )
 
 
 class Reshape(BaseOperator, torch.nn.Module):
