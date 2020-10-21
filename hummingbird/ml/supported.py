@@ -403,29 +403,24 @@ sparkml_api_operator_name_map = _build_sparkml_api_operator_name_map()
 backends = _build_backend_map()
 
 # Supported configurations settings accepted by Hummingbird are defined below.
-N_FEATURES = "n_features"
-"""Number of features expected in the input data."""
-
+# Please check `test.test_extra_conf.py` for examples on how to use these.
 TREE_IMPLEMENTATION = "tree_implementation"
 """Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav."""
 
 ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
 """For ONNX models we can set the name of the output model."""
 
-ONNX_INITIAL_TYPES = "onnx_initial_types"
-"""For ONNX models we can explicitly set the input types and shapes."""
-
 ONNX_TARGET_OPSET = "onnx_target_opset"
 """For ONNX models we can set the target opset to use. 9 by default."""
 
 INPUT_NAMES = "input_names"
-"""Set the names of the inputs. Assume that the numbers onf inputs_names is equal to the number of inputs."""
+"""Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs."""
 
 OUTPUT_NAMES = "output_names"
 """Set the names of the outputs."""
 
 CONTAINER = "container"
-"""Boolean used to chose whether to return the container for Sklearn API or just the model"""
+"""Boolean used to chose whether to return the container for Sklearn API or just the model."""
 
 N_THREADS = "n_threads"
 """Select how many threads to use for scoring. This paremeter will set the number of intra-op threads.

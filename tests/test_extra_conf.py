@@ -2,23 +2,29 @@
 Tests extra configurations.
 """
 from distutils.version import LooseVersion
-
-try:
-    import psutil
-except ImportError:
-    psutil = None
+import psutil
 import unittest
 import warnings
 import sys
 
 import numpy as np
+from onnxconverter_common.data_types import FloatTensorType
+from sklearn import datasets
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, IsolationForest
 from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 import torch
 
 import hummingbird.ml
-from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed
+from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, pandas_installed, lightgbm_installed
 from hummingbird.ml import constants
+
+if lightgbm_installed():
+    import lightgbm as lgb
+
+if onnx_ml_tools_installed():
+    from onnxmltools.convert import convert_sklearn, convert_lightgbm
 
 
 class TestExtraConf(unittest.TestCase):
@@ -80,7 +86,12 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "onnx", X)
+        # Create ONNX-ML model
+        onnx_ml_model = convert_sklearn(
+            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+        )
+
+        hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx", X)
 
         self.assertIsNotNone(hb_model)
         self.assertTrue(hb_model._session.get_session_options().intra_op_num_threads == psutil.cpu_count(logical=False))
@@ -368,6 +379,120 @@ class TestExtraConf(unittest.TestCase):
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
         np.testing.assert_allclose(model.decision_function(X), hb_model.decision_function(X), rtol=1e-06, atol=1e-06)
         np.testing.assert_allclose(model.score_samples(X), hb_model.score_samples(X), rtol=1e-06, atol=1e-06)
+
+    # Test batch with pandas.
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
+    def test_pandas_batch(self):
+        import pandas
+
+        max_depth = 10
+        iris = datasets.load_iris()
+        X = iris.data[:, :3]
+        y = iris.target
+        columns = ["vA", "vB", "vC"]
+        X_train = pandas.DataFrame(X, columns=columns)
+
+        pipeline = Pipeline(
+            steps=[
+                ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
+                ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
+            ]
+        )
+
+        pipeline.fit(X_train, y)
+
+        torch_model = hummingbird.ml.convert(pipeline, "torch", X_train, extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertTrue(torch_model is not None)
+
+        np.testing.assert_allclose(
+            pipeline.predict_proba(X_train), torch_model.predict_proba(X_train), rtol=1e-06, atol=1e-06,
+        )
+
+    # Test batch with pandas.
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
+    def test_pandas_batch_ts(self):
+        import pandas
+
+        max_depth = 10
+        iris = datasets.load_iris()
+        X = iris.data[:, :3]
+        y = iris.target
+        columns = ["vA", "vB", "vC"]
+        X_train = pandas.DataFrame(X, columns=columns)
+
+        pipeline = Pipeline(
+            steps=[
+                ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
+                ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
+            ]
+        )
+
+        pipeline.fit(X_train, y)
+
+        torch_model = hummingbird.ml.convert(pipeline, "torch.jit", X_train, extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertTrue(torch_model is not None)
+
+        np.testing.assert_allclose(
+            pipeline.predict_proba(X_train), torch_model.predict_proba(X_train), rtol=1e-06, atol=1e-06,
+        )
+
+    # Test batch with pandas.
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_pandas_batch_onnx(self):
+        import pandas
+
+        max_depth = 10
+        iris = datasets.load_iris()
+        X = iris.data[:, :3]
+        y = iris.target
+        columns = ["vA", "vB", "vC"]
+        X_train = pandas.DataFrame(X, columns=columns)
+
+        pipeline = Pipeline(
+            steps=[
+                ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
+                ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
+            ]
+        )
+
+        pipeline.fit(X_train, y)
+
+        hb_model = hummingbird.ml.convert(pipeline, "onnx", X_train, extra_config={constants.BATCH_SIZE: 10})
+
+        self.assertTrue(hb_model is not None)
+
+        np.testing.assert_allclose(
+            pipeline.predict_proba(X_train), hb_model.predict_proba(X_train), rtol=1e-06, atol=1e-06,
+        )
+
+    # Check converter with model name set as extra_config.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lightgbm_pytorch_extra_config(self):
+        warnings.filterwarnings("ignore")
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = np.array([100, -10, 50], dtype=np.float32)
+        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
+        model.fit(X, y)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_lightgbm(
+            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+        )
+
+        # Create ONNX model
+        model_name = "hummingbird.ml.test.lightgbm"
+        onnx_model = hummingbird.ml.convert(onnx_ml_model, "onnx", extra_config={constants.ONNX_OUTPUT_MODEL_NAME: model_name})
+
+        assert onnx_model.model.graph.name == model_name
 
 
 if __name__ == "__main__":
