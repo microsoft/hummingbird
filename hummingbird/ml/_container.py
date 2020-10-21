@@ -71,6 +71,12 @@ class SklearnContainer(ABC):
         """
         This function either score the full dataset at once or triggers batch inference.
         """
+        if DataFrame is not None and type(inputs[0]) == DataFrame:
+            # Split the dataframe into column ndarrays.
+            inputs = inputs[0]
+            input_names = list(inputs.columns)
+            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+            inputs = [df.to_numpy().reshape(-1, 1) for df in splits]
 
         if self._batch_size is None:
             return function(*inputs)
@@ -82,17 +88,12 @@ class SklearnContainer(ABC):
         This function contains the code to run batched inference.
         """
 
-        if DataFrame is not None and type(inputs[0]) == DataFrame:
-            # Split the dataframe into column ndarrays.
-            inputs = inputs[0]
-            input_names = list(inputs.columns)
-            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
-            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
-            inputs = tuple(splits)
-        elif type(inputs) is tuple:
-            inputs = np.array(*inputs)
+        is_tuple = type(inputs) is tuple
+        if is_tuple:
+            total_size = inputs[0].shape[0]
+        else:
+            total_size = inputs.shape[0]
 
-        total_size = inputs.shape[0]
         iterations = total_size // self._batch_size
         iterations += 1 if total_size % self._batch_size > 0 else 0
         iterations = max(1, iterations)
@@ -101,7 +102,11 @@ class SklearnContainer(ABC):
         for i in range(0, iterations):
             start = i * self._batch_size
             end = min(start + self._batch_size, total_size)
-            predictions.extend(function(inputs[start:end, :]).ravel())
+            if is_tuple:
+                batch = tuple([input[start:end, :] for input in inputs])
+            else:
+                batch = inputs[start:end, :]
+            predictions.extend(function(*batch).ravel())
 
         if reshape:
             return np.array(predictions).ravel().reshape(total_size, -1)
@@ -131,8 +136,8 @@ class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer):
     Container mirroring Sklearn transformers API.
     """
 
-    def _transform(self, inputs):
-        return self.model.forward(inputs).cpu().numpy()
+    def _transform(self, *inputs):
+        return self.model.forward(*inputs).cpu().numpy()
 
     def transform(self, *inputs):
         """
@@ -157,13 +162,13 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         self._is_regression = is_regression
         self._is_anomaly_detection = is_anomaly_detection
 
-    def _predict(self, inputs):
+    def _predict(self, *inputs):
         if self._is_regression:
-            return self.model.forward(inputs).cpu().numpy().ravel()
+            return self.model.forward(*inputs).cpu().numpy().ravel()
         elif self._is_anomaly_detection:
-            return self.model.forward(inputs)[0].cpu().numpy().ravel()
+            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
         else:
-            return self.model.forward(inputs)[0].cpu().numpy().ravel()
+            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
 
     def predict(self, *inputs):
         """
@@ -185,8 +190,8 @@ class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
             model, n_threads, batch_size, is_regression=False, extra_config=extra_config
         )
 
-    def _predict_proba(self, input):
-        return self.model.forward(input)[1].cpu().numpy()
+    def _predict_proba(self, *input):
+        return self.model.forward(*input)[1].cpu().numpy()
 
     def predict_proba(self, *inputs):
         """
@@ -206,8 +211,8 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
             model, n_threads, batch_size, is_regression=False, is_anomaly_detection=True, extra_config=extra_config
         )
 
-    def _decision_function(self, inputs):
-        return self.model.forward(inputs)[1].cpu().numpy().ravel()
+    def _decision_function(self, *inputs):
+        return self.model.forward(*inputs)[1].cpu().numpy().ravel()
 
     def decision_function(self, *inputs):
         """
@@ -244,7 +249,7 @@ def _torchscript_wrapper(device, function, *inputs):
                 inputs[i] = torch.from_numpy(inputs[i]).float()
             elif type(inputs[i]) is not torch.Tensor:
                 raise RuntimeError("Inputer tensor {} of not supported type {}".format(i, type(inputs[i])))
-            if device != "cpu" and device is not None:
+            if device.type != "cpu" and device is not None:
                 inputs[i] = inputs[i].to(device)
         return function(*inputs)
 
@@ -290,7 +295,7 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
     def predict_proba(self, *inputs):
         device = _get_device(self.model)
         f = super(TorchScriptSklearnContainerClassification, self)._predict_proba
-        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
+        f_wrapped = lambda *x: _torchscript_wrapper(device, f, *x)  # noqa: E731
 
         return self._run(f_wrapped, *inputs, reshape=True)
 

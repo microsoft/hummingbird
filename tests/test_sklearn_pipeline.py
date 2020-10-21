@@ -261,6 +261,47 @@ class TestSklearnPipeline(unittest.TestCase):
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
+    def test_pipeline_column_transformer_pandas_ts(self):
+        iris = datasets.load_iris()
+        X = iris.data[:, :3]
+        y = iris.target
+        X_train = pandas.DataFrame(X, columns=["vA", "vB", "vC"])
+        X_train["vcat"] = X_train["vA"].apply(lambda x: 1 if x > 0.5 else 2)
+        X_train["vcat2"] = X_train["vB"].apply(lambda x: 3 if x > 0.5 else 4)
+        y_train = y % 2
+        numeric_features = [0, 1, 2]  # ["vA", "vB", "vC"]
+        categorical_features = [3, 4]  # ["vcat", "vcat2"]
+
+        classifier = LogisticRegression(
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
+        )
+
+        numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
+
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("num", numeric_transformer, numeric_features),
+                ("cat", categorical_transformer, categorical_features),
+            ]
+        )
+
+        model = Pipeline(steps=[("preprocessor", preprocessor), ("classifier", classifier)])
+
+        model.fit(X_train, y_train)
+
+        X_test = X_train[:11]
+
+        torch_model = hummingbird.ml.convert(model, "torch.jit", X_test)
+
+        self.assertTrue(torch_model is not None)
+
+        np.testing.assert_allclose(
+            model.predict_proba(X_test), torch_model.predict_proba(X_test), rtol=1e-06, atol=1e-06,
+        )
+
+    @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_weights(self):
         iris = datasets.load_iris()
         X = iris.data[:, :3]
@@ -288,7 +329,7 @@ class TestSklearnPipeline(unittest.TestCase):
             transformer_weights={"num": 2, "cat": 3},
         )
 
-        model = Pipeline(steps=[("precprocessor", preprocessor), ("classifier", classifier)])
+        model = Pipeline(steps=[("preprocessor", preprocessor), ("classifier", classifier)])
 
         model.fit(X_train, y_train)
 
