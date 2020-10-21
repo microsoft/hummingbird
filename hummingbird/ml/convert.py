@@ -193,27 +193,33 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
                 map(lambda x: len(x[1].shape) == 2, initial_types)
             ), "Hummingbird currently supports only inputs with len(shape) == 2."
             first_shape = initial_types[0][1].shape
-            first_type = type(initial_types[0][1])
             assert all(
                 map(lambda x: x[1].shape == first_shape, initial_types)
             ), "Hummingbird currently supports only inputs with same shape."
+            extra_config[constants.N_INPUTS] = len(initial_types)
+            extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS] * first_shape[1]
 
-            test_input = np.random.rand(first_shape[0], first_shape[1])
-            extra_config[constants.N_FEATURES] = initial_types[0][1].shape[1]
-            if first_type is FloatTensorType:
-                test_input = np.array(test_input, dtype=np.float32)
-            elif first_type is DoubleTensorType:
-                test_input = np.array(test_input, dtype=np.float64)
-            elif first_type is Int32TensorType:
-                test_input = np.array(test_input, dtype=np.int32)
-            elif first_type is Int64TensorType:
-                test_input = np.array(test_input, dtype=np.int64)
-            else:
-                raise RuntimeError(
-                    "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
-                        first_type
+            test_input = []
+            for i, it in enumerate(initial_types):
+                test_data = np.random.rand(first_shape[0], first_shape[1])
+                if type(it[1]) is FloatTensorType:
+                    test_input.append(np.array(test_data, dtype=np.float32))
+                elif type(it[1]) is DoubleTensorType:
+                    test_input.append(np.array(test_data, dtype=np.float64))
+                elif type(it[1]) is Int32TensorType:
+                    test_input.append(np.array(test_data, dtype=np.int32))
+                elif type(it[1]) is Int64TensorType:
+                    test_input.append(np.array(test_data, dtype=np.int64))
+                else:
+                    raise RuntimeError(
+                        "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
+                            type(it[1])
+                        )
                     )
-                )
+            if extra_config[constants.N_INPUTS] == 1:
+                test_input = test_input[0]
+            else:
+                test_input = tuple(test_input)
             extra_config[constants.TEST_INPUT] = test_input
 
     # Set the number of features. Some converter requires to know in advance the number of features.
