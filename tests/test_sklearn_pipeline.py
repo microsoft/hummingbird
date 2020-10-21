@@ -263,7 +263,7 @@ class TestSklearnPipeline(unittest.TestCase):
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_pandas_ts(self):
         iris = datasets.load_iris()
-        X = iris.data[:, :3]
+        X = np.array(iris.data[:, :3], np.float32)  # If we don't use float32 here, with python 3.5 and torch 1.5.1 will fail.
         y = iris.target
         X_train = pandas.DataFrame(X, columns=["vA", "vB", "vC"])
         X_train["vcat"] = X_train["vA"].apply(lambda x: 1 if x > 0.5 else 2)
