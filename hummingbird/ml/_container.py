@@ -67,6 +67,51 @@ class SklearnContainer(ABC):
     def model(self):
         return self._model
 
+    def _run(self, function, *inputs, reshape=False):
+        """
+        This function either score the full dataset at once or triggers batch inference.
+        """
+        if DataFrame is not None and type(inputs[0]) == DataFrame:
+            # Split the dataframe into column ndarrays.
+            inputs = inputs[0]
+            input_names = list(inputs.columns)
+            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+            inputs = [df.to_numpy().reshape(-1, 1) for df in splits]
+
+        if self._batch_size is None:
+            return function(*inputs)
+        else:
+            return self._run_batch_inference(function, *inputs, reshape=reshape)
+
+    def _run_batch_inference(self, function, *inputs, reshape=False):
+        """
+        This function contains the code to run batched inference.
+        """
+
+        is_tuple = type(inputs) is tuple
+        if is_tuple:
+            total_size = inputs[0].shape[0]
+        else:
+            total_size = inputs.shape[0]
+
+        iterations = total_size // self._batch_size
+        iterations += 1 if total_size % self._batch_size > 0 else 0
+        iterations = max(1, iterations)
+        predictions = []
+
+        for i in range(0, iterations):
+            start = i * self._batch_size
+            end = min(start + self._batch_size, total_size)
+            if is_tuple:
+                batch = tuple([input[start:end, :] for input in inputs])
+            else:
+                batch = inputs[start:end, :]
+            predictions.extend(function(*batch).ravel())
+
+        if reshape:
+            return np.array(predictions).ravel().reshape(total_size, -1)
+        return np.array(predictions).ravel()
+
 
 class PyTorchTorchscriptSklearnContainer(SklearnContainer):
     """
@@ -91,12 +136,15 @@ class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer):
     Container mirroring Sklearn transformers API.
     """
 
+    def _transform(self, *inputs):
+        return self.model.forward(*inputs).cpu().numpy()
+
     def transform(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        return self.model.forward(*inputs).cpu().numpy()
+        return self._run(self._transform, *inputs, reshape=True)
 
 
 class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
@@ -114,6 +162,14 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         self._is_regression = is_regression
         self._is_anomaly_detection = is_anomaly_detection
 
+    def _predict(self, *inputs):
+        if self._is_regression:
+            return self.model.forward(*inputs).cpu().numpy().ravel()
+        elif self._is_anomaly_detection:
+            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
+        else:
+            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
+
     def predict(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
@@ -121,12 +177,7 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         On classification tasks returns the predicted class labels for the input data.
         On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
         """
-        if self._is_regression:
-            return self.model.forward(*inputs).cpu().numpy().flatten()
-        elif self._is_anomaly_detection:
-            return self.model.forward(*inputs)[0].cpu().numpy().flatten()
-        else:
-            return self.model.forward(*inputs)[0].cpu().numpy()
+        return self._run(self._predict, *inputs)
 
 
 class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
@@ -139,12 +190,15 @@ class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
             model, n_threads, batch_size, is_regression=False, extra_config=extra_config
         )
 
+    def _predict_proba(self, *input):
+        return self.model.forward(*input)[1].cpu().numpy()
+
     def predict_proba(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
         """
-        return self.model.forward(*inputs)[1].cpu().numpy()
+        return self._run(self._predict_proba, *inputs, reshape=True)
 
 
 class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression):
@@ -157,12 +211,16 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
             model, n_threads, batch_size, is_regression=False, is_anomaly_detection=True, extra_config=extra_config
         )
 
+    def _decision_function(self, *inputs):
+        return self.model.forward(*inputs)[1].cpu().numpy().ravel()
+
     def decision_function(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision function scores.
         """
-        scores = self.model.forward(*inputs)[1].cpu().numpy().flatten()
+        scores = self._run(self._decision_function, *inputs)
+
         # Backward compatibility for sklearn <= 0.21
         if constants.IFOREST_THRESHOLD in self._extra_config:
             scores += self._extra_config[constants.IFOREST_THRESHOLD]
@@ -180,26 +238,18 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
 def _torchscript_wrapper(device, function, *inputs):
     """
     This function contains the code to enable predictions over torchscript models.
-    It is used to wrap pytorch container functions.
+    It is used to translates inputs in the proper torch format.
     """
     inputs = [*inputs]
 
     with torch.no_grad():
-        if type(inputs) == DataFrame and DataFrame is not None:
-            # Split the dataframe into column ndarrays.
-            inputs = inputs[0]
-            input_names = list(inputs.columns)
-            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
-            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
-            inputs = tuple(splits)
-
         # Maps data inputs to the expected type and device.
         for i in range(len(inputs)):
             if type(inputs[i]) is np.ndarray:
                 inputs[i] = torch.from_numpy(inputs[i]).float()
             elif type(inputs[i]) is not torch.Tensor:
                 raise RuntimeError("Inputer tensor {} of not supported type {}".format(i, type(inputs[i])))
-            if device != "cpu" and device is not None:
+            if device.type != "cpu" and device is not None:
                 inputs[i] = inputs[i].to(device)
         return function(*inputs)
 
@@ -211,9 +261,10 @@ class TorchScriptSklearnContainerTransformer(PyTorchSklearnContainerTransformer)
 
     def transform(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerTransformer, self).transform
+        f = super(TorchScriptSklearnContainerTransformer, self)._transform
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs, reshape=True)
 
 
 class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
@@ -223,9 +274,10 @@ class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
 
     def predict(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerRegression, self).predict
+        f = super(TorchScriptSklearnContainerRegression, self)._predict
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs)
 
 
 class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassification):
@@ -235,15 +287,17 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
 
     def predict(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerClassification, self).predict
+        f = super(TorchScriptSklearnContainerClassification, self)._predict
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs)
 
     def predict_proba(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerClassification, self).predict_proba
+        f = super(TorchScriptSklearnContainerClassification, self)._predict_proba
+        f_wrapped = lambda *x: _torchscript_wrapper(device, f, *x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs, reshape=True)
 
 
 class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomalyDetection):
@@ -253,21 +307,24 @@ class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomaly
 
     def predict(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerAnomalyDetection, self).predict
+        f = super(TorchScriptSklearnContainerAnomalyDetection, self)._predict
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs)
 
     def decision_function(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerAnomalyDetection, self).decision_function
+        f = super(TorchScriptSklearnContainerAnomalyDetection, self)._decision_function
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs)
 
     def score_samples(self, *inputs):
         device = _get_device(self.model)
-        f = super(TorchScriptSklearnContainerAnomalyDetection, self).score_samples
+        f = self.decision_function
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return _torchscript_wrapper(device, f, *inputs)
+        return self._run(f_wrapped, *inputs) + self._extra_config[constants.OFFSET]
 
 
 # ONNX containers.
@@ -324,14 +381,17 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
 
         assert len(self._output_names) == 1
 
+    def _transform(self, *inputs):
+        named_inputs = self._get_named_inputs(inputs)
+
+        return np.array(self._session.run(self._output_names, named_inputs))
+
     def transform(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        named_inputs = self._get_named_inputs(inputs)
-
-        return self._session.run(self._output_names, named_inputs)
+        return self._run(self._transform, *inputs, reshape=True)
 
 
 class ONNXSklearnContainerRegression(ONNXSklearnContainer):
@@ -351,7 +411,7 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         self._is_regression = is_regression
         self._is_anomaly_detection = is_anomaly_detection
 
-    def predict(self, *inputs):
+    def _predict(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On regression returns the predicted values.
@@ -361,11 +421,18 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer):
         named_inputs = self._get_named_inputs(inputs)
 
         if self._is_regression:
-            return self._session.run(self._output_names, named_inputs)
+            return np.array(self._session.run(self._output_names, named_inputs))
         elif self._is_anomaly_detection:
-            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].flatten()
+            return np.array(self._session.run([self._output_names[0]], named_inputs))[0].ravel()
         else:
-            return self._session.run([self._output_names[0]], named_inputs)[0]
+            return np.array(self._session.run([self._output_names[0]], named_inputs))[0]
+
+    def predict(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On data transformers it returns transformed output data
+        """
+        return self._run(self._predict, *inputs)
 
 
 class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
@@ -380,7 +447,7 @@ class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
 
         assert len(self._output_names) == 2
 
-    def predict_proba(self, *inputs):
+    def _predict_proba(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
@@ -388,6 +455,13 @@ class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
         named_inputs = self._get_named_inputs(inputs)
 
         return self._session.run([self._output_names[1]], named_inputs)[0]
+
+    def predict_proba(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On data transformers it returns transformed output data
+        """
+        return self._run(self._predict_proba, *inputs, reshape=True)
 
 
 class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
@@ -402,7 +476,7 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
 
         assert len(self._output_names) == 2
 
-    def decision_function(self, *inputs):
+    def _decision_function(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision function scores.
@@ -414,6 +488,13 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
         if constants.IFOREST_THRESHOLD in self._extra_config:
             scores += self._extra_config[constants.IFOREST_THRESHOLD]
         return scores
+
+    def decision_function(self, *inputs):
+        """
+        Utility functions used to emulate the behavior of the Sklearn API.
+        On data transformers it returns transformed output data
+        """
+        return self._run(self._decision_function, *inputs)
 
     def score_samples(self, *inputs):
         """
