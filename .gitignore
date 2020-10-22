@@ -78,3 +78,6 @@ dmypy.json
 configs/db/*.config
 configs/github/*.token
 
+# MAC
+**.DS_STORE
+
