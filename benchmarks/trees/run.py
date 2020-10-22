@@ -175,7 +175,7 @@ def parse_args():
     parser.add_argument("-niters", default=1, type=int, help=("Number of iterations for each experiment"))
     parser.add_argument("-maxdepth", default=None, type=int, help=("Maxmimum number of levels in the trees"))
     parser.add_argument(
-        "-validate", default=False, action="store_true", help="Validate prediction output and fails accordigly."
+        "-validate", default=False, action="store_true", help="Validate prediction output and fails accordingly."
     )
     parser.add_argument("-extra", default="{}", help="Extra arguments as a python dictionary")
     args = parser.parse_args()
