@@ -32,7 +32,7 @@ class LinearModel(BaseOperator, torch.nn.Module):
             self.binary_classification = True
 
     def forward(self, x):
-        output = torch.addmm(self.intercepts, x, self.coefficients)
+        output = torch.addmm(self.intercepts, x.float(), self.coefficients)
         if self.multi_class == "multinomial":
             output = torch.softmax(output, dim=1)
         elif self.regression:

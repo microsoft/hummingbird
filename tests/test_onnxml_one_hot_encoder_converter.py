@@ -130,6 +130,22 @@ class TestONNXOneHotEncoder(unittest.TestCase):
         # Create ONNX model by calling converter, should raise error for strings
         self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", data)
 
+    # Test OneHotEncoder failcase when input data type is not supported
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_ohe_string_raises_type_error_onnx(self):
+        warnings.filterwarnings("ignore")
+        model = OneHotEncoder()
+        data = [["a", "r", "x"], ["a", "r", "x"], ["aaaa", "r", "x"], ["a", "r", "xx"]]
+        model.fit(data)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_sklearn(model, initial_types=[("input", StringTensorType_onnx([4, 3]))])
+
+        # Create ONNX model by calling converter, should raise error for strings
+        self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx")
+
 
 if __name__ == "__main__":
     unittest.main()
