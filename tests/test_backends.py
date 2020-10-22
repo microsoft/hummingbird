@@ -1,12 +1,20 @@
 """
-Tests Sklearn GradientBoostingClassifier converters.
+Tests Hummingbird's backends.
 """
 import unittest
 import warnings
-
 import numpy as np
+
 from sklearn.ensemble import GradientBoostingClassifier
-from onnxconverter_common.data_types import FloatTensorType
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+from onnxconverter_common.data_types import (
+    FloatTensorType,
+    DoubleTensorType,
+    Int64TensorType,
+    Int32TensorType,
+    StringTensorType,
+)
 
 import hummingbird.ml
 from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, tvm_installed
@@ -69,7 +77,7 @@ class TestBackends(unittest.TestCase):
 
         model.fit(X, y)
 
-        # Test backends are not case sensitive
+        # Test scala backend rises an exception
         self.assertRaises(MissingBackend, hummingbird.ml.convert, model, "scala")
 
     # Test torchscript requires test_data
@@ -109,7 +117,7 @@ class TestBackends(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
-    def test_onnx_test_data(self):
+    def test_onnx_no_test_data_float(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
         num_classes = 2
@@ -126,7 +134,91 @@ class TestBackends(unittest.TestCase):
             model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=11
         )
 
-        # Test onnx requires test_data
+        # Test onnx requires no test_data
+        hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx")
+        assert hb_model
+
+    # Test onnx no test_data, double input
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_onnx_no_test_data_double(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_sklearn(
+            model, initial_types=[("input", DoubleTensorType([X.shape[0], X.shape[1]]))], target_opset=11
+        )
+
+        # Test onnx requires no test_data
+        hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx")
+        assert hb_model
+
+    # Test onnx no test_data, long input
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_onnx_no_test_data_long(self):
+        warnings.filterwarnings("ignore")
+        model = model = StandardScaler(with_mean=True, with_std=True)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.int64)
+
+        model.fit(X)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_sklearn(
+            model, initial_types=[("input", Int64TensorType([X.shape[0], X.shape[1]]))], target_opset=11
+        )
+
+        # Test onnx requires no test_data
+        hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx")
+        assert hb_model
+
+    # Test onnx no test_data, int input
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_onnx_no_test_data_int(self):
+        warnings.filterwarnings("ignore")
+        model = OneHotEncoder()
+        X = np.array([[1, 2, 3]], dtype=np.int32)
+        model.fit(X)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_sklearn(
+            model, initial_types=[("input", Int32TensorType([X.shape[0], X.shape[1]]))], target_opset=11
+        )
+
+        # Test onnx requires no test_data
+        hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx")
+        assert hb_model
+
+    # Test onnx no test_data, string input
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_onnx_no_test_data_string(self):
+        warnings.filterwarnings("ignore")
+        model = OneHotEncoder()
+        X = np.array([["a", "b", "c"]])
+        model.fit(X)
+
+        # Create ONNX-ML model
+        onnx_ml_model = convert_sklearn(
+            model, initial_types=[("input", StringTensorType([X.shape[0], X.shape[1]]))], target_opset=11
+        )
+
+        # Test backends are not case sensitive
         self.assertRaises(RuntimeError, hummingbird.ml.convert, onnx_ml_model, "onnx")
 
 

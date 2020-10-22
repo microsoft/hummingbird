@@ -26,7 +26,7 @@
 <details class="source">
 <summary>
 <span>Expand source code</span>
-<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L0-L92" class="git-link">Browse git</a>
+<a href="https://github.com/microsoft/hummingbird/blob/master/hummingbird/ml/operator_converters/sklearn/kneighbors.py#L0-L133" class="git-link">Browse git</a>
 </summary>
 <pre><code class="python"># -------------------------------------------------------------------------
 # Copyright (c) 2020 Supun Nakandala. All rights reserved.
@@ -42,8 +42,8 @@ Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsR
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .._kneighbors_implementations import KNeighborsModel
-from ..constants import BATCH_SIZE
+from hummingbird.ml.operator_converters._kneighbors_implementations import KNeighborsModel, MetricType
+from hummingbird.ml.operator_converters import constants
 
 
 def convert_sklearn_kneighbors_regression_model(operator, device, extra_config):
@@ -79,9 +79,11 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
 
 
 def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
-    if BATCH_SIZE not in extra_config:
+    if constants.BATCH_SIZE not in extra_config:
         raise RuntimeError(
-            &#34;Hummingbird requires explicit specification of &#34; + BATCH_SIZE + &#34; parameter when compiling KNeighborsClassifier&#34;
+            &#34;Hummingbird requires explicit specification of &#34;
+            + constants.BATCH_SIZE
+            + &#34; parameter when compiling KNeighborsClassifier&#34;
         )
 
     classes = None
@@ -91,18 +93,47 @@ def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
             raise RuntimeError(&#34;Hummingbird supports only integer labels for class labels.&#34;)
 
     metric = operator.raw_operator.metric
-    metric_params = operator.raw_operator.metric_params
+    params = operator.raw_operator.metric_params
 
-    if metric not in [&#34;minkowski&#34;, &#34;euclidean&#34;]:
+    if metric not in [&#34;minkowski&#34;, &#34;euclidean&#34;, &#34;manhattan&#34;, &#34;chebyshev&#34;, &#34;wminkowski&#34;, &#34;seuclidean&#34;, &#34;mahalanobis&#34;]:
         raise NotImplementedError(
-            &#34;Hummingbird currently supports only the metric type &#39;minkowski&#39; and &#39;euclidean&#39; for KNeighbors&#34; + &#34;Classifier&#34;
+            &#34;Hummingbird currently supports only the metric type &#39;minkowski&#39;, &#39;wminkowski&#39;, &#39;manhattan&#39;, &#39;chebyshev&#39;, &#39;mahalanobis&#39;, &#39;euclidean&#39;, and &#39;seuclidean&#39; for KNeighbors&#34;
+            + &#34;Classifier&#34;
             if is_classifier
             else &#34;Regressor&#34;
         )
 
-    p = 2
-    if metric == &#34;minkowski&#34; and metric_params is not None and &#34;p&#34; in metric_params:
-        p = metric_params[&#34;p&#34;]
+    metric_type = None
+    metric_params = None
+    if metric in [&#34;minkowski&#34;, &#34;euclidean&#34;, &#34;manhattan&#34;, &#34;chebyshev&#34;]:
+        metric_type = MetricType.minkowski
+        p = 2
+        if metric == &#34;minkowski&#34; and params is not None and &#34;p&#34; in params:
+            p = params[&#34;p&#34;]
+        elif metric == &#34;manhattan&#34;:
+            p = 1
+        elif metric == &#34;chebyshev&#34;:
+            p = float(&#34;inf&#34;)
+        metric_params = {&#34;p&#34;: p}
+    elif metric == &#34;wminkowski&#34;:
+        metric_type = MetricType.wminkowski
+        p = 2
+        if params is not None and &#34;p&#34; in params:
+            p = params[&#34;p&#34;]
+        w = params[&#34;w&#34;]
+        metric_params = {&#34;p&#34;: p, &#34;w&#34;: w}
+    elif metric == &#34;seuclidean&#34;:
+        metric_type = MetricType.seuclidean
+        V = params[&#34;V&#34;]
+        metric_params = {&#34;V&#34;: V}
+    elif metric == &#34;mahalanobis&#34;:
+        metric_type = MetricType.mahalanobis
+        if &#34;VI&#34; in params:
+            VI = params[&#34;VI&#34;]
+        else:
+            VI = np.linalg.inv(params[&#34;V&#34;])
+
+        metric_params = {&#34;VI&#34;: VI}
 
     weights = operator.raw_operator.weights
     if weights not in [&#34;uniform&#34;, &#34;distance&#34;]:
@@ -116,7 +147,17 @@ def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
     train_labels = operator.raw_operator._y
     n_neighbors = operator.raw_operator.n_neighbors
 
-    return KNeighborsModel(train_data, train_labels, n_neighbors, weights, classes, p, extra_config[BATCH_SIZE], is_classifier)
+    return KNeighborsModel(
+        train_data,
+        train_labels,
+        n_neighbors,
+        weights,
+        classes,
+        extra_config[constants.BATCH_SIZE],
+        is_classifier,
+        metric_type,
+        metric_params,
+    )
 
 
 register_converter(&#34;SklearnKNeighborsClassifier&#34;, convert_sklearn_kneighbors_classification_model)

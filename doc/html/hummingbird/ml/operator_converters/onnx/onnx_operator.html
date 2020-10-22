@@ -294,7 +294,20 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <span>(</span><span>to_type)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p></div>
+<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>regression</code></strong></dt>
+<dd>Whether operator is a regression model.</dd>
+<dt><strong><code>classification</code></strong></dt>
+<dd>Whether the operator is a classification model.</dd>
+<dt><strong><code>transformer</code></strong></dt>
+<dd>Whether the operator is a feature transformer.</dd>
+<dt><strong><code>anomaly_detection</code></strong></dt>
+<dd>Whether the operator is an anomaly detection model.</dd>
+<dt><strong><code>kwargs</code></strong></dt>
+<dd>Other keyword arguments.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -346,7 +359,20 @@ register_converter(&#34;ONNXMLReshape&#34;, convert_onnx_reshape)</code></pre>
 <span>(</span><span>shape)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p></div>
+<div class="desc"><p>Abstract class defining the basic structure for operator implementations in Hummingbird.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>regression</code></strong></dt>
+<dd>Whether operator is a regression model.</dd>
+<dt><strong><code>classification</code></strong></dt>
+<dd>Whether the operator is a classification model.</dd>
+<dt><strong><code>transformer</code></strong></dt>
+<dd>Whether the operator is a feature transformer.</dd>
+<dt><strong><code>anomaly_detection</code></strong></dt>
+<dd>Whether the operator is an anomaly detection model.</dd>
+<dt><strong><code>kwargs</code></strong></dt>
+<dd>Other keyword arguments.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>

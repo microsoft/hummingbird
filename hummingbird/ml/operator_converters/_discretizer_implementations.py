@@ -9,8 +9,9 @@
 Base classes for sklearn discretizers: Binarizer, KBinsDiscretizer
 """
 import torch
-from ._one_hot_encoder_implementations import OneHotEncoder
+
 from ._base_operator import BaseOperator
+from ._one_hot_encoder_implementations import OneHotEncoder
 
 
 class Binarizer(BaseOperator, torch.nn.Module):

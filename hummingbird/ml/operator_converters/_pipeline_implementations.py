@@ -17,7 +17,7 @@ from ._base_operator import BaseOperator
 
 class Concat(BaseOperator, torch.nn.Module):
     def __init__(self):
-        super(Concat, self).__init__()
+        super(Concat, self).__init__(transformer=True)
 
     def forward(self, *x):
         if len(x[0].shape) > 1:

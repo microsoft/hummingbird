@@ -189,7 +189,20 @@ register_converter(&#34;SklearnPolynomialFeatures&#34;, convert_sklearn_poly_fea
 </code></dt>
 <dd>
 <div class="desc"><p>Class implementing PolynomialFeatures operators in PyTorch.</p>
-<h1 id="todo-extend-this-class-to-support-higher-orders">TODO extend this class to support higher orders</h1></div>
+<h1 id="todo-extend-this-class-to-support-higher-orders">TODO extend this class to support higher orders</h1>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>regression</code></strong></dt>
+<dd>Whether operator is a regression model.</dd>
+<dt><strong><code>classification</code></strong></dt>
+<dd>Whether the operator is a classification model.</dd>
+<dt><strong><code>transformer</code></strong></dt>
+<dd>Whether the operator is a feature transformer.</dd>
+<dt><strong><code>anomaly_detection</code></strong></dt>
+<dd>Whether the operator is an anomaly detection model.</dd>
+<dt><strong><code>kwargs</code></strong></dt>
+<dd>Other keyword arguments.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>

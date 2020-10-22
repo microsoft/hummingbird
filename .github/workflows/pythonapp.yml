@@ -61,7 +61,7 @@ jobs:
         export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
     - name: Install extra dependencies
       run: |
-        pip install .[extra,onnx]
+        pip install .[extra,onnx,sparkml]
         pip install pandas
     - name: Lint with flake8
       run: |

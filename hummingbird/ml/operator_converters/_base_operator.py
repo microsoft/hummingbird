@@ -7,6 +7,15 @@ class BaseOperator(ABC):
     """
 
     def __init__(self, regression=False, classification=False, transformer=False, anomaly_detection=False, **kwargs):
+        """
+        Args:
+            regression: Whether operator is a regression model.
+            classification: Whether the operator is a classification model.
+            transformer: Whether the operator is a feature transformer.
+            anomaly_detection: Whether the operator is an anomaly detection model.
+            kwargs: Other keyword arguments.
+        """
+
         super().__init__()
 
         # An operator can be either a model or a transformer. In the latter case, self.transformer must be set to True.
