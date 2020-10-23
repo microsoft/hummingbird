@@ -25,6 +25,8 @@ clean-sphinx-site:
 sphinx-site: #clean-sphinx-site
 	pip install sphinx sphinx_rtd_theme psutil
 	sphinx-apidoc -o sphinx/api -t sphinx/_templates ../hummingbird  -d 1 -f -e
+	#running out of ideas on why this breaks things:
+	rm sphinx/api/hummingbird.ml.operator_converters.onnx.onnx_operator.rst
 	$(MAKE) -C sphinx
 	$(MAKE) copy-python-apis
 
