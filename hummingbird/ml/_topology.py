@@ -54,14 +54,19 @@ def _jit_model(torch_model, trace_input, device, extra_config):
     return torch.jit.trace(torch_model, trace_input).eval()
 
 
-def _get_trace_input_from_test_input(inputs):
+def _get_trace_input_from_test_input(input, batch_size):
     """
     Utility function used to properly put the inputs into a format understandable by torch.
     """
-    if type(inputs) is tuple:
-        trace_input = tuple([torch.from_numpy(i) for i in inputs])
+    if type(input) is tuple:
+        if batch_size is not None:
+            trace_input = tuple([torch.from_numpy(i)[0:batch_size, :] for i in input])
+        else:
+            trace_input = tuple([torch.from_numpy(i) for i in input])
     else:
-        trace_input = torch.from_numpy(inputs)
+        trace_input = torch.from_numpy(input)
+        if batch_size is not None:
+            trace_input = trace_input[0:batch_size, :]
     return trace_input
 
 
