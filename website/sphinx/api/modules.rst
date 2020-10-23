@@ -1,7 +1,7 @@
-ml
-==
+hummingbird
+===========
 
 .. toctree::
    :maxdepth: 1
 
-   ml
+   hummingbird
