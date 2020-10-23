@@ -78,7 +78,6 @@ def get_number_processors(args):
 def print_sys_info(args):
     import xgboost
     import lightgbm
-    import onnxruntime
     import sklearn
     import torch
 
@@ -88,7 +87,13 @@ def print_sys_info(args):
     print("LightGBM: %s" % lightgbm.__version__)
     print("Sklearn : %s" % sklearn.__version__)
     print("PyTorch : %s" % torch.__version__)
-    print("ORT   : %s" % onnxruntime.__version__)
+
+    try:
+        import onnxruntime
+
+        print("ORT   : %s" % onnxruntime.__version__)
+    except ImportError:
+        pass
 
     if args.gpu:
         print("Running on GPU")
@@ -170,7 +175,7 @@ def parse_args():
     parser.add_argument("-niters", default=1, type=int, help=("Number of iterations for each experiment"))
     parser.add_argument("-maxdepth", default=None, type=int, help=("Maxmimum number of levels in the trees"))
     parser.add_argument(
-        "-validate", default=False, action="store_true", help="Validate prediction output and fails accordigly."
+        "-validate", default=False, action="store_true", help="Validate prediction output and fails accordingly."
     )
     parser.add_argument("-extra", default="{}", help="Extra arguments as a python dictionary")
     args = parser.parse_args()

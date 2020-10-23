@@ -50,12 +50,14 @@ def _get_trace_input_from_test_input(input, batch_size):
     Utility function used to properly put the inputs into a format understandable by torch.
     """
     if type(input) is tuple:
-        trace_input = tuple([torch.from_numpy(i) for i in input])
+        if batch_size is not None:
+            trace_input = tuple([torch.from_numpy(i)[0:batch_size, :] for i in input])
+        else:
+            trace_input = tuple([torch.from_numpy(i) for i in input])
     else:
         trace_input = torch.from_numpy(input)
-
-    if batch_size is not None:
-        trace_input = trace_input[0:batch_size, :]
+        if batch_size is not None:
+            trace_input = trace_input[0:batch_size, :]
     return trace_input
 
 
