@@ -24,6 +24,7 @@ clean-sphinx-site:
 .PHONY:
 sphinx-site: #clean-sphinx-site
 	pip install sphinx sphinx_rtd_theme psutil
+	pip freeze
 	sphinx-apidoc -o sphinx/api -t sphinx/_templates ../hummingbird  -d 1 -f -e
 	$(MAKE) -C sphinx
 	$(MAKE) copy-python-apis
