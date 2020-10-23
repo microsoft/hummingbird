@@ -2,7 +2,7 @@ Welcome to Hummingbird
 ===================================================
 
 This is the API documentation for the Python interface.
-You can find the main documentation website at https://microsoft.github.io/Hummingbird/, which contains end-to-end examples
+
 
 .. automodule:: hummingbird
    :members:
@@ -11,8 +11,6 @@ You can find the main documentation website at https://microsoft.github.io/Hummi
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :hidden:
 
-   Main website <https://microsoft.github.io/hummingbird/>
-   api/hummingbird
