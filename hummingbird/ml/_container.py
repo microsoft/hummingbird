@@ -63,6 +63,7 @@ class SklearnContainer(ABC):
         self._n_threads = n_threads
         self._batch_size = batch_size
         self._extra_config = extra_config
+        self._last_iteration = False
 
     @property
     def model(self):
@@ -107,6 +108,9 @@ class SklearnContainer(ABC):
                 batch = tuple([input[start:end, :] for input in inputs])
             else:
                 batch = inputs[start:end, :]
+            # Tell function that we are in the last iteration and do proper actions in case
+            # (e.g., for TVM we may want to use the raminder model).
+            self._last_iteration = i == iterations - 1
             predictions.extend(function(*batch).ravel())
 
         if reshape:
@@ -499,7 +503,7 @@ class TVMSklearnContainer(SklearnContainer):
         self._to_tvm_array = lambda x: tvm.nd.array(x, self._ctx)
 
     def _to_tvm_tensor(self, *inputs):
-        return {self._input_names[0]: self._to_tvm_array(inputs[i]) for i in range(len(inputs))}
+        return {self._input_names[i]: self._to_tvm_array(inputs[i]) for i in range(len(inputs))}
 
 
 class TVMSklearnContainerTransformer(TVMSklearnContainer, SklearnContainerTransformer):
@@ -508,6 +512,9 @@ class TVMSklearnContainerTransformer(TVMSklearnContainer, SklearnContainerTransf
     """
 
     def _transform(self, *inputs):
+        if self._last_iteration and self._remainder_model is not None:
+            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
+            return self._remainder_model.get_output(0).asnumpy()
         self.model.run(**self._to_tvm_tensor(*inputs))
         return self.model.get_output(0).asnumpy()
 
@@ -518,11 +525,11 @@ class TVMSklearnContainerRegression(TVMSklearnContainer, SklearnContainerRegress
     """
 
     def _predict(self, *inputs):
+        if self._last_iteration and self._remainder_model is not None:
+            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
+            return self._remainder_model.get_output(0).asnumpy().ravel()
         self.model.run(**self._to_tvm_tensor(*inputs))
-        if self._is_regression or self._is_anomaly_detection:
-            return self.model.get_output(0).asnumpy().ravel()
-        else:
-            return self.model.get_output(0).asnumpy().ravel()
+        return self.model.get_output(0).asnumpy().ravel()
 
 
 class TVMSklearnContainerClassification(TVMSklearnContainerRegression, SklearnContainerClassification):
@@ -531,10 +538,9 @@ class TVMSklearnContainerClassification(TVMSklearnContainerRegression, SklearnCo
     """
 
     def _predict_proba(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On classification tasks returns the probability estimates.
-        """
+        if self._last_iteration and self._remainder_model is not None:
+            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
+            return self._remainder_model.get_output(1).asnumpy()
         self.model.run(**self._to_tvm_tensor(*inputs))
         return self.model.get_output(1).asnumpy()
 
@@ -545,12 +551,12 @@ class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression, Sklearn
     """
 
     def _decision_function(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On anomaly detection (e.g. isolation forest) returns the decision function scores.
-        """
-        self.model.run(**self._to_tvm_tensor(*inputs))
-        scores = self.model.get_output(1).asnumpy().ravel()
+        if self._last_iteration and self._remainder_model is not None:
+            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
+            scores = self._remainder_model.get_output(1).asnumpy().ravel()
+        else:
+            self.model.run(**self._to_tvm_tensor(*inputs))
+            scores = self.model.get_output(1).asnumpy().ravel()
 
         # Backward compatibility for sklearn <= 0.21
         if constants.IFOREST_THRESHOLD in self._extra_config:

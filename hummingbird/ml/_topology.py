@@ -221,14 +221,23 @@ def convert(topology, backend, device, extra_config={}):
             extra_config[constants.TEST_INPUT], batch_size
         )
         ts_model = _jit_model(torch_model, batch_trace_input, "cpu", extra_config)
+        if remainder_trace_input is not None:
+            remainder_ts_model = _jit_model(torch_model, remainder_trace_input, "cpu", extra_config)
 
         # Generate the test input in the TVM format. In case we have a remainder beyond the batch, generate a remainder test input as well.
         test_input = [
-            (topology.raw_model.input_names[i], batch_trace_input.shape) for i in range(len(topology.raw_model.input_names))
+            (
+                topology.raw_model.input_names[i],
+                batch_trace_input[i].shape if type(batch_trace_input) is tuple else batch_trace_input.shape,
+            )
+            for i in range(len(topology.raw_model.input_names))
         ]
         if remainder_trace_input is not None:
             remainder_test_input = [
-                (topology.raw_model.input_names[i], remainder_trace_input.shape)
+                (
+                    topology.raw_model.input_names[i],
+                    remainder_trace_input[i].shape if type(remainder_trace_input) is tuple else remainder_trace_input.shape,
+                )
                 for i in range(len(topology.raw_model.input_names))
             ]
 
@@ -257,7 +266,7 @@ def convert(topology, backend, device, extra_config={}):
         # Create the relay version of the model.
         model, params = relay.frontend.from_pytorch(ts_model, test_input)
         if remainder_trace_input is not None:
-            remainder_model, remainder_params = relay.frontend.from_pytorch(ts_model, remainder_test_input)
+            remainder_model, remainder_params = relay.frontend.from_pytorch(remainder_ts_model, remainder_test_input)
 
         # Generate the model.
         with tvm.transform.PassContext(opt_level=3, config=config):
