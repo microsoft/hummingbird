@@ -143,66 +143,21 @@ class TorchScriptBackend(PytorchBackend):
         return t.interval
 
 
-class TVMBackend(ScoreBackend):
-    def __init__(self):
-        super().__init__()
-        self.remainder_model = None  # for batch inference in case we have remainder records
-
+class TVMBackend(PytorchBackend):
     def convert(self, model, data, args, model_name):
-        from hummingbird.ml import convert
-        import os
-
         self.configure(data, model, args)
-        batch = min(len(data.X_test), self.params["batch_size"])
         predict_data = self.get_data(data.X_test)
-        remainder = len(data.X_test) % batch
-
-        os.environ["TVM_NUM_THREADS"] = str(self.params["nthread"])
 
         with Timer() as t:
-            self.model = convert(model, "tvm", predict_data[0:batch], device=self.params["device"])
-
-            if remainder > 0:
-                self.remainder_model = convert(model, "tvm", predict_data[0:remainder], device=self.params["device"])
-        return t.interval
-
-    def predict(self, data):
-        assert self.model is not None
-        batch_size = self.params["batch_size"]
-        is_regression = data.learning_task == LearningTask.REGRESSION
-
-        with Timer() as t:
-            predict_data = self.get_data(data.X_test)
-            total_size = len(predict_data)
-            iterations = total_size // batch_size
-            iterations += 1 if total_size % batch_size > 0 else 0
-            iterations = max(1, iterations)
-            self.predictions = np.empty([total_size, self.params["n_classes"]], dtype="f4")
-
-            for i in range(0, iterations):
-                start = i * batch_size
-                end = min(start + batch_size, total_size)
-
-                if i == iterations - 1 and self.remainder_model is not None:
-                    if is_regression:
-                        self.predictions[start:end, :] = self.remainder_model.predict(predict_data[start:end, :]).reshape(
-                            -1, self.params["n_classes"]
-                        )
-                    else:
-                        self.predictions[start:end, :] = self.remainder_model.predict_proba(predict_data[start:end, :])
-                else:
-                    if is_regression:
-                        self.predictions[start:end, :] = self.model.predict(predict_data[start:end, :]).reshape(
-                            -1, self.params["n_classes"]
-                        )
-                    else:
-                        self.predictions[start:end, :] = self.model.predict_proba(predict_data[start:end, :])
+            self.model = convert(
+                model,
+                "tvm",
+                predict_data,
+                self.params["device"],
+                extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
+            )
 
         return t.interval
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        if self.remainder_model is not None:
-            del self.remainder_model
 
 
 class ONNXBackend(PytorchBackend):

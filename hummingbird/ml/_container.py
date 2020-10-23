@@ -12,6 +12,7 @@ In Hummingbird we use two types of containers:
 """
 
 from abc import ABC
+import os
 import numpy as np
 from onnxconverter_common.container import CommonSklearnModelContainer
 import torch
@@ -501,6 +502,8 @@ class TVMSklearnContainer(SklearnContainer):
         if constants.TVM_REMAINDER_MODEL in self._extra_config:
             self._remainder_model = self._extra_config[constants.TVM_REMAINDER_MODEL]
         self._to_tvm_array = lambda x: tvm.nd.array(x, self._ctx)
+
+        os.environ["TVM_NUM_THREADS"] = str(self._n_threads)
 
     def _to_tvm_tensor(self, *inputs):
         return {self._input_names[i]: self._to_tvm_array(inputs[i]) for i in range(len(inputs))}
