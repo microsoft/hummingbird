@@ -4,7 +4,7 @@ Welcome to Hummingbird
 This is the API documentation for the Python interface.
 You can find the main documentation website at https://microsoft.github.io/Hummingbird/, which contains end-to-end examples
 
-.. automodule:: Hummingbird
+.. automodule:: hummingbird
    :members:
    :undoc-members:
    :show-inheritance:
@@ -14,5 +14,5 @@ You can find the main documentation website at https://microsoft.github.io/Hummi
    :maxdepth: 3
    :hidden:
 
-   Main website <https://microsoft.github.io/Hummingbird/>
-   api/Hummingbird
+   Main website <https://microsoft.github.io/hummingbird/>
+   api/hummingbird
