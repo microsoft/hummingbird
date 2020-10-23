@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.onnx.one\_hot\_encoder module
+=================================================================
+
+.. automodule:: hummingbird.ml.operator_converters.onnx.one_hot_encoder
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

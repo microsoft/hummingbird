@@ -5,3 +5,4 @@ hummingbird.ml.operator\_converters.sparkml.linear
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:

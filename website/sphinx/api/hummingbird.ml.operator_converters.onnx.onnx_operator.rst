@@ -5,3 +5,4 @@ hummingbird.ml.operator\_converters.onnx.onnx\_operator
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:

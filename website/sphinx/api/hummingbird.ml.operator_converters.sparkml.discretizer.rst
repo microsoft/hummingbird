@@ -5,3 +5,4 @@ hummingbird.ml.operator\_converters.sparkml.discretizer
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:

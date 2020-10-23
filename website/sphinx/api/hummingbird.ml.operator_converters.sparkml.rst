@@ -6,6 +6,7 @@ hummingbird.ml.operator\_converters.sparkml
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
 
 
 .. toctree::

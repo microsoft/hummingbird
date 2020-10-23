@@ -46,7 +46,7 @@ if LooseVersion(sphinx.__version__) < LooseVersion("1.4"):
 else:
     extensions.append("sphinx.ext.imgmath")
 
-autodoc_default_flags = ["members", "inherited-members"]
+autodoc_default_flags = ["members", "inherited-members", "private-members"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

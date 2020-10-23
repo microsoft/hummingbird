@@ -6,6 +6,7 @@ This is the API documentation for the Python interface.
 
 .. automodule:: hummingbird
    :members:
+   :private-members:
    :undoc-members:
    :show-inheritance:
 

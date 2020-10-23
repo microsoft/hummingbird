@@ -5,3 +5,4 @@ hummingbird.ml.operator\_converters.sklearn.gbdt
    :members:
    :undoc-members:
    :show-inheritance:
+   :private-members:
