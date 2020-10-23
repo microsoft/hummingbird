@@ -35,19 +35,29 @@ import sys
 import argparse
 import json
 import ast
+import gc
 import psutil
 import signal
-import train
-import score
 import pickle
 import numpy as np
 import warnings
 from pathlib import Path
 from scipy import stats
-from metrics import get_metrics
-from datasets import prepare_dataset, LearningTask
 from memory_profiler import memory_usage
-import gc
+
+import benchmarks.trees.train as train
+import benchmarks.trees.score as score
+from benchmarks.trees.metrics import get_metrics
+from benchmarks.datasets import prepare_dataset, LearningTask
+
+from hummingbird.ml._utils import (
+    xgboost_installed,
+    lightgbm_installed,
+    sklearn_installed,
+    onnx_ml_tools_installed,
+    onnx_runtime_installed,
+    tvm_installed,
+)
 
 
 ROOT_PATH = Path(__file__).absolute().parent.parent.parent
@@ -71,7 +81,6 @@ def print_sys_info(args):
     import lightgbm
     import sklearn
     import torch
-    import tvm
 
     print("System  : %s" % sys.version)
     print("OS  : %s" % sys.platform)
@@ -79,12 +88,18 @@ def print_sys_info(args):
     print("LightGBM: %s" % lightgbm.__version__)
     print("Sklearn : %s" % sklearn.__version__)
     print("PyTorch : %s" % torch.__version__)
-    print("TVM : %s" % tvm.__version__)
 
+    # Optional imports
     try:
         import onnxruntime
 
         print("ORT   : %s" % onnxruntime.__version__)
+    except ImportError:
+        pass
+    try:
+        import tvm
+
+        print("TVM : %s" % tvm.__version__)
     except ImportError:
         pass
 
@@ -168,7 +183,7 @@ def parse_args():
     parser.add_argument("-niters", default=5, type=int, help=("Number of iterations for each experiment"))
     parser.add_argument("-maxdepth", default=None, type=int, help=("Maxmimum number of levels in the trees"))
     parser.add_argument(
-        "-validate", default=False, action="store_true", help="Validate prediction output and fails accordigly."
+        "-validate", default=False, action="store_true", help="Validate prediction output and fails accordingly."
     )
     parser.add_argument("-extra", default="{}", help="Extra arguments as a python dictionary")
     args = parser.parse_args()
@@ -228,7 +243,19 @@ def benchmark(args, dataset_folder, model_folder, dataset):
             args.operator = op
 
             if args.backend == "all":
-                args.backend = "onnx-ml,hb-pytorch,hb-torchscript,hb-tvm"
+                args.backend = "onnx-ml,hb-pytorch,hb-torchscript,hb-onnx,hb-tvm"
+            if "hb-tvm" in args.backend:
+                assert (
+                    tvm_installed
+                ), "To run benchmark with TVM you need to have TVM installed. Either install TVM or remove it from the backends."
+            if "hb-onnx" in args.backend:
+                assert (
+                    onnx_runtime_installed
+                ), "To run benchmark with ONNX you need to have ONNX runtime installed. Either install ONNX runtime or remove ONNX from the backends."
+            if "onnx-ml" in args.backend:
+                assert (
+                    onnx_runtime_installed and onnx_ml_tools_installed
+                ), "To run benchmark with ONNX-ML you need to have ONNX runtime and ONNXMLTOOLS installed. Either install ONNX runtime and ONNXMLTOOLS or remove ONNX-ML from the backends."
             for backend in args.backend.split(","):
                 print("Running '%s' ..." % backend)
                 scorer = score.ScoreBackend.create(backend)
@@ -292,4 +319,8 @@ def main():
 
 
 if __name__ == "__main__":
+    assert xgboost_installed, "benchmark requires XGBoost"
+    assert lightgbm_installed, "benchmark requires LightGBM"
+    assert sklearn_installed, "benchmark requires sklearn"
+
     main()

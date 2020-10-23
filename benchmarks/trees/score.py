@@ -25,26 +25,13 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from abc import ABC, abstractmethod
-from distutils.version import LooseVersion
-import time
 import numpy as np
 
-from datasets import LearningTask
+from benchmarks.timer import Timer
+from benchmarks.datasets import LearningTask
 
-
-class Timer:
-    def __init__(self):
-        self.start = None
-        self.end = None
-        self.interval = None
-
-    def __enter__(self):
-        self.start = time.perf_counter()
-        return self
-
-    def __exit__(self, *args):
-        self.end = time.perf_counter()
-        self.interval = self.end - self.start
+from hummingbird.ml import constants
+from hummingbird.ml import convert
 
 
 class ScoreBackend(ABC):
@@ -56,6 +43,8 @@ class ScoreBackend(ABC):
             return TorchScriptBackend()
         if name == "hb-tvm":
             return TVMBackend()
+        if name == "hb-onnx":
+            return ONNXBackend()
         if name == "onnx-ml":
             return ONNXMLBackend()
         raise ValueError("Unknown backend: " + name)
@@ -106,47 +95,30 @@ class ScoreBackend(ABC):
 
 class PytorchBackend(ScoreBackend):
     def get_data(self, data, size=-1):
-        import torch
-
         return ScoreBackend.get_data(data, size)
 
     def convert(self, model, data, args, model_name):
-        from hummingbird.ml import convert
-
         self.configure(data, model, args)
 
         with Timer() as t:
-            self.model = convert(model, "torch", device=self.params["device"])
+            self.model = convert(
+                model,
+                "torch",
+                device=self.params["device"],
+                extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
+            )
 
         return t.interval
 
     def predict(self, data):
-        import torch
-
         assert self.model is not None
-
-        batch_size = self.params["batch_size"]
-        torch.set_num_threads(self.params["nthread"])
-        is_regression = data.learning_task == LearningTask.REGRESSION
 
         with Timer() as t:
             predict_data = self.get_data(data.X_test)
-            total_size = len(predict_data)
-            iterations = total_size // batch_size
-            iterations += 1 if total_size % batch_size > 0 else 0
-            iterations = max(1, iterations)
-
-            self.predictions = np.empty([total_size, self.params["n_classes"]], dtype="f4")
-
-            for i in range(0, iterations):
-                start = i * batch_size
-                end = min(start + batch_size, total_size)
-                if is_regression:
-                    self.predictions[start:end, :] = self.model.predict(predict_data[start:end]).reshape(
-                        -1, self.params["n_classes"]
-                    )
-                else:
-                    self.predictions[start:end, :] = self.model.predict_proba(predict_data[start:end])
+            if data.learning_task == LearningTask.REGRESSION:
+                self.predictions = self.model.predict(predict_data)
+            else:
+                self.predictions = self.model.predict_proba(predict_data)
 
         return t.interval
 
@@ -156,16 +128,17 @@ class PytorchBackend(ScoreBackend):
 
 class TorchScriptBackend(PytorchBackend):
     def convert(self, model, data, args, model_name):
-        from hummingbird.ml import convert
-
         self.configure(data, model, args)
-        if data.learning_task != LearningTask.REGRESSION:
-            self.n_classes = model.n_classes_
-        batch_size = self.params["batch_size"]
-        predict_data = self.get_data(data.X_test, batch_size)
+        predict_data = self.get_data(data.X_test)
 
         with Timer() as t:
-            self.model = convert(model, "torch.jit", predict_data, self.params["device"])
+            self.model = convert(
+                model,
+                "torch.jit",
+                predict_data,
+                self.params["device"],
+                extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
+            )
 
         return t.interval
 
@@ -230,6 +203,25 @@ class TVMBackend(ScoreBackend):
     def __exit__(self, exc_type, exc_value, traceback):
         if self.remainder_model is not None:
             del self.remainder_model
+
+
+class ONNXBackend(PytorchBackend):
+    def convert(self, model, data, args, model_name):
+
+        self.configure(data, model, args)
+        predict_data = self.get_data(data.X_test)
+
+        with Timer() as t:
+            self.model = convert(
+                model,
+                "onnx",
+                predict_data,
+                self.params["device"],
+                extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
+            )
+        return t.interval
+
+    def __exit__(self, exc_type, exc_value, traceback):
         del self.model
 
 
@@ -279,18 +271,13 @@ class ONNXMLBackend(ScoreBackend):
 
         remainder_sess = None
         sess_options = ort.SessionOptions()
-        sess_options.inter_op_num_threads = self.params["nthread"]
         sess_options.intra_op_num_threads = self.params["nthread"]
         sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
         sess = ort.InferenceSession(self.model.SerializeToString(), sess_options=sess_options)
         if self.remainder_model is not None:
             remainder_sess = ort.InferenceSession(self.remainder_model.SerializeToString(), sess_options=sess_options)
 
-        batch_size = (
-            1
-            if (self.params["operator"] == "xgb" and LooseVersion(ort.__version__) >= LooseVersion("1.4.0"))
-            else self.params["batch_size"]
-        )
+        batch_size = 1 if self.params["operator"] == "xgb" else self.params["batch_size"]
         input_name = sess.get_inputs()[0].name
         is_regression = data.learning_task == LearningTask.REGRESSION
         if is_regression:

@@ -44,6 +44,11 @@ if pandas_installed():
 else:
     DataFrame = None
 
+if pandas_installed():
+    from pandas import DataFrame
+else:
+    DataFrame = None
+
 
 def _jit_model(torch_model, trace_input, device, extra_config):
     """
@@ -124,6 +129,10 @@ def convert(topology, backend, device, extra_config={}):
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
 
+    # Set the parameters for the model / container
+    n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
+    batch_size = None if constants.BATCH_SIZE not in extra_config else extra_config[constants.BATCH_SIZE]
+
     if backend == onnx.__name__:
         onnx_model_name = output_model_name = None
         target_opset = 11
@@ -138,7 +147,7 @@ def convert(topology, backend, device, extra_config={}):
             output_model_name = str(uuid4().hex) + ".onnx"
 
         # Put the tracing test input into the right format.
-        trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT])
+        trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -197,7 +206,7 @@ def convert(topology, backend, device, extra_config={}):
         fix_graph(hb_model.graph)
     elif backend == tvm_backend:
         # First we need to generate the torchscript model.
-        trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT])
+        trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
         ts_model = _jit_model(torch_model, trace_input, "cpu", extra_config)
 
         # Generate the test input in the TVM format.
@@ -250,7 +259,7 @@ def convert(topology, backend, device, extra_config={}):
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
-            trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT])
+            trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
             if device != "cpu":
                 trace_input.to(device)
             torch_model = torch.jit.trace(torch_model, trace_input).eval()

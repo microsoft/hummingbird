@@ -31,32 +31,17 @@
 
 
 from abc import ABC, abstractmethod
-import time
-import numpy as np
 import lightgbm as lgb
-import xgboost as xgb
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import RandomForestRegressor
-from datasets import LearningTask
+import numpy as np
+import os.path
 import pandas as pd
 import pickle
-import os.path
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score
+import xgboost as xgb
 
-
-class Timer:
-    def __init__(self):
-        self.start = None
-        self.end = None
-        self.interval = None
-
-    def __enter__(self):
-        self.start = time.perf_counter()
-        return self
-
-    def __exit__(self, *args):
-        self.end = time.perf_counter()
-        self.interval = self.end - self.start
+from benchmarks.timer import Timer
+from benchmarks.datasets import LearningTask
 
 
 class TrainEnsembleAlgorithm(ABC):

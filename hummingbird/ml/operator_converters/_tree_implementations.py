@@ -222,19 +222,11 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         nodes_offset = [[i * self.num_nodes for i in range(self.num_trees)]]
         self.nodes_offset = torch.nn.Parameter(torch.LongTensor(nodes_offset), requires_grad=False)
 
-        # Fix the batch size if known upfront. This will help with compilation
-        # (e.g., with TVM we can get a segfault is this is not set https://github.com/microsoft/hummingbird/issues/232)
-        self.indexes = None
-        if constants.BATCH_SIZE in extra_config:
-            self.indexes = self._expand_indexes(extra_config[constants.BATCH_SIZE])
-
     def aggregation(self, x):
         return x
 
     def forward(self, x):
-        indexes = self.indexes
-        if indexes is None:
-            indexes = self._expand_indexes(x.size()[0])
+        indexes = self._expand_indexes(x.size()[0])
 
         for _ in range(self.max_tree_depth):
             tree_nodes = indexes
