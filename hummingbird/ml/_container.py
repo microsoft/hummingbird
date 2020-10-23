@@ -519,7 +519,7 @@ class TVMSklearnContainer(ABC):
     The container allows to mirror the Sklearn API.
     """
 
-    def __init__(self, model, n_threads, batch_size, extra_config={}):
+    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
         """
         Args:
             model: A TVM model
@@ -561,8 +561,10 @@ class TVMSklearnContainerRegression(TVMSklearnContainer):
     Container mirroring Sklearn regressors API.
     """
 
-    def __init__(self, model, extra_config={}, is_regression=True, is_anomaly_detection=False, **kwargs):
-        super(TVMSklearnContainerRegression, self).__init__(model, extra_config)
+    def __init__(
+        self, model, n_threads=None, batch_size=None, extra_config={}, is_regression=True, is_anomaly_detection=False, **kwargs
+    ):
+        super(TVMSklearnContainerRegression, self).__init__(model, n_threads, batch_size, extra_config)
 
         assert not (is_regression and is_anomaly_detection)
 
@@ -588,8 +590,10 @@ class TVMSklearnContainerClassification(TVMSklearnContainerRegression):
     Container mirroring Sklearn classifiers API.
     """
 
-    def __init__(self, model, extra_config={}):
-        super(TVMSklearnContainerClassification, self).__init__(model, extra_config, is_regression=False)
+    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
+        super(TVMSklearnContainerClassification, self).__init__(
+            model, n_threads, batch_size, extra_config, is_regression=False
+        )
 
     def predict_proba(self, *inputs):
         """
@@ -605,9 +609,9 @@ class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression):
     Container mirroring Sklearn anomaly detection API.
     """
 
-    def __init__(self, model, extra_config={}):
+    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
         super(TVMSklearnContainerAnomalyDetection, self).__init__(
-            model, extra_config, is_regression=False, is_anomaly_detection=True
+            model, n_threads, batch_size, extra_config, is_regression=False, is_anomaly_detection=True
         )
 
     def decision_function(self, *inputs):
