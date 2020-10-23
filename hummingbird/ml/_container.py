@@ -44,7 +44,8 @@ class CommonSparkMLModelContainer(CommonSklearnModelContainer):
         super(CommonSparkMLModelContainer, self).__init__(sparkml_model)
 
 
-# Output containers
+# Output containers.
+# Abstract containers enabling the Sklearn API.
 class SklearnContainer(ABC):
     def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
         """
@@ -113,31 +114,13 @@ class SklearnContainer(ABC):
         return np.array(predictions).ravel()
 
 
-class PyTorchTorchscriptSklearnContainer(SklearnContainer):
-    """
-    Base container for PyTorch and TorchScript models.
-    """
-
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        super(PyTorchTorchscriptSklearnContainer, self).__init__(model, n_threads, batch_size, extra_config)
-
-        assert self._n_threads is not None
-
-        # We set intra op concurrency while we force operators to run sequentially.
-        # We can revise this later, but in general we don't have graphs requireing inter-op parallelism.
-        if torch.get_num_interop_threads() != 1:
-            torch.set_num_interop_threads(1)
-        torch.set_num_threads(self._n_threads)
-
-
-# PyTorch containers.
-class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer):
+class SklearnContainerTransformer(SklearnContainer):
     """
     Container mirroring Sklearn transformers API.
     """
 
-    def _transform(self, *inputs):
-        return self.model.forward(*inputs).cpu().numpy()
+    def _transform(self, *input):
+        pass
 
     def transform(self, *inputs):
         """
@@ -147,7 +130,7 @@ class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer):
         return self._run(self._transform, *inputs, reshape=True)
 
 
-class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
+class SklearnContainerRegression(SklearnContainer):
     """
     Container mirroring Sklearn regressors API.
     """
@@ -155,20 +138,15 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
     def __init__(
         self, model, n_threads, batch_size, is_regression=True, is_anomaly_detection=False, extra_config={}, **kwargs
     ):
-        super(PyTorchSklearnContainerRegression, self).__init__(model, n_threads, batch_size, extra_config)
+        super(SklearnContainerRegression, self).__init__(model, n_threads, batch_size, extra_config)
 
         assert not (is_regression and is_anomaly_detection)
 
         self._is_regression = is_regression
         self._is_anomaly_detection = is_anomaly_detection
 
-    def _predict(self, *inputs):
-        if self._is_regression:
-            return self.model.forward(*inputs).cpu().numpy().ravel()
-        elif self._is_anomaly_detection:
-            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
-        else:
-            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
+    def _predict(self, *input):
+        pass
 
     def predict(self, *inputs):
         """
@@ -180,18 +158,18 @@ class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer):
         return self._run(self._predict, *inputs)
 
 
-class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
+class SklearnContainerClassification(SklearnContainerRegression):
     """
     Container mirroring Sklearn classifiers API.
     """
 
     def __init__(self, model, n_threads, batch_size, extra_config={}):
-        super(PyTorchSklearnContainerClassification, self).__init__(
+        super(SklearnContainerClassification, self).__init__(
             model, n_threads, batch_size, is_regression=False, extra_config=extra_config
         )
 
     def _predict_proba(self, *input):
-        return self.model.forward(*input)[1].cpu().numpy()
+        pass
 
     def predict_proba(self, *inputs):
         """
@@ -201,18 +179,18 @@ class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression):
         return self._run(self._predict_proba, *inputs, reshape=True)
 
 
-class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression):
+class SklearnContainerAnomalyDetection(SklearnContainerRegression):
     """
     Container mirroring Sklearn anomaly detection API.
     """
 
     def __init__(self, model, n_threads, batch_size, extra_config={}):
-        super(PyTorchSklearnContainerAnomalyDetection, self).__init__(
+        super(SklearnContainerAnomalyDetection, self).__init__(
             model, n_threads, batch_size, is_regression=False, is_anomaly_detection=True, extra_config=extra_config
         )
 
     def _decision_function(self, *inputs):
-        return self.model.forward(*inputs)[1].cpu().numpy().ravel()
+        pass
 
     def decision_function(self, *inputs):
         """
@@ -232,6 +210,65 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression)
         On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
         """
         return self.decision_function(*inputs) + self._extra_config[constants.OFFSET]
+
+
+class PyTorchTorchscriptSklearnContainer(SklearnContainer):
+    """
+    Base container for PyTorch and TorchScript models.
+    """
+
+    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
+        super(PyTorchTorchscriptSklearnContainer, self).__init__(model, n_threads, batch_size, extra_config)
+
+        assert self._n_threads is not None
+
+        # We set intra op concurrency while we force operators to run sequentially.
+        # We can revise this later, but in general we don't have graphs requireing inter-op parallelism.
+        if torch.get_num_interop_threads() != 1:
+            torch.set_num_interop_threads(1)
+        torch.set_num_threads(self._n_threads)
+
+
+# PyTorch containers.
+class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer, SklearnContainerTransformer):
+    """
+    Container for PyTorch models mirroring Sklearn transformers API.
+    """
+
+    def _transform(self, *inputs):
+        return self.model.forward(*inputs).cpu().numpy()
+
+
+class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer, SklearnContainerRegression):
+    """
+    Container for PyTorch models mirroring Sklearn regressor API.
+    """
+
+    def _predict(self, *inputs):
+        if self._is_regression:
+            return self.model.forward(*inputs).cpu().numpy().ravel()
+        elif self._is_anomaly_detection:
+            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
+        else:
+            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
+
+
+class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression, SklearnContainerClassification):
+    """
+    Container for PyTorch models mirroring Sklearn classifiers API.
+    """
+
+    def _predict_proba(self, *input):
+        return self.model.forward(*input)[1].cpu().numpy()
+
+
+class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression, SklearnContainerAnomalyDetection):
+    """
+    Container for PyTorch models mirroning the Sklearn anomaly detection API.
+    """
+
+    def _decision_function(self, *inputs):
+        return self.model.forward(*inputs)[1].cpu().numpy().ravel()
 
 
 # TorchScript containers.
@@ -264,7 +301,7 @@ def _torchscript_wrapper(device, function, *inputs):
 
 class TorchScriptSklearnContainerTransformer(PyTorchSklearnContainerTransformer):
     """
-    Container mirroring Sklearn transformers API.
+    Container for TorchScript models mirroring Sklearn transformers API.
     """
 
     def transform(self, *inputs):
@@ -277,7 +314,7 @@ class TorchScriptSklearnContainerTransformer(PyTorchSklearnContainerTransformer)
 
 class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
     """
-    Container mirroring Sklearn regressors API.
+    Container for TorchScript models mirroring Sklearn regressors API.
     """
 
     def predict(self, *inputs):
@@ -290,7 +327,7 @@ class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
 
 class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassification):
     """
-    Container mirroring Sklearn classifiers API.
+    Container for TorchScript models mirroring Sklearn classifiers API.
     """
 
     def predict(self, *inputs):
@@ -310,7 +347,7 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
 
 class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomalyDetection):
     """
-    Container mirroring Sklearn anomaly detection API.
+    Container for TorchScript models mirroring Sklearn anomaly detection API.
     """
 
     def predict(self, *inputs):
@@ -348,9 +385,6 @@ class ONNXSklearnContainer(SklearnContainer):
         if onnx_runtime_installed():
             import onnxruntime as ort
 
-            self._model = model
-            self._extra_config = extra_config
-
             sess_options = ort.SessionOptions()
             if self._n_threads is not None:
                 sess_options.intra_op_num_threads = self._n_threads
@@ -358,7 +392,7 @@ class ONNXSklearnContainer(SklearnContainer):
                 sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
             self._session = ort.InferenceSession(self._model.SerializeToString(), sess_options=sess_options)
             self._output_names = [self._session.get_outputs()[i].name for i in range(len(self._session.get_outputs()))]
-            self.input_names = [input.name for input in self._session.get_inputs()]
+            self._input_names = [input.name for input in self._session.get_inputs()]
         else:
             raise RuntimeError("ONNX Container requires ONNX runtime installed.")
 
@@ -366,129 +400,75 @@ class ONNXSklearnContainer(SklearnContainer):
         """
         Retrieve the inputs names from the session object.
         """
-        if len(inputs) < len(self.input_names):
+        if len(inputs) < len(self._input_names):
             inputs = inputs[0]
 
-        assert len(inputs) == len(self.input_names)
+        assert len(inputs) == len(self._input_names)
 
         named_inputs = {}
 
         for i in range(len(inputs)):
-            named_inputs[self.input_names[i]] = np.array(inputs[i])
+            named_inputs[self._input_names[i]] = np.array(inputs[i])
 
         return named_inputs
 
 
-class ONNXSklearnContainerTransformer(ONNXSklearnContainer):
+class ONNXSklearnContainerTransformer(ONNXSklearnContainer, SklearnContainerTransformer):
     """
-    Container mirroring Sklearn transformers API.
+    Container for ONNX models mirroring Sklearn transformers API.
     """
-
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        super(ONNXSklearnContainerTransformer, self).__init__(model, n_threads, batch_size, extra_config)
-
-        assert len(self._output_names) == 1
 
     def _transform(self, *inputs):
+        assert len(self._output_names) == 1
+
         named_inputs = self._get_named_inputs(inputs)
 
         return np.array(self._session.run(self._output_names, named_inputs))
 
-    def transform(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On data transformers it returns transformed output data
-        """
-        return self._run(self._transform, *inputs, reshape=True)
 
-
-class ONNXSklearnContainerRegression(ONNXSklearnContainer):
+class ONNXSklearnContainerRegression(ONNXSklearnContainer, SklearnContainerRegression):
     """
-    Container mirroring Sklearn regressors API.
+    Container for ONNX models mirroring Sklearn regressors API.
     """
-
-    def __init__(
-        self, model, n_threads=None, batch_size=None, is_regression=True, is_anomaly_detection=False, extra_config={}, **kwargs
-    ):
-        super(ONNXSklearnContainerRegression, self).__init__(model, n_threads, batch_size, extra_config)
-
-        assert not (is_regression and is_anomaly_detection)
-        if is_regression:
-            assert len(self._output_names) == 1
-
-        self._is_regression = is_regression
-        self._is_anomaly_detection = is_anomaly_detection
 
     def _predict(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On regression returns the predicted values.
-        On classification tasks returns the predicted class labels for the input data.
-        On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
-        """
         named_inputs = self._get_named_inputs(inputs)
 
         if self._is_regression:
+            assert len(self._output_names) == 1
+
             return np.array(self._session.run(self._output_names, named_inputs))
         elif self._is_anomaly_detection:
+            assert len(self._output_names) == 2
+
             return np.array(self._session.run([self._output_names[0]], named_inputs))[0].ravel()
         else:
+            assert len(self._output_names) == 2
+
             return np.array(self._session.run([self._output_names[0]], named_inputs))[0]
 
-    def predict(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On data transformers it returns transformed output data
-        """
-        return self._run(self._predict, *inputs)
 
-
-class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression):
+class ONNXSklearnContainerClassification(ONNXSklearnContainerRegression, SklearnContainerClassification):
     """
-    Container mirroring Sklearn classifiers API.
+    Container for ONNX models mirroring Sklearn classifiers API.
     """
-
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        super(ONNXSklearnContainerClassification, self).__init__(
-            model, n_threads, batch_size, is_regression=False, extra_config=extra_config
-        )
-
-        assert len(self._output_names) == 2
 
     def _predict_proba(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On classification tasks returns the probability estimates.
-        """
+        assert len(self._output_names) == 2
+
         named_inputs = self._get_named_inputs(inputs)
 
         return self._session.run([self._output_names[1]], named_inputs)[0]
 
-    def predict_proba(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On data transformers it returns transformed output data
-        """
-        return self._run(self._predict_proba, *inputs, reshape=True)
 
-
-class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
+class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression, SklearnContainerAnomalyDetection):
     """
-    Container mirroring Sklearn anomaly detection API.
+    Container for ONNX models mirroring Sklearn anomaly detection API.
     """
-
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        super(ONNXSklearnContainerAnomalyDetection, self).__init__(
-            model, n_threads, batch_size, is_regression=False, is_anomaly_detection=True, extra_config=extra_config
-        )
-
-        assert len(self._output_names) == 2
 
     def _decision_function(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On anomaly detection (e.g. isolation forest) returns the decision function scores.
-        """
+        assert len(self._output_names) == 2
+
         named_inputs = self._get_named_inputs(inputs)
 
         scores = np.array(self._session.run([self._output_names[1]], named_inputs)[0]).flatten()
@@ -497,87 +477,47 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression):
             scores += self._extra_config[constants.IFOREST_THRESHOLD]
         return scores
 
-    def decision_function(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On data transformers it returns transformed output data
-        """
-        return self._run(self._decision_function, *inputs)
-
-    def score_samples(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
-        """
-        return self.decision_function(*inputs) + self._extra_config[constants.OFFSET]
-
 
 # TVM containers.
-class TVMSklearnContainer(ABC):
+class TVMSklearnContainer(SklearnContainer):
     """
     Base container for TVM models.
     The container allows to mirror the Sklearn API.
     """
 
     def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        """
-        Args:
-            model: A TVM model
-            extra_config: Some additional configuration parameter
-        """
+        super(TVMSklearnContainer, self).__init__(model, n_threads, batch_size, extra_config=extra_config)
+
         assert tvm_installed()
         import tvm
 
-        self._model = model
-        self._extra_config = extra_config
         self._ctx = self._extra_config[constants.TVM_CONTEXT]
         self._input_names = self._extra_config[constants.TVM_INPUT_NAMES]
+        self._remainder_model = None
+        if constants.TVM_REMAINDER_MODEL in self._extra_config:
+            self._remainder_model = self._extra_config[constants.TVM_REMAINDER_MODEL]
         self._to_tvm_array = lambda x: tvm.nd.array(x, self._ctx)
-
-    @property
-    def model(self):
-        return self._model
 
     def _to_tvm_tensor(self, *inputs):
         return {self._input_names[0]: self._to_tvm_array(inputs[i]) for i in range(len(inputs))}
 
 
-class TVMSklearnContainerTransformer(TVMSklearnContainer):
+class TVMSklearnContainerTransformer(TVMSklearnContainer, SklearnContainerTransformer):
     """
-    Container mirroring Sklearn transformers API.
+    Container for TVM models mirroring Sklearn transformers API.
     """
 
-    def transform(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On data transformers it returns transformed output data
-        """
+    def _transform(self, *inputs):
         self.model.run(**self._to_tvm_tensor(*inputs))
-        return self.model.get_output(0).asnumpy().squeeze()
+        return self.model.get_output(0).asnumpy()
 
 
-class TVMSklearnContainerRegression(TVMSklearnContainer):
+class TVMSklearnContainerRegression(TVMSklearnContainer, SklearnContainerRegression):
     """
-    Container mirroring Sklearn regressors API.
+    Container for TVM models mirroring Sklearn regressors API.
     """
 
-    def __init__(
-        self, model, n_threads=None, batch_size=None, extra_config={}, is_regression=True, is_anomaly_detection=False, **kwargs
-    ):
-        super(TVMSklearnContainerRegression, self).__init__(model, n_threads, batch_size, extra_config)
-
-        assert not (is_regression and is_anomaly_detection)
-
-        self._is_regression = is_regression
-        self._is_anomaly_detection = is_anomaly_detection
-
-    def predict(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On regression returns the predicted values.
-        On classification tasks returns the predicted class labels for the input data.
-        On anomaly detection (e.g. isolation forest) returns the predicted classes (-1 or 1).
-        """
+    def _predict(self, *inputs):
         self.model.run(**self._to_tvm_tensor(*inputs))
         if self._is_regression or self._is_anomaly_detection:
             return self.model.get_output(0).asnumpy().ravel()
@@ -585,17 +525,12 @@ class TVMSklearnContainerRegression(TVMSklearnContainer):
             return self.model.get_output(0).asnumpy().ravel()
 
 
-class TVMSklearnContainerClassification(TVMSklearnContainerRegression):
+class TVMSklearnContainerClassification(TVMSklearnContainerRegression, SklearnContainerClassification):
     """
-    Container mirroring Sklearn classifiers API.
+    Container for TVM models mirroring Sklearn classifiers API.
     """
 
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        super(TVMSklearnContainerClassification, self).__init__(
-            model, n_threads, batch_size, extra_config, is_regression=False
-        )
-
-    def predict_proba(self, *inputs):
+    def _predict_proba(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
@@ -604,17 +539,12 @@ class TVMSklearnContainerClassification(TVMSklearnContainerRegression):
         return self.model.get_output(1).asnumpy()
 
 
-class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression):
+class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression, SklearnContainerAnomalyDetection):
     """
-    Container mirroring Sklearn anomaly detection API.
+    Container for TVM models mirroring Sklearn anomaly detection API.
     """
 
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        super(TVMSklearnContainerAnomalyDetection, self).__init__(
-            model, n_threads, batch_size, extra_config, is_regression=False, is_anomaly_detection=True
-        )
-
-    def decision_function(self, *inputs):
+    def _decision_function(self, *inputs):
         """
         Utility functions used to emulate the behavior of the Sklearn API.
         On anomaly detection (e.g. isolation forest) returns the decision function scores.
@@ -626,11 +556,3 @@ class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression):
         if constants.IFOREST_THRESHOLD in self._extra_config:
             scores += self._extra_config[constants.IFOREST_THRESHOLD]
         return scores
-
-    def score_samples(self, *inputs):
-        """
-        Utility functions used to emulate the behavior of the Sklearn API.
-        On anomaly detection (e.g. isolation forest) returns the decision_function score plus offset_
-        """
-        self.model.run(**self._to_tvm_tensor(*inputs))
-        return self.decision_function(inputs) + self._extra_config[constants.OFFSET]

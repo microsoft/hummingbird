@@ -17,7 +17,13 @@ from sklearn.pipeline import Pipeline
 import torch
 
 import hummingbird.ml
-from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, pandas_installed, lightgbm_installed
+from hummingbird.ml._utils import (
+    onnx_ml_tools_installed,
+    onnx_runtime_installed,
+    pandas_installed,
+    lightgbm_installed,
+    tvm_installed,
+)
 from hummingbird.ml import constants
 
 if lightgbm_installed():
@@ -534,6 +540,21 @@ class TestExtraConf(unittest.TestCase):
         onnx_model = hummingbird.ml.convert(onnx_ml_model, "onnx", extra_config={constants.ONNX_OUTPUT_MODEL_NAME: model_name})
 
         assert onnx_model.model.graph.name == model_name
+
+    # Test max fuse depth configuration in TVM
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_xgb_classifier_converter_tvm(self):
+        warnings.filterwarnings("ignore")
+
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = np.array([100, -10, 50], dtype=np.float32)
+        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":
