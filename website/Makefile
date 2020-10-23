@@ -24,12 +24,9 @@ clean-sphinx-site:
 .PHONY:
 sphinx-site: #clean-sphinx-site
 	pip install sphinx sphinx_rtd_theme psutil
+	# TODO: There is a bug with torch 1.6 causing a "has no attribute 'training')" error.  Using 1.5 for now.
+	pip install torch==1.5.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
 	sphinx-apidoc -o sphinx/api -t sphinx/_templates ../hummingbird  -d 1 -f -e
-	#running out of ideas on why this breaks things:
-	rm sphinx/api/hummingbird.ml.operator_converters.onnx.onnx_operator.rst
-	rm sphinx/api/hummingbird.ml.operator_converters.sklearn.iforest.rst
-	rm sphinx/api/hummingbird.ml.operator_converters.sklearn.imputer.rst
-	rm sphinx/api/hummingbird.ml.operator_converters.sklearn.pipeline.rst
 	$(MAKE) -C sphinx
 	$(MAKE) copy-python-apis
 
