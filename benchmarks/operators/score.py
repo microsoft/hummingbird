@@ -26,6 +26,9 @@
 
 from abc import ABC, abstractmethod
 import numpy as np
+from sklearn.preprocessing.data import PolynomialFeatures
+from sklearn.svm.classes import LinearSVC, NuSVC, SVC
+import sys
 
 from benchmarks.timer import Timer
 from benchmarks.datasets import LearningTask
@@ -36,7 +39,7 @@ from hummingbird.ml import convert
 
 class ScoreBackend(ABC):
     @staticmethod
-    def create(name):  # pylint: disable=too-many-return-statements
+    def create(name):
         if name == "hb-pytorch":
             return PytorchBackend()
         if name == "hb-torchscript":
@@ -62,7 +65,28 @@ class ScoreBackend(ABC):
                 "input_size": data.X_test.shape[1] if isinstance(data.X_test, np.ndarray) else len(data.X_test.columns),
                 "device": "cpu" if args.gpu is False else "cuda",
                 "nthread": args.cpus,
-                "n_classes": 1 if data.learning_task == LearningTask.REGRESSION else model.n_classes_,
+                "extra_config": args.extra,
+                "transform": True
+                if args.operator
+                not in [
+                    "LogisticRegression",
+                    "SGDClassifier",
+                    "LogisticRegressionCV",
+                    "SGDClassifier",
+                    "LinearSVC",
+                    "NuSVC",
+                    "SVC",
+                    "DecisionTreeClassifier",
+                    "MLPClassifier",
+                    "BernoulliNB",
+                ]
+                else False,
+                "n_classes": 231
+                if type(model) == PolynomialFeatures
+                else 20
+                if data.learning_task == LearningTask.REGRESSION
+                else len(set(data.y_test)),
+                "operator": args.operator,
             }
         )
 
@@ -108,9 +132,13 @@ class PytorchBackend(ScoreBackend):
     def predict(self, data):
         assert self.model is not None
 
+        is_regression = data.learning_task == LearningTask.REGRESSION or "SVC" in self.params["operator"]
+
         with Timer() as t:
             predict_data = self.get_data(data.X_test)
-            if data.learning_task == LearningTask.REGRESSION:
+            if self.params["transform"]:
+                self.predictions = self.model.transform(predict_data)
+            elif is_regression:
                 self.predictions = self.model.predict(predict_data)
             else:
                 self.predictions = self.model.predict_proba(predict_data)
@@ -140,7 +168,6 @@ class TorchScriptBackend(PytorchBackend):
 
 class ONNXBackend(PytorchBackend):
     def convert(self, model, data, args, model_name):
-
         self.configure(data, model, args)
         predict_data = self.get_data(data.X_test)
 
@@ -152,10 +179,8 @@ class ONNXBackend(PytorchBackend):
                 self.params["device"],
                 extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
             )
-        return t.interval
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        del self.model
+        return t.interval
 
 
 class ONNXMLBackend(ScoreBackend):
@@ -168,33 +193,20 @@ class ONNXMLBackend(ScoreBackend):
         self.params.update({"operator": args.operator})
 
     def convert(self, model, data, args, model_name):
-        from onnxmltools.convert import convert_xgboost
-        from onnxmltools.convert import convert_lightgbm
         from skl2onnx import convert_sklearn
         from onnxmltools.convert.common.data_types import FloatTensorType
 
         self.configure(data, model, args)
 
         with Timer() as t:
-            if self.params["operator"] == "xgb":
-                initial_type = [("input", FloatTensorType([1, self.params["input_size"]]))]
-                fixed_names = list(map(lambda x: str(x), range(len(model._Booster.feature_names))))
-                model._Booster.feature_names = fixed_names
-                self.model = convert_xgboost(model, initial_types=initial_type, target_opset=11)
-            else:
-                batch = min(len(data.X_test), self.params["batch_size"])
-                remainder = len(data.X_test) % batch
-                initial_type = [("input", FloatTensorType([batch, self.params["input_size"]]))]
+            batch = min(len(data.X_test), self.params["batch_size"])
+            remainder = len(data.X_test) % batch
+            initial_type = [("input", FloatTensorType([batch, self.params["input_size"]]))]
 
-                if self.params["operator"] == "lgbm":
-                    converter = convert_lightgbm
-                elif self.params["operator"] == "rf":
-                    converter = convert_sklearn
-
-                self.model = converter(model, initial_types=initial_type)
-                if remainder > 0:
-                    initial_type = [("input", FloatTensorType([remainder, self.params["input_size"]]))]
-                    self.remainder_model = converter(model, initial_types=initial_type, target_opset=11)
+            self.model = convert_sklearn(model, initial_types=initial_type)
+            if remainder > 0:
+                initial_type = [("input", FloatTensorType([remainder, self.params["input_size"]]))]
+                self.remainder_model = convert_sklearn(model, initial_types=initial_type, target_opset=11)
         return t.interval
 
     def predict(self, data):
@@ -212,7 +224,7 @@ class ONNXMLBackend(ScoreBackend):
 
         batch_size = 1 if self.params["operator"] == "xgb" else self.params["batch_size"]
         input_name = sess.get_inputs()[0].name
-        is_regression = data.learning_task == LearningTask.REGRESSION
+        is_regression = data.learning_task == LearningTask.REGRESSION or "SVC" in self.params["operator"]
         if is_regression:
             output_name_index = 0
         else:
@@ -225,26 +237,24 @@ class ONNXMLBackend(ScoreBackend):
             iterations = total_size // batch_size
             iterations += 1 if total_size % batch_size > 0 else 0
             iterations = max(1, iterations)
-            self.predictions = np.empty([total_size, self.params["n_classes"]], dtype="f4")
+
             for i in range(0, iterations):
                 start = i * batch_size
                 end = min(start + batch_size, total_size)
 
                 if self.params["operator"] == "xgb":
                     self.predictions[start:end, :] = sess.run([output_name], {input_name: predict_data[start:end, :]})
-                elif self.params["operator"] == "lgbm" or "rf":
+                else:
                     if i == iterations - 1 and self.remainder_model is not None:
                         pred = remainder_sess.run([output_name], {input_name: predict_data[start:end, :]})
                     else:
                         pred = sess.run([output_name], {input_name: predict_data[start:end, :]})
 
                     if is_regression:
-                        self.predictions[start:end, :] = pred[0]
+                        self.predictions = pred[0]
                     else:
-                        self.predictions[start:end, :] = list(map(lambda x: list(x.values()), pred[0]))
+                        self.predictions = list(map(lambda x: list(x.values()), pred[0]))
 
-        if is_regression:
-            self.predictions = self.predictions.flatten()
         del sess
         if remainder_sess is not None:
             del remainder_sess

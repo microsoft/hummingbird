@@ -39,6 +39,11 @@ if pandas_installed():
 else:
     DataFrame = None
 
+if pandas_installed():
+    from pandas import DataFrame
+else:
+    DataFrame = None
+
 
 def _get_trace_input_from_test_input(input, batch_size):
     """
