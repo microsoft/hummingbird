@@ -411,7 +411,7 @@ ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
 """For ONNX models we can set the name of the output model."""
 
 ONNX_TARGET_OPSET = "onnx_target_opset"
-"""For ONNX models we can set the target opset to use. 9 by default."""
+"""For ONNX models we can set the target opset to use. 11 by default."""
 
 INPUT_NAMES = "input_names"
 """Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs."""
