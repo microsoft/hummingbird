@@ -76,11 +76,11 @@ class TestSklearnNormalizer(unittest.TestCase):
             model = Normalizer(norm=norm)
             model.fit(data)
 
-            torch_model = hummingbird.ml.convert(model, "onnx", data)
+            hb_model = hummingbird.ml.convert(model, "onnx", data)
 
-            self.assertIsNotNone(torch_model)
+            self.assertIsNotNone(hb_model)
             np.testing.assert_allclose(
-                model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+                model.transform(data), hb_model.transform(data_tensor)[0], rtol=1e-06, atol=1e-06,
             )
 
     # TVM backend

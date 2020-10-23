@@ -519,7 +519,7 @@ class TVMSklearnContainer(ABC):
     The container allows to mirror the Sklearn API.
     """
 
-    def __init__(self, model, extra_config={}):
+    def __init__(self, model, n_threads, batch_size, extra_config={}):
         """
         Args:
             model: A TVM model
