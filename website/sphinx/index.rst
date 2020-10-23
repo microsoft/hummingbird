@@ -11,6 +11,7 @@ This is the API documentation for the Python interface.
 
 
 .. toctree::
-   :maxdepth: 4
-   :hidden:
+   :maxdepth: 3
 
+   Main website <https://microsoft.github.io/hummingbird/>
+   api/hummingbird

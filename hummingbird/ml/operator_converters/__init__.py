@@ -46,18 +46,3 @@ from . import xgb  # noqa: E402
 from .sparkml import discretizer  # noqa: E402
 from .sparkml import linear  # noqa: E402
 from .sparkml import vector_assembler  # noqa: E402
-
-__pdoc__ = {}
-__pdoc__["hummingbird.operator_converters._array_feature_extractor_implementations"] = True
-__pdoc__["hummingbird.operator_converters._decomposition_implementations"] = True
-__pdoc__["hummingbird.operator_converters._discretizer_implementations"] = True
-__pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
-__pdoc__["hummingbird.operator_converters._kneighbors_implementations"] = True
-__pdoc__["hummingbird.operator_converters._linear_implementations"] = True
-__pdoc__["hummingbird.operator_converters._mlp_implementations"] = True
-__pdoc__["hummingbird.operator_converters._nb_implementations"] = True
-__pdoc__["hummingbird.operator_converters._normalizer_implementations"] = True
-__pdoc__["hummingbird.operator_converters._one_hot_encoder_implementations"] = True
-__pdoc__["hummingbird.operator_converters._scaler_implementations"] = True
-__pdoc__["hummingbird.operator_converters._tree_commons"] = True
-__pdoc__["hummingbird.operator_converters._tree_implementations"] = True
