@@ -81,3 +81,8 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
+    - name: Generate Documentation
+      run: |
+        pip install sphinx sphinx_rtd_theme
+        sphinx-apidoc -o website/sphinx/api -t website/sphinx/_templates hummingbird/ml  -d 1 -f -e
+
