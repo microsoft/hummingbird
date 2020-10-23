@@ -29,6 +29,7 @@ sphinx-site: #clean-sphinx-site
 	rm sphinx/api/hummingbird.ml.operator_converters.onnx.onnx_operator.rst
 	rm sphinx/api/hummingbird.ml.operator_converters.sklearn.iforest.rst
 	rm sphinx/api/hummingbird.ml.operator_converters.sklearn.imputer.rst
+	rm sphinx/api/hummingbird.ml.operator_converters.sklearn.pipeline.rst
 	$(MAKE) -C sphinx
 	$(MAKE) copy-python-apis
 
