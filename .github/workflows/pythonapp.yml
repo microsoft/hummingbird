@@ -63,16 +63,6 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
-    - name: Generate Documentation
-      run: |
-        make sphinx-site -C website/
-    - name: Deploy to GitHub pages
-      if: ${{ github.ref == 'refs/heads/master' }}
-      uses: JamesIves/github-pages-deploy-action@3.6.2
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: website/public/python_api
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -91,3 +81,15 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
+    - name: Generate Documentation   # for some awful reason, this only works with older torch????
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      run: |
+        pip install torch==1.5.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+        make sphinx-site -C website/
+    - name: Deploy to GitHub pages
+      if: ${{ github.ref == 'refs/heads/master' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      uses: JamesIves/github-pages-deploy-action@3.6.2
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: website/public/python_api
