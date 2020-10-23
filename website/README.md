@@ -12,14 +12,8 @@ pip install sphinx sphinx_rtd_theme
 
 ## Commands
 
-These are run automatically in the pipeline on push.
+This are run automatically in the pipeline on push:
 
-To generate the .rst files:
 ```
-sphinx-apidoc -o website/sphinx/api -t website/sphinx/_templates hummingbird  -d 1 -f -e
-```
-
-Then to run Sphinx and generate html:
-```
-make -C website/sphinx/
+make sphinx-site -C website/
 ```
