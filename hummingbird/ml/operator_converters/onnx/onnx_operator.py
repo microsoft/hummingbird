@@ -52,10 +52,10 @@ class Reshape(BaseOperator, torch.nn.Module):
 
 def convert_onnx_cast(operator, device=None, extra_config={}):
     """
-    Converter for `ai.onnx.Cast`.
+    Converter for https://github.com/onnx/onnx/blob/master/docs/Operators.md#cast
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Cast` model
+        operator: An operator wrapping an ONNX Cast model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -76,10 +76,10 @@ def convert_onnx_cast(operator, device=None, extra_config={}):
 
 def convert_onnx_concat(operator, device=None, extra_config={}):
     """
-    Converter for `ai.onnx.Concat`.
+    Converter for https://github.com/onnx/onnx/blob/master/docs/Operators.md#concat
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Concat` model
+        operator: An operator wrapping an ONNX Concat model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -94,10 +94,10 @@ def convert_onnx_concat(operator, device=None, extra_config={}):
 
 def convert_onnx_reshape(operator, device=None, extra_config={}):
     """
-    Converter for `ai.onnx.Reshape`.
+    Converter for https://github.com/onnx/onnx/blob/master/docs/Operators.md#reshape
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Reshape` model
+        operator: An operator wrapping an ONNX reshape model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
