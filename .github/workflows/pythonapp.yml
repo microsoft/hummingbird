@@ -86,9 +86,7 @@ jobs:
         flags: unittests
     - name: Generate Documentation
       run: |
-        pip install sphinx sphinx_rtd_theme psutil
-        sphinx-apidoc -o website/sphinx/api -t website/sphinx/_templates hummingbird  -d 1 -f -e
-        make -C website/sphinx/
+        make sphinx-site -C website/
     - name: Deploy to GitHub pages
       if: ${{ github.ref == 'refs/heads/master' }}
       uses: JamesIves/github-pages-deploy-action@3.6.2
