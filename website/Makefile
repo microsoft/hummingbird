@@ -27,6 +27,7 @@ sphinx-site: #clean-sphinx-site
 	sphinx-apidoc -o sphinx/api -t sphinx/_templates ../hummingbird  -d 1 -f -e
 	#running out of ideas on why this breaks things:
 	rm sphinx/api/hummingbird.ml.operator_converters.onnx.onnx_operator.rst
+	rm sphinx/api/hummingbird.ml.operator_converters.sklearn.iforest.rst
 	$(MAKE) -C sphinx
 	$(MAKE) copy-python-apis
 
