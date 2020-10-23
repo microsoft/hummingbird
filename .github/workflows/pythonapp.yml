@@ -73,10 +73,13 @@ jobs:
       run: |
         pytest
     - name: Coverage
+      # run and push coverage only on one of the runs
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
