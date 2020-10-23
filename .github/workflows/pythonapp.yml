@@ -18,8 +18,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-2019]
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        os: [ubuntu-latest]
+        python-version: [3.5, 3.7, ]
 
     steps:
     - uses: actions/checkout@v2
@@ -63,24 +63,7 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # The GitHub editor is 127 chars wide
-        flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        pytest
-    - name: Coverage
-      run: |
-        coverage run -a -m pytest tests
-        coverage xml
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.xml
-        flags: unittests
+
     - name: Generate Documentation
       run: |
         make sphinx-site -C website/
