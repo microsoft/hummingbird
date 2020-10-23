@@ -28,14 +28,14 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
-    "numpydoc",
+    # "numpydoc",
     #   'sphinx_gallery.gen_gallery',
-    "matplotlib.sphinxext.plot_directive",
+    # "matplotlib.sphinxext.plot_directive",
 ]
 
-# this is needed for some reason...
-# see https://github.com/numpy/numpydoc/issues/69
-numpydoc_show_class_members = False
+## this is needed for some reason...
+## see https://github.com/numpy/numpydoc/issues/69
+# numpydoc_show_class_members = False
 
 # pngmath / imgmath compatibility layer for different sphinx versions
 import sphinx  # noqa: E402
@@ -148,7 +148,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/{.major}".format(sys.version_info), None),
     "numpy": ("https://docs.scipy.org/doc/numpy/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
-    "matplotlib": ("https://matplotlib.org/", None),
+    # "matplotlib": ("https://matplotlib.org/", None),
     "sklearn": ("http://scikit-learn.org/stable", None),
 }
 
