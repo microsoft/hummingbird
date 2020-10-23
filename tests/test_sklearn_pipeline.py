@@ -622,7 +622,7 @@ class TestSklearnPipeline(unittest.TestCase):
         assert len(hb_model.model.graph.input) == n_features
 
         np.testing.assert_allclose(
-            pipeline.predict(X), hb_model.predict(X_test), rtol=1e-06, atol=1e-06,
+            pipeline.predict(X), np.array(hb_model.predict(X_test)).flatten(), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")

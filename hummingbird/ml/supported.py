@@ -426,7 +426,7 @@ If not set, compilation may take forever (https://github.com/microsoft/hummingbi
 By default Hummingbird uses a max_fuse_depth of 50, but this can be override using this parameter."""
 
 INPUT_NAMES = "input_names"
-"""Set the names of the inputs. Assume that the numbers onf inputs_names is equal to the number of inputs."""
+"""Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs."""
 
 OUTPUT_NAMES = "output_names"
 """Set the names of the outputs."""

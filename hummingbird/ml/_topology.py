@@ -267,7 +267,7 @@ def convert(topology, backend, device, extra_config={}):
 
     assert idx >= 0, "Cannot detect container type. Please fill an issue at https://github.com/microsoft/hummingbird."
 
-    # If the operator is a transformer, we need to check wheter there is another operator type before.
+    # If is a transformer, we need to check whether there is another operator type before.
     # E.g., normalization after classification.
     tmp_idx = idx
     if operator_map[operators[idx].full_name].transformer:

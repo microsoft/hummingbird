@@ -50,9 +50,6 @@ TEST_INPUT = "test_input"
 N_INPUTS = "n_inputs"
 """Number of inputs expected by the model."""
 
-N_INPUTS = "n_inputs"
-"""Number of inputs expected by the model."""
-
 NUM_TREES = "n_trees"
 """Number of trees composing an ensemble."""
 
