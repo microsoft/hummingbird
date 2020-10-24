@@ -63,6 +63,45 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
+    - name: Fetch TVM
+      run: |
+        git clone https://github.com/apache/incubator-tvm.git
+        cd tvm
+        git submodule update --recursive --init
+        cmake -E make_directory build.common
+    - name: CMake TVM on Windows
+      if: matrix.os == 'windows-latest'
+      working-directory: tvm.build.common
+      run: >-
+        cmake
+        -DUSE_SORT=ON
+        -DUSE_RPC=ON
+        -DUSE_GRAPH_RUNTIME=ON
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_CONFIGURATION_TYPES="Release"
+        ..
+    - name: CMake TVM not on Windows
+      if: matrix.os != 'windows-latest'
+      working-directory: tvm.build.common
+      run: >-
+        cmake
+        "-DUSE_SORT=ON"
+        "-DUSE_RPC=ON"
+        "-DUSE_GRAPH_RUNTIME=ON"
+        "-DUSE_METAL=ON"
+        ..
+    - name: Build TVM on Windows
+      if: matrix.os == 'windows-latest'
+      working-directory: tvm
+      run: cmake --build build.common --config Release -- /m
+    - name: Build TVM not on Windows
+      if: matrix.os != 'windows-latest'
+      working-directory: tvm
+      run: cmake --build build.common --config Release -j3
+    - name: Install python TVM
+      if: matrix.os == 'windows-latest'
+      working-directory: tvm.python
+      run: python setup.py install
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
