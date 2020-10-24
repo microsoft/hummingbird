@@ -70,7 +70,7 @@ jobs:
         git submodule update --recursive --init
         cmake -E make_directory build.common
     - name: CMake TVM on Windows
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-2019'
       working-directory: incubator-tvm/build.common
       run: >-
         cmake
@@ -80,8 +80,8 @@ jobs:
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_CONFIGURATION_TYPES="Release"
         ..
-    - name: CMake TVM not on Windows
-      if: matrix.os != 'windows-latest'
+    - name: CMake TVM on Mac
+      if: matrix.os == 'macos-latest'
       working-directory: incubator-tvm/build.common
       run: >-
         cmake
@@ -91,15 +91,15 @@ jobs:
         "-DUSE_METAL=ON"
         ..
     - name: Build TVM on Windows
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-2019'
       working-directory: incubator
       run: cmake --build build.common --config Release -- /m
-    - name: Build TVM not on Windows
-      if: matrix.os != 'windows-latest'
+    - name: Build TVM on Mac
+      if: matrix.os == 'macos-latest'
       working-directory: incubator
       run: cmake --build build.common --config Release -j3
     - name: Install python TVM
-      if: matrix.os == 'windows-latest'
+    if: matrix.os != 'ubuntu-latest'
       working-directory: incubator/python
       run: python setup.py install
     - name: Lint with flake8
