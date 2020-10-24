@@ -92,15 +92,15 @@ jobs:
         ..
     - name: Build TVM on Windows
       if: matrix.os == 'windows-2019'
-      working-directory: incubator
+      working-directory: incubator-tvm
       run: cmake --build build.common --config Release -- /m
     - name: Build TVM on Mac
       if: matrix.os == 'macos-latest'
-      working-directory: incubator
+      working-directory: incubator-tvm
       run: cmake --build build.common --config Release -j3
     - name: Install python TVM
     if: matrix.os != 'ubuntu-latest'
-      working-directory: incubator/python
+      working-directory: incubator-tvm/python
       run: python setup.py install
     - name: Lint with flake8
       run: |
