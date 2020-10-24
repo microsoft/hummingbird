@@ -65,13 +65,14 @@ jobs:
         pip install pandas
     - name: Fetch TVM
       run: |
+        cd ~/
         git clone https://github.com/apache/incubator-tvm.git
         cd incubator-tvm
         git submodule update --recursive --init
         cmake -E make_directory build.common
     - name: CMake TVM on Windows
       if: matrix.os == 'windows-2019'
-      working-directory: incubator-tvm/build.common
+      working-directory: ~/incubator-tvm/build.common
       run: >-
         cmake
         -DUSE_SORT=ON
@@ -82,7 +83,7 @@ jobs:
         ..
     - name: CMake TVM on Mac
       if: matrix.os == 'macos-latest'
-      working-directory: incubator-tvm/build.common
+      working-directory: ~/incubator-tvm/build.common
       run: >-
         cmake
         "-DUSE_SORT=ON"
@@ -92,15 +93,15 @@ jobs:
         ..
     - name: Build TVM on Windows
       if: matrix.os == 'windows-2019'
-      working-directory: incubator-tvm
+      working-directory: ~/incubator-tvm
       run: cmake --build build.common --config Release -- /m
     - name: Build TVM on Mac
       if: matrix.os == 'macos-latest'
-      working-directory: incubator-tvm
+      working-directory: ~/incubator-tvm
       run: cmake --build build.common --config Release -j3
     - name: Install python TVM
       if: matrix.os != 'ubuntu-latest'
-      working-directory: incubator-tvm/python
+      working-directory: ~/incubator-tvm/python
       run: python setup.py install
     - name: Lint with flake8
       run: |
