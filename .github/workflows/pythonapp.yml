@@ -69,7 +69,9 @@ jobs:
         git clone https://github.com/apache/incubator-tvm.git
         cd incubator-tvm
         git submodule update --recursive --init
+        pwd
     - uses: conda-incubator/setup-miniconda@v1
+      if: startsWith(matrix.os, 'macos')
       with:
         activate-environment: tvm-build
         channel-priority: strict
