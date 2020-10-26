@@ -86,10 +86,8 @@ jobs:
       working-directory: ../../../incubator-tvm/build.common
       run: >-
         cmake
-        "-DUSE_SORT=ON"
         "-DUSE_RPC=ON"
         "-DUSE_GRAPH_RUNTIME=ON"
-        "-DUSE_METAL=ON"
         ..
     # - name: Build TVM on Windows
     #   if: matrix.os == 'windows-2019'
