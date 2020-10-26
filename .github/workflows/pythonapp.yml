@@ -100,7 +100,9 @@ jobs:
     - name: Install python TVM
       if: matrix.os != 'windows-2019'
       working-directory: ../../../incubator-tvm/python
-      run: python setup.py install
+      run: |
+        export TVM_HOME=/home/runner/incubator-tvm/python/tvm/
+        python setup.py install
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
