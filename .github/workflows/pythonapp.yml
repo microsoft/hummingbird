@@ -70,7 +70,6 @@ jobs:
         cd incubator-tvm
         git submodule update --recursive --init
         cmake -E make_directory build.common
-        pwd
     # - name: CMake TVM on Windows
     #   if: matrix.os == 'windows-2019'
     #   working-directory: incubator-tvm/build.common
@@ -84,9 +83,8 @@ jobs:
     #     ..
     - name: CMake TVM on Mac
       if: matrix.os != 'windows-2019'
-      working-directory: incubator-tvm/build.common
+      working-directory: ../../../incubator-tvm/build.common
       run: >-
-        pwd
         cmake
         "-DUSE_SORT=ON"
         "-DUSE_RPC=ON"
@@ -99,11 +97,11 @@ jobs:
     #   run: cmake --build build.common --config Release -- /m
     - name: Build TVM on Unix
       if: matrix.os != 'windows-2019'
-      working-directory: incubator-tvm
+      working-directory: ../../../incubator-tvm/build.common
       run: cmake --build build.common --config Release -j3
     - name: Install python TVM
       if: matrix.os != 'ubuntu-latest'
-      working-directory: incubator-tvm/python
+      working-directory: ../../../incubator-tvm/build.common/python
       run: python setup.py install
     - name: Lint with flake8
       run: |
