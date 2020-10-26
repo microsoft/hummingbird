@@ -69,40 +69,39 @@ jobs:
         git clone https://github.com/apache/incubator-tvm.git
         cd incubator-tvm
         git submodule update --recursive --init
-        cmake -E make_directory build.common
-    # - name: CMake TVM on Windows
-    #   if: matrix.os == 'windows-2019'
-    #   working-directory: incubator-tvm/build.common
-    #   run: >-
-    #     cmake
-    #     -DUSE_SORT=ON
-    #     -DUSE_RPC=ON
-    #     -DUSE_GRAPH_RUNTIME=ON
-    #     -DCMAKE_BUILD_TYPE=Release
-    #     -DCMAKE_CONFIGURATION_TYPES="Release"
-    #     ..
-    - name: CMake TVM on Mac
+    - uses: actions/cache@v1
+        env:
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ matrix.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('../../../incubator-tvm/conda/build-environment.yaml') }}
+    - uses: conda-incubator/setup-miniconda@v1
       if: matrix.os != 'windows-2019'
-      working-directory: ../../../incubator-tvm/build.common
-      run: >-
-        cmake
-        "-DUSE_RPC=ON"
-        "-DUSE_GRAPH_RUNTIME=ON"
-        ..
-    # - name: Build TVM on Windows
-    #   if: matrix.os == 'windows-2019'
-    #   working-directory: incubator-tvm
-    #   run: cmake --build build.common --config Release -- /m
-    - name: Build TVM on Unix
+      with:
+        activate-environment: tvm-build
+        channel-priority: strict
+        environment-file: ../../../incubator-tvm/conda/build-environment.yaml
+        auto-activate-base: false
+        use-only-tar-bz2: true
+        python-version: ${{ matrix.python-version }}
+    - name: Conda info
       if: matrix.os != 'windows-2019'
-      working-directory: ../../../incubator-tvm
-      run: cmake --build build.common --config Release -j3
-    - name: Install python TVM
-      if: matrix.os != 'windows-2019'
-      working-directory: ../../../incubator-tvm/python
       run: |
-        export TVM_HOME=/home/runner/incubator-tvm/
-        python setup.py install
+        conda info
+        conda list
+    # - name: TVM-Build@Win
+    #   if: startsWith(matrix.os, 'windows')
+    #   working-directory: incubator-tvm
+    #   shell: cmd /C call {0}
+    #   run: >-
+    #     conda build --output-folder=conda/pkg conda/recipe &&
+    #     conda install tvm -c ./conda/pkg
+    - name: TVM-Build@Unix
+      if: matrix.os != 'windows-2019'
+      shell: bash -l {0}
+      run: >-
+        conda build --output-folder=../../../incubator-tvm/conda/pkg  ../../../incubator-tvm/conda/recipe &&
+        conda install tvm -c ../../../incubator-tvm/conda/pkg
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -111,12 +110,12 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest
+        python -m pytest
     - name: Coverage
       # run and push coverage only on one of the runs
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       run: |
-        coverage run -a -m pytest tests
+        python -m coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
@@ -124,14 +123,3 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
-    - name: Generate Documentation   # for some awful reason, this only works with older torch????
-      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
-      run: |
-        make sphinx-site -C website/
-    - name: Deploy to GitHub pages
-      if: ${{ github.ref == 'refs/heads/master' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
-      uses: JamesIves/github-pages-deploy-action@3.6.2
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: website/public
