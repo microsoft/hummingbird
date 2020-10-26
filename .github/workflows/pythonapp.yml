@@ -92,7 +92,6 @@ jobs:
     #     conda install tvm -c ./conda/pkg
     - name: TVM-Build@Unix
       if: matrix.os != 'windows-2019'
-      working-directory: incubator-tvm
       shell: bash -l {0}
       run: >-
         conda build --output-folder=conda/pkg  conda/recipe &&
