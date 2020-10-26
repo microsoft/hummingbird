@@ -70,10 +70,11 @@ jobs:
         cd incubator-tvm
         git submodule update --recursive --init
     - uses: conda-incubator/setup-miniconda@v1
+      working-directory: incubator-tvm
       with:
         activate-environment: tvm-build
         channel-priority: strict
-        environment-file: ~/incubator-tvm/conda/build-environment.yaml
+        environment-file: conda/build-environment.yaml
         auto-activate-base: false
         use-only-tar-bz2: true
     - name: Conda info
