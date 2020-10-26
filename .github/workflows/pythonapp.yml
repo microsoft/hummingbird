@@ -97,12 +97,12 @@ jobs:
       if: matrix.os != 'windows-2019'
       working-directory: ../../../incubator-tvm/build.common
       run: make -j3
-    - name: Install python TVM
-      if: matrix.os != 'windows-2019'
-      working-directory: ../../../incubator-tvm/python
-      run: |
-        export TVM_HOME=/home/runner/incubator-tvm/
-        python setup.py install
+    # - name: Install python TVM
+    #   if: matrix.os != 'windows-2019'
+    #   working-directory: ../../../incubator-tvm/python
+    #   run: |
+    #     export TVM_HOME=/home/runner/incubator-tvm/
+    #     python setup.py install
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -111,6 +111,8 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+        export PYTHONPATH=$PYTHONPATH:$HOME/../../../incubator-tvm/python/tvm
+        export
         pytest
     - name: Coverage
       # run and push coverage only on one of the runs
