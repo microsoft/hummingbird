@@ -71,10 +71,10 @@ jobs:
         git submodule update --recursive --init
     - uses: actions/cache@v1
       env:
-          CACHE_NUMBER: 0
-        with:
-          path: ~/conda_pkgs_dir
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('../../../incubator-tvm/conda/build-environment.yaml') }}
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('../../../incubator-tvm/conda/build-environment.yaml') }}
     - uses: conda-incubator/setup-miniconda@v1
       if: matrix.os != 'windows-2019'
       with:
