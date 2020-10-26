@@ -94,8 +94,8 @@ jobs:
       if: matrix.os != 'windows-2019'
       shell: bash -l {0}
       run: >-
-        conda build --output-folder=conda/pkg  conda/recipe &&
-        conda install tvm -c ./conda/pkg
+        conda build --output-folder=../../../incubator-tvm/conda/pkg  ../../../incubator-tvm/conda/recipe &&
+        conda install tvm -c ../../../incubator-tvm/conda/pkg
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
