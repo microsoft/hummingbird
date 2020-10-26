@@ -28,6 +28,7 @@ share/python-wheels/
 MANIFEST
 website/sphinx/_build/
 website/public/
+website/sphinx/api/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

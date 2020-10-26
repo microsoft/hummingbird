@@ -6,7 +6,7 @@ PATH := $(PATH):${HOME}/.local/bin
 export PATH
 
 .PHONY:
-all: public/python_api
+all: public
 
 
 .PHONY:
@@ -17,8 +17,7 @@ clean: clean-sphinx-site
 clean-sphinx-site:
 	rm -rf sphinx/_build
 	rm -rf sphinx/api
-	git checkout sphinx/api/hummingbird.rst
-	rm -rf public/python_api
+	rm -rf public
 
 # Note: this is an expensive target.
 .PHONY:
@@ -36,10 +35,10 @@ sphinx/_build/html:
 .PHONY:
 copy-python-apis: sphinx/_build/html
 	mkdir -p public
-	rm -rf public/python_api
-	cp -a sphinx/_build/html public/python_api
+	rm -rf public
+	cp -a sphinx/_build/html public
 
-public/python_api:
+public:
 	$(MAKE) copy-python-apis
 
 
