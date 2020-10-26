@@ -69,33 +69,42 @@ jobs:
         git clone https://github.com/apache/incubator-tvm.git
         cd incubator-tvm
         git submodule update --recursive --init
+        cmake -E make_directory build.common
         pwd
-    - uses: conda-incubator/setup-miniconda@v1
-      if: matrix.os != 'windows-2019'
-      with:
-        activate-environment: tvm-build
-        channel-priority: strict
-        environment-file: ../../../incubator-tvm/conda/build-environment.yaml
-        auto-activate-base: false
-        use-only-tar-bz2: true
-    - name: Conda info
-      if: matrix.os != 'windows-2019'
-      run: |
-        conda info
-        conda list
-    # - name: TVM-Build@Win
-    #   if: startsWith(matrix.os, 'windows')
-    #   working-directory: incubator-tvm
-    #   shell: cmd /C call {0}
+    # - name: CMake TVM on Windows
+    #   if: matrix.os == 'windows-2019'
+    #   working-directory: incubator-tvm/build.common
     #   run: >-
-    #     conda build --output-folder=conda/pkg conda/recipe &&
-    #     conda install tvm -c ./conda/pkg
-    - name: TVM-Build@Unix
+    #     cmake
+    #     -DUSE_SORT=ON
+    #     -DUSE_RPC=ON
+    #     -DUSE_GRAPH_RUNTIME=ON
+    #     -DCMAKE_BUILD_TYPE=Release
+    #     -DCMAKE_CONFIGURATION_TYPES="Release"
+    #     ..
+    - name: CMake TVM on Mac
       if: matrix.os != 'windows-2019'
-      shell: bash -l {0}
+      working-directory: incubator-tvm/build.common
       run: >-
-        conda build --output-folder=../../../incubator-tvm/conda/pkg  ../../../incubator-tvm/conda/recipe &&
-        conda install tvm -c ../../../incubator-tvm/conda/pkg
+        pwd
+        cmake
+        "-DUSE_SORT=ON"
+        "-DUSE_RPC=ON"
+        "-DUSE_GRAPH_RUNTIME=ON"
+        "-DUSE_METAL=ON"
+        ..
+    # - name: Build TVM on Windows
+    #   if: matrix.os == 'windows-2019'
+    #   working-directory: incubator-tvm
+    #   run: cmake --build build.common --config Release -- /m
+    - name: Build TVM on Unix
+      if: matrix.os != 'windows-2019'
+      working-directory: incubator-tvm
+      run: cmake --build build.common --config Release -j3
+    - name: Install python TVM
+      if: matrix.os != 'ubuntu-latest'
+      working-directory: incubator-tvm/python
+      run: python setup.py install
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
