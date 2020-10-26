@@ -71,7 +71,7 @@ jobs:
         git submodule update --recursive --init
         pwd
     - uses: conda-incubator/setup-miniconda@v1
-      if: startsWith(matrix.os, 'macos')
+      if: matrix.os != 'windows-2019'
       with:
         activate-environment: tvm-build
         channel-priority: strict
@@ -91,7 +91,7 @@ jobs:
         conda build --output-folder=conda/pkg conda/recipe &&
         conda install tvm -c ./conda/pkg
     - name: TVM-Build@MacOS
-      if: startsWith(matrix.os, 'macOS')
+      if: matrix.os != 'windows-2019'
       working-directory: incubator-tvm
       shell: bash -l {0}
       run: >-
