@@ -52,7 +52,6 @@ setup(
     install_requires=install_requires,
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
-        "docs": ["pdoc3==0.8.1"],
         "sparkml": ["pyspark>=2.4.4"],
         "onnx": onnx_requires,
         "extra": extra_requires,
