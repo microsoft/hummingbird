@@ -418,7 +418,7 @@ ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
 """For ONNX models we can set the name of the output model."""
 
 ONNX_TARGET_OPSET = "onnx_target_opset"
-"""For ONNX models we can set the target opset to use. 9 by default."""
+"""For ONNX models we can set the target opset to use. 11 by default."""
 
 TVM_MAX_FUSE_DEPTH = "tvm_max_fuse_depth"
 """For TVM we can fix the number of operations that will be fused.
