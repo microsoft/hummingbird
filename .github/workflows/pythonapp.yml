@@ -73,11 +73,25 @@ jobs:
       run: |
         pytest
     - name: Coverage
+      # run and push coverage only on one of the runs
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
         flags: unittests
+    - name: Generate Documentation   # for some awful reason, this only works with older torch????
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      run: |
+        make sphinx-site -C website/
+    - name: Deploy to GitHub pages
+      if: ${{ github.ref == 'refs/heads/master' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      uses: JamesIves/github-pages-deploy-action@3.6.2
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: website/public

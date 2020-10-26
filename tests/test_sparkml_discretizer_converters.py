@@ -43,7 +43,7 @@ class TestSparkMLDiscretizers(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         spark_output = model.transform(test_df).select("sepal_length_bucket").toPandas()
-        torch_output_np = torch_model.transform(pd_df)
+        torch_output_np = torch_model.transform(pd_df[["sepal_length"]])
         np.testing.assert_allclose(spark_output.to_numpy(), torch_output_np, rtol=1e-06, atol=1e-06)
 
 
