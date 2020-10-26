@@ -70,7 +70,6 @@ jobs:
         cd incubator-tvm
         git submodule update --recursive --init
     - uses: conda-incubator/setup-miniconda@v1
-      working-directory: incubator-tvm
       with:
         activate-environment: tvm-build
         channel-priority: strict
