@@ -63,25 +63,34 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
+    - name: Fetch TVM
+      run: |
+        cd ~/
+        git clone https://github.com/apache/incubator-tvm.git
+        cd incubator-tvm
+        git submodule update --recursive --init
     - uses: conda-incubator/setup-miniconda@v1
       with:
         activate-environment: tvm-build
         channel-priority: strict
-        environment-file: conda/build-environment.yaml
+        environment-file: ~/incubator-tvm/conda/build-environment.yaml
         auto-activate-base: false
         use-only-tar-bz2: true
     - name: Conda info
+      working-directory: incubator-tvm
       run: |
         conda info
         conda list
     - name: TVM-Build@Win
       if: startsWith(matrix.os, 'windows')
+      working-directory: incubator-tvm
       shell: cmd /C call {0}
       run: >-
         conda build --output-folder=conda/pkg conda/recipe &&
         conda install tvm -c ./conda/pkg
     - name: TVM-Build@MacOS
       if: startsWith(matrix.os, 'macOS')
+      working-directory: incubator-tvm
       shell: bash -l {0}
       run: >-
         conda build --output-folder=conda/pkg  conda/recipe &&
