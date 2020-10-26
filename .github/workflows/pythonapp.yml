@@ -80,7 +80,6 @@ jobs:
         use-only-tar-bz2: true
     - name: Conda info
       if: matrix.os != 'windows-2019'
-      working-directory: incubator-tvm
       run: |
         conda info
         conda list
