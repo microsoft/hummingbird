@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hummingbird.ml.operator_converters._gbdt_commons &mdash; hummingbird  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/js/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="hummingbird.ml.operator_converters._kneighbors_implementations" href="hummingbird.ml.operator_converters._kneighbors_implementations.html" />
+    <link rel="prev" title="hummingbird.ml.operator_converters._discretizer_implementations" href="hummingbird.ml.operator_converters._discretizer_implementations.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> hummingbird
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://microsoft.github.io/hummingbird/">Main website</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="hummingbird.html">hummingbird</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="hummingbird.ml.html">hummingbird.ml</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._container.html">hummingbird.ml._container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._parse.html">hummingbird.ml._parse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._topology.html">hummingbird.ml._topology</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._utils.html">hummingbird.ml._utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.convert.html">hummingbird.ml.convert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.exceptions.html">hummingbird.ml.exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.supported.html">hummingbird.ml.supported</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._array_feature_extractor_implementations.html">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._base_operator.html">hummingbird.ml.operator_converters._base_operator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">hummingbird.ml.operator_converters._gbdt_commons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._kneighbors_implementations.html">hummingbird.ml.operator_converters._kneighbors_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._linear_implementations.html">hummingbird.ml.operator_converters._linear_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._mlp_implementations.html">hummingbird.ml.operator_converters._mlp_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._normalizer_implementations.html">hummingbird.ml.operator_converters._normalizer_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._one_hot_encoder_implementations.html">hummingbird.ml.operator_converters._one_hot_encoder_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._pipeline_implementations.html">hummingbird.ml.operator_converters._pipeline_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._scaler_implementations.html">hummingbird.ml.operator_converters._scaler_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_commons.html">hummingbird.ml.operator_converters._tree_commons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_implementations.html">hummingbird.ml.operator_converters._tree_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.constants.html">hummingbird.ml.operator_converters.constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.xgb.html">hummingbird.ml.operator_converters.xgb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.onnx.html">hummingbird.ml.operator_converters.onnx</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.html">hummingbird.ml.operator_converters.sklearn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sparkml.html">hummingbird.ml.operator_converters.sparkml</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hummingbird</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="hummingbird.html">hummingbird</a> &raquo;</li>
+        
+          <li><a href="hummingbird.ml.html">hummingbird.ml</a> &raquo;</li>
+        
+          <li><a href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a> &raquo;</li>
+        
+      <li>hummingbird.ml.operator_converters._gbdt_commons</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/hummingbird.ml.operator_converters._gbdt_commons.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-hummingbird.ml.operator_converters._gbdt_commons">
+<span id="hummingbird-ml-operator-converters-gbdt-commons"></span><h1>hummingbird.ml.operator_converters._gbdt_commons<a class="headerlink" href="#module-hummingbird.ml.operator_converters._gbdt_commons" title="Permalink to this headline">¶</a></h1>
+<p>Collections of functions shared among GBDT converters.</p>
+<dl class="py function">
+<dt id="hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_classifier_common">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters._gbdt_commons.</code><code class="sig-name descname">convert_gbdt_classifier_common</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_infos</span></em>, <em class="sig-param"><span class="n">get_tree_parameters</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">n_classes</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L18"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_classifier_common" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common converter for GBDT classifiers.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>tree_infos: The information representaing a tree (ensemble)
+get_tree_parameters: A function specifying how to parse the tree_infos into parameters
+n_features: The number of features input to the model
+n_classes: How many classes are expected. 1 for regression tasks
+classes: The classes used for classification. None if implementing a regression model
+extra_config: Extra configuration used to properly implement the source tree</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tree implementation in PyTorch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_common">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters._gbdt_commons.</code><code class="sig-name descname">convert_gbdt_common</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_infos</span></em>, <em class="sig-param"><span class="n">get_tree_parameters</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L52"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_common" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common converter for GBDT models.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>tree_infos: The information representaing a tree (ensemble)
+get_tree_parameters: A function specifying how to parse the tree_infos into parameters
+n_features: The number of features input to the model
+classes: The classes used for classification. None if implementing a regression model
+extra_config: Extra configuration used to properly implement the source tree</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tree implementation in PyTorch</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="hummingbird.ml.operator_converters._kneighbors_implementations.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters._kneighbors_implementations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="hummingbird.ml.operator_converters._discretizer_implementations.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters._discretizer_implementations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Microsoft
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

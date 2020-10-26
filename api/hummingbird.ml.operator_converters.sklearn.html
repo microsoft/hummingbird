@@ -1,0 +1,283 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hummingbird.ml.operator_converters.sklearn &mdash; hummingbird  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/js/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor" href="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.html" />
+    <link rel="prev" title="hummingbird.ml.operator_converters.onnx.tree_ensemble" href="hummingbird.ml.operator_converters.onnx.tree_ensemble.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> hummingbird
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://microsoft.github.io/hummingbird/">Main website</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="hummingbird.html">hummingbird</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="hummingbird.ml.html">hummingbird.ml</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._container.html">hummingbird.ml._container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._parse.html">hummingbird.ml._parse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._topology.html">hummingbird.ml._topology</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._utils.html">hummingbird.ml._utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.convert.html">hummingbird.ml.convert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.exceptions.html">hummingbird.ml.exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.supported.html">hummingbird.ml.supported</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._array_feature_extractor_implementations.html">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._base_operator.html">hummingbird.ml.operator_converters._base_operator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._kneighbors_implementations.html">hummingbird.ml.operator_converters._kneighbors_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._linear_implementations.html">hummingbird.ml.operator_converters._linear_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._mlp_implementations.html">hummingbird.ml.operator_converters._mlp_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._normalizer_implementations.html">hummingbird.ml.operator_converters._normalizer_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._one_hot_encoder_implementations.html">hummingbird.ml.operator_converters._one_hot_encoder_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._pipeline_implementations.html">hummingbird.ml.operator_converters._pipeline_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._scaler_implementations.html">hummingbird.ml.operator_converters._scaler_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_commons.html">hummingbird.ml.operator_converters._tree_commons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_implementations.html">hummingbird.ml.operator_converters._tree_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.constants.html">hummingbird.ml.operator_converters.constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.xgb.html">hummingbird.ml.operator_converters.xgb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.onnx.html">hummingbird.ml.operator_converters.onnx</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">hummingbird.ml.operator_converters.sklearn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sparkml.html">hummingbird.ml.operator_converters.sparkml</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hummingbird</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="hummingbird.html">hummingbird</a> &raquo;</li>
+        
+          <li><a href="hummingbird.ml.html">hummingbird.ml</a> &raquo;</li>
+        
+          <li><a href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a> &raquo;</li>
+        
+      <li>hummingbird.ml.operator_converters.sklearn</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/hummingbird.ml.operator_converters.sklearn.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-hummingbird.ml.operator_converters.sklearn">
+<span id="hummingbird-ml-operator-converters-sklearn"></span><h1>hummingbird.ml.operator_converters.sklearn<a class="headerlink" href="#module-hummingbird.ml.operator_converters.sklearn" title="Permalink to this headline">¶</a></h1>
+<p>All scikit-learn operators converters are stored under this package.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.html">hummingbird.ml.operator_converters.sklearn.array_feature_extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.decision_tree.html">hummingbird.ml.operator_converters.sklearn.decision_tree</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.decomposition.html">hummingbird.ml.operator_converters.sklearn.decomposition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.discretizer.html">hummingbird.ml.operator_converters.sklearn.discretizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.gbdt.html">hummingbird.ml.operator_converters.sklearn.gbdt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.iforest.html">hummingbird.ml.operator_converters.sklearn.iforest</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.imputer.html">hummingbird.ml.operator_converters.sklearn.imputer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.kneighbors.html">hummingbird.ml.operator_converters.sklearn.kneighbors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.linear.html">hummingbird.ml.operator_converters.sklearn.linear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.mlp.html">hummingbird.ml.operator_converters.sklearn.mlp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.nb.html">hummingbird.ml.operator_converters.sklearn.nb</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.normalizer.html">hummingbird.ml.operator_converters.sklearn.normalizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.one_hot_encoder.html">hummingbird.ml.operator_converters.sklearn.one_hot_encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.pipeline.html">hummingbird.ml.operator_converters.sklearn.pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.poly_features.html">hummingbird.ml.operator_converters.sklearn.poly_features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.scaler.html">hummingbird.ml.operator_converters.sklearn.scaler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.sv.html">hummingbird.ml.operator_converters.sklearn.sv</a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="hummingbird.ml.operator_converters.onnx.tree_ensemble.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters.onnx.tree_ensemble" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Microsoft
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

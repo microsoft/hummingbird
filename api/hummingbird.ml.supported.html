@@ -1,0 +1,461 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hummingbird.ml.supported &mdash; hummingbird  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/js/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="hummingbird.ml.operator_converters" href="hummingbird.ml.operator_converters.html" />
+    <link rel="prev" title="hummingbird.ml.exceptions" href="hummingbird.ml.exceptions.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> hummingbird
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://microsoft.github.io/hummingbird/">Main website</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="hummingbird.html">hummingbird</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="hummingbird.ml.html">hummingbird.ml</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._container.html">hummingbird.ml._container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._parse.html">hummingbird.ml._parse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._topology.html">hummingbird.ml._topology</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._utils.html">hummingbird.ml._utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.convert.html">hummingbird.ml.convert</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.exceptions.html">hummingbird.ml.exceptions</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">hummingbird.ml.supported</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._array_feature_extractor_implementations.html">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._base_operator.html">hummingbird.ml.operator_converters._base_operator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._kneighbors_implementations.html">hummingbird.ml.operator_converters._kneighbors_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._linear_implementations.html">hummingbird.ml.operator_converters._linear_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._mlp_implementations.html">hummingbird.ml.operator_converters._mlp_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._normalizer_implementations.html">hummingbird.ml.operator_converters._normalizer_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._one_hot_encoder_implementations.html">hummingbird.ml.operator_converters._one_hot_encoder_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._pipeline_implementations.html">hummingbird.ml.operator_converters._pipeline_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._scaler_implementations.html">hummingbird.ml.operator_converters._scaler_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_commons.html">hummingbird.ml.operator_converters._tree_commons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_implementations.html">hummingbird.ml.operator_converters._tree_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.constants.html">hummingbird.ml.operator_converters.constants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.xgb.html">hummingbird.ml.operator_converters.xgb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.onnx.html">hummingbird.ml.operator_converters.onnx</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.html">hummingbird.ml.operator_converters.sklearn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sparkml.html">hummingbird.ml.operator_converters.sparkml</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">hummingbird</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="hummingbird.html">hummingbird</a> &raquo;</li>
+        
+          <li><a href="hummingbird.ml.html">hummingbird.ml</a> &raquo;</li>
+        
+      <li>hummingbird.ml.supported</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/hummingbird.ml.supported.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-hummingbird.ml.supported">
+<span id="hummingbird-ml-supported"></span><h1>hummingbird.ml.supported<a class="headerlink" href="#module-hummingbird.ml.supported" title="Permalink to this headline">¶</a></h1>
+<p>All operators, backends, and configurations settings supported in Hummingbird are registered here.</p>
+<p><strong>Supported Backends</strong>
+PyTorch,
+TorchScript,
+ONNX</p>
+<p><strong>Supported Operators</strong>
+BernoulliNB,
+Binarizer,
+DecisionTreeClassifier,
+DecisionTreeRegressor,
+ExtraTreesClassifier,
+ExtraTreesRegressor,
+FastICA,
+GaussianNB,
+GradientBoostingClassifier,
+GradientBoostingRegressor,
+HistGradientBoostingClassifier,
+HistGradientBoostingRegressor,
+IsolationForest,
+KernelPCA,
+KBinsDiscretizer,
+KNeighborsClassifier,
+KNeighborsRegressor,
+LinearRegression,
+LinearSVC,
+LogisticRegression,
+LogisticRegressionCV,
+MaxAbsScaler,
+MinMaxScaler,
+MissingIndicator,
+MLPClassifier,
+MLPRegressor,
+MultinomialNB,
+Normalizer,
+OneHotEncoder,
+PCA,
+PolynomialFeatures,
+RandomForestClassifier,
+RandomForestRegressor,
+RobustScaler,
+SelectKBest,
+SelectPercentile,
+SimpleImputer,
+SGDClassifier,
+StandardScaler,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor,
+TruncatedSVD,
+VarianceThreshold,</p>
+<p>LGBMClassifier,
+LGBMRanker,
+LGBMRegressor,</p>
+<p>XGBClassifier,
+XGBRanker,
+XGBRegressor</p>
+<dl class="py data">
+<dt id="hummingbird.ml.supported.BATCH_SIZE">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">BATCH_SIZE</code><em class="property"> = 'batch_size'</em><a class="headerlink" href="#hummingbird.ml.supported.BATCH_SIZE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select whether to partition the input dataset at inference time in N batch_size partitions.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.supported.CONTAINER">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">CONTAINER</code><em class="property"> = 'container'</em><a class="headerlink" href="#hummingbird.ml.supported.CONTAINER" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean used to chose whether to return the container for Sklearn API or just the model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.supported.INPUT_NAMES">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">INPUT_NAMES</code><em class="property"> = 'input_names'</em><a class="headerlink" href="#hummingbird.ml.supported.INPUT_NAMES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.supported.N_THREADS">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">N_THREADS</code><em class="property"> = 'n_threads'</em><a class="headerlink" href="#hummingbird.ml.supported.N_THREADS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select how many threads to use for scoring. This paremeter will set the number of intra-op threads.
+Inter-op threads are by default set to 1 in Hummingbird. Check <cite>tests.test_extra_conf.py</cite> for usage examples.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">ONNX_OUTPUT_MODEL_NAME</code><em class="property"> = 'onnx_model_name'</em><a class="headerlink" href="#hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>For ONNX models we can set the name of the output model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.supported.ONNX_TARGET_OPSET">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">ONNX_TARGET_OPSET</code><em class="property"> = 'onnx_target_opset'</em><a class="headerlink" href="#hummingbird.ml.supported.ONNX_TARGET_OPSET" title="Permalink to this definition">¶</a></dt>
+<dd><p>For ONNX models we can set the target opset to use. 11 by default.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.supported.OUTPUT_NAMES">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">OUTPUT_NAMES</code><em class="property"> = 'output_names'</em><a class="headerlink" href="#hummingbird.ml.supported.OUTPUT_NAMES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the names of the outputs.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.supported.TREE_IMPLEMENTATION">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">TREE_IMPLEMENTATION</code><em class="property"> = 'tree_implementation'</em><a class="headerlink" href="#hummingbird.ml.supported.TREE_IMPLEMENTATION" title="Permalink to this definition">¶</a></dt>
+<dd><p>Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported._build_backend_map">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">_build_backend_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L286"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported._build_backend_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>The set of supported backends is defined here.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported._build_lightgbm_operator_list">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">_build_lightgbm_operator_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L248"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported._build_lightgbm_operator_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all suported LightGBM (Sklearn API) operators.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported._build_onnxml_api_operator_name_map">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">_build_onnxml_api_operator_name_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L327"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported._build_onnxml_api_operator_name_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associate ONNXML with the operator class names.
+If two ONNXML models share a single name, it means they are equivalent in terms of conversion.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported._build_onnxml_operator_list">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">_build_onnxml_operator_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L261"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported._build_onnxml_operator_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all suported ONNXML operators.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported._build_sklearn_api_operator_name_map">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">_build_sklearn_api_operator_name_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L309"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sklearn_api_operator_name_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associate Sklearn with the operator class names.
+If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported._build_sklearn_operator_list">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">_build_sklearn_operator_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L82"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sklearn_operator_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put all suported Sklearn operators on a list.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported._build_sparkml_api_operator_name_map">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">_build_sparkml_api_operator_name_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L335"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sparkml_api_operator_name_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associate Spark-ML with the operator class names.
+If two Spark-ML models share a single name, it means they are equivalent in terms of conversion.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported._build_sparkml_operator_list">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">_build_sparkml_operator_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L215"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sparkml_operator_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all suported SparkML operators.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported._build_xgboost_operator_list">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">_build_xgboost_operator_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L236"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported._build_xgboost_operator_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all suported XGBoost (Sklearn API) operators.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported.get_onnxml_api_operator_name">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">get_onnxml_api_operator_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_type</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L359"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported.get_onnxml_api_operator_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the operator name for the input model type in <em>ONNX-ML API</em> format.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>model_type: A ONNX-ML model object (e.g., TreeEnsembleClassifier)</p>
+</dd>
+<dt>Returns:</dt><dd><p>A string which stands for the type of the input model in the Hummingbird conversion framework.
+None if the model_type is not supported</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported.get_sklearn_api_operator_name">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">get_sklearn_api_operator_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_type</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L343"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported.get_sklearn_api_operator_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the operator name for the input model type in <em>scikit-learn API</em> format.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>model_type: A scikit-learn model object (e.g., RandomForestClassifier)</dt><dd><p>or an object with scikit-learn API (e.g., LightGBM)</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>A string which stands for the type of the input model in the Hummingbird conversion framework</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="hummingbird.ml.supported.get_sparkml_api_operator_name">
+<code class="sig-prename descclassname">hummingbird.ml.supported.</code><code class="sig-name descname">get_sparkml_api_operator_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model_type</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/4394740/hummingbirdhummingbird/ml/supported.py#L375"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.supported.get_sparkml_api_operator_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the operator name for the input model type in <em>Spark-ML API</em> format.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>model_type: A Spark-ML model object (e.g., LogisticRegression)</p>
+</dd>
+<dt>Returns:</dt><dd><p>A string which stands for the type of the input model in the Hummingbird conversion framework.
+None if the model_type is not supported</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="hummingbird.ml.operator_converters.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="hummingbird.ml.exceptions.html" class="btn btn-neutral float-left" title="hummingbird.ml.exceptions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Microsoft
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
