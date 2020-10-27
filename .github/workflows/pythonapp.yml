@@ -99,7 +99,8 @@ jobs:
       run: |
         make -j3
         export TVM_HOME=$HOME/incubator-tvm
-        export PYTHONPATH=$TVM_HOME/
+        export PYTHONPATH=$TVM_HOME/python
+        export
     # - name: Install python TVM
     #   if: matrix.os != 'windows-2019'
     #   working-directory: ../../../incubator-tvm/python
