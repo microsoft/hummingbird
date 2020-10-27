@@ -45,6 +45,7 @@ from . import lightgbm  # noqa: E402
 from . import xgb  # noqa: E402
 from .sparkml import discretizer  # noqa: E402
 from .sparkml import linear  # noqa: E402
+from .sparkml import sql_transformer  # noqa: E402
 from .sparkml import vector_assembler  # noqa: E402
 
 __pdoc__ = {}
