@@ -52,6 +52,10 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(torch.get_num_interop_threads() == 1)
 
     # Test one thread in pytorch.
+    @unittest.skipIf(
+        sys.platform == "darwin" and LooseVersion(torch.__version__) > LooseVersion("1.6.0"),
+        reason="Setting threading multi times will break on mac",
+    )
     def test_torch_one_thread(self):
         warnings.filterwarnings("ignore")
         max_depth = 10

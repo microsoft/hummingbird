@@ -97,14 +97,22 @@ def convert(topology, backend, device, extra_config={}):
         except Exception as e:
             raise e
 
+    # Set the parameters for the model / container
+    n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
+    batch_size = None if constants.BATCH_SIZE not in extra_config else extra_config[constants.BATCH_SIZE]
+
+    # We set the number of threads for torch here to avoid errors in case we JIT.
+    # We set intra op concurrency while we force operators to run sequentially.
+    # We can revise this later, but in general we don't have graphs requireing inter-op parallelism.
+    if n_threads is not None:
+        if torch.get_num_interop_threads() != 1:
+            torch.set_num_interop_threads(1)
+        torch.set_num_threads(n_threads)
+
     operators = list(topology.topological_operator_iterator())
     torch_model = _PyTorchBackendModel(
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
-
-    # Set the parameters for the model / container
-    n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
-    batch_size = None if constants.BATCH_SIZE not in extra_config else extra_config[constants.BATCH_SIZE]
 
     if backend == onnx.__name__:
         onnx_model_name = output_model_name = None

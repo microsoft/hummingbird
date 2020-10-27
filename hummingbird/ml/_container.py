@@ -122,12 +122,14 @@ class PyTorchTorchscriptSklearnContainer(SklearnContainer):
         super(PyTorchTorchscriptSklearnContainer, self).__init__(model, n_threads, batch_size, extra_config)
 
         assert self._n_threads is not None
-
-        # We set intra op concurrency while we force operators to run sequentially.
-        # We can revise this later, but in general we don't have graphs requireing inter-op parallelism.
-        torch.set_num_threads(self._n_threads)
-        if torch.get_num_interop_threads() != 1:
-            torch.set_num_interop_threads(1)
+        assert (
+            torch.get_num_threads() == self._n_threads
+        ), "Number of intraop threads does not match with {}. Please fill an issue at https://github.com/microsoft/hummingbird.".format(
+            self._n_threads
+        )
+        assert (
+            torch.get_num_interop_threads() == 1
+        ), "Number of interop threads is not 1. Please fill an issue at https://github.com/microsoft/hummingbird."
 
 
 # PyTorch containers.

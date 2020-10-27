@@ -25,7 +25,7 @@ install_requires = [
     "numpy>=1.15",
     "onnxconverter-common>=1.6.0",
     "scikit-learn>=0.21.3",
-    "torch>=1.4.*",
+    "torch>=1.4.*,<1.7.0",
     "psutil",
 ]
 onnx_requires = [
