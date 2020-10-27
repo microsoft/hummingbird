@@ -235,7 +235,7 @@ class PyTorchTorchscriptSklearnContainer(SklearnContainer):
 
 
 # PyTorch containers.
-class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer, SklearnContainerTransformer):
+class PyTorchSklearnContainerTransformer(SklearnContainerTransformer):
     """
     Container for PyTorch models mirroring Sklearn transformers API.
     """
@@ -244,7 +244,7 @@ class PyTorchSklearnContainerTransformer(PyTorchTorchscriptSklearnContainer, Skl
         return self.model.forward(*inputs).cpu().numpy()
 
 
-class PyTorchSklearnContainerRegression(PyTorchTorchscriptSklearnContainer, SklearnContainerRegression):
+class PyTorchSklearnContainerRegression(SklearnContainerRegression):
     """
     Container for PyTorch models mirroring Sklearn regressor API.
     """
