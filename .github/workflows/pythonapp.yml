@@ -98,7 +98,8 @@ jobs:
       working-directory: ../../../incubator-tvm/build.common
       run: |
         make -j3
-        export PYTHONPATH=$HOME/incubator-tvm/python/
+        export TVM_HOME=$HOME/incubator-tvm
+        export PYTHONPATH=$TVM_HOME/
     # - name: Install python TVM
     #   if: matrix.os != 'windows-2019'
     #   working-directory: ../../../incubator-tvm/python
