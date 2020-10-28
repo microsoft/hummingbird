@@ -108,6 +108,10 @@ jobs:
       run: |
         export TVM_HOME=/home/runner/incubator-tvm/
         python setup.py install
+    # - name: Test TVM
+    #   if: matrix.os == 'macOS-latest'
+    #   run: |
+    #     gdb python tests/test_extra_conf.py
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
