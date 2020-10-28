@@ -111,6 +111,7 @@ jobs:
     - name: Test TVM
       if: matrix.os == 'ubuntu-latest'
       run: |
+        sudo apt-get install gdb
         gdb -ex r --args python tests/test_extra_conf.py
     - name: Lint with flake8
       run: |
