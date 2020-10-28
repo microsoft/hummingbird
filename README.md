@@ -7,6 +7,12 @@
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Downloads](https://pepy.tech/badge/hummingbird-ml)](https://pepy.tech/project/hummingbird-ml)
 
+<p>
+    <img src="website/images/hb-logo-notext.png"  width=200  >
+    <br>
+
+</p>
+
 ## Introduction
 *Hummingbird* is a library for compiling trained traditional ML models into tensor computations. *Hummingbird* allows users to seamlessly leverage neural network frameworks (such as [PyTorch](https://pytorch.org/)) to accelerate traditional ML models. Thanks to *Hummingbird*, users can benefit from: (1) all the current and future optimizations implemented in neural network frameworks; (2) native hardware acceleration; (3) having a unique platform to support for both traditional and neural network models; and have all of this (4) without having to re-engineer their models.
 
@@ -37,19 +43,19 @@ In this example, the decision tree has four decision nodes (orange), and five le
 **Step 1:** Multiply the `input tensor` with tensor `A` (computed from the decision tree model above) that captures the relationship between input features and internal nodes. Then compare it with tensor `B` which is set to the value of each internal node (orange) to create the tensor `input path` that represents the path from input to node. In this case, the tree model has 4 conditions and the input vector is 5, therefore, the shape of tensor `A` is 5x4 and tensor B is 1x4.
 
 <p align="center">
-<img src="website/images/3-matrix.png" width=600 >
+<img src="website/images/3-matrix.png" width=450 >
 </p>
 
 **Step 2:** The `input path` tensor will be multiplied with tensor `C` that captures whether the internal node is a parent of that internal node, and if so, whether it is in the left or right sub-tree (left = 1, right =-1, otherwise =0) and then check the equals with tensor `D` that captures the count of the left child of its parent in the path from a leaf node to the tree root to create the tenor output path that represents the path from node to output. In this case, this tree model has 5 outputs with 4 conditions, therefore, the shape of tensor `C` is 4x5 and tensor `D` is 1x5.
 
 <p align="center">
-<img src="website/images/4-matrixnext.png" width=400 >
+<img src="website/images/4-matrixnext.png" width=450 >
 </p>
 
 **Step 3:** The `output path` will be multiplied with tensor `E` that captures the mapping between leaf nodes to infer the final prediction. In this case, tree model has 5 outputs, therefore, shape of tensor `E` is 5x1.
 
 <p align="center">
-<img src="website/images/5-singletensor.png" width=400>
+<img src="website/images/5-singletensor.png" width=450>
 </p>
 
 And now Hummingbird has compiled a tree-based model using the GEMM strategy!  For more details, please see [Figure 3](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf) of our paper.

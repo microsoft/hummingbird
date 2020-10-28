@@ -37,6 +37,7 @@ copy-python-apis: sphinx/_build/html
 	mkdir -p public
 	rm -rf public
 	cp -a sphinx/_build/html public
+	cp -a ../website/images public/images
 
 public:
 	$(MAKE) copy-python-apis
