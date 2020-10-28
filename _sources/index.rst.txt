@@ -1,5 +1,7 @@
 Welcome to Hummingbird
 ===================================================
+.. image:: ../images/hb-logo-notext.png
+   :width: 200
 
 This is the API documentation for the Python interface.
 
