@@ -217,23 +217,6 @@ class SklearnContainerAnomalyDetection(SklearnContainerRegression):
         return self.decision_function(*inputs) + self._extra_config[constants.OFFSET]
 
 
-class PyTorchTorchscriptSklearnContainer(SklearnContainer):
-    """
-    Base container for PyTorch and TorchScript models.
-    """
-
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        super(PyTorchTorchscriptSklearnContainer, self).__init__(model, n_threads, batch_size, extra_config)
-
-        assert self._n_threads is not None
-
-        # We set intra op concurrency while we force operators to run sequentially.
-        # We can revise this later, but in general we don't have graphs requireing inter-op parallelism.
-        if torch.get_num_interop_threads() != 1:
-            torch.set_num_interop_threads(1)
-        torch.set_num_threads(self._n_threads)
-
-
 # PyTorch containers.
 class PyTorchSklearnContainerTransformer(SklearnContainerTransformer):
     """
