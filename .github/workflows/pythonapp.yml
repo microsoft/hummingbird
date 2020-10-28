@@ -70,7 +70,7 @@ jobs:
       env:
         CACHE_NUMBER: 0
       with:
-        path: ~/incubator-tvm
+        path: ../../../incubator-tvm
         key: ${{ runner.os }}-tvm-${{ env.CACHE_NUMBER }}-${{ hashFiles('version.py') }}
     # Getting TVM requires: 1) fetching TVM from github, 2) get LLVM, 3) cmake, 4) make, 5) install python dependecy.
     # 1 to 4 will be retrieved from the cache.
@@ -96,13 +96,13 @@ jobs:
     #     ..
     - name: Get LLVM on Linux
       if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
-      working-directory: ~/incubator-tvm
+      working-directory: ../../../incubator-tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
     - name: Get LLVM on Mac
       if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os == 'mac-latest' }}
-      working-directory: ~/incubator-tvm
+      working-directory: ../../../incubator-tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
