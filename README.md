@@ -8,7 +8,7 @@
 [![Downloads](https://pepy.tech/badge/hummingbird-ml)](https://pepy.tech/project/hummingbird-ml)
 
 <p>
-    <img src="website/images/hb-logo.png"  >
+    <img src="website/images/hb-logo-notext.png"  width=250  >
     <br>
 
 </p>
