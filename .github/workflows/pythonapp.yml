@@ -27,6 +27,9 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    # PyTorch for Mac has different pip syntax wrt Win and Linux.
+    # PyTorch stop supporting python 3.5 from version 1.6.
+    # The following cases address the situations above.
     - name: Install pytorch for mac
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
@@ -43,7 +46,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
-        pip install decorator attrs tornado
     - name: Run basic tests without extra
       run: |
         pytest
@@ -64,12 +66,23 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
-    - name: Fetch TVM
-      if: ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
+    - uses: actions/cache@v1
+      # TVM takes forever, we try to cache it.
+      id: cache
+      env:
+        CACHE_NUMBER: 0
+      with:
+        path: ~/incubator-tvm
+        key: ${{ runner.os }}-tvm-${{ env.CACHE_NUMBER }}-${{ hashFiles('version.py') }}
+    # Getting TVM requires: 1) fetching TVM from github, 2) get LLVM, 3) cmake, 4) make, 5) install python dependecy.
+    # 1 to 4 will be retrieved from the cache.
+    - name: Fetch and prepare TVM for compilation
+      if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' }}
       run: |
         cd ~/
         git clone https://github.com/apache/incubator-tvm.git
         cd incubator-tvm
+        git checkout tags/v0.7.0
         git submodule update --recursive --init
         cmake -E make_directory build
     # - name: CMake TVM on Windows
@@ -83,14 +96,20 @@ jobs:
     #     -DCMAKE_BUILD_TYPE=Release
     #     -DCMAKE_CONFIGURATION_TYPES="Release"
     #     ..
-    - name: Get LLVM on Mac
-      if: ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
-      working-directory: ../../../incubator-tvm
+    - name: Get LLVM on Linux
+      if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os = 'ubuntu-latest' }}
+      working-directory: ~/incubator-tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-    - name: CMake TVM on Mac
-      if: ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
+    - name: Get LLVM on Mac
+    if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os = 'mac-latest' }}
+    working-directory: ~/incubator-tvm
+    run: |
+      wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+      tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+    - name: CMake TVM on Linux
+      if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
       working-directory: ../../../incubator-tvm/build
       run: >-
         cmake
@@ -98,28 +117,25 @@ jobs:
         "-DUSE_GRAPH_RUNTIME=ON"
         "-DUSE_LLVM=/home/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/llvm-config"
         ..
-    # - name: Build TVM on Windows
-    #   if: matrix.os == 'windows-2019'
-    #   working-directory: incubator-tvm
-    #   run: cmake --build build.common --config Release -- /m
+    - name: CMake TVM on Mac
+    if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os == 'mac-latest' }}
+    working-directory: ../../../incubator-tvm/build
+    run: >-
+      cmake
+      "-DUSE_RPC=ON"
+      "-DUSE_GRAPH_RUNTIME=ON"
+      "-DUSE_LLVM=/home/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-apple-darwin/bin/llvm-config"
+      ..
     - name: Build TVM on Unix
-      if: ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
+      if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
       working-directory: ../../../incubator-tvm/build
       run: |
         make -j3
-    #    export TVM_HOME=$HOME/incubator-tvm
-    # export PYTHONPATH=$TVM_HOME/python
     - name: Install python TVM
-      if: ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
       working-directory: ../../../incubator-tvm/python
       run: |
-        export TVM_HOME=/home/runner/incubator-tvm/
         python setup.py install
-    - name: Test TVM
-      if: ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
-      run: |
-        sudo apt-get install gdb
-        gdb -ex r --args python tests/test_extra_conf.py
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -129,8 +145,8 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+    # Run and push coverage only for one of the runs (Linux py3.7).
     - name: Coverage
-      # run and push coverage only on one of the runs
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       run: |
         coverage run -a -m pytest tests
@@ -141,7 +157,8 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
-    - name: Generate Documentation   # for some awful reason, this only works with older torch????
+    # Compile and push documentation only for one of the runs (Linux py3.7).
+    - name: Generate Documentation
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       run: |
         make sphinx-site -C website/
