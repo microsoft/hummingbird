@@ -288,7 +288,8 @@ def _build_onnxml_operator_list():
             "Reshape",
             # Preprocessing
             "ArrayFeatureExtractor",
-            "Binarizer" "OneHotEncoder",
+            "Binarizer",
+            "OneHotEncoder",
             "Normalizer",
             "Scaler",
             # Tree-based models

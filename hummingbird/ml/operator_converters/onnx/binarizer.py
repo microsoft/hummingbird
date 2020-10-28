@@ -27,6 +27,7 @@ def convert_onnx_binarizer(operator, device=None, extra_config={}):
         A PyTorch model
     """
 
+    threshold = None
     for attr in operator.raw_operator.origin.attribute:
         if attr.name == "threshold":
             threshold = attr.f

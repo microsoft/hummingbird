@@ -47,26 +47,48 @@ class TestONNXBinarizer(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
+    # Check 0.0 threshold
     def test_binarizer_converter_0thresh(self, rtol=1e-06, atol=1e-06):
         onnx_ml_pred, onnx_pred = self._test_binarizer_converter(0.0)
+
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    # Check positive threshold
+    def test_binarizer_converter_posthresh(self, rtol=1e-06, atol=1e-06):
+        onnx_ml_pred, onnx_pred = self._test_binarizer_converter(2.0)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
-    # @unittest.skipIf(
-    #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
-    # )
-    # def test_onnx_binarizer_converter_raises_rt(self):
-    #     warnings.filterwarnings("ignore")
-    #     X = np.array([[1, 2, 3], [4, 3, 0], [0, 1, 4], [0, 5, 6]], dtype=np.float32)
-    #     model = Binarizer(norm="l1")
-    #     model.fit(X)
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    # Check neg threshold
+    def test_binarizer_converter_negthresh(self, rtol=1e-06, atol=1e-06):
+        onnx_ml_pred, onnx_pred = self._test_binarizer_converter(-2.0)
 
-    #     # generate test input
-    #     onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
-    #     onnx_ml_model.graph.node[0].attribute[0].s = "".encode()
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
-    #     self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    # if the model is corrupt, we should get a RuntimeError
+    def test_onnx_binarizer_converter_raises_rt(self):
+        warnings.filterwarnings("ignore")
+        X = np.array([[1, 2, 3], [4, 3, 0], [0, 1, 4], [0, 5, 6]], dtype=np.float32)
+        model = Binarizer(threshold=0)
+        model.fit(X)
+
+        # generate test input
+        onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
+        print(onnx_ml_model.graph.node[0].attribute[0])
+        onnx_ml_model.graph.node[0].attribute[0].name = "".encode()
+
+        self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
 
 
 if __name__ == "__main__":
