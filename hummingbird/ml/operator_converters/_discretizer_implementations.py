@@ -35,11 +35,12 @@ class KBinsDiscretizer(BaseOperator, torch.nn.Module):
         self.encode = encode
         # We use DoubleTensors for better precision.
         # We use a small delta value of 1e-9.
-        self.ge_tensor = torch.nn.Parameter(torch.DoubleTensor(bin_edges[:, :-1] - 1e-9), requires_grad=False)
-        self.lt_tensor = torch.nn.Parameter(torch.DoubleTensor(bin_edges[:, 1:] + 1e-9), requires_grad=False)
+        self.ge_tensor = torch.nn.Parameter(torch.FloatTensor(bin_edges[:, :-1]), requires_grad=False)
+        self.lt_tensor = torch.nn.Parameter(torch.FloatTensor(bin_edges[:, 1:]), requires_grad=False)
         self.ohe = OneHotEncoder(labels, device)
 
     def forward(self, x):
+        x = x.float()
         x = torch.unsqueeze(x, 2)
         x = torch.ge(x, self.ge_tensor) & torch.lt(x, self.lt_tensor)
         x = x.float()
