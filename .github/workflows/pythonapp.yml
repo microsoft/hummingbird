@@ -90,7 +90,7 @@ jobs:
         cmake
         "-DUSE_RPC=ON"
         "-DUSE_GRAPH_RUNTIME=ON"
-        "-USE_LLVM llvm-config-10"
+        "-DUSE_LLVM=llvm-config-10"
         ..
     # - name: Build TVM on Windows
     #   if: matrix.os == 'windows-2019'
