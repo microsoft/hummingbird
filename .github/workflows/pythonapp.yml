@@ -83,6 +83,12 @@ jobs:
     #     -DCMAKE_BUILD_TYPE=Release
     #     -DCMAKE_CONFIGURATION_TYPES="Release"
     #     ..
+    - name: Get LLVM on Mac
+      if: ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
+      working-directory: ../../../incubator-tvm
+      run: |
+        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+        tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
     - name: CMake TVM on Mac
       if: ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
       working-directory: ../../../incubator-tvm/build
@@ -90,7 +96,7 @@ jobs:
         cmake
         "-DUSE_RPC=ON"
         "-DUSE_GRAPH_RUNTIME=ON"
-        "-DUSE_LLVM=llvm-config-10"
+        "-DUSE_LLVM=/home/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/llvm-config"
         ..
     # - name: Build TVM on Windows
     #   if: matrix.os == 'windows-2019'
