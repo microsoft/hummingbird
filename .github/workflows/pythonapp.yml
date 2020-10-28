@@ -64,6 +64,7 @@ jobs:
         pip install .[extra,onnx,sparkml]
         pip install pandas
     - name: Fetch TVM
+      if: matrix.os == 'macOS-latest'
       run: |
         cd ~/
         git clone https://github.com/apache/incubator-tvm.git
@@ -82,7 +83,7 @@ jobs:
     #     -DCMAKE_CONFIGURATION_TYPES="Release"
     #     ..
     - name: CMake TVM on Mac
-      if: matrix.os != 'windows-2019'
+      if: matrix.os == 'macOS-latest'
       working-directory: ../../../incubator-tvm/build
       run: >-
         cmake
@@ -94,14 +95,14 @@ jobs:
     #   working-directory: incubator-tvm
     #   run: cmake --build build.common --config Release -- /m
     - name: Build TVM on Unix
-      if: matrix.os != 'windows-2019'
+      if: matrix.os == 'macOS-latest'
       working-directory: ../../../incubator-tvm/build
       run: |
         make -j3
     #    export TVM_HOME=$HOME/incubator-tvm
     # export PYTHONPATH=$TVM_HOME/python
     - name: Install python TVM
-      if: matrix.os != 'windows-2019'
+      if: matrix.os == 'macOS-latest'
       working-directory: ../../../incubator-tvm/python
       run: |
         export TVM_HOME=/home/runner/incubator-tvm/
