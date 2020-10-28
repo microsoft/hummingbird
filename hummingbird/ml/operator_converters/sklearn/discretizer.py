@@ -45,17 +45,18 @@ def convert_sklearn_k_bins_discretizer(operator, device, extra_config):
     max_bin_edges = 0
     labels = []
     for x in operator.raw_operator.bin_edges_:
-        bin_edges.append(x.flatten().tolist())
+        temp = x.flatten().tolist()
+        temp[0] = temp[0] - 1e-3
+        temp[-1] = temp[-1] + 1e-3
+        bin_edges.append(temp)
         max_bin_edges = max(max_bin_edges, len(bin_edges[-1]))
 
     for i in range(len(bin_edges)):
         labels.append(np.array([i for i in range(len(bin_edges[i]) - 1)]))
         if len(bin_edges[i]) < max_bin_edges:
             bin_edges[i] = (
-                [bin_edges[i][0]]
-                + bin_edges[i][1:-1]
+                bin_edges[i]
                 + [np.inf for _ in range((max_bin_edges - len(bin_edges[i])))]
-                + [bin_edges[i][-1]]
             )
 
     return KBinsDiscretizer(operator.raw_operator.encode, np.array(bin_edges), labels, device)
