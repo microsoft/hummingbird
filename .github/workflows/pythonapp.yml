@@ -106,6 +106,9 @@ jobs:
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+        cd clang+llvm-10.0.0-x86_64-apple-darwin
+        cd bin
+        ls
     - name: CMake TVM on Linux
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
       working-directory: ../../../incubator-tvm/build
