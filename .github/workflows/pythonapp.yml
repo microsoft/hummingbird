@@ -98,14 +98,14 @@ jobs:
       working-directory: ../../../incubator-tvm/build
       run: |
         make -j3
-        export TVM_HOME=$HOME/incubator-tvm
-        export PYTHONPATH=$TVM_HOME/python
-    # - name: Install python TVM
-    #   if: matrix.os != 'windows-2019'
-    #   working-directory: ../../../incubator-tvm/python
-    #   run: |
-    #     export TVM_HOME=/home/runner/incubator-tvm/
-    #     python setup.py install
+    #    export TVM_HOME=$HOME/incubator-tvm
+    # export PYTHONPATH=$TVM_HOME/python
+    - name: Install python TVM
+      if: matrix.os != 'windows-2019'
+      working-directory: ../../../incubator-tvm/python
+      run: |
+        export TVM_HOME=/home/runner/incubator-tvm/
+        python setup.py install
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
