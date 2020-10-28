@@ -69,7 +69,7 @@ jobs:
         git clone https://github.com/apache/incubator-tvm.git
         cd incubator-tvm
         git submodule update --recursive --init
-        cmake -E make_directory build.common
+        cmake -E make_directory build
     # - name: CMake TVM on Windows
     #   if: matrix.os == 'windows-2019'
     #   working-directory: incubator-tvm/build.common
@@ -83,7 +83,7 @@ jobs:
     #     ..
     - name: CMake TVM on Mac
       if: matrix.os != 'windows-2019'
-      working-directory: ../../../incubator-tvm/build.common
+      working-directory: ../../../incubator-tvm/build
       run: >-
         cmake
         "-DUSE_RPC=ON"
@@ -95,7 +95,7 @@ jobs:
     #   run: cmake --build build.common --config Release -- /m
     - name: Build TVM on Unix
       if: matrix.os != 'windows-2019'
-      working-directory: ../../../incubator-tvm/build.common
+      working-directory: ../../../incubator-tvm/build
       run: |
         make -j3
         export TVM_HOME=$HOME/incubator-tvm
