@@ -6,7 +6,6 @@
 
 from onnxconverter_common.registration import register_converter
 
-from .._normalizer_implementations import Normalizer
 from .._discretizer_implementations import Binarizer
 
 """
