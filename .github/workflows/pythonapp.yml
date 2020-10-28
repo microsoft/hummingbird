@@ -103,11 +103,11 @@ jobs:
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
     - name: Get LLVM on Mac
-    if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os = 'mac-latest' }}
-    working-directory: ~/incubator-tvm
-    run: |
-      wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
-      tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+      if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os = 'mac-latest' }}
+      working-directory: ~/incubator-tvm
+      run: |
+        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+        tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
     - name: CMake TVM on Linux
       if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
       working-directory: ../../../incubator-tvm/build
@@ -118,14 +118,14 @@ jobs:
         "-DUSE_LLVM=/home/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/llvm-config"
         ..
     - name: CMake TVM on Mac
-    if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os == 'mac-latest' }}
-    working-directory: ../../../incubator-tvm/build
-    run: >-
-      cmake
-      "-DUSE_RPC=ON"
-      "-DUSE_GRAPH_RUNTIME=ON"
-      "-DUSE_LLVM=/home/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-apple-darwin/bin/llvm-config"
-      ..
+      if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os == 'mac-latest' }}
+      working-directory: ../../../incubator-tvm/build
+      run: >-
+        cmake
+        "-DUSE_RPC=ON"
+        "-DUSE_GRAPH_RUNTIME=ON"
+        "-DUSE_LLVM=/home/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-apple-darwin/bin/llvm-config"
+        ..
     - name: Build TVM on Unix
       if: steps.cache.outputs.cache-hit != 'true' && ${{ matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
       working-directory: ../../../incubator-tvm/build
@@ -143,8 +143,7 @@ jobs:
         # The GitHub editor is 127 chars wide
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
-      run: |
-        pytest
+      run: pytest
     # Run and push coverage only for one of the runs (Linux py3.7).
     - name: Coverage
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
