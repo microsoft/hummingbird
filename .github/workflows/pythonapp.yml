@@ -108,11 +108,12 @@ jobs:
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'windows-2019' }}
       working-directory: ../../../incubator-tvm
       run: |
-        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe
+        Invoke-WebRequest -Uri https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe -OutFile LLVM-10.0.0-win64.exe
         LLVM-10.0.0-win64.exe
-    - name: tmate
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'windows-2019' }}
-      uses: mxschmitt/action-tmate@v3
+        dir
+    # - name: tmate
+    #   if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'windows-2019' }}
+    #   uses: mxschmitt/action-tmate@v3
     - name: CMake TVM on Linux
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
       working-directory: ../../../incubator-tvm/build
