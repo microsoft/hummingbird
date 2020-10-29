@@ -101,7 +101,7 @@ jobs:
         cmake
         "-DUSE_RPC=ON"
         "-DUSE_GRAPH_RUNTIME=ON"
-        "-DUSE_LLVM=/home/runner/incubator-tvm/llvm/bin/llvm-config"
+        "-DUSE_LLVM=/Users/runner/incubator-tvm/llvm/bin/llvm-config"
         ..
     - name: Build TVM
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
