@@ -14,7 +14,7 @@ import hummingbird.ml
 
 class ScoreBackend(ABC):
     @staticmethod
-    def create(name):  # pylint: disable=too-many-return-statements
+    def create(name):
         if name in ["torch", "torch.jit", "onnx"]:
             return HBBackend(name)
         raise ValueError("Unknown backend: " + name)
