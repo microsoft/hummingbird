@@ -85,7 +85,6 @@ class TestONNXBinarizer(unittest.TestCase):
 
         # generate test input
         onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
-        print(onnx_ml_model.graph.node[0].attribute[0])
         onnx_ml_model.graph.node[0].attribute[0].name = "".encode()
 
         self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
