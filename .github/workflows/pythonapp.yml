@@ -116,9 +116,9 @@ jobs:
         "-DUSE_GRAPH_RUNTIME=ON"
         "-DUSE_LLVM=/home/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/llvm-config"
         ..
-    - name: tmate
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'macos-latest' }}
-      uses: mxschmitt/action-tmate@v3
+    # - name: tmate
+    #   if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'macos-latest' }}
+    #   uses: mxschmitt/action-tmate@v3
     - name: CMake TVM on Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'macos-latest' }}
       working-directory: ../../../incubator-tvm/build
