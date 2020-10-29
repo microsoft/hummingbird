@@ -81,6 +81,7 @@ jobs:
         git checkout tags/v0.7.0
         git submodule update --recursive --init
         cmake -E make_directory build
+        pwd
     # - name: CMake TVM on Windows
     #   if: matrix.os == 'windows-2019'
     #   working-directory: incubator-tvm/build.common
