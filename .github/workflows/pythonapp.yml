@@ -67,11 +67,9 @@ jobs:
     - uses: actions/cache@v1
       # TVM takes forever, we try to cache it.
       id: cache
-      env:
-        CACHE_NUMBER: 0
       with:
         path: ../../../incubator-tvm
-        key: ${{ runner.os }}-tvm-${{ env.CACHE_NUMBER }}-${{ hashFiles('version.py') }}
+        key: ${{ runner.os }}-tvm-0.7
     # Getting TVM requires: 1) fetching TVM from github, 2) get LLVM, 3) cmake, 4) make, 5) install python dependecy.
     # 1 to 4 will be retrieved from the cache.
     - name: Fetch and prepare TVM for compilation
@@ -106,7 +104,15 @@ jobs:
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
-        cd clang+llvm-10.0.0-x86_64-apple-darwin
+    - name: Get LLVM on Win
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'windows-2019' }}
+      working-directory: ../../../incubator-tvm
+      run: |
+        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe
+        LLVM-10.0.0-win64.exe
+    - name: tmate
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'windows-2019' }}
+      uses: mxschmitt/action-tmate@v3
     - name: CMake TVM on Linux
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
       working-directory: ../../../incubator-tvm/build
@@ -116,9 +122,6 @@ jobs:
         "-DUSE_GRAPH_RUNTIME=ON"
         "-DUSE_LLVM=/home/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04/bin/llvm-config"
         ..
-    # - name: tmate
-    #   if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'macos-latest' }}
-    #   uses: mxschmitt/action-tmate@v3
     - name: CMake TVM on Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'macos-latest' }}
       working-directory: ../../../incubator-tvm/build
