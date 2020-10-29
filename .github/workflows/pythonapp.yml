@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-2019]
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -82,17 +82,6 @@ jobs:
         git submodule update --recursive --init
         cmake -E make_directory build
         pwd
-    # - name: CMake TVM on Windows
-    #   if: matrix.os == 'windows-2019'
-    #   working-directory: incubator-tvm/build.common
-    #   run: >-
-    #     cmake
-    #     -DUSE_SORT=ON
-    #     -DUSE_RPC=ON
-    #     -DUSE_GRAPH_RUNTIME=ON
-    #     -DCMAKE_BUILD_TYPE=Release
-    #     -DCMAKE_CONFIGURATION_TYPES="Release"
-    #     ..
     - name: Get LLVM on Linux
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
       working-directory: ../../../incubator-tvm
@@ -132,6 +121,18 @@ jobs:
         "-DUSE_RPC=ON"
         "-DUSE_GRAPH_RUNTIME=ON"
         "-DUSE_LLVM=/Users/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-apple-darwin/bin/llvm-config"
+        ..
+    - name: CMake TVM on Windows
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'windows-2019'
+      working-directory: C:\Users\runneradmin\incubator-tvm/build
+      run: >-
+        cmake
+        -DUSE_SORT=ON
+        -DUSE_RPC=ON
+        -DUSE_GRAPH_RUNTIME=ON
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_CONFIGURATION_TYPES="Release"
+        -DUSE_LLVM=llvm-config-10.0
         ..
     - name: Build TVM on Unix
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
