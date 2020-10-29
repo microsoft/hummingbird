@@ -123,8 +123,8 @@ jobs:
         "-DUSE_LLVM=/Users/runner/incubator-tvm/clang+llvm-10.0.0-x86_64-apple-darwin/bin/llvm-config"
         ..
     - name: CMake TVM on Windows
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'windows-2019'
-      working-directory: C:\Users\runneradmin\incubator-tvm/build
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'windows-2019' }}
+      working-directory: C:\Users\runneradmin\incubator-tvm\build
       run: >-
         cmake
         -DUSE_SORT=ON
@@ -139,6 +139,10 @@ jobs:
       working-directory: ../../../incubator-tvm/build
       run: |
         make -j3
+    - name: Build TVM on Win
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'windows-2019' }}
+      working-directory: C:\Users\runneradmin\incubator-tvm\build
+      run: make -j3
     - name: Install python TVM
       if: ${{ matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
       working-directory: ../../../incubator-tvm/python
