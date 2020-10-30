@@ -12,7 +12,7 @@ PyTorch,
 TorchScript,
 ONNX
 
-**Supported Operators**
+**Supported Operators (scikit-learn)**
 BernoulliNB,
 Binarizer,
 DecisionTreeClassifier,
@@ -57,14 +57,29 @@ TreeEnsembleRegressor,
 TruncatedSVD,
 VarianceThreshold,
 
+**Supported Operators (LGBM)**
 LGBMClassifier,
 LGBMRanker,
 LGBMRegressor,
 
-
+**Supported Operators (XGB)**
 XGBClassifier,
 XGBRanker,
-XGBRegressor
+XGBRegressor,
+
+**Supported Operators (ONNX-ML)**
+"ArrayFeatureExtractor",
+"Binarizer"
+"Cast",
+"Concat",
+"LinearClassifier",
+"LinearRegressor",
+"OneHotEncoder",
+"Normalizer",
+"Reshape",
+"Scaler",
+"TreeEnsembleClassifier",
+"TreeEnsembleRegressor",
 """
 from collections import defaultdict
 
@@ -273,6 +288,7 @@ def _build_onnxml_operator_list():
             "Reshape",
             # Preprocessing
             "ArrayFeatureExtractor",
+            "Binarizer",
             "OneHotEncoder",
             "Normalizer",
             "Scaler",
