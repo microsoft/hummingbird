@@ -273,14 +273,12 @@ def convert(topology, backend, device, extra_config={}):
 
         # Generate the model.
         with tvm.transform.PassContext(opt_level=3, config=config):
-            opt_mod, opt_params = relay.optimize(model, target=target, params=params)
-            graph, lib, params = relay.build(opt_mod, target=target, params=opt_params)
+            graph, lib, params = relay.build(model, target=target, params=params)
         tvm_model = graph_runtime.create(graph, lib, ctx)
         tvm_model.set_input(**params)
         if remainder_trace_input is not None:
             with tvm.transform.PassContext(opt_level=3, config=config):
-                opt_mod, opt_params = relay.optimize(remainder_model, target=target, params=remainder_params)
-                graph, lib, params = relay.build(opt_mod, target=target, params=opt_params)
+                graph, lib, params = relay.build(remainder_model, target=target, params=remainder_params)
             tvm_remainder_model = graph_runtime.create(graph, lib, ctx)
             tvm_remainder_model.set_input(**params)
 
