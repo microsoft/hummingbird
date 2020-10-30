@@ -66,9 +66,10 @@ jobs:
         pip install pandas
     - uses: actions/cache@v1
       # TVM takes forever, we try to cache it.
+      if: ${{ matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
       id: cache
       env:
-        CACHE_NUMBER: 0
+        CACHE_NUMBER: 1
       with:
         path: ../../../incubator-tvm
         key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-tvm-0.7
