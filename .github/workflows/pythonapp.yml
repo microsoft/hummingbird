@@ -122,7 +122,9 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # The GitHub editor is 127 chars wide
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
+    # We don't run pytest for Linux py3.7 since we do coverage for that case.
     - name: Test with pytest
+      if: ${{ matrix.python-version != '3.7' && matrix.os != 'ubuntu-latest' }}
       run: pytest
     # Run and push coverage only for one of the runs (Linux py3.7).
     - name: Coverage
