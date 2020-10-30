@@ -120,18 +120,19 @@ class ScoreBackend(ABC):
 
 class HBBackend(ScoreBackend):
     def __init__(self, backend):
+        super().__init__()
         self.backend = backend
 
     def convert(self, model, data, args, model_name):
         self.configure(data, model, args)
 
-        data = self.get_data(data.X_test)
+        test_data = self.get_data(data.X_test)
 
         with Timer() as t:
             self.model = convert(
                 model,
                 self.backend,
-                data,
+                test_data,
                 device=self.params["device"],
                 extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
             )
