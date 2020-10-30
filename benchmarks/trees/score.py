@@ -36,18 +36,19 @@ from hummingbird.ml import convert
 
 class ScoreBackend(ABC):
     @staticmethod
-    def create(name):  # pylint: disable=too-many-return-statements
+    def create(name):
         if name == "hb-pytorch":
-            return PytorchBackend()
+            return HBBackend("torch")
         if name == "hb-torchscript":
-            return TorchScriptBackend()
+            return HBBackend("torch.jit")
         if name == "hb-onnx":
-            return ONNXBackend()
+            return HBBackend("onnx")
         if name == "onnx-ml":
             return ONNXMLBackend()
         raise ValueError("Unknown backend: " + name)
 
     def __init__(self):
+        self.backend = None
         self.model = None
         self.params = {}
         self.predictions = None
@@ -91,14 +92,21 @@ class ScoreBackend(ABC):
         pass
 
 
-class PytorchBackend(ScoreBackend):
+class HBBackend(ScoreBackend):
+    def __init__(self, backend):
+        super().__init__()
+        self.backend = backend
+
     def convert(self, model, data, args, model_name):
         self.configure(data, model, args)
+
+        test_data = self.get_data(data.X_test)
 
         with Timer() as t:
             self.model = convert(
                 model,
-                "torch",
+                self.backend,
+                test_data,
                 device=self.params["device"],
                 extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
             )
@@ -115,43 +123,6 @@ class PytorchBackend(ScoreBackend):
             else:
                 self.predictions = self.model.predict_proba(predict_data)
 
-        return t.interval
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        del self.model
-
-
-class TorchScriptBackend(PytorchBackend):
-    def convert(self, model, data, args, model_name):
-        self.configure(data, model, args)
-        predict_data = self.get_data(data.X_test)
-
-        with Timer() as t:
-            self.model = convert(
-                model,
-                "torch.jit",
-                predict_data,
-                self.params["device"],
-                extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
-            )
-
-        return t.interval
-
-
-class ONNXBackend(PytorchBackend):
-    def convert(self, model, data, args, model_name):
-
-        self.configure(data, model, args)
-        predict_data = self.get_data(data.X_test)
-
-        with Timer() as t:
-            self.model = convert(
-                model,
-                "onnx",
-                predict_data,
-                self.params["device"],
-                extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
-            )
         return t.interval
 
     def __exit__(self, exc_type, exc_value, traceback):
