@@ -120,7 +120,7 @@ class ScoreBackend(ABC):
 
 class HBBackend(ScoreBackend):
     def __init__(self, backend):
-        super().__init__()
+        super(HBBackend, self).__init__()
         self.backend = backend
 
     def convert(self, model, data, args, model_name):
