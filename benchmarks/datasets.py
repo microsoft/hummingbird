@@ -120,7 +120,9 @@ def prepare_airline(dataset_folder, nrows):  # pylint: disable=too-many-locals
     y = df["ArrDelayBinary"]
     del df
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
-    data = Data(X_train.astype("|f4"), X_test.astype("|f4"), y_train, y_test, LearningTask.CLASSIFICATION)
+    data = Data(
+        X_train.astype("|f4").to_numpy(), X_test.astype("|f4").to_numpy(), y_train, y_test, LearningTask.CLASSIFICATION
+    )
     pickle.dump(data, open(pickle_url, "wb"), protocol=4)
     return data
 
@@ -141,7 +143,9 @@ def prepare_fraud(dataset_folder, nrows):
     X = df[[col for col in df.columns if col.startswith("V")]]
     y = df["Class"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
-    data = Data(X_train.astype("|f4"), X_test.astype("|f4"), y_train, y_test, LearningTask.CLASSIFICATION)
+    data = Data(
+        X_train.astype("|f4").to_numpy(), X_test.astype("|f4").to_numpy(), y_train, y_test, LearningTask.CLASSIFICATION
+    )
     pickle.dump(data, open(pickle_url, "wb"), protocol=4)
     return data
 
@@ -162,7 +166,9 @@ def prepare_higgs(dataset_folder, nrows):
     y = higgs.iloc[:, 0]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
-    data = Data(X_train.astype("|f4"), X_test.astype("|f4"), y_train, y_test, LearningTask.CLASSIFICATION)
+    data = Data(
+        X_train.astype("|f4").to_numpy(), X_test.astype("|f4").to_numpy(), y_train, y_test, LearningTask.CLASSIFICATION
+    )
     pickle.dump(data, open(pickle_url, "wb"), protocol=4)
     return data
 
@@ -191,7 +197,7 @@ def prepare_year(dataset_folder, nrows):
         print("Warning: nrows is specified, not using predefined test/train split for " "YearPredictionMSD.")
         X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
 
-    data = Data(X_train.astype("|f4"), X_test.astype("|f4"), y_train, y_test, LearningTask.REGRESSION)
+    data = Data(X_train.astype("|f4").to_numpy(), X_test.astype("|f4").to_numpy(), y_train, y_test, LearningTask.REGRESSION)
     pickle.dump(data, open(pickle_url, "wb"), protocol=4)
     return data
 
