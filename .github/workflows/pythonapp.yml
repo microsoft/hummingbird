@@ -6,11 +6,11 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - main
 
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -155,7 +155,7 @@ jobs:
       run: |
         make sphinx-site -C website/
     - name: Deploy to GitHub pages
-      if: ${{ github.ref == 'refs/heads/master' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       uses: JamesIves/github-pages-deploy-action@3.6.2
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

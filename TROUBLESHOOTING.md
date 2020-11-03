@@ -14,7 +14,7 @@ In order to run Hummingbird on PyTorch with GPU, you will need to `pip uninstall
 
 * *lightgbm installation:* `OSError: dlopen(lib_lightgbm.so, 6): Library not loaded: ...libomp.dylib`
     * There is a fixed issue with lgbm and MacOS.  See [LightGBM#1369](https://github.com/Microsoft/LightGBM/issues/1369).
-    * see also our [build file](https://github.com/microsoft/hummingbird/blob/master/.github/workflows/pythonapp.yml) with `brew install libomp`
+    * see also our [build file](https://github.com/microsoft/hummingbird/blob/main/.github/workflows/pythonapp.yml) with `brew install libomp`
 
 
 #### Windows
