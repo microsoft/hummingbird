@@ -177,6 +177,8 @@ class TestSklearnSVC(unittest.TestCase):
     def test_nu_svc_bi_tvm(self):
         self._test_nu_svc(2, backend="tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
+    # Commenting SVC multiclass for TVM because we are currently missing an operator for implementing mode
+    # https://github.com/pytorch/pytorch/issues/43867.
     # # SVC multiclass
     # def test_svc_multi(self):
     #     self._test_svc(3)
