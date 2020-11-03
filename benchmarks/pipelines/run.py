@@ -32,6 +32,21 @@ def print_sys_info(args):
     print("OS  : %s" % sys.platform)
     print("Sklearn: %s" % sklearn.__version__)
     print("Torch: %s" % torch.__version__)
+
+    # Optional imports
+    try:
+        import onnxruntime
+
+        print("ORT   : %s" % onnxruntime.__version__)
+    except ImportError:
+        pass
+    try:
+        import tvm
+
+        print("TVM : %s" % tvm.__version__)
+    except ImportError:
+        pass
+
     if args.gpu:
         print("Running on GPU")
     else:

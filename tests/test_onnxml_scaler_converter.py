@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, StandardScaler, RobustScaler
 import torch
 
-from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, lightgbm_installed
+from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed
 from hummingbird.ml import convert
 
 if onnx_runtime_installed():

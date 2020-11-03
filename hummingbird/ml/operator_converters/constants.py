@@ -38,6 +38,15 @@ ONNX_INITIALIZERS = "onnx_initializers"
 ONNX_INPUTS = "onnx_inputs"
 """The input of the onnx model."""
 
+TVM_CONTEXT = "tvm_context"
+"""The context for TVM containing information on the target."""
+
+TVM_INPUT_NAMES = "tvm_input_names"
+"""TVM expects named inputs. This is used to set the names for the inputs."""
+
+TVM_REMAINDER_MODEL = "tvm_remainder_model"
+"""TVM is statically compiled and when batching we may need to use a different model for the remainder part of the records."""
+
 TEST_INPUT = "test_input"
 """The test input data for models that need to be traced."""
 

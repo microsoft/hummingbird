@@ -10,7 +10,8 @@ All operators, backends, and configurations settings supported in Hummingbird ar
 **Supported Backends**
 PyTorch,
 TorchScript,
-ONNX
+ONNX,
+TVM
 
 **Supported Operators (scikit-learn)**
 BernoulliNB,
@@ -90,6 +91,7 @@ from ._utils import (
     lightgbm_installed,
     xgboost_installed,
     onnx_runtime_installed,
+    tvm_installed,
     sparkml_installed,
 )
 
@@ -319,6 +321,11 @@ def _build_backend_map():
 
         backends[onnx.__name__] = onnx.__name__
 
+    if tvm_installed():
+        import tvm
+
+        backends[tvm.__name__] = tvm.__name__
+
     return backends
 
 
@@ -428,6 +435,11 @@ ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
 
 ONNX_TARGET_OPSET = "onnx_target_opset"
 """For ONNX models we can set the target opset to use. 11 by default."""
+
+TVM_MAX_FUSE_DEPTH = "tvm_max_fuse_depth"
+"""For TVM we can fix the number of operations that will be fused.
+If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232).
+By default Hummingbird uses a max_fuse_depth of 50, but this can be override using this parameter."""
 
 INPUT_NAMES = "input_names"
 """Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs."""

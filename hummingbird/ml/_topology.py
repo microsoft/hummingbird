@@ -15,6 +15,7 @@ from uuid import uuid4
 
 from onnxconverter_common.registration import get_converter
 import onnx
+import timeit
 
 from hummingbird.ml._container import (
     PyTorchSklearnContainerRegression,
@@ -29,8 +30,12 @@ from hummingbird.ml._container import (
     ONNXSklearnContainerClassification,
     ONNXSklearnContainerTransformer,
     ONNXSklearnContainerAnomalyDetection,
+    TVMSklearnContainerRegression,
+    TVMSklearnContainerClassification,
+    TVMSklearnContainerTransformer,
+    TVMSklearnContainerAnomalyDetection,
 )
-from hummingbird.ml._utils import pandas_installed, _get_device
+from hummingbird.ml._utils import pandas_installed, tvm_installed, _get_device
 from hummingbird.ml.exceptions import MissingConverter
 from hummingbird.ml.operator_converters import constants
 
@@ -40,20 +45,40 @@ else:
     DataFrame = None
 
 
+def _jit_model(torch_model, trace_input, device, extra_config):
+    """
+    Function used to convert an input pytorch model into torchscript.
+    """
+    if device != "cpu":
+        trace_input.to(device)
+    return torch.jit.trace(torch_model, trace_input).eval()
+
+
 def _get_trace_input_from_test_input(input, batch_size):
     """
     Utility function used to properly put the inputs into a format understandable by torch.
+    If a not None batch_size is passed, the function generates a tracing input of batch_size.
+    If input size % batch_size is not 0, a tracing input of the remainder is also generated.
     """
+    remainder = None
     if type(input) is tuple:
         if batch_size is not None:
             trace_input = tuple([torch.from_numpy(i)[0:batch_size, :] for i in input])
+            if len(input) > 0 and input[0].shape[0] % batch_size != 0:
+                remainder_size = input[0].shape[0] % batch_size
+                remainder = tuple([torch.from_numpy(i)[0:remainder_size, :] for i in input])
         else:
             trace_input = tuple([torch.from_numpy(i) for i in input])
     else:
         trace_input = torch.from_numpy(input)
         if batch_size is not None:
-            trace_input = trace_input[0:batch_size, :]
-    return trace_input
+            batch_input = trace_input[0:batch_size, :]
+            remainder_size = len(input) % batch_size
+            if remainder_size != 0:
+                remainder = trace_input[0:remainder_size, :]
+            trace_input = batch_input
+
+    return (trace_input, remainder)
 
 
 def convert(topology, backend, device, extra_config={}):
@@ -73,7 +98,15 @@ def convert(topology, backend, device, extra_config={}):
     assert backend is not None, "Cannot convert a Topology object into backend None."
     assert device is not None, "Cannot convert a Topology object into device None."
 
+    tvm_backend = None
     operator_map = {}
+
+    if tvm_installed():
+        import tvm
+        from tvm import relay
+        from tvm.contrib import graph_runtime
+
+        tvm_backend = tvm.__name__
 
     for operator in topology.topological_operator_iterator():
         try:
@@ -128,12 +161,12 @@ def convert(topology, backend, device, extra_config={}):
             output_model_name = str(uuid4().hex) + ".onnx"
 
         # Put the tracing test input into the right format.
-        trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
+        batch_trace_input, _ = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
 
         # Generate the ONNX models
         torch.onnx.export(
             torch_model,
-            trace_input,
+            batch_trace_input,
             output_model_name,
             input_names=topology.raw_model.input_names,
             output_names=topology.raw_model.output_names,
@@ -185,6 +218,77 @@ def convert(topology, backend, device, extra_config={}):
             return num_fixed
 
         fix_graph(hb_model.graph)
+    elif backend == tvm_backend:
+        # First we need to generate the torchscript model.
+        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
+            extra_config[constants.TEST_INPUT], batch_size
+        )
+        ts_model = _jit_model(torch_model, batch_trace_input, "cpu", extra_config)
+        if remainder_trace_input is not None:
+            remainder_ts_model = _jit_model(torch_model, remainder_trace_input, "cpu", extra_config)
+
+        # Generate the test input in the TVM format. In case we have a remainder beyond the batch, generate a remainder test input as well.
+        test_input = [
+            (
+                topology.raw_model.input_names[i],
+                batch_trace_input[i].shape if type(batch_trace_input) is tuple else batch_trace_input.shape,
+            )
+            for i in range(len(topology.raw_model.input_names))
+        ]
+        if remainder_trace_input is not None:
+            remainder_test_input = [
+                (
+                    topology.raw_model.input_names[i],
+                    remainder_trace_input[i].shape if type(remainder_trace_input) is tuple else remainder_trace_input.shape,
+                )
+                for i in range(len(topology.raw_model.input_names))
+            ]
+
+        # Pick the proper target.
+        if device == "cuda":
+            target = tvm.target.cuda()
+            ctx = tvm.gpu()
+        elif device == "cpu":
+            target = "llvm"
+            ctx = tvm.cpu()
+        elif "llvm" in device:
+            target = device
+            ctx = tvm.cpu()
+        else:
+            raise RuntimeError("Device {} not recognized".format(device))
+
+        # Get configuration parameters.
+        config = {}
+        if constants.TVM_MAX_FUSE_DEPTH in extra_config:
+            config["relay.FuseOps.max_depth"] = extra_config[constants.TVM_MAX_FUSE_DEPTH]
+        else:
+            # 50 is a good depth for operator fusion. More than that will probably hurt performance.
+            # https://github.com/microsoft/hummingbird/issues/232#issuecomment-697979508
+            config["relay.FuseOps.max_depth"] = 50
+
+        # Create the relay version of the model.
+        model, params = relay.frontend.from_pytorch(ts_model, test_input)
+        if remainder_trace_input is not None:
+            remainder_model, remainder_params = relay.frontend.from_pytorch(remainder_ts_model, remainder_test_input)
+
+        # Generate the model. We set opt_level=3 to enable all optimizations.
+        with tvm.transform.PassContext(opt_level=3, config=config):
+            graph, lib, params = relay.build(model, target=target, params=params)
+        tvm_model = graph_runtime.create(graph, lib, ctx)
+        tvm_model.set_input(**params)
+        if remainder_trace_input is not None:
+            with tvm.transform.PassContext(opt_level=3, config=config):
+                graph, lib, params = relay.build(remainder_model, target=target, params=remainder_params)
+            tvm_remainder_model = graph_runtime.create(graph, lib, ctx)
+            tvm_remainder_model.set_input(**params)
+
+        # In the container we will be using the context to properly configure the input tensors.
+        extra_config[constants.TVM_CONTEXT] = ctx
+        extra_config[constants.TVM_INPUT_NAMES] = topology.raw_model.input_names
+        if remainder_trace_input is not None:
+            extra_config[constants.TVM_REMAINDER_MODEL] = tvm_remainder_model
+
+        hb_model = tvm_model
     else:
         # Set the device for the model.
         if device != "cpu":
@@ -193,18 +297,19 @@ def convert(topology, backend, device, extra_config={}):
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
-            trace_input = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
+            trace_input, _ = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
             if device != "cpu":
                 trace_input.to(device)
             torch_model = torch.jit.trace(torch_model, trace_input).eval()
             torch.jit.optimized_execution(torch_model)
+
         hb_model = torch_model
 
     # Return if the container is not needed.
     if constants.CONTAINER in extra_config and not extra_config[constants.CONTAINER]:
         return hb_model
 
-    # We scan the operators backwards until we find an operator with a defined type
+    # We scan the operators backwards until we find an operator with a defined type.
     # This is necessary because ONNX models can have arbitrary operators doing casting, reshaping etc.
     idx = len(operators) - 1
     while (
@@ -232,12 +337,15 @@ def convert(topology, backend, device, extra_config={}):
         if idx < 0:
             idx = tmp_idx
 
+    # Get the proper container type.
     if operator_map[operators[idx].full_name].regression:
         # We are doing a regression task.
         if backend == torch.jit.__name__:
             container = TorchScriptSklearnContainerRegression
         elif backend == onnx.__name__:
             container = ONNXSklearnContainerRegression
+        elif backend == tvm_backend:
+            container = TVMSklearnContainerRegression
         else:
             container = PyTorchSklearnContainerRegression
     elif operator_map[operators[idx].full_name].anomaly_detection:
@@ -246,6 +354,8 @@ def convert(topology, backend, device, extra_config={}):
             container = TorchScriptSklearnContainerAnomalyDetection
         elif backend == onnx.__name__:
             container = ONNXSklearnContainerAnomalyDetection
+        elif backend == tvm_backend:
+            container = TVMSklearnContainerAnomalyDetection
         else:
             container = PyTorchSklearnContainerAnomalyDetection
     elif operator_map[operators[idx].full_name].transformer:
@@ -254,6 +364,8 @@ def convert(topology, backend, device, extra_config={}):
             container = TorchScriptSklearnContainerTransformer
         elif backend == onnx.__name__:
             container = ONNXSklearnContainerTransformer
+        elif backend == tvm_backend:
+            container = TVMSklearnContainerTransformer
         else:
             container = PyTorchSklearnContainerTransformer
     else:
@@ -262,6 +374,8 @@ def convert(topology, backend, device, extra_config={}):
             container = TorchScriptSklearnContainerClassification
         elif backend == onnx.__name__:
             container = ONNXSklearnContainerClassification
+        elif backend == tvm_backend:
+            container = TVMSklearnContainerClassification
         else:
             container = PyTorchSklearnContainerClassification
 

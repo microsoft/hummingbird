@@ -9,8 +9,9 @@ import torch
 from sklearn.ensemble import IsolationForest
 
 import hummingbird.ml
+from hummingbird.ml import constants
+from hummingbird.ml._utils import onnx_runtime_installed, tvm_installed
 from tree_utils import iforest_implementation_map
-from hummingbird.ml._utils import onnx_runtime_installed
 
 
 class TestIsolationForestConverter(unittest.TestCase):
@@ -103,6 +104,23 @@ class TestIsolationForestConverter(unittest.TestCase):
             np.testing.assert_allclose(model.decision_function(X), onnx_model.decision_function(X), rtol=1e-06, atol=1e-06)
             np.testing.assert_allclose(model.score_samples(X), onnx_model.score_samples(X), rtol=1e-06, atol=1e-06)
             np.testing.assert_array_equal(model.predict(X), onnx_model.predict(X))
+
+    # Test TVM backend.
+    @unittest.skipIf(not (tvm_installed()), reason="TVM test requires TVM")
+    def test_isolation_forest_tvm_converter(self):
+        warnings.filterwarnings("ignore")
+        for max_samples in [2 ** 1, 2 ** 3, 2 ** 8, 2 ** 10, 2 ** 12]:
+            model = IsolationForest(n_estimators=10, max_samples=max_samples)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            model.fit(X)
+            hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
+
+            self.assertIsNotNone(hb_model)
+            np.testing.assert_allclose(model.decision_function(X), hb_model.decision_function(X), rtol=1e-06, atol=1e-06)
+            np.testing.assert_allclose(model.score_samples(X), hb_model.score_samples(X), rtol=1e-06, atol=1e-06)
+            np.testing.assert_array_equal(model.predict(X), hb_model.predict(X))
 
 
 if __name__ == "__main__":

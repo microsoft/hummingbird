@@ -408,6 +408,6 @@ def convert_decision_ensemble_tree_common(
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)
+        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
         return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)

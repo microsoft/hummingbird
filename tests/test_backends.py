@@ -17,7 +17,7 @@ from onnxconverter_common.data_types import (
 )
 
 import hummingbird.ml
-from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed
+from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, tvm_installed
 from hummingbird.ml.exceptions import MissingBackend
 
 if onnx_ml_tools_installed():
@@ -96,7 +96,24 @@ class TestBackends(unittest.TestCase):
         # Test torcscript requires test_input
         self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "torch.jit")
 
-    # Test onnx no test_data, float input
+    # Test TVM requires test_data
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_test_data(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        # Test tvm requires test_input
+        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "tvm")
+
+    # Test onnx requires test_data or initial_types
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )

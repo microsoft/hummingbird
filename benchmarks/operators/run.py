@@ -63,11 +63,7 @@ import benchmarks.operators.train as train
 import benchmarks.operators.score as score
 from benchmarks.datasets import prepare_dataset, LearningTask
 
-from hummingbird.ml._utils import (
-    sklearn_installed,
-    onnx_ml_tools_installed,
-    onnx_runtime_installed,
-)
+from hummingbird.ml._utils import sklearn_installed, onnx_ml_tools_installed, onnx_runtime_installed, tvm_installed
 
 ROOT_PATH = Path(__file__).absolute().parent.parent.parent
 
@@ -106,7 +102,6 @@ def get_number_processors(args):
 
 
 def print_sys_info(args):
-    import onnxruntime
     import sklearn
     import torch
 
@@ -114,7 +109,20 @@ def print_sys_info(args):
     print("OS  : %s" % sys.platform)
     print("Sklearn : %s" % sklearn.__version__)
     print("PyTorch : %s" % torch.__version__)
-    print("ORT   : %s" % onnxruntime.__version__)
+
+    # Optional imports
+    try:
+        import onnxruntime
+
+        print("ORT   : %s" % onnxruntime.__version__)
+    except ImportError:
+        pass
+    try:
+        import tvm
+
+        print("TVM : %s" % tvm.__version__)
+    except ImportError:
+        pass
 
     if args.gpu:
         print("Running on GPU")
@@ -229,7 +237,19 @@ def benchmark(args, dataset_folder, model_folder, dataset):
             args.operator = op
 
             if args.backend == "all":
-                args.backend = "onnx-ml,hb-torchscript,hb-onnx"
+                args.backend = "onnx-ml,hb-pytorch,hb-torchscript,hb-onnx"
+            if "hb-tvm" in args.backend:
+                assert (
+                    tvm_installed
+                ), "To run benchmark with TVM you need to have TVM installed. Either install TVM or remove it from the backends."
+            if "hb-onnx" in args.backend:
+                assert (
+                    onnx_runtime_installed
+                ), "To run benchmark with ONNX you need to have ONNX runtime installed. Either install ONNX runtime or remove ONNX from the backends."
+            if "onnx-ml" in args.backend:
+                assert (
+                    onnx_runtime_installed and onnx_ml_tools_installed
+                ), "To run benchmark with ONNX-ML you need to have ONNX runtime and ONNXMLTOOLS installed. Either install ONNX runtime and ONNXMLTOOLS or remove ONNX-ML from the backends."
             for backend in args.backend.split(","):
                 print("Running '%s' ..." % backend)
                 scorer = score.ScoreBackend.create(backend)

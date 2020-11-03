@@ -22,6 +22,7 @@ from ._utils import (
     sparkml_installed,
     is_pandas_dataframe,
     is_spark_dataframe,
+    tvm_installed,
 )
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
@@ -70,7 +71,13 @@ def _supported_backend_check_config(model, backend, extra_config):
     import onnx
     import torch
 
-    if backend is torch.jit.__name__ and constants.TEST_INPUT not in extra_config:
+    tvm_backend = None
+    if tvm_installed():
+        import tvm
+
+        tvm_backend = tvm.__name__
+
+    if (backend == torch.jit.__name__ or backend == tvm_backend) and constants.TEST_INPUT not in extra_config:
         raise RuntimeError("Backend {} requires test inputs. Please pass some test input to the convert.".format(backend))
 
 
@@ -262,7 +269,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
-    The *torch.jit* backend requires a test_input.
+    The *torch.jit* and *tvm* backends requires a test_input.
     [Sklearn]: https://scikit-learn.org/
     [LightGBM]: https://lightgbm.readthedocs.io/
     [XGBoost]: https://xgboost.readthedocs.io/
@@ -276,8 +283,8 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         backend: The target for the conversion
         test_input: Some input data used to trace the model execution.
                     Multiple inputs can be passed as `tuple` objects or pandas Dataframes.
-                    When possible, (`numpy`)`arrays` are suggesed.
-        device: The target device the model should be run. This parameter is only used by the *torch** backends, and
+                    When possible, (`numpy`)`arrays` are suggested.
+        device: The target device the model should be run. This parameter is only used by the *torch** backends and *tvm*, and
                 the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
         extra_config: Extra configurations to be used by the individual operator converters.
                       The set of supported extra configurations can be found at `hummingbird.ml.supported`
