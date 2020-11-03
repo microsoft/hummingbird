@@ -6,7 +6,13 @@ import warnings
 
 import numpy as np
 
-from hummingbird.ml._utils import lightgbm_installed, xgboost_installed, onnx_runtime_installed, onnx_ml_tools_installed
+from hummingbird.ml._utils import (
+    lightgbm_installed,
+    xgboost_installed,
+    onnx_runtime_installed,
+    onnx_ml_tools_installed,
+    tvm_installed,
+)
 
 
 class TestNoExtra(unittest.TestCase):
@@ -38,6 +44,12 @@ class TestNoExtra(unittest.TestCase):
     def test_onnx_ml_installed_false(self):
         warnings.filterwarnings("ignore")
         assert not onnx_ml_tools_installed()
+
+    # Test no TVM returns false on tvm_installed()
+    @unittest.skipIf(onnx_ml_tools_installed(), reason="Test when TVM is not installed")
+    def test_tvm_installed_false(self):
+        warnings.filterwarnings("ignore")
+        assert not tvm_installed()
 
     # Test that we can import the converter successfully without installing [extra]
     def test_import_convert_no_extra(self):

@@ -547,8 +547,8 @@ class TestExtraConf(unittest.TestCase):
 
         max_depth = 10
         iris = datasets.load_iris()
-        X = iris.data[:, :3]
-        y = iris.target
+        X = iris.data[:149, :3]
+        y = iris.target[:149]
         columns = ["vA", "vB", "vC"]
         X_train = pandas.DataFrame(X, columns=columns)
 
@@ -576,8 +576,8 @@ class TestExtraConf(unittest.TestCase):
 
         max_depth = 10
         iris = datasets.load_iris()
-        X = iris.data[:, :3]
-        y = iris.target
+        X = iris.data[:149, :3]
+        y = iris.target[:149]
         columns = ["vA", "vB", "vC"]
         X_train = pandas.DataFrame(X, columns=columns)
 
@@ -606,8 +606,8 @@ class TestExtraConf(unittest.TestCase):
 
         max_depth = 10
         iris = datasets.load_iris()
-        X = iris.data[:, :3]
-        y = iris.target
+        X = iris.data[:149, :3]
+        y = iris.target[:149]
         columns = ["vA", "vB", "vC"]
         X_train = pandas.DataFrame(X, columns=columns)
 
@@ -679,8 +679,8 @@ class TestExtraConf(unittest.TestCase):
 
         max_depth = 10
         iris = datasets.load_iris()
-        X = iris.data[:, :3]
-        y = iris.target
+        X = iris.data[:149, :3]
+        y = iris.target[:149]
         columns = ["vA", "vB", "vC"]
         X_train = pandas.DataFrame(X, columns=columns)
 

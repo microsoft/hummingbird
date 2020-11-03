@@ -282,9 +282,9 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            torch_model = hummingbird.ml.convert(model, "torchscript", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
-            self.assertIsNotNone(torch_model)
-            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+            tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
+            self.assertIsNotNone(tvm_model)
+            np.testing.assert_allclose(model.predict(X), tvm_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Test TVM backend classification.
     @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
@@ -302,9 +302,9 @@ class TestXGBoostConverter(unittest.TestCase):
 
             model.fit(X, y)
 
-            torch_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
-            self.assertIsNotNone(torch_model)
-            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+            tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
+            self.assertIsNotNone(tvm_model)
+            np.testing.assert_allclose(model.predict_proba(X), tvm_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":

@@ -271,7 +271,7 @@ def convert(topology, backend, device, extra_config={}):
         if remainder_trace_input is not None:
             remainder_model, remainder_params = relay.frontend.from_pytorch(remainder_ts_model, remainder_test_input)
 
-        # Generate the model.
+        # Generate the model. We set opt_level=3 to enable all optimizations.
         with tvm.transform.PassContext(opt_level=3, config=config):
             graph, lib, params = relay.build(model, target=target, params=params)
         tvm_model = graph_runtime.create(graph, lib, ctx)

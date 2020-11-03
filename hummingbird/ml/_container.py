@@ -11,7 +11,7 @@ In Hummingbird we use two types of containers:
 - containers for output models (e.g., `SklearnContainer`) used to surface output models as unified API format.
 """
 
-from abc import ABC
+from abc import ABC, abstractmethod
 import os
 import numpy as np
 from onnxconverter_common.container import CommonSklearnModelContainer
@@ -121,10 +121,14 @@ class SklearnContainer(ABC):
 
 class SklearnContainerTransformer(SklearnContainer):
     """
-    Container mirroring Sklearn transformers API.
+    Abstract container mirroring Sklearn transformers API.
     """
 
+    @abstractmethod
     def _transform(self, *input):
+        """
+        This method contains container-specific implementation of transform.
+        """
         pass
 
     def transform(self, *inputs):
@@ -137,7 +141,7 @@ class SklearnContainerTransformer(SklearnContainer):
 
 class SklearnContainerRegression(SklearnContainer):
     """
-    Container mirroring Sklearn regressors API.
+    Abstract container mirroring Sklearn regressors API.
     """
 
     def __init__(
@@ -150,7 +154,11 @@ class SklearnContainerRegression(SklearnContainer):
         self._is_regression = is_regression
         self._is_anomaly_detection = is_anomaly_detection
 
+    @abstractmethod
     def _predict(self, *input):
+        """
+        This method contains container-specific implementation of predict.
+        """
         pass
 
     def predict(self, *inputs):
@@ -173,7 +181,11 @@ class SklearnContainerClassification(SklearnContainerRegression):
             model, n_threads, batch_size, is_regression=False, extra_config=extra_config
         )
 
+    @abstractmethod
     def _predict_proba(self, *input):
+        """
+        This method contains container-specific implementation of predict_proba.
+        """
         pass
 
     def predict_proba(self, *inputs):
@@ -194,7 +206,11 @@ class SklearnContainerAnomalyDetection(SklearnContainerRegression):
             model, n_threads, batch_size, is_regression=False, is_anomaly_detection=True, extra_config=extra_config
         )
 
+    @abstractmethod
     def _decision_function(self, *inputs):
+        """
+        This method contains container-specific implementation of decision_function.
+        """
         pass
 
     def decision_function(self, *inputs):
@@ -350,7 +366,11 @@ class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomaly
         f = super(TorchScriptSklearnContainerAnomalyDetection, self)._decision_function
         f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return self._run(f_wrapped, *inputs)
+        scores = self._run(f_wrapped, *inputs)
+
+        if constants.IFOREST_THRESHOLD in self._extra_config:
+            scores += self._extra_config[constants.IFOREST_THRESHOLD]
+        return scores
 
     def score_samples(self, *inputs):
         device = _get_device(self.model)
@@ -459,11 +479,7 @@ class ONNXSklearnContainerAnomalyDetection(ONNXSklearnContainerRegression, Sklea
 
         named_inputs = self._get_named_inputs(inputs)
 
-        scores = np.array(self._session.run([self._output_names[1]], named_inputs)[0]).flatten()
-        # Backward compatibility for sklearn <= 0.21
-        if constants.IFOREST_THRESHOLD in self._extra_config:
-            scores += self._extra_config[constants.IFOREST_THRESHOLD]
-        return scores
+        return np.array(self._session.run([self._output_names[1]], named_inputs)[0]).flatten()
 
 
 # TVM containers.
@@ -539,12 +555,7 @@ class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression, Sklearn
     def _decision_function(self, *inputs):
         if self._last_iteration and self._remainder_model is not None:
             self._remainder_model.run(**self._to_tvm_tensor(*inputs))
-            scores = self._remainder_model.get_output(1).asnumpy().ravel()
+            return self._remainder_model.get_output(1).asnumpy().ravel()
         else:
             self.model.run(**self._to_tvm_tensor(*inputs))
-            scores = self.model.get_output(1).asnumpy().ravel()
-
-        # Backward compatibility for sklearn <= 0.21
-        if constants.IFOREST_THRESHOLD in self._extra_config:
-            scores += self._extra_config[constants.IFOREST_THRESHOLD]
-        return scores
+            return self.model.get_output(1).asnumpy().ravel()

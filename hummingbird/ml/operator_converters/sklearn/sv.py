@@ -21,7 +21,6 @@ class SVC(BaseOperator, torch.nn.Module):
         super(SVC, self).__init__(classification=True)
         self.kernel = kernel
         self.degree = degree
-        # self.gamma = torch.nn.Parameter(torch.from_numpy(np.array(gamma, dtype=np.float64)), requires_grad=False)
         self.gamma = gamma
         self.regression = False
         sv = sv.toarray() if type(sv) == scipy.sparse.csr.csr_matrix else sv
@@ -43,7 +42,6 @@ class SVC(BaseOperator, torch.nn.Module):
         if min(classes) != 0 or max(classes) != len(classes) - 1:
             self.perform_class_select = True
         self.n_classes = len(classes)
-        # self.two = torch.nn.Parameter(torch.from_numpy(np.array(2.0, dtype=np.float64)), requires_grad=False)
 
     def forward(self, x):
         x = x.double()
@@ -71,10 +69,10 @@ class SVC(BaseOperator, torch.nn.Module):
             class_ids = torch.gt(c, 0.0).int().flatten()
         else:
             votes = torch.where(c > 0, self.true_classes, self.false_classes)
-            # TODO mode is still not implemented for GPU backend
+            # TODO mode is still not implemented for GPU backend.
             votes = votes.data.cpu()
             class_ids, _ = torch.mode(votes, dim=1)
-        # no class probabilities in SVC
+        # No class probabilities in SVC.
         if self.perform_class_select:
             temp = torch.index_select(self.classes, 0, class_ids.long())
             return temp, temp

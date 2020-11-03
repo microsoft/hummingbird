@@ -88,7 +88,7 @@ class TestSklearnScalerConverter(unittest.TestCase):
         model.fit(data)
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertIsNotNone(torch_model)
-        np.testing.assert_allclose(model.transform(data), torch_model.transform(data_tensor), rtol=1e-04, atol=1e-04)
+        np.testing.assert_allclose(model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06)
 
         model = StandardScaler(with_mean=True, with_std=True)
         model.fit(data)
@@ -120,21 +120,21 @@ class TestSklearnScalerConverter(unittest.TestCase):
 
         model = StandardScaler(with_mean=False, with_std=False)
         model.fit(data)
-        torch_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
-        self.assertIsNotNone(torch_model)
-        np.testing.assert_allclose(model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06)
+        tvm_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
+        self.assertIsNotNone(tvm_model)
+        np.testing.assert_allclose(model.transform(data), tvm_model.transform(data_tensor), rtol=1e-06, atol=1e-06)
 
         model = StandardScaler(with_mean=True, with_std=False)
         model.fit(data)
-        torch_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
-        self.assertIsNotNone(torch_model)
-        np.testing.assert_allclose(model.transform(data), torch_model.transform(data_tensor), rtol=1e-04, atol=1e-04)
+        tvm_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
+        self.assertIsNotNone(tvm_model)
+        np.testing.assert_allclose(model.transform(data), tvm_model.transform(data_tensor), rtol=1e-06, atol=1e-06)
 
         model = StandardScaler(with_mean=True, with_std=True)
         model.fit(data)
-        torch_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
-        self.assertIsNotNone(torch_model)
-        np.testing.assert_allclose(model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06)
+        tvm_model = hummingbird.ml.convert(model, "tvm", data, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
+        self.assertIsNotNone(tvm_model)
+        np.testing.assert_allclose(model.transform(data), tvm_model.transform(data_tensor), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":
