@@ -124,16 +124,27 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     # We don't run pytest for Linux py3.7 since we do coverage for that case.
     - name: Test with pytest
-      if: ${{ matrix.python-version == '3.7' && matrix.os != 'ubuntu-latest' }}
+      if: ${{ matrix.python-version != '3.7' || matrix.os != 'ubuntu-latest' }}
       run: pytest
-    # Run and push coverage only for one of the runs (Linux py3.7).
-    - name: Coverage
+    # Run and push coverage only for two runs (Linux py3.7 and py3.5).
+    - name: Coverage 3.7 Linux
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
-    - name: Upload coverage to Codecov
+    - name: Coverage 3.5 Linux
+      if: ${{ matrix.python-version == '3.5' && matrix.os == 'ubuntu-latest' }}
+      run: |
+        coverage run -a -m pytest tests
+        coverage xml
+    - name: Upload coverage to Codecov 3.7
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        flags: unittests
+    - name: Upload coverage to Codecov 3.5
+      if: ${{ matrix.python-version == '3.5' && matrix.os == 'ubuntu-latest' }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
