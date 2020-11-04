@@ -28,10 +28,6 @@ class Concat(BaseOperator, torch.nn.Module):
                 if len(dtypes) > 1:
                     if torch.float64 in dtypes:
                         x = [t.double() for t in x]
-                    elif torch.float32 in dtypes:
-                        x = [t.float() for t in x]
-                    elif torch.int64 in dtypes:
-                        x = [t.long() for t in x]
                     else:
                         raise RuntimeError(
                             "Combination of data types for Concat input tensors not supported. Please fill an issue at https://github.com/microsoft/hummingbird."
