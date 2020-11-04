@@ -64,7 +64,7 @@ class TestSklearnNormalizer(unittest.TestCase):
             )
 
     # ONNX backend
-    @unittest.skipIf(not (onnx_runtime_installed()), reason="ONNXML test requires ONNX and  ORT")
+    @unittest.skipIf(not (onnx_runtime_installed()), reason="ONNX test requires ONNX and  ORT")
     def test_normalizer_converter_onnx(self):
         # Generate a random 2D array with values in [0, 1000)
         np.random.seed(0)
