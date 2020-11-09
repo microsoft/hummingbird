@@ -20,10 +20,10 @@ class BernoulliNBModel(BaseOperator, torch.nn.Module):
         self.classification = True
         self.binarize = binarize
         self.jll_calc_bias = torch.nn.Parameter(
-            torch.from_numpy(jll_calc_bias.astype("float32")).view(-1), requires_grad=False
+            torch.from_numpy(jll_calc_bias.astype("float64")).view(-1), requires_grad=False
         )
         self.feature_log_prob_minus_neg_prob = torch.nn.Parameter(
-            torch.from_numpy(feature_log_prob_minus_neg_prob.astype("float32")), requires_grad=False
+            torch.from_numpy(feature_log_prob_minus_neg_prob.astype("float64")), requires_grad=False
         )
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
         self.perform_class_select = False
@@ -31,13 +31,14 @@ class BernoulliNBModel(BaseOperator, torch.nn.Module):
             self.perform_class_select = True
 
     def forward(self, x):
+        x = x.double()
         if self.binarize is not None:
-            x = torch.gt(x, self.binarize).float()
+            x = torch.gt(x, self.binarize).double()
 
         jll = torch.addmm(self.jll_calc_bias, x, self.feature_log_prob_minus_neg_prob)
         log_prob_x = torch.logsumexp(jll, dim=1)
         log_prob_x = jll - log_prob_x.view(-1, 1)
-        prob_x = torch.exp(log_prob_x)
+        prob_x = torch.exp(log_prob_x).float()
 
         if self.perform_class_select:
             return torch.index_select(self.classes, 0, torch.argmax(jll, dim=1)), prob_x
