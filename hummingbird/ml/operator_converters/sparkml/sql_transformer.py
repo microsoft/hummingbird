@@ -71,6 +71,8 @@ class SQLTransformerModel(BaseOperator, torch.nn.Module):
     def calculate_output_feature(self, project_node_def_stack, inputs_dict):
         if project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute':
             return inputs_dict[project_node_def_stack[0]['nameParts'][1:-1].strip()], project_node_def_stack[1:]
+        elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Literal':
+            return float(project_node_def_stack[0]['value']), project_node_def_stack[1:]
         elif project_node_def_stack[0]['class'] in self.supported_binary_ops:
             op = self.supported_binary_ops[project_node_def_stack[0]['class']]
             project_node_def_stack = project_node_def_stack[1:]
