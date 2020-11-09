@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 
 import hummingbird.ml
-from hummingbird.ml._utils import lightgbm_installed, onnx_runtime_installed
+from hummingbird.ml._utils import lightgbm_installed, onnx_runtime_installed, tvm_installed
 from tree_utils import gbdt_implementation_map
 
 if lightgbm_installed():
@@ -301,8 +301,6 @@ class TestLGBMConverter(unittest.TestCase):
     @unittest.skipIf(not onnx_runtime_installed(), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_onnx(self):
-        import onnxruntime as ort
-
         warnings.filterwarnings("ignore")
 
         X = [[0, 1], [1, 1], [2, 0]]
@@ -314,10 +312,63 @@ class TestLGBMConverter(unittest.TestCase):
         # Create ONNX model
         onnx_model = hummingbird.ml.convert(model, "onnx", X)
 
-        # Get the predictions for the ONNX-ML model
-        onnx_pred = onnx_model.predict(X)
+        np.testing.assert_allclose(onnx_model.predict(X)[0].flatten(), model.predict(X))
 
-        np.testing.assert_allclose(onnx_pred[0].flatten(), model.predict(X))
+    # TVM backend tests.
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_lightgbm_tvm_regressor(self):
+        warnings.filterwarnings("ignore")
+
+        for tree_implementation in ["gemm", "tree_trav", "perf_tree_trav"]:
+            X = [[0, 1], [1, 1], [2, 0]]
+            X = np.array(X, dtype=np.float32)
+            y = np.array([100, -10, 50], dtype=np.float32)
+            model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
+            model.fit(X, y)
+
+            # Create TVM model.
+            tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={"tree_implementation": tree_implementation})
+
+            # Check results.
+            np.testing.assert_allclose(tvm_model.predict(X), model.predict(X))
+
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM installed")
+    def test_lightgbm_tvm_classifier(self):
+        warnings.filterwarnings("ignore")
+
+        for tree_implementation in ["gemm", "tree_trav", "perf_tree_trav"]:
+            X = [[0, 1], [1, 1], [2, 0]]
+            X = np.array(X, dtype=np.float32)
+            y = np.array([0, 1, 0], dtype=np.float32)
+            model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
+            model.fit(X, y)
+
+            # Create TVM model.
+            tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={"tree_implementation": tree_implementation})
+
+            # Check results.
+            np.testing.assert_allclose(tvm_model.predict(X), model.predict(X))
+            np.testing.assert_allclose(tvm_model.predict_proba(X), model.predict_proba(X))
+
+    # Test TVM with large input datasets.
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM installed")
+    def test_lightgbm_tvm_classifier_large_dataset(self):
+        warnings.filterwarnings("ignore")
+
+        for tree_implementation in ["gemm", "tree_trav", "perf_tree_trav"]:
+            size = 200000
+            X = np.random.rand(size, 28)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(2, size=size)
+            model = lgb.LGBMClassifier(n_estimators=100, max_depth=3)
+            model.fit(X, y)
+
+            # Create TVM model.
+            tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={"tree_implementation": tree_implementation})
+
+            # Check results.
+            np.testing.assert_allclose(tvm_model.predict(X), model.predict(X))
+            np.testing.assert_allclose(tvm_model.predict_proba(X), model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":

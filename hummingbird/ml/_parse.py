@@ -101,6 +101,53 @@ def parse_sparkml_api_model(model, extra_config={}):
     return topology
 
 
+def parse_onnx_api_model(model):
+    """
+    Puts *ONNX* object into an abstract representation so that our framework can work seamlessly on models created
+    with different machine learning tools.
+
+    Args:
+        model: A model object in onnx format
+
+    Returns:
+        A `onnxconverter_common.topology.Topology` object representing the input model
+    """
+    assert model is not None, "Cannot convert a mode of type None."
+
+    raw_model_container = CommonONNXModelContainer(model)
+
+    # We modify the ONNX model during translation
+    model = deepcopy(model)
+
+    # Declare a computational graph. It will become a representation of
+    # the input ONNX model after parsing.
+    topology = Topology(raw_model_container)
+
+    # Declare an object to provide variables' and operators' naming mechanism.
+    # One global scope is enough for parsing ONNX models.
+    scope = topology.declare_scope("__root__")
+
+    # Declare input variables.
+    inputs = []
+    for i in model.graph.input:
+        inputs.append(scope.declare_local_variable(i.name))
+
+    # The object raw_model_container is a part of the topology we're going to return.
+    # We use it to store the inputs of the ONNX graph.
+    for variable in inputs:
+        raw_model_container.add_input(variable)
+
+    # Parse the input ONNX model into its scope with the topology.
+    _parse_onnx_api(scope, model, inputs)
+
+    # The object raw_model_container is a part of the topology we're going to return.
+    # We use it to store the output_names of the ONNX graph.
+    for o in model.graph.output:
+        raw_model_container.add_output(scope.declare_local_variable(o.name))
+
+    return topology
+
+
 def _declare_input_variables(scope, raw_model_container, extra_config):
     # Declare input variables.
     inputs = []
@@ -157,53 +204,6 @@ def _declare_output_variables(raw_model_container, extra_config, outputs):
     # We use it to store the outputs of the Sklearn/Spark-ML's computational graph.
     for variable in outputs:
         raw_model_container.add_output(variable)
-
-
-def parse_onnx_api_model(model):
-    """
-    Puts *ONNX* object into an abstract representation so that our framework can work seamlessly on models created
-    with different machine learning tools.
-
-    Args:
-        model: A model object in onnx format
-
-    Returns:
-        A `onnxconverter_common.topology.Topology` object representing the input model
-    """
-    assert model is not None, "Cannot convert a mode of type None."
-
-    raw_model_container = CommonONNXModelContainer(model)
-
-    # We modify the ONNX model during translation
-    model = deepcopy(model)
-
-    # Declare a computational graph. It will become a representation of
-    # the input ONNX model after parsing.
-    topology = Topology(raw_model_container)
-
-    # Declare an object to provide variables' and operators' naming mechanism.
-    # One global scope is enough for parsing ONNX models.
-    scope = topology.declare_scope("__root__")
-
-    # Declare input variables.
-    inputs = []
-    for i in model.graph.input:
-        inputs.append(scope.declare_local_variable(i.name))
-
-    # The object raw_model_container is a part of the topology we're going to return.
-    # We use it to store the inputs of the ONNX graph.
-    for variable in inputs:
-        raw_model_container.add_input(variable)
-
-    # Parse the input ONNX model into its scope with the topology.
-    _parse_onnx_api(scope, model, inputs)
-
-    # The object raw_model_container is a part of the topology we're going to return.
-    # We use it to store the output_names of the ONNX graph.
-    for o in model.graph.output:
-        raw_model_container.add_output(scope.declare_local_variable(o.name))
-
-    return topology
 
 
 def _parse_sklearn_api(scope, model, inputs):
@@ -422,6 +422,7 @@ def _build_sklearn_api_parsers_map():
 def _build_sparkml_api_parsers_map():
     # Parsers for edge cases are going here.
     from pyspark.ml.pipeline import PipelineModel
+
     map_parser = {
         PipelineModel: _parse_sparkml_pipeline,
         # More parsers will go here
@@ -527,12 +528,12 @@ def _parse_sparkml_single_operator(scope, operator, all_inputs):
     elif hasattr(operator, "getInputCols") and callable(operator.getInputCols):
         temp = {i.raw_name: i for i in all_inputs if i.raw_name in operator.getInputCols()}
         this_operator.inputs = [temp[i] for i in operator.getInputCols()]
-    elif operator.hasParam('featuresCol'):
-        col_name = [param[1] for param in operator.extractParamMap().items() if param[0].name == 'featuresCol'][0]
+    elif operator.hasParam("featuresCol"):
+        col_name = [param[1] for param in operator.extractParamMap().items() if param[0].name == "featuresCol"][0]
         this_operator.inputs = [i for i in all_inputs if i.raw_name == col_name]
     else:
-        print(operator.getParam('featuresCol'))
-        raise RuntimeError('Unable to determine inputs for the Spark-ML operator: {}'.format(type(operator)))
+        print(operator.getParam("featuresCol"))
+        raise RuntimeError("Unable to determine inputs for the Spark-ML operator: {}".format(type(operator)))
 
     if hasattr(operator, "getOutputCol") and callable(operator.getOutputCol):
         variable = scope.declare_local_variable(operator.getOutputCol())

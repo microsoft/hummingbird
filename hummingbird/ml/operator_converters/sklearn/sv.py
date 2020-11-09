@@ -30,7 +30,7 @@ class SVC(BaseOperator, torch.nn.Module):
         self.coef0 = coef0
         self.n_features = sv.shape[1]
         self.a = a
-        self.b = torch.nn.Parameter(torch.nn.Parameter(torch.from_numpy(b.reshape(1, -1)).double()), requires_grad=False)
+        self.b = torch.nn.Parameter(torch.from_numpy(b.reshape(1, -1)).double(), requires_grad=False)
         self.start = [sum(nv[:i]) for i in range(len(nv))]
         self.end = [self.start[i] + nv[i] for i in range(len(nv))]
         self.len_nv = len(nv)
@@ -52,7 +52,7 @@ class SVC(BaseOperator, torch.nn.Module):
             # using quadratic expansion--susseptible to rounding-off errors
             # http://www.robots.ox.ac.uk/~albanie/notes/Euclidean_distance_trick.pdf
             x_norm = -self.gamma * (x ** 2).sum(1).view(-1, 1)
-            k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t))
+            k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t).double())
         elif self.kernel == "sigmoid":
             k = torch.sigmoid(self.gamma * torch.mm(x, self.sv_t) + self.coef0)
         else:  # poly kernel
@@ -69,10 +69,10 @@ class SVC(BaseOperator, torch.nn.Module):
             class_ids = torch.gt(c, 0.0).int().flatten()
         else:
             votes = torch.where(c > 0, self.true_classes, self.false_classes)
-            # TODO mode is still not implemented for GPU backend
+            # TODO mode is still not implemented for GPU backend.
             votes = votes.data.cpu()
             class_ids, _ = torch.mode(votes, dim=1)
-        # no class probabilities in SVC
+        # No class probabilities in SVC.
         if self.perform_class_select:
             temp = torch.index_select(self.classes, 0, class_ids.long())
             return temp, temp

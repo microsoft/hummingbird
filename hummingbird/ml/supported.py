@@ -10,9 +10,10 @@ All operators, backends, and configurations settings supported in Hummingbird ar
 **Supported Backends**
 PyTorch,
 TorchScript,
-ONNX
+ONNX,
+TVM
 
-**Supported Operators**
+**Supported Operators (scikit-learn)**
 BernoulliNB,
 Binarizer,
 DecisionTreeClassifier,
@@ -57,19 +58,42 @@ TreeEnsembleRegressor,
 TruncatedSVD,
 VarianceThreshold,
 
+**Supported Operators (LGBM)**
 LGBMClassifier,
 LGBMRanker,
 LGBMRegressor,
 
-
+**Supported Operators (XGB)**
 XGBClassifier,
 XGBRanker,
-XGBRegressor
+XGBRegressor,
+
+**Supported Operators (ONNX-ML)**
+"ArrayFeatureExtractor",
+"Binarizer"
+"Cast",
+"Concat",
+"LinearClassifier",
+"LinearRegressor",
+"OneHotEncoder",
+"Normalizer",
+"Reshape",
+"Scaler",
+"TreeEnsembleClassifier",
+"TreeEnsembleRegressor",
 """
 from collections import defaultdict
 
 from .exceptions import MissingConverter
-from ._utils import torch_installed, sklearn_installed, lightgbm_installed, xgboost_installed, onnx_runtime_installed, sparkml_installed
+from ._utils import (
+    torch_installed,
+    sklearn_installed,
+    lightgbm_installed,
+    xgboost_installed,
+    onnx_runtime_installed,
+    tvm_installed,
+    sparkml_installed,
+)
 
 
 def _build_sklearn_operator_list():
@@ -119,8 +143,8 @@ def _build_sklearn_operator_list():
         from sklearn.decomposition import PCA, KernelPCA, FastICA, TruncatedSVD
 
         # KNeighbors models
-        from sklearn.neighbors._classification import KNeighborsClassifier
-        from sklearn.neighbors._regression import KNeighborsRegressor
+        from sklearn.neighbors import KNeighborsClassifier
+        from sklearn.neighbors import KNeighborsRegressor
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -217,9 +241,8 @@ def _build_sparkml_operator_list():
             # Featurizers
             Bucketizer,
             VectorAssembler,
-
             # Linear Models
-            LogisticRegressionModel
+            LogisticRegressionModel,
         ]
 
         return supported_ops
@@ -267,6 +290,7 @@ def _build_onnxml_operator_list():
             "Reshape",
             # Preprocessing
             "ArrayFeatureExtractor",
+            "Binarizer",
             "OneHotEncoder",
             "Normalizer",
             "Scaler",
@@ -296,6 +320,11 @@ def _build_backend_map():
         import onnx
 
         backends[onnx.__name__] = onnx.__name__
+
+    if tvm_installed():
+        import tvm
+
+        backends[tvm.__name__] = tvm.__name__
 
     return backends
 
@@ -397,26 +426,33 @@ sparkml_api_operator_name_map = _build_sparkml_api_operator_name_map()
 backends = _build_backend_map()
 
 # Supported configurations settings accepted by Hummingbird are defined below.
-N_FEATURES = "n_features"
-"""Number of features expected in the input data."""
-
+# Please check `test.test_extra_conf.py` for examples on how to use these.
 TREE_IMPLEMENTATION = "tree_implementation"
 """Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav."""
 
 ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
 """For ONNX models we can set the name of the output model."""
 
-ONNX_INITIAL_TYPES = "onnx_initial_types"
-"""For ONNX models we can explicitly set the input types and shapes."""
-
 ONNX_TARGET_OPSET = "onnx_target_opset"
-"""For ONNX models we can set the target opset to use. 9 by default."""
+"""For ONNX models we can set the target opset to use. 11 by default."""
+
+TVM_MAX_FUSE_DEPTH = "tvm_max_fuse_depth"
+"""For TVM we can fix the number of operations that will be fused.
+If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232).
+By default Hummingbird uses a max_fuse_depth of 50, but this can be override using this parameter."""
 
 INPUT_NAMES = "input_names"
-"""Set the names of the inputs. Assume that the numbers onf inputs_names is equal to the number of inputs."""
+"""Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs."""
 
 OUTPUT_NAMES = "output_names"
 """Set the names of the outputs."""
 
 CONTAINER = "container"
-"""Whether to return the container for Sklearn API or just the model"""
+"""Boolean used to chose whether to return the container for Sklearn API or just the model."""
+
+N_THREADS = "n_threads"
+"""Select how many threads to use for scoring. This paremeter will set the number of intra-op threads.
+Inter-op threads are by default set to 1 in Hummingbird. Check `tests.test_extra_conf.py` for usage examples."""
+
+BATCH_SIZE = "batch_size"
+"""Select whether to partition the input dataset at inference time in N batch_size partitions."""

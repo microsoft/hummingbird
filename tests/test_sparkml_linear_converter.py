@@ -43,7 +43,9 @@ class TestSparkMLLinear(unittest.TestCase):
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(
             np.array(model.transform(df).select("probability").collect()).reshape(-1, classes),
-            torch_model.predict_proba(X), rtol=1e-06, atol=1e-06
+            torch_model.predict_proba(X),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
     # pyspark.ml.LogisticRegression with two classes

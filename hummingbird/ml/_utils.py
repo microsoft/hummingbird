@@ -9,9 +9,10 @@ Collection of utility functions used throughout Hummingbird.
 """
 
 from distutils.version import LooseVersion
+import torch
 import warnings
 
-from .exceptions import ConstantError
+from hummingbird.ml.exceptions import ConstantError
 
 
 def torch_installed():
@@ -112,6 +113,18 @@ def xgboost_installed():
     return True
 
 
+def tvm_installed():
+    """
+    Checks that *TVM* is available.
+    """
+    try:
+        import tvm
+        from tvm import relay
+    except ImportError:
+        return False
+    return True
+
+
 def pandas_installed():
     """
     Checks that *Pandas* is available.
@@ -125,6 +138,7 @@ def pandas_installed():
 
 def is_pandas_dataframe(df):
     import pandas as pd
+
     if type(df) == pd.DataFrame:
         return True
     else:
@@ -136,10 +150,24 @@ def is_spark_dataframe(df):
         return False
 
     import pyspark
+
     if type(df) == pyspark.sql.DataFrame:
         return True
     else:
         return False
+
+
+def _get_device(model):
+    """
+    Convenient function used to get the runtime device for the model.
+    """
+    assert issubclass(model.__class__, torch.nn.Module)
+
+    device = None
+    if len(list(model.parameters())) > 0:
+        device = next(model.parameters()).device  # Assuming we are using a single device for all parameters
+
+    return device
 
 
 class _Constants(object):

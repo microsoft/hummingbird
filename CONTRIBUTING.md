@@ -35,7 +35,7 @@ The simplest setup (assuming you have PyTorch already installed) is:
 mkdir hummingbird
 cd hummingbird
 git clone https://github.com/microsoft/hummingbird.git .
-pip install -e .[docs,tests,extra]
+pip install -e .[tests,extra]
 ```
 
 If you do not have pytorch installed, please [install it](https://pytorch.org/get-started/locally/) first.

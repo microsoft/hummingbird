@@ -48,7 +48,7 @@ class TestSklearnDiscretizers(unittest.TestCase):
 
     # Test KBinDiscretizer on dummy data
     def test_k_bins_discretizer_converter_dummy_data(self):
-        data = np.array([[1, 2, -3], [4, -3, 0], [0, 1, 4], [0, -5, 6]], dtype=np.float32)[:, :2]
+        data = np.array([[1, 2, -3], [4, -3, 0], [0, 1, 4], [0, -5, 6]], dtype=np.float32)
         self._test_k_bin_discretizer_base(data)
 
     # Test KBinDiscretizer on breast cancer data

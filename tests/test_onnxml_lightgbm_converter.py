@@ -34,7 +34,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         )
 
         # Create ONNX model
-        onnx_model = convert(onnx_ml_model, "onnx", X, extra_config)
+        onnx_model = convert(onnx_ml_model, "onnx", extra_config=extra_config)
 
         # Get the predictions for the ONNX-ML model
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
@@ -74,27 +74,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
             list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
         )  # probs
 
-    # Check that ONNXML models raise error if the input data or type is not set.
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
-    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
-    def test_lightgbm_pytorch(self):
-        warnings.filterwarnings("ignore")
-        X = [[0, 1], [1, 1], [2, 0]]
-        X = np.array(X, dtype=np.float32)
-        y = np.array([100, -10, 50], dtype=np.float32)
-        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
-        model.fit(X, y)
-
-        # Create ONNX-ML model
-        onnx_ml_model = convert_lightgbm(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
-        )
-
-        self.assertRaises(RuntimeError, convert, onnx_ml_model, "torch")
-
-    # Check that ONNXML models can only target the ONNX backend.
+    # Check that ONNXML models can also target other backends.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
@@ -123,33 +103,6 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         onnx_ml_pred = session.run(output_names, inputs)
 
         np.testing.assert_allclose(onnx_ml_pred[0].flatten(), pt_model.predict(X))
-
-    # Check converter with extra configs.
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
-    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
-    def test_lightgbm_pytorch_extra_config(self):
-        warnings.filterwarnings("ignore")
-        X = [[0, 1], [1, 1], [2, 0]]
-        X = np.array(X, dtype=np.float32)
-        y = np.array([100, -10, 50], dtype=np.float32)
-        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
-        model.fit(X, y)
-
-        # Create ONNX-ML model
-        onnx_ml_model = convert_lightgbm(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
-        )
-
-        # Create ONNX model
-        model_name = "hummingbird.ml.test.lightgbm"
-        extra_config = {}
-        extra_config[constants.ONNX_OUTPUT_MODEL_NAME] = model_name
-        extra_config[constants.ONNX_INITIAL_TYPES] = [("input", FloatTensorType([X.shape[0], X.shape[1]]))]
-        onnx_model = convert(onnx_ml_model, "onnx", extra_config=extra_config)
-
-        assert onnx_model.model.graph.name == model_name
 
     # Basic regression test.
     @unittest.skipIf(

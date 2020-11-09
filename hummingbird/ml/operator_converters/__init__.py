@@ -19,6 +19,7 @@ constants = _Constants(converter_constants, hummingbird_constants)
 # To register a converter for scikit-learn API operators, import associated modules here.
 from .onnx import onnx_operator  # noqa: E402
 from .onnx import array_feature_extractor as onnx_afe  # noqa: E402, F811
+from .onnx import binarizer as onnx_binarizer  # noqa: E402, F811
 from .onnx import linear as onnx_linear  # noqa: E402, F811
 from .onnx import normalizer as onnx_normalizer  # noqa: E402, F811
 from .onnx import one_hot_encoder as onnx_ohe  # noqa: E402, F811
@@ -47,18 +48,3 @@ from .sparkml import discretizer  # noqa: E402
 from .sparkml import linear  # noqa: E402
 from .sparkml import sql_transformer  # noqa: E402
 from .sparkml import vector_assembler  # noqa: E402
-
-__pdoc__ = {}
-__pdoc__["hummingbird.operator_converters._array_feature_extractor_implementations"] = True
-__pdoc__["hummingbird.operator_converters._decomposition_implementations"] = True
-__pdoc__["hummingbird.operator_converters._discretizer_implementations"] = True
-__pdoc__["hummingbird.operator_converters._gbdt_commons"] = True
-__pdoc__["hummingbird.operator_converters._kneighbors_implementations"] = True
-__pdoc__["hummingbird.operator_converters._linear_implementations"] = True
-__pdoc__["hummingbird.operator_converters._mlp_implementations"] = True
-__pdoc__["hummingbird.operator_converters._nb_implementations"] = True
-__pdoc__["hummingbird.operator_converters._normalizer_implementations"] = True
-__pdoc__["hummingbird.operator_converters._one_hot_encoder_implementations"] = True
-__pdoc__["hummingbird.operator_converters._scaler_implementations"] = True
-__pdoc__["hummingbird.operator_converters._tree_commons"] = True
-__pdoc__["hummingbird.operator_converters._tree_implementations"] = True

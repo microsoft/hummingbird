@@ -33,13 +33,13 @@ def convert_sparkml_bucketizer(operator, device, extra_config):
     labels = []
 
     for i in range(len(bin_edges)):
+        bin_edges[i][0] = bin_edges[i][0] - 1e-3
+        bin_edges[i][-1] = bin_edges[i][-1] + 1e-3
         labels.append(np.array([i for i in range(len(bin_edges[i]) - 1)]))
         if len(bin_edges[i]) < max_bin_edges:
             bin_edges[i] = (
-                [bin_edges[i][0]]
-                + bin_edges[i][1:-1]
+                bin_edges[i]
                 + [np.inf for _ in range((max_bin_edges - len(bin_edges[i])))]
-                + [bin_edges[i][-1]]
             )
 
     return KBinsDiscretizer(None, np.array(bin_edges), labels, device)
