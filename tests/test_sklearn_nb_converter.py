@@ -117,62 +117,62 @@ class TestSklearnNBClassifier(unittest.TestCase):
 
     # MultinomialNB binary
     def test_multinomialnb_classifer_bi(self):
-        self._test_bernoulinb_classifer(2)
+        self._test_multinomialnb_classifer(2)
 
     # MultinomialNB multi-class
     def test_multinomialnb_classifer_multi(self):
-        self._test_bernoulinb_classifer(3)
+        self._test_multinomialnb_classifer(3)
 
     # MultinomialNB multi-class w/ modified alpha
     def test_multinomialnb_classifer_multi_alpha(self):
-        self._test_bernoulinb_classifer(3, alpha=0.5)
+        self._test_multinomialnb_classifer(3, alpha=0.5)
 
     #  MultinomialNB multi-class w/ fir prior
     def test_multinomialnb_classifer_multi_fit_prior(self):
-        self._test_bernoulinb_classifer(3, fit_prior=True)
+        self._test_multinomialnb_classifer(3, fit_prior=True)
 
     #  MultinomialNB multi-class w/ class prior
     def test_multinomialnb_classifer_multi_class_prior(self):
         np.random.seed(0)
         class_prior = np.random.rand(3)
-        self._test_bernoulinb_classifer(3, class_prior=class_prior)
+        self._test_multinomialnb_classifer(3, class_prior=class_prior)
 
     # BernoulliNB multi-class w/ labels shift
     def test_multinomialnb_classifer_multi_labels_shift(self):
-        self._test_bernoulinb_classifer(3, labels_shift=3)
+        self._test_multinomialnb_classifer(3, labels_shift=3)
 
     # TVM Backend
     # MultinomialNB binary
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_multinomialnb_classifer_bi_tvm(self):
-        self._test_bernoulinb_classifer(2, backend="tvm")
+        self._test_multinomialnb_classifer(2, backend="tvm")
 
     # MultinomialNB multi-class
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_multinomialnb_classifer_multi_tvm(self):
-        self._test_bernoulinb_classifer(3, backend="tvm")
+        self._test_multinomialnb_classifer(3, backend="tvm")
 
     # MultinomialNB multi-class w/ modified alpha
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_multinomialnb_classifer_multi_alpha_tvm(self):
-        self._test_bernoulinb_classifer(3, alpha=0.5, backend="tvm")
+        self._test_multinomialnb_classifer(3, alpha=0.5, backend="tvm")
 
     #  MultinomialNB multi-class w/ fir prior
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_multinomialnb_classifer_multi_fit_prior_tvm(self):
-        self._test_bernoulinb_classifer(3, fit_prior=True, backend="tvm")
+        self._test_multinomialnb_classifer(3, fit_prior=True, backend="tvm")
 
     #  MultinomialNB multi-class w/ class prior
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_multinomialnb_classifer_multi_class_prior_tvm(self):
         np.random.seed(0)
         class_prior = np.random.rand(3)
-        self._test_bernoulinb_classifer(3, class_prior=class_prior, backend="tvm")
+        self._test_multinomialnb_classifer(3, class_prior=class_prior, backend="tvm")
 
     # BernoulliNB multi-class w/ labels shift
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_multinomialnb_classifer_multi_labels_shift_tvm(self):
-        self._test_bernoulinb_classifer(3, labels_shift=3, backend="tvm")
+        self._test_multinomialnb_classifer(3, labels_shift=3, backend="tvm")
 
     # GaussianNB test function to be parameterized
     def _test_gaussiannb_classifer(self, num_classes, priors=None, var_smoothing=1e-9, labels_shift=0, backend="torch"):
