@@ -516,6 +516,7 @@ def _parse_sparkml_single_operator(scope, operator, all_inputs):
         all_inputs: A list of `onnxconverter_common.topology.Variable`s
     """
     import inspect
+    import pyspark
 
     if isinstance(operator, str):
         raise RuntimeError("Parameter operator must be an object not a " "string '{0}'.".format(operator))
@@ -523,28 +524,37 @@ def _parse_sparkml_single_operator(scope, operator, all_inputs):
     alias = get_sparkml_api_operator_name(type(operator))
     this_operator = scope.declare_local_operator(alias, operator)
 
-    if hasattr(operator, "getInputCol") and callable(operator.getInputCol):
-        this_operator.inputs = [i for i in all_inputs if i.raw_name == operator.getInputCol()]
-    elif hasattr(operator, "getInputCols") and callable(operator.getInputCols):
-        temp = {i.raw_name: i for i in all_inputs if i.raw_name in operator.getInputCols()}
-        this_operator.inputs = [temp[i] for i in operator.getInputCols()]
-    elif operator.hasParam("featuresCol"):
-        col_name = [param[1] for param in operator.extractParamMap().items() if param[0].name == "featuresCol"][0]
-        this_operator.inputs = [i for i in all_inputs if i.raw_name == col_name]
-    else:
-        print(operator.getParam("featuresCol"))
-        raise RuntimeError("Unable to determine inputs for the Spark-ML operator: {}".format(type(operator)))
+    if type(operator) == pyspark.ml.feature.SQLTransformer:
+        from .operator_converters.sparkml.sql_transformer import get_input_output_col_names
+        input_cols, output_cols = get_input_output_col_names(operator)
+        temp = {i.raw_name: i for i in all_inputs if i.raw_name in input_cols}
+        this_operator.inputs = [temp[i] for i in input_cols]
 
-    if hasattr(operator, "getOutputCol") and callable(operator.getOutputCol):
-        variable = scope.declare_local_variable(operator.getOutputCol())
-        this_operator.outputs.append(variable)
-    elif hasattr(operator, "getOutputCols") and callable(operator.getOutputCols):
-        for output_col in operator.getOutputCols():
+        for output_col in output_cols:
             variable = scope.declare_local_variable(output_col)
             this_operator.outputs.append(variable)
     else:
-        variable = scope.declare_local_variable("variable")
-        this_operator.outputs.append(variable)
+        if hasattr(operator, "getInputCol") and callable(operator.getInputCol):
+            this_operator.inputs = [i for i in all_inputs if i.raw_name == operator.getInputCol()]
+        elif hasattr(operator, "getInputCols") and callable(operator.getInputCols):
+            temp = {i.raw_name: i for i in all_inputs if i.raw_name in operator.getInputCols()}
+            this_operator.inputs = [temp[i] for i in operator.getInputCols()]
+        elif operator.hasParam("featuresCol"):
+            col_name = [param[1] for param in operator.extractParamMap().items() if param[0].name == "featuresCol"][0]
+            this_operator.inputs = [i for i in all_inputs if i.raw_name == col_name]
+        else:
+            raise RuntimeError("Unable to determine inputs for the Spark-ML operator: {}".format(type(operator)))
+
+        if hasattr(operator, "getOutputCol") and callable(operator.getOutputCol):
+            variable = scope.declare_local_variable(operator.getOutputCol())
+            this_operator.outputs.append(variable)
+        elif hasattr(operator, "getOutputCols") and callable(operator.getOutputCols):
+            for output_col in operator.getOutputCols():
+                variable = scope.declare_local_variable(output_col)
+                this_operator.outputs.append(variable)
+        else:
+            variable = scope.declare_local_variable("variable")
+            this_operator.outputs.append(variable)
 
     return this_operator.outputs, all_inputs + this_operator.outputs
 

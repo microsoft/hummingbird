@@ -35,16 +35,20 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
         pd_df = pd.DataFrame(data=np.c_[iris['data'], iris['target']], columns=features + ['target'])[["sepal_length", "sepal_width", "petal_length", "petal_width"]]
         df = sql.createDataFrame(pd_df)
 
-        sql_transformer = SQLTransformer(statement="SELECT *, sepal_length*(sepal_length/sepal_width) as new_feature from __THIS__")
-        df = sql_transformer.transform(df)
+        model = SQLTransformer(statement="SELECT *, sepal_length*(sepal_length/sepal_width) as new_feature1,"
+                                         " petal_length*(petal_length/petal_width) as new_feature2 from __THIS__")
 
-        print(df.printSchema())
+        test_df = df
+        torch_model = convert(model, "torch", test_df)
+        self.assertTrue(torch_model is not None)
 
-        parser = spark._jsparkSession.sessionState().sqlParser()
-        plan = parser.parsePlan(sql_transformer.getStatement())
-        plan_json = json.loads(plan.toJSON())
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(plan_json)     
+        # df = sql_transformer.transform(df)
+        # print(df.printSchema())
+        # parser = spark._jsparkSession.sessionState().sqlParser()
+        # plan = parser.parsePlan(sql_transformer.getStatement())
+        # plan_json = json.loads(plan.toJSON())
+        # pp = pprint.PrettyPrinter(indent=4)
+        # pp.pprint(plan_json)
 
 
 if __name__ == "__main__":
