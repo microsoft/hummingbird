@@ -237,6 +237,27 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         model.fit(X, y)
         self._test_classifier(X, model)
 
+
+    # Classication test with boosting_type='rf'
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_onnxml_model_boosting_type_rf(self):
+        warnings.filterwarnings("ignore")
+        n_features = 28
+        n_total = 100
+        np.random.seed(0)
+        X = np.random.rand(n_total, n_features)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=n_total)
+
+        # Create LightGBM model
+        model = lgb.LGBMClassifier(boosting_type='rf',n_estimators=128, max_depth=5,  bagging_freq = 1, subsample=0.3)
+        model.fit(X, y)
+        self._test_classifier(X, model)
+
+
     # Binary classification test with 3 estimators zipmap (taken from ONNXMLTOOLS).
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
