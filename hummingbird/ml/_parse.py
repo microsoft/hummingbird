@@ -354,7 +354,7 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
                 if name not in input_names:
                     input_names.append(name)
 
-        this_operator = scope.declare_local_operator("SparkMLSQLTransformer")
+        this_operator = scope.declare_local_operator("SparkMLSQLTransformer", project_tree)
         temp = {i.raw_name: i for i in all_inputs if i.raw_name in input_names}
         this_operator.inputs = [temp[i] for i in input_names]
         output = scope.declare_local_variable(output_name)

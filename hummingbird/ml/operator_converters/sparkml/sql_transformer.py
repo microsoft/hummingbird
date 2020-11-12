@@ -76,7 +76,7 @@ def convert_sparkml_sql_transformer(operator, device, extra_config):
         A PyTorch model
     """
     input_names = [input.raw_name for input in operator.inputs]
-    return SQLTransformerModel(input_names, operator.operand, device)
+    return SQLTransformerModel(input_names, operator.raw_operator, device)
 
 
 register_converter("SparkMLSQLTransformer", convert_sparkml_sql_transformer)
