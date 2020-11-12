@@ -11,12 +11,14 @@ Some code here have been copied from https://github.com/onnx/sklearn-onnx/.
 from collections import OrderedDict
 from copy import deepcopy
 import pprint
+import json
 from uuid import uuid4
 
 import numpy as np
 from onnxconverter_common.container import CommonSklearnModelContainer
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 from onnxconverter_common.topology import Topology
+from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
 from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
@@ -297,24 +299,70 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
     :param all_inputs: A list of Variable objects
     :return: A list of output variables produced by column transformer
     """
-    import pyspark
-    from .operator_converters.sparkml.sql_transformer import get_input_output_col_names
-
     if isinstance(operator, str):
         raise RuntimeError("Parameter operator must be an object not a " "string '{0}'.".format(operator))
 
-    alias = get_sparkml_api_operator_name(type(operator))
-    this_operator = scope.declare_local_operator(alias, operator)
+    import pyspark
+    import pandas as pd
+    from pyspark.sql import SparkSession
 
-    input_cols, output_cols = get_input_output_col_names(operator)
-    temp = {i.raw_name: i for i in all_inputs if i.raw_name in input_cols}
-    this_operator.inputs = [temp[i] for i in input_cols]
+    spark = SparkSession.builder.getOrCreate()
+    parser = spark._jsparkSession.sessionState().sqlParser()
+    plan = parser.parsePlan(operator.getStatement())
+    plan_json = json.loads(plan.toJSON())
 
-    for output_col in output_cols:
-        variable = scope.declare_local_variable(output_col)
-        this_operator.outputs.append(variable)
+    def _get_sample_input(onnx_input):
+        onnx_type = onnx_input.type
+        if type(onnx_type) == DoubleTensorType:
+            np_type = np.float64
+        elif type(onnx_type) == FloatTensorType:
+            np_type = np.float32
+        elif type(onnx_type) == Int32TensorType:
+            np_type = np.int32
+        elif type(onnx_type) == Int64TensorType:
+            np_type = np.int64
+        else:
+            raise RuntimeError('Unsupport ONNX datatype {} encounted in SQLTransformer.'.format(onnx_type))
 
-    return this_operator.outputs, all_inputs + this_operator.outputs
+        shape = onnx_type.shape
+        # If the second dimension is 1, we treat the column as a vector.
+        if len(shape) == 2 and shape[1] == 1:
+            shape = shape[:1]
+
+        return np.zeros(shape=shape, dtype=np_type).tolist()
+
+    # We create a sample input data frame to obtain the Catalyst optimized paln.
+    df = spark.createDataFrame(pd.DataFrame({i.raw_name: _get_sample_input(i) for i in all_inputs}))
+    catalyst_plan = operator.transform(df)._jdf.logicalPlan()
+    optimized_plan = spark\
+        ._jsparkSession\
+        .sessionState()\
+        .executePlan(catalyst_plan)\
+        .optimizedPlan()
+    plan_json = json.loads(optimized_plan.toJSON())
+
+    sql_transformer_outputs = []
+    project_trees = [p for p in [node['projectList'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Project'][0]
+                     if p[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Alias']
+
+    for project_tree in project_trees:
+        output_name = project_tree[0]['name']
+        input_names = []
+        for project_tree_node in project_tree[1:]:
+            if project_tree_node['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
+                name = project_tree_node['name']
+                if name not in input_names:
+                    input_names.append(name)
+
+        this_operator = scope.declare_local_operator("SparkMLSQLTransformer")
+        temp = {i.raw_name: i for i in all_inputs if i.raw_name in input_names}
+        this_operator.inputs = [temp[i] for i in input_names]
+        output = scope.declare_local_variable(output_name)
+        this_operator.outputs.append(output)
+        this_operator.operand = project_tree
+        sql_transformer_outputs.append(output)
+
+    return sql_transformer_outputs, all_inputs + sql_transformer_outputs
 
 
 def _parse_sklearn_feature_union(scope, model, inputs):
