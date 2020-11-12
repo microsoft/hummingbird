@@ -112,7 +112,7 @@ def convert_sparkml_sql_transformer(operator, device, extra_config):
     from pyspark.sql import SparkSession
     import pandas as pd
 
-    def __get_sample_input(onnx_input):
+    def _get_sample_input(onnx_input):
         onnx_type = onnx_input.type
         if type(onnx_type) == DoubleTensorType:
             np_type = np.float64
@@ -134,7 +134,7 @@ def convert_sparkml_sql_transformer(operator, device, extra_config):
 
     # We create a sample input data frame to obtain the Catalyst optimized paln.
     spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(pd.DataFrame({i.raw_name: __get_sample_input(i) for i in operator.inputs}))
+    df = spark.createDataFrame(pd.DataFrame({i.raw_name: _get_sample_input(i) for i in operator.inputs}))
     catalyst_plan = operator.raw_operator.transform(df)._jdf.logicalPlan()
     optimized_plan = spark\
         ._jsparkSession\
