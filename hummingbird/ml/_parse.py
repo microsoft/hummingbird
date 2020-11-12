@@ -486,23 +486,23 @@ def _parse_onnx_single_operator(scope, operator):
         this_operator.outputs.append(variable)
 
 
-def _parse_sparkml_api(scope, model, inputs):
+def _parse_sparkml_api(scope, model, all_inputs):
     """
     This function handles all input Spark-ML models.
 
     Args:
         scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
         model: A Spark-ML model object
-        inputs: A list of `onnxconverter_common.topology.Variable`s
+        all_inputs: A list of `onnxconverter_common.topology.Variable`s
 
     Returns:
         A list of output `onnxconverter_common.topology.Variable` which will be passed to next stage
     """
     tmodel = type(model)
     if tmodel in sparkml_api_parsers_map:
-        outputs = sparkml_api_parsers_map[tmodel](scope, model, inputs)
+        outputs = sparkml_api_parsers_map[tmodel](scope, model, all_inputs)
     else:
-        outputs = _parse_sparkml_single_operator(scope, model, inputs)
+        outputs = _parse_sparkml_single_operator(scope, model, all_inputs)
     return outputs
 
 
