@@ -147,6 +147,24 @@ def convert(topology, backend, device, extra_config={}):
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
 
+    batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
+        extra_config[constants.TEST_INPUT], batch_size
+    )
+
+    with torch.no_grad():
+        outputs = torch_model(batch_trace_input)
+        if isinstance(outputs, torch.Tensor):
+            outputs = tuple(outputs)
+
+    num_output_columns = []
+    for output in outputs:
+        oshape = output.shape
+        if len(oshape) == 1:
+            num_output_columns.append(1)
+        else:
+            assert len(oshape) == 2
+            num_output_columns.append(oshape[1])
+
     if backend == onnx.__name__:
         onnx_model_name = output_model_name = None
         target_opset = 11
@@ -159,9 +177,6 @@ def convert(topology, backend, device, extra_config={}):
             target_opset = extra_config[constants.ONNX_TARGET_OPSET]
         if output_model_name is None:
             output_model_name = str(uuid4().hex) + ".onnx"
-
-        # Put the tracing test input into the right format.
-        batch_trace_input, _ = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -220,9 +235,6 @@ def convert(topology, backend, device, extra_config={}):
         fix_graph(hb_model.graph)
     elif backend == tvm_backend:
         # First we need to generate the torchscript model.
-        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
-            extra_config[constants.TEST_INPUT], batch_size
-        )
         ts_model = _jit_model(torch_model, batch_trace_input, "cpu", extra_config)
         if remainder_trace_input is not None:
             remainder_ts_model = _jit_model(torch_model, remainder_trace_input, "cpu", extra_config)
@@ -274,6 +286,7 @@ def convert(topology, backend, device, extra_config={}):
         # Generate the model. We set opt_level=3 to enable all optimizations.
         with tvm.transform.PassContext(opt_level=3, config=config):
             graph, lib, params = relay.build(model, target=target, params=params)
+
         tvm_model = graph_runtime.create(graph, lib, ctx)
         tvm_model.set_input(**params)
         if remainder_trace_input is not None:
@@ -297,10 +310,9 @@ def convert(topology, backend, device, extra_config={}):
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
-            trace_input, _ = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
             if device != "cpu":
-                trace_input.to(device)
-            torch_model = torch.jit.trace(torch_model, trace_input).eval()
+                batch_trace_input.to(device)
+            torch_model = torch.jit.trace(torch_model, batch_trace_input).eval()
             torch.jit.optimized_execution(torch_model)
 
         hb_model = torch_model
@@ -381,7 +393,7 @@ def convert(topology, backend, device, extra_config={}):
 
     n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
     batch_size = None if constants.BATCH_SIZE not in extra_config else extra_config[constants.BATCH_SIZE]
-    hb_model = container(hb_model, n_threads, batch_size, extra_config=extra_config)
+    hb_model = container(hb_model, num_output_columns, n_threads, batch_size, extra_config=extra_config)
 
     return hb_model
 

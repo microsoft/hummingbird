@@ -48,7 +48,7 @@ class CommonSparkMLModelContainer(CommonSklearnModelContainer):
 # Output containers.
 # Abstract containers enabling the Sklearn API.
 class SklearnContainer(ABC):
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
+    def __init__(self, model, num_output_columns, n_threads=None, batch_size=None, extra_config={}):
         """
         Base container abstract class allowing to mirror the Sklearn API.
         *SklearnContainer* enables the use of `predict`, `predict_proba` etc. API of Sklearn
@@ -61,6 +61,8 @@ class SklearnContainer(ABC):
             extra_config: Some additional configuration parameter.
         """
         self._model = model
+        self._num_output_columns = num_output_columns
+        self._output_index = 0
         self._n_threads = n_threads
         self._batch_size = batch_size
         self._extra_config = extra_config
@@ -100,7 +102,7 @@ class SklearnContainer(ABC):
         iterations = total_size // self._batch_size
         iterations += 1 if total_size % self._batch_size > 0 else 0
         iterations = max(1, iterations)
-        predictions = []
+        predictions = np.empty([total_size, self._num_output_columns[self._output_index]])
 
         for i in range(0, iterations):
             start = i * self._batch_size
@@ -112,11 +114,11 @@ class SklearnContainer(ABC):
             # Tell function that we are in the last iteration and do proper actions in case
             # (e.g., for TVM we may want to use the raminder model).
             self._last_iteration = i == iterations - 1
-            predictions.extend(function(*batch).ravel())
+            predictions[start:end, :] = function(*batch)
 
         if reshape:
-            return np.array(predictions).ravel().reshape(total_size, -1)
-        return np.array(predictions).ravel()
+            return predictions.ravel().reshape(total_size, -1)
+        return predictions.ravel()
 
 
 class SklearnContainerTransformer(SklearnContainer):
@@ -145,14 +147,15 @@ class SklearnContainerRegression(SklearnContainer):
     """
 
     def __init__(
-        self, model, n_threads, batch_size, is_regression=True, is_anomaly_detection=False, extra_config={}, **kwargs
+        self, model, num_output_columns, n_threads, batch_size, is_regression=True, is_anomaly_detection=False, extra_config={}, **kwargs
     ):
-        super(SklearnContainerRegression, self).__init__(model, n_threads, batch_size, extra_config)
+        super(SklearnContainerRegression, self).__init__(model, num_output_columns, n_threads, batch_size, extra_config)
 
         assert not (is_regression and is_anomaly_detection)
 
         self._is_regression = is_regression
         self._is_anomaly_detection = is_anomaly_detection
+        self._output_index = 0
 
     @abstractmethod
     def _predict(self, *input):
@@ -176,10 +179,11 @@ class SklearnContainerClassification(SklearnContainerRegression):
     Container mirroring Sklearn classifiers API.
     """
 
-    def __init__(self, model, n_threads, batch_size, extra_config={}):
+    def __init__(self, model, num_output_columns, n_threads, batch_size, extra_config={}):
         super(SklearnContainerClassification, self).__init__(
-            model, n_threads, batch_size, is_regression=False, extra_config=extra_config
+            model, num_output_columns, n_threads, batch_size, is_regression=False, extra_config=extra_config
         )
+        self._output_index = 1
 
     @abstractmethod
     def _predict_proba(self, *input):
@@ -201,10 +205,11 @@ class SklearnContainerAnomalyDetection(SklearnContainerRegression):
     Container mirroring Sklearn anomaly detection API.
     """
 
-    def __init__(self, model, n_threads, batch_size, extra_config={}):
+    def __init__(self, model, num_output_columns, n_threads, batch_size, extra_config={}):
         super(SklearnContainerAnomalyDetection, self).__init__(
-            model, n_threads, batch_size, is_regression=False, is_anomaly_detection=True, extra_config=extra_config
+            model, num_output_columns, n_threads, batch_size, is_regression=False, is_anomaly_detection=True, extra_config=extra_config
         )
+        self._output_index = 1
 
     @abstractmethod
     def _decision_function(self, *inputs):
@@ -398,8 +403,8 @@ class ONNXSklearnContainer(SklearnContainer):
     The container allows to mirror the Sklearn API.
     """
 
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        super(ONNXSklearnContainer, self).__init__(model, n_threads, batch_size, extra_config)
+    def __init__(self, model, num_output_columns, n_threads=None, batch_size=None, extra_config={}):
+        super(ONNXSklearnContainer, self).__init__(model, num_output_columns, n_threads, batch_size, extra_config)
 
         if onnx_runtime_installed():
             import onnxruntime as ort
@@ -500,8 +505,8 @@ class TVMSklearnContainer(SklearnContainer):
     The container allows to mirror the Sklearn API.
     """
 
-    def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
-        super(TVMSklearnContainer, self).__init__(model, n_threads, batch_size, extra_config=extra_config)
+    def __init__(self, model, num_output_columns, n_threads=None, batch_size=None, extra_config={}):
+        super(TVMSklearnContainer, self).__init__(model, num_output_columns, n_threads, batch_size, extra_config=extra_config)
 
         assert tvm_installed()
         import tvm
