@@ -114,7 +114,8 @@ class SklearnContainer(ABC):
             # Tell function that we are in the last iteration and do proper actions in case
             # (e.g., for TVM we may want to use the raminder model).
             self._last_iteration = i == iterations - 1
-            predictions[start:end, :] = function(*batch)
+            out = function(*batch)
+            predictions[start:end, :] = np.expand_dims(out, 1) if len(out.shape) == 1 else out
 
         if reshape:
             return predictions.ravel().reshape(total_size, -1)
@@ -147,7 +148,15 @@ class SklearnContainerRegression(SklearnContainer):
     """
 
     def __init__(
-        self, model, num_output_columns, n_threads, batch_size, is_regression=True, is_anomaly_detection=False, extra_config={}, **kwargs
+        self,
+        model,
+        num_output_columns,
+        n_threads,
+        batch_size,
+        is_regression=True,
+        is_anomaly_detection=False,
+        extra_config={},
+        **kwargs
     ):
         super(SklearnContainerRegression, self).__init__(model, num_output_columns, n_threads, batch_size, extra_config)
 
@@ -207,7 +216,13 @@ class SklearnContainerAnomalyDetection(SklearnContainerRegression):
 
     def __init__(self, model, num_output_columns, n_threads, batch_size, extra_config={}):
         super(SklearnContainerAnomalyDetection, self).__init__(
-            model, num_output_columns, n_threads, batch_size, is_regression=False, is_anomaly_detection=True, extra_config=extra_config
+            model,
+            num_output_columns,
+            n_threads,
+            batch_size,
+            is_regression=False,
+            is_anomaly_detection=True,
+            extra_config=extra_config,
         )
         self._output_index = 1
 
