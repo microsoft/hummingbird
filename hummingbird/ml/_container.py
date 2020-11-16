@@ -234,7 +234,18 @@ class SklearnContainerAnomalyDetection(SklearnContainerRegression):
 
 
 # PyTorch containers.
-class PyTorchSklearnContainerTransformer(SklearnContainerTransformer):
+class PyTorchSklearnContainer(ABC):
+    """
+    Base container for PyTorch models.
+    We used this container to surface PyTorch-specific functionalities in the containers.
+    """
+
+    def to(self, device):
+        self.model.to(device)
+        return self
+
+
+class PyTorchSklearnContainerTransformer(SklearnContainerTransformer, PyTorchSklearnContainer):
     """
     Container for PyTorch models mirroring Sklearn transformers API.
     """
@@ -243,7 +254,7 @@ class PyTorchSklearnContainerTransformer(SklearnContainerTransformer):
         return self.model.forward(*inputs).cpu().numpy()
 
 
-class PyTorchSklearnContainerRegression(SklearnContainerRegression):
+class PyTorchSklearnContainerRegression(SklearnContainerRegression, PyTorchSklearnContainer):
     """
     Container for PyTorch models mirroring Sklearn regressor API.
     """
