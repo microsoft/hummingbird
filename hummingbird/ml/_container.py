@@ -102,7 +102,11 @@ class SklearnContainer(ABC):
         iterations = total_size // self._batch_size
         iterations += 1 if total_size % self._batch_size > 0 else 0
         iterations = max(1, iterations)
-        predictions = np.empty([total_size, self._num_output_columns[self._output_index]])
+
+        if len(self._num_output_columns) == 0:
+            predictions = None
+        else:
+            predictions = np.empty([total_size, self._num_output_columns[self._output_index]])
 
         for i in range(0, iterations):
             start = i * self._batch_size
@@ -115,7 +119,12 @@ class SklearnContainer(ABC):
             # (e.g., for TVM we may want to use the raminder model).
             self._last_iteration = i == iterations - 1
             out = function(*batch)
-            predictions[start:end, :] = np.expand_dims(out, 1) if len(out.shape) == 1 else out
+            out = np.expand_dims(out, 1) if len(out.shape) == 1 else out
+
+            if predictions is None:
+                predictions = np.empty([total_size, out.shape[1]])
+
+            predictions[start:end, :] = out
 
         if reshape:
             return predictions.ravel().reshape(total_size, -1)

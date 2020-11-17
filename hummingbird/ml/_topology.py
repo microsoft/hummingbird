@@ -147,23 +147,26 @@ def convert(topology, backend, device, extra_config={}):
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
 
-    batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
-        extra_config[constants.TEST_INPUT], batch_size
-    )
-
-    with torch.no_grad():
-        outputs = torch_model(batch_trace_input)
-        if isinstance(outputs, torch.Tensor):
-            outputs = tuple(outputs)
-
+    # The column dimension is needed for preallocating an array to hold prediction results
     num_output_columns = []
-    for output in outputs:
-        oshape = output.shape
-        if len(oshape) == 1:
-            num_output_columns.append(1)
-        else:
-            assert len(oshape) == 2
-            num_output_columns.append(oshape[1])
+
+    if constants.TEST_INPUT in extra_config:
+        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
+            extra_config[constants.TEST_INPUT], batch_size
+        )
+
+        with torch.no_grad():
+            outputs = torch_model(batch_trace_input)
+            if isinstance(outputs, torch.Tensor):
+                outputs = tuple(outputs)
+
+        for output in outputs:
+            oshape = output.shape
+            if len(oshape) == 1:
+                num_output_columns.append(1)
+            else:
+                assert len(oshape) == 2
+                num_output_columns.append(oshape[1])
 
     if backend == onnx.__name__:
         onnx_model_name = output_model_name = None
