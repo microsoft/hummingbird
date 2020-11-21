@@ -55,10 +55,6 @@ class TrainEnsembleAlgorithm(ABC):
             return RandomForestAlgorithm()
         raise ValueError("Unknown algorithm: " + name)
 
-    @staticmethod
-    def get_data(data, start, end):
-        return data[start:end, :] if isinstance(data, np.ndarray) else data.iloc[start:end, :]
-
     def __init__(self):
         self.params = {}
         self.model = None
@@ -70,34 +66,11 @@ class TrainEnsembleAlgorithm(ABC):
 
     def test(self, data):
         assert self.model is not None
-        return self.model.predict(data.X_test)
+        return self.model.predict(data)
 
-    def predict(self, model, data, args):
-        batch_size = args.batch_size
-        predict_data = data.X_test
-
+    def predict(self, model, predict_data, args):
         with Timer() as t:
-            total_size = len(predict_data)
-            iterations = total_size // batch_size
-            iterations += 1 if total_size % batch_size > 0 else 0
-            iterations = max(1, iterations)
-
-            if data.learning_task == LearningTask.CLASSIFICATION:
-                self.predictions = np.empty([total_size, 2], dtype="f4")
-                predict_fn = model.predict_proba
-            if data.learning_task == LearningTask.MULTICLASS_CLASSIFICATION:
-                self.predictions = np.empty([total_size, model.n_classes_], dtype="f4")
-                predict_fn = model.predict_proba
-            if data.learning_task == LearningTask.REGRESSION:
-                self.predictions = np.empty([total_size], dtype="f4")
-                predict_fn = model.predict
-
-            for i in range(0, iterations):
-                start = i * batch_size
-                end = min(start + batch_size, total_size)
-                batch = TrainEnsembleAlgorithm.get_data(predict_data, start, end)
-                self.predictions[start:end] = predict_fn(batch)
-
+            self.predictions = self.predict_fn(predict_data)
         return t.interval
 
     def __enter__(self):
@@ -158,6 +131,7 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
+            self.predict_fn = self.model.predict
         else:
             self.model = xgb.XGBClassifier(
                 max_depth=params["max_depth"],
@@ -171,6 +145,8 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
+            self.predict_fn = self.model.predict_proba
+            print("set predict fn")
 
         with Timer() as t:
             self.model.fit(data.X_train, data.y_train)
@@ -210,6 +186,7 @@ class LgbmAlgorithm(TrainEnsembleAlgorithm):
                 n_jobs=params["njobs"],
                 reg_lambda=params["reg_lambda"],
             )
+            self.predict_fn = self.model.predict
         else:
             self.model = lgb.LGBMClassifier(
                 max_depth=params["max_depth"],
@@ -221,6 +198,7 @@ class LgbmAlgorithm(TrainEnsembleAlgorithm):
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
+            self.predict_fn = self.model.predict_proba
 
         with Timer() as t:
             self.model.fit(data.X_train, data.y_train)
@@ -243,10 +221,12 @@ class RandomForestAlgorithm(TrainEnsembleAlgorithm):
             self.model = RandomForestRegressor(
                 max_depth=params["max_depth"], n_estimators=params["ntrees"], n_jobs=params["njobs"]
             )
+            self.predict_fn = self.model.predict
         else:
             self.model = RandomForestClassifier(
                 max_depth=params["max_depth"], n_estimators=params["ntrees"], n_jobs=params["njobs"]
             )
+            self.predict_fn = self.model.predict_proba
 
         with Timer() as t:
             self.model.fit(data.X_train, data.y_train.astype("|i4"))

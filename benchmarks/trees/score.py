@@ -69,15 +69,6 @@ class ScoreBackend(ABC):
             }
         )
 
-    @staticmethod
-    def get_data(data, size=-1):
-        np_data = data.to_numpy() if not isinstance(data, np.ndarray) else data
-
-        if size != -1:
-            np_data = np_data[0:size, :]
-
-        return np_data
-
     @abstractmethod
     def convert(self, model, args, model_name):
         pass
@@ -99,10 +90,8 @@ class HBBackend(ScoreBackend):
         super(HBBackend, self).__init__()
         self.backend = backend
 
-    def convert(self, model, data, args, model_name):
+    def convert(self, model, data, test_data, args, model_name):
         self.configure(data, model, args)
-
-        test_data = self.get_data(data.X_test)
 
         with Timer() as t:
             self.model = convert(
@@ -113,17 +102,18 @@ class HBBackend(ScoreBackend):
                 extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
             )
 
+        if data.learning_task == LearningTask.REGRESSION:
+            self.predict_fn = self.model.predict
+        else:
+            self.predict_fn = self.model.predict_proba
+
         return t.interval
 
-    def predict(self, data):
+    def predict(self, predict_data):
         assert self.model is not None
 
         with Timer() as t:
-            predict_data = self.get_data(data.X_test)
-            if data.learning_task == LearningTask.REGRESSION:
-                self.predictions = self.model.predict(predict_data)
-            else:
-                self.predictions = self.model.predict_proba(predict_data)
+            self.predictions = self.predict_fn(predict_data)
 
         return t.interval
 
@@ -147,6 +137,7 @@ class ONNXMLBackend(ScoreBackend):
         from onnxmltools.convert.common.data_types import FloatTensorType
 
         self.configure(data, model, args)
+        self.is_regression = data.learning_task == LearningTask.REGRESSION
 
         with Timer() as t:
             if self.params["operator"] == "xgb":
@@ -168,9 +159,10 @@ class ONNXMLBackend(ScoreBackend):
                 if remainder > 0:
                     initial_type = [("input", FloatTensorType([remainder, self.params["input_size"]]))]
                     self.remainder_model = converter(model, initial_types=initial_type, target_opset=11)
+
         return t.interval
 
-    def predict(self, data):
+    def predict(self, predict_data):
         import onnxruntime as ort
 
         assert self.model is not None
@@ -185,15 +177,14 @@ class ONNXMLBackend(ScoreBackend):
 
         batch_size = 1 if self.params["operator"] == "xgb" else self.params["batch_size"]
         input_name = sess.get_inputs()[0].name
-        is_regression = data.learning_task == LearningTask.REGRESSION
-        if is_regression:
+
+        if self.is_regression:
             output_name_index = 0
         else:
             output_name_index = 1
         output_name = sess.get_outputs()[output_name_index].name
 
         with Timer() as t:
-            predict_data = ScoreBackend.get_data(data.X_test)
             total_size = len(predict_data)
             iterations = total_size // batch_size
             iterations += 1 if total_size % batch_size > 0 else 0
@@ -211,12 +202,12 @@ class ONNXMLBackend(ScoreBackend):
                     else:
                         pred = sess.run([output_name], {input_name: predict_data[start:end, :]})
 
-                    if is_regression:
+                    if self.is_regression:
                         self.predictions[start:end, :] = pred[0]
                     else:
                         self.predictions[start:end, :] = list(map(lambda x: list(x.values()), pred[0]))
 
-        if is_regression:
+        if self.is_regression:
             self.predictions = self.predictions.flatten()
         del sess
         if remainder_sess is not None:

@@ -193,6 +193,14 @@ def parse_args():
     return args
 
 
+def get_data(data, size=-1):
+    np_data = data.to_numpy() if not isinstance(data, np.ndarray) else data
+
+    if size != -1:
+        np_data = np_data[0:size, :]
+
+    return np_data
+
 # Benchmarks a single dataset.
 def benchmark(args, dataset_folder, model_folder, dataset):
     warnings.filterwarnings("ignore")
@@ -208,10 +216,12 @@ def benchmark(args, dataset_folder, model_folder, dataset):
         model_name = op + "-" + str(args.ntrees) + "-" + str(args.cpus)
         model_full_name = os.path.join(model_folder, model_name + ".pkl")
         trainer = train.TrainEnsembleAlgorithm.create(op)
+        test_data = get_data(data.X_test)
+
         with trainer:
             if not os.path.exists(model_full_name):
                 train_time = trainer.fit(data, args)
-                pred = trainer.test(data)
+                pred = trainer.test(test_data)
                 results[op] = {
                     "train_time": str(train_time),
                     "train_accuracy": str(get_metrics(data, pred)),
@@ -226,17 +236,26 @@ def benchmark(args, dataset_folder, model_folder, dataset):
             times = []
             mean = 0
             mem = 0
-            try:
-                for i in range(args.niters):
-                    set_alarm(3600)
-                    times.append(trainer.predict(model, data, args))
-                    set_alarm(0)
-                mean = stats.trim_mean(times, 1 / len(times)) if args.niters > 1 else times[0]
-                gc.collect()
-                mem = max(memory_usage((trainer.predict, (model, data, args))))
-            except Exception as e:
-                print(e)
-                pass
+
+            for i in range(args.niters):
+                set_alarm(3600)
+                times.append(trainer.predict(model, test_data, args))
+                set_alarm(0)
+            mean = stats.trim_mean(times, 1 / len(times)) if args.niters > 1 else times[0]
+            gc.collect()
+            mem = max(memory_usage((trainer.predict, (model, test_data, args))))
+
+            # try:
+            #     for i in range(args.niters):
+            #         set_alarm(3600)
+            #         times.append(trainer.predict(model, predict_data, args))
+            #         set_alarm(0)
+            #     mean = stats.trim_mean(times, 1 / len(times)) if args.niters > 1 else times[0]
+            #     gc.collect()
+            #     mem = max(memory_usage((trainer.predict, (model, data, args))))
+            # except Exception as e:
+            #     print(e)
+            #     pass
             results[op].update({"prediction_time": mean})
             results[op].update({"peak_mem": mem})
             outer_ops = args.operator
@@ -260,21 +279,29 @@ def benchmark(args, dataset_folder, model_folder, dataset):
                 print("Running '%s' ..." % backend)
                 scorer = score.ScoreBackend.create(backend)
                 with scorer:
-                    conversion_time = scorer.convert(model, data, args, os.path.join(model_folder, model_name))
+                    conversion_time = scorer.convert(model, data, test_data, args, os.path.join(model_folder, model_name))
 
                     times = []
                     prediction_time = 0
-                    try:
-                        for i in range(args.niters):
-                            set_alarm(3600)
-                            times.append(scorer.predict(data))
-                            set_alarm(0)
-                        prediction_time = times[0] if args.niters == 1 else stats.trim_mean(times, 1 / len(times))
-                        gc.collect()
-                        mem = max(memory_usage((scorer.predict, (data,))))
-                    except Exception as e:
-                        print(e)
-                        pass
+                    for i in range(args.niters):
+                        set_alarm(3600)
+                        times.append(scorer.predict(test_data))
+                        set_alarm(0)
+                    prediction_time = times[0] if args.niters == 1 else stats.trim_mean(times, 1 / len(times))
+                    gc.collect()
+                    mem = max(memory_usage((scorer.predict, (test_data,))))
+
+                    # try:
+                    #     for i in range(args.niters):
+                    #         set_alarm(3600)
+                    #         times.append(scorer.predict(data))
+                    #         set_alarm(0)
+                    #     prediction_time = times[0] if args.niters == 1 else stats.trim_mean(times, 1 / len(times))
+                    #     gc.collect()
+                    #     mem = max(memory_usage((scorer.predict, (data,))))
+                    # except Exception as e:
+                    #     print(e)
+                    #     pass
 
                     results[op][backend] = {
                         "conversion_time": str(conversion_time),
