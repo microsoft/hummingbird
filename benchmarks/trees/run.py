@@ -185,9 +185,7 @@ def parse_args():
         "-batch_benchmark",
         default=False,
         action="store_true",
-        help=("Whether to do a single batch benchmark with specified batch_size"
-              "and niters (not on the whole data)"
-              ),
+        help=("Whether to do a single batch benchmark with specified batch_size and niters (not on the whole data)"),
     )
     parser.add_argument("-maxdepth", default=None, type=int, help=("Maxmimum number of levels in the trees"))
     parser.add_argument(
