@@ -138,6 +138,13 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
     def fit(self, data, args):
         params = self.configure(data, args)
 
+        tree_method = params["tree_method"]
+        predictor = "cpu_predictor"
+
+        if args.gpu:
+            tree_method = "gpu_hist"
+            predictor = "gpu_predictor"
+
         if data.learning_task == LearningTask.REGRESSION:
             self.model = xgb.XGBRegressor(
                 max_depth=params["max_depth"],
@@ -146,7 +153,8 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
                 learning_rate=params["learning_rate"],
                 objective=params["objective"],
                 nthread=params["nthread"],
-                tree_method=params["tree_method"],
+                predictor=predictor,
+                tree_method=tree_method,
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
@@ -158,7 +166,8 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
                 learning_rate=params["learning_rate"],
                 objective=params["objective"],
                 nthread=params["nthread"],
-                tree_method=params["tree_method"],
+                predictor=predictor,
+                tree_method=tree_method,
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
