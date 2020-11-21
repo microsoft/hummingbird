@@ -181,6 +181,14 @@ def parse_args():
         ),
     )
     parser.add_argument("-niters", default=5, type=int, help=("Number of iterations for each experiment"))
+    parser.add_argument(
+        "-batch_benchmark",
+        default=False,
+        action="store_true",
+        help=("Whether to do a single batch benchmark with specified batch_size"
+              "and niters (not on the whole data)"
+              ),
+    )
     parser.add_argument("-maxdepth", default=None, type=int, help=("Maxmimum number of levels in the trees"))
     parser.add_argument(
         "-validate", default=False, action="store_true", help="Validate prediction output and fails accordingly."
@@ -197,9 +205,12 @@ def get_data(data, size=-1):
     np_data = data.to_numpy() if not isinstance(data, np.ndarray) else data
 
     if size != -1:
-        np_data = np_data[0:size, :]
+        msg = "Requested size bigger than the data size (%d vs %d)" % (size, np_data.shape[0])
+        assert size <= np_data.shape[0], msg
+        np_data = np_data[0:size]
 
     return np_data
+
 
 # Benchmarks a single dataset.
 def benchmark(args, dataset_folder, model_folder, dataset):
@@ -216,15 +227,21 @@ def benchmark(args, dataset_folder, model_folder, dataset):
         model_name = op + "-" + str(args.ntrees) + "-" + str(args.cpus)
         model_full_name = os.path.join(model_folder, model_name + ".pkl")
         trainer = train.TrainEnsembleAlgorithm.create(op, data.learning_task)
-        test_data = get_data(data.X_test)
+        if args.batch_benchmark:
+            test_size = args.batch_size
+        else:
+            test_size = data.X_test.shape[0]
+
+        X_test = get_data(data.X_test, size=test_size)
+        y_test = get_data(data.y_test, size=test_size)
 
         with trainer:
             if not os.path.exists(model_full_name):
                 train_time = trainer.fit(data, args)
-                pred = trainer.test(test_data)
+                pred = trainer.test(X_test)
                 results[op] = {
                     "train_time": str(train_time),
-                    "train_accuracy": str(get_metrics(data, pred)),
+                    "train_accuracy": str(get_metrics(y_test, pred, data.learning_task)),
                 }
                 model = trainer.model
                 if not os.path.exists(model_folder):
@@ -237,25 +254,18 @@ def benchmark(args, dataset_folder, model_folder, dataset):
             mean = 0
             mem = 0
 
-            for i in range(args.niters):
-                set_alarm(3600)
-                times.append(trainer.predict(model, test_data, args))
-                set_alarm(0)
-            mean = stats.trim_mean(times, 1 / len(times)) if args.niters > 1 else times[0]
-            gc.collect()
-            mem = max(memory_usage((trainer.predict, (model, test_data, args))))
+            try:
+                for i in range(args.niters):
+                    set_alarm(3600)
+                    times.append(trainer.predict(model, X_test, args))
+                    set_alarm(0)
+                mean = stats.trim_mean(times, 1 / len(times)) if args.niters > 1 else times[0]
+                gc.collect()
+                mem = max(memory_usage((trainer.predict, (model, X_test, args))))
+            except Exception as e:
+                print(e)
+                pass
 
-            # try:
-            #     for i in range(args.niters):
-            #         set_alarm(3600)
-            #         times.append(trainer.predict(model, predict_data, args))
-            #         set_alarm(0)
-            #     mean = stats.trim_mean(times, 1 / len(times)) if args.niters > 1 else times[0]
-            #     gc.collect()
-            #     mem = max(memory_usage((trainer.predict, (model, data, args))))
-            # except Exception as e:
-            #     print(e)
-            #     pass
             results[op].update({"prediction_time": mean})
             results[op].update({"peak_mem": mem})
             outer_ops = args.operator
@@ -279,29 +289,22 @@ def benchmark(args, dataset_folder, model_folder, dataset):
                 print("Running '%s' ..." % backend)
                 scorer = score.ScoreBackend.create(backend)
                 with scorer:
-                    conversion_time = scorer.convert(model, data, test_data, args, os.path.join(model_folder, model_name))
+                    conversion_time = scorer.convert(model, data, X_test, args, os.path.join(model_folder, model_name))
 
                     times = []
                     prediction_time = 0
-                    for i in range(args.niters):
-                        set_alarm(3600)
-                        times.append(scorer.predict(test_data))
-                        set_alarm(0)
-                    prediction_time = times[0] if args.niters == 1 else stats.trim_mean(times, 1 / len(times))
-                    gc.collect()
-                    mem = max(memory_usage((scorer.predict, (test_data,))))
 
-                    # try:
-                    #     for i in range(args.niters):
-                    #         set_alarm(3600)
-                    #         times.append(scorer.predict(data))
-                    #         set_alarm(0)
-                    #     prediction_time = times[0] if args.niters == 1 else stats.trim_mean(times, 1 / len(times))
-                    #     gc.collect()
-                    #     mem = max(memory_usage((scorer.predict, (data,))))
-                    # except Exception as e:
-                    #     print(e)
-                    #     pass
+                    try:
+                        for i in range(args.niters):
+                            set_alarm(3600)
+                            times.append(scorer.predict(X_test))
+                            set_alarm(0)
+                        prediction_time = times[0] if args.niters == 1 else stats.trim_mean(times, 1 / len(times))
+                        gc.collect()
+                        mem = max(memory_usage((scorer.predict, (X_test,))))
+                    except Exception as e:
+                        print(e)
+                        pass
 
                     results[op][backend] = {
                         "conversion_time": str(conversion_time),

@@ -37,14 +37,14 @@ import sklearn.metrics as sklm
 from benchmarks.datasets import LearningTask
 
 
-def get_metrics(data, pred):
-    if data.learning_task == LearningTask.REGRESSION:
-        return regression_metrics(data.y_test, pred)
-    if data.learning_task == LearningTask.CLASSIFICATION:
-        return classification_metrics(data.y_test, pred)
-    if data.learning_task == LearningTask.MULTICLASS_CLASSIFICATION:
-        return classification_metrics_multilabel(data.y_test, pred)
-    raise ValueError("No metrics defined for learning task: " + str(data.learning_task))
+def get_metrics(y_test, pred, learning_task):
+    if learning_task == LearningTask.REGRESSION:
+        return regression_metrics(y_test, pred)
+    if learning_task == LearningTask.CLASSIFICATION:
+        return classification_metrics(y_test, pred)
+    if learning_task == LearningTask.MULTICLASS_CLASSIFICATION:
+        return classification_metrics_multilabel(y_test, pred)
+    raise ValueError("No metrics defined for learning task: " + str(learning_task))
 
 
 def evaluate_metrics(y_true, y_pred, metrics):

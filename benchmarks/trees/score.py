@@ -89,6 +89,7 @@ class HBBackend(ScoreBackend):
     def __init__(self, backend):
         super(HBBackend, self).__init__()
         self.backend = backend
+        self.predict_fn = None
 
     def convert(self, model, data, test_data, args, model_name):
         self.configure(data, model, args)
@@ -110,7 +111,7 @@ class HBBackend(ScoreBackend):
         return t.interval
 
     def predict(self, predict_data):
-        assert self.model is not None
+        assert self.predict_fn is not None
 
         with Timer() as t:
             self.predictions = self.predict_fn(predict_data)
@@ -130,7 +131,7 @@ class ONNXMLBackend(ScoreBackend):
         super(ONNXMLBackend, self).configure(data, model, args)
         self.params.update({"operator": args.operator})
 
-    def convert(self, model, data, args, model_name):
+    def convert(self, model, data, test_data, args, model_name):
         from onnxmltools.convert import convert_xgboost
         from onnxmltools.convert import convert_lightgbm
         from skl2onnx import convert_sklearn
