@@ -33,11 +33,7 @@
 from abc import ABC, abstractmethod
 import lightgbm as lgb
 import numpy as np
-import os.path
-import pandas as pd
-import pickle
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import accuracy_score
 import xgboost as xgb
 
 from benchmarks.timer import Timer
@@ -46,19 +42,20 @@ from benchmarks.datasets import LearningTask
 
 class TrainEnsembleAlgorithm(ABC):
     @staticmethod
-    def create(name):  # pylint: disable=too-many-return-statements
+    def create(name, learning_task):  # pylint: disable=too-many-return-statements
         if name == "xgb":
-            return XgbAlgorithm()
+            return XgbAlgorithm(learning_task)
         if name == "lgbm":
-            return LgbmAlgorithm()
+            return LgbmAlgorithm(learning_task)
         if name == "rf":
-            return RandomForestAlgorithm()
+            return RandomForestAlgorithm(learning_task)
         raise ValueError("Unknown algorithm: " + name)
 
-    def __init__(self):
+    def __init__(self, learning_task):
         self.params = {}
         self.model = None
         self.predictions = []
+        self.learning_task = learning_task
 
     @abstractmethod
     def fit(self, data, args):
@@ -69,8 +66,13 @@ class TrainEnsembleAlgorithm(ABC):
         return self.model.predict(data)
 
     def predict(self, model, predict_data, args):
+        if self.learning_task == LearningTask.REGRESSION:
+            predict_fn = model.predict
+        else:
+            predict_fn = model.predict_proba
+
         with Timer() as t:
-            self.predictions = self.predict_fn(predict_data)
+            self.predictions = predict_fn(predict_data)
         return t.interval
 
     def __enter__(self):
@@ -131,7 +133,6 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
-            self.predict_fn = self.model.predict
         else:
             self.model = xgb.XGBClassifier(
                 max_depth=params["max_depth"],
@@ -145,8 +146,6 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
-            self.predict_fn = self.model.predict_proba
-            print("set predict fn")
 
         with Timer() as t:
             self.model.fit(data.X_train, data.y_train)
@@ -186,7 +185,6 @@ class LgbmAlgorithm(TrainEnsembleAlgorithm):
                 n_jobs=params["njobs"],
                 reg_lambda=params["reg_lambda"],
             )
-            self.predict_fn = self.model.predict
         else:
             self.model = lgb.LGBMClassifier(
                 max_depth=params["max_depth"],
@@ -198,7 +196,6 @@ class LgbmAlgorithm(TrainEnsembleAlgorithm):
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
-            self.predict_fn = self.model.predict_proba
 
         with Timer() as t:
             self.model.fit(data.X_train, data.y_train)
@@ -221,12 +218,10 @@ class RandomForestAlgorithm(TrainEnsembleAlgorithm):
             self.model = RandomForestRegressor(
                 max_depth=params["max_depth"], n_estimators=params["ntrees"], n_jobs=params["njobs"]
             )
-            self.predict_fn = self.model.predict
         else:
             self.model = RandomForestClassifier(
                 max_depth=params["max_depth"], n_estimators=params["ntrees"], n_jobs=params["njobs"]
             )
-            self.predict_fn = self.model.predict_proba
 
         with Timer() as t:
             self.model.fit(data.X_train, data.y_train.astype("|i4"))

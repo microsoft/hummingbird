@@ -215,7 +215,7 @@ def benchmark(args, dataset_folder, model_folder, dataset):
         results[op] = {}
         model_name = op + "-" + str(args.ntrees) + "-" + str(args.cpus)
         model_full_name = os.path.join(model_folder, model_name + ".pkl")
-        trainer = train.TrainEnsembleAlgorithm.create(op)
+        trainer = train.TrainEnsembleAlgorithm.create(op, data.learning_task)
         test_data = get_data(data.X_test)
 
         with trainer:
