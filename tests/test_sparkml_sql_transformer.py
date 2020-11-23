@@ -38,7 +38,8 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
         model = SQLTransformer(statement="SELECT *, sepal_length*(sepal_length/sepal_width) as new_feature1,"
                                          " petal_length*(petal_length/petal_width) as new_feature2,"
                                          " petal_length + 10.0*(sepal_width - petal_width) as new_feature3,"
-                                         " sqrt(petal_length) as new_feature4 from __THIS__")
+                                         " sqrt(petal_length) as new_feature4 from __THIS__"
+                                         " WHERE (sepal_length < 4.5 AND petal_length < 4.5) OR sepal_width >= 4.5 OR sepal_width = 4.5")
 
         output_col_names = ['new_feature1', 'new_feature2', 'new_feature3', 'new_feature4']
         test_df = df

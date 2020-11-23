@@ -12,32 +12,54 @@ from onnxconverter_common.registration import register_converter
 from .._base_operator import BaseOperator
 from .. import constants
 
+# List of supported unary SQL ops.
+SUPPORTED_UNARY_OPS = {
+    'org.apache.spark.sql.catalyst.expressions.Sqrt': torch.sqrt
+}
 
-class SQLTransformerModel(BaseOperator, torch.nn.Module):
+# List of supported binary SQL ops.
+SUPPORTED_BINARY_OPS = {
+    # Arithmatic ops.
+    'org.apache.spark.sql.catalyst.expressions.Add': torch.add,
+    'org.apache.spark.sql.catalyst.expressions.Subtract': torch.sub,
+    'org.apache.spark.sql.catalyst.expressions.Multiply': torch.mul,
+    'org.apache.spark.sql.catalyst.expressions.Divide': torch.div,
 
-    # List of supported unary SQL ops.
-    supported_unary_ops = {
-        'org.apache.spark.sql.catalyst.expressions.Sqrt': torch.sqrt
-    }
+    # Logical ops.
+    'org.apache.spark.sql.catalyst.expressions.Or': torch.logical_or,
+    'org.apache.spark.sql.catalyst.expressions.And': torch.logical_and,
+    'org.apache.spark.sql.catalyst.expressions.LessThan': torch.lt,
+    'org.apache.spark.sql.catalyst.expressions.LessThanOrEqual': torch.le,
+    'org.apache.spark.sql.catalyst.expressions.GreaterThan': torch.gt,
+    'org.apache.spark.sql.catalyst.expressions.GreaterThanOrEqual': torch.ge,
+    'org.apache.spark.sql.catalyst.expressions.EqualTo': torch.eq
+}
 
-    # List of supported binary SQL ops.
-    supported_binary_ops = {
-        'org.apache.spark.sql.catalyst.expressions.Add': torch.add,
-        'org.apache.spark.sql.catalyst.expressions.Subtract': torch.sub,
-        'org.apache.spark.sql.catalyst.expressions.Multiply': torch.mul,
-        'org.apache.spark.sql.catalyst.expressions.Divide': torch.div,
-    }
+
+class SQLWhereModel(BaseOperator, torch.nn.Module):
+
+    def __init__(self, input_names, condition_node, device):
+        super(SQLWhereModel, self).__init__()
+        self.transformer = True
+        self.input_names = input_names
+        self.select_op = SQLSelectModel(input_names, condition_node, device)
+
+    def forward(self, *x):
+        filter_confition = self.select_op(*x)
+        return [torch.masked_select(c, filter_confition).reshape(-1, 1) for c in x]
+
+
+class SQLSelectModel(BaseOperator, torch.nn.Module):
 
     def __init__(self, input_names, project_node, device):
-        super(SQLTransformerModel, self).__init__()
+        super(SQLSelectModel, self).__init__()
         self.transformer = True
         self.input_names = input_names
         self.project_node = project_node
 
     def forward(self, *x):
         inputs_dict = {name : tensor for name, tensor in zip(self.input_names, x)}
-        # The first node of the project_node_def is the name definition node. Hence ignored.
-        return self.calculate_output_feature(self.project_node[1:], inputs_dict)[0]
+        return self.calculate_output_feature(self.project_node, inputs_dict)[0]
 
     def calculate_output_feature(self, project_node_def_stack, inputs_dict):
         # Handles reading of a feature column.
@@ -47,15 +69,15 @@ class SQLTransformerModel(BaseOperator, torch.nn.Module):
         elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Literal':
             return float(project_node_def_stack[0]['value']), project_node_def_stack[1:]
         # Handles binary ops e.g., Add/Subtract/Mul/Div.
-        elif project_node_def_stack[0]['class'] in self.supported_binary_ops:
-            op = self.supported_binary_ops[project_node_def_stack[0]['class']]
+        elif project_node_def_stack[0]['class'] in SUPPORTED_BINARY_OPS:
+            op = SUPPORTED_BINARY_OPS[project_node_def_stack[0]['class']]
             project_node_def_stack = project_node_def_stack[1:]
             left, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             right, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             return op(left, right), project_node_def_stack
         # Handles unary ops e.g., Sqrt.
-        elif project_node_def_stack[0]['class'] in self.supported_unary_ops:
-            op = self.supported_unary_ops[project_node_def_stack[0]['class']]
+        elif project_node_def_stack[0]['class'] in SUPPORTED_UNARY_OPS:
+            op = SUPPORTED_UNARY_OPS[project_node_def_stack[0]['class']]
             project_node_def_stack = project_node_def_stack[1:]
             param, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             return op(param), project_node_def_stack
@@ -63,12 +85,12 @@ class SQLTransformerModel(BaseOperator, torch.nn.Module):
             raise RuntimeError('SQLTransformer encountered unsupported operator type: {}'.format(project_node_def_stack[0]['class']))
 
 
-def convert_sparkml_sql_transformer(operator, device, extra_config):
+def convert_sparkml_sql_select(operator, device, extra_config):
     """
-    Converter for `pyspark.ml.feature.SQLTransformer`
+    Converter for SELECT statement in `pyspark.ml.feature.SQLTransformer`
 
     Args:
-        operator: An operator wrapping a `pyspark.ml.feature.SQLTransformer`
+        operator: JSON encoded filter condition extracted from SparkSQL parsed tree
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -76,7 +98,25 @@ def convert_sparkml_sql_transformer(operator, device, extra_config):
         A PyTorch model
     """
     input_names = [input.raw_name for input in operator.inputs]
-    return SQLTransformerModel(input_names, operator.raw_operator, device)
+    # First entry in the raw_operator is the Alias, which we ignore.
+    return SQLSelectModel(input_names, operator.raw_operator[1:], device)
 
 
-register_converter("SparkMLSQLTransformer", convert_sparkml_sql_transformer)
+def convert_sparkml_sql_where(operator, device, extra_config):
+    """
+    Converter for WHERE statement in `pyspark.ml.feature.SQLTransformer`
+
+    Args:
+        operator: JSON encoded project_tree extracted from SparkSQL parsed tree
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    input_names = [input.raw_name for input in operator.inputs]
+    return SQLWhereModel(input_names, operator.raw_operator, device)
+
+
+register_converter("SparkMLSQLSelectModel", convert_sparkml_sql_select)
+register_converter("SparkMLSQLWhereModel", convert_sparkml_sql_where)

@@ -332,7 +332,7 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
         return np.zeros(shape=shape, dtype=np_type).tolist()
 
     # We create a sample input data frame to obtain the Catalyst optimized paln.
-    df = spark.createDataFrame(pd.DataFrame({i.raw_name: _get_sample_input(i) for i in all_inputs}))
+    df = spark.createDataFrame(pd.DataFrame({i.raw_name: _get_sample_input(i) for i in all_inputs if not i.is_abandoned}))
     catalyst_plan = operator.transform(df)._jdf.logicalPlan()
     optimized_plan = spark\
         ._jsparkSession\
@@ -341,6 +341,20 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
         .optimizedPlan()
     plan_json = json.loads(optimized_plan.toJSON())
 
+    # WHERE clause
+    filter_tree = [node for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Filter']
+    if len(filter_tree) > 0:
+        conditions = filter_tree[0]['condition']
+        where_operator = scope.declare_local_operator("SparkMLSQLWhereModel", conditions)
+        where_operator.inputs = all_inputs
+        for input in all_inputs:
+            if not input.is_abandoned:
+                output = scope.declare_local_variable(input.raw_name)
+                input.is_abandoned = True
+                where_operator.outputs.append(output)
+        all_inputs = where_operator.outputs
+
+    # SELECT clause
     sql_transformer_outputs = []
     project_trees = [p for p in [node['projectList'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Project'][0]
                      if p[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Alias']
@@ -354,12 +368,11 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
                 if name not in input_names:
                     input_names.append(name)
 
-        this_operator = scope.declare_local_operator("SparkMLSQLTransformer", project_tree)
-        temp = {i.raw_name: i for i in all_inputs if i.raw_name in input_names}
-        this_operator.inputs = [temp[i] for i in input_names]
+        select_operator = scope.declare_local_operator("SparkMLSQLSelectModel", project_tree)
+        temp = {i.raw_name: i for i in all_inputs if i.raw_name in input_names and not i.is_abandoned}
+        select_operator.inputs = [temp[i] for i in input_names]
         output = scope.declare_local_variable(output_name)
-        this_operator.outputs.append(output)
-        this_operator.operand = project_tree
+        select_operator.outputs.append(output)
         sql_transformer_outputs.append(output)
 
     return sql_transformer_outputs, all_inputs + sql_transformer_outputs
@@ -602,13 +615,13 @@ def _parse_sparkml_single_operator(scope, operator, all_inputs):
     this_operator = scope.declare_local_operator(alias, operator)
 
     if hasattr(operator, "getInputCol") and callable(operator.getInputCol):
-        this_operator.inputs = [i for i in all_inputs if i.raw_name == operator.getInputCol()]
+        this_operator.inputs = [i for i in all_inputs if i.raw_name == operator.getInputCol() and not i.is_abandoned]
     elif hasattr(operator, "getInputCols") and callable(operator.getInputCols):
-        temp = {i.raw_name: i for i in all_inputs if i.raw_name in operator.getInputCols()}
+        temp = {i.raw_name: i for i in all_inputs if i.raw_name in operator.getInputCols() and not i.is_abandoned}
         this_operator.inputs = [temp[i] for i in operator.getInputCols()]
     elif operator.hasParam("featuresCol"):
         col_name = [param[1] for param in operator.extractParamMap().items() if param[0].name == "featuresCol"][0]
-        this_operator.inputs = [i for i in all_inputs if i.raw_name == col_name]
+        this_operator.inputs = [i for i in all_inputs if i.raw_name == col_name and not i.is_abandoned]
     else:
         raise RuntimeError("Unable to determine inputs for the Spark-ML operator: {}".format(type(operator)))
 
