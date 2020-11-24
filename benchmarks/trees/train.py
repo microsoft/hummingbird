@@ -76,21 +76,25 @@ class TrainEnsembleAlgorithm(ABC):
         with Timer() as t:
             total_size = len(predict_data)
             iterations = total_size // batch_size
-            iterations += 1 if total_size % batch_size > 0 else 0
-            iterations = max(1, iterations)
 
-            if self.learning_task == LearningTask.CLASSIFICATION:
-                self.predictions = np.empty([total_size, 2], dtype="f4")
-            if self.learning_task == LearningTask.MULTICLASS_CLASSIFICATION:
-                self.predictions = np.empty([total_size, model.n_classes_], dtype="f4")
-            if self.learning_task == LearningTask.REGRESSION:
-                self.predictions = np.empty([total_size], dtype="f4")
+            if total_size == batch_size:
+                self.predictions = predict_fn(predict_data)
+            else:
+                iterations += 1 if total_size % batch_size > 0 else 0
+                iterations = max(1, iterations)
 
-            for i in range(0, iterations):
-                start = i * batch_size
-                end = min(start + batch_size, total_size)
-                batch = predict_data[start:end]
-                self.predictions[start:end] = predict_fn(batch)
+                if self.learning_task == LearningTask.CLASSIFICATION:
+                    self.predictions = np.empty([total_size, 2], dtype="f4")
+                if self.learning_task == LearningTask.MULTICLASS_CLASSIFICATION:
+                    self.predictions = np.empty([total_size, model.n_classes_], dtype="f4")
+                if self.learning_task == LearningTask.REGRESSION:
+                    self.predictions = np.empty([total_size], dtype="f4")
+
+                for i in range(0, iterations):
+                    start = i * batch_size
+                    end = min(start + batch_size, total_size)
+                    batch = predict_data[start:end]
+                    self.predictions[start:end] = predict_fn(batch)
 
         return t.interval
 
