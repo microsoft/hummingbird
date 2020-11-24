@@ -103,14 +103,14 @@ class TrainEnsembleAlgorithm(ABC):
 
 
 # learning parameters shared by all algorithms, using the xgboost convention
-shared_params = {"max_depth": 8, "learning_rate": 0.1, "reg_lambda": 1}
+shared_params = {"learning_rate": 0.1, "reg_lambda": 1}
 
 
 class XgbAlgorithm(TrainEnsembleAlgorithm):
     def configure(self, data, args):
         params = shared_params.copy()
         params.update({"tree_method": "hist"})
-        params.update({"max_leaves": 256, "nthread": args.cpus, "ntrees": args.ntrees})
+        params.update({"max_leaves": 256, "nthread": args.cpus, "max_depth": args.max_depth, "ntrees": args.ntrees})
         if data.learning_task == LearningTask.REGRESSION:
             params["objective"] = "reg:squarederror"
             params["args"] = {}
@@ -175,7 +175,7 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
 class LgbmAlgorithm(TrainEnsembleAlgorithm):
     def configure(self, data, args):
         params = shared_params.copy()
-        params.update({"max_leaves": 256, "njobs": args.cpus, "ntrees": args.ntrees})
+        params.update({"max_leaves": 256, "njobs": args.cpus, "max_depth": args.max_depth, "ntrees": args.ntrees})
         if data.learning_task == LearningTask.REGRESSION:
             params["objective"] = "regression"
             params["args"] = {}
@@ -225,7 +225,7 @@ class LgbmAlgorithm(TrainEnsembleAlgorithm):
 class RandomForestAlgorithm(TrainEnsembleAlgorithm):
     def configure(self, data, args):
         params = shared_params.copy()
-        params.update({"njobs": args.cpus, "ntrees": args.ntrees})
+        params.update({"njobs": args.cpus, "ntrees": args.ntrees, "max_depth": args.max_depth})
         params.update(args.extra)
 
         return params

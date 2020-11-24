@@ -187,7 +187,7 @@ def parse_args():
         action="store_true",
         help=("Whether to do a single batch benchmark with specified batch_size and niters (not on the whole data)"),
     )
-    parser.add_argument("-maxdepth", default=None, type=int, help=("Maxmimum number of levels in the trees"))
+    parser.add_argument("-max_depth", default=8, type=int, help=("Maxmimum number of levels in the trees"))
     parser.add_argument(
         "-validate", default=False, action="store_true", help="Validate prediction output and fails accordingly."
     )
@@ -195,7 +195,7 @@ def parse_args():
     args = parser.parse_args()
     # Default value for output json file.
     if not args.output:
-        args.output = "result-{}-{}-{}.json".format("gpu" if args.gpu else args.cpus, args.ntrees, args.batch_size)
+        args.output = "result-{}-{}-{}-{}.json".format("gpu" if args.gpu else args.cpus, args.ntrees, args.max_depth, args.batch_size)
     return args
 
 
@@ -222,7 +222,7 @@ def benchmark(args, dataset_folder, model_folder, dataset):
     for op in operators.split(","):
         print("Running '%s' ..." % op)
         results[op] = {}
-        model_name = op + "-" + str(args.ntrees) + "-" + str(args.cpus)
+        model_name = op + "-" + str(args.ntrees) + "-" + str(args.max_depth) + "-" + str(args.cpus)
         model_full_name = os.path.join(model_folder, model_name + ".pkl")
         trainer = train.TrainEnsembleAlgorithm.create(op, data.learning_task)
         if args.batch_benchmark:
