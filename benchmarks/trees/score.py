@@ -198,7 +198,7 @@ class ONNXMLBackend(ScoreBackend):
                 if self.params["operator"] == "xgb":
                     self.predictions[start:end, :] = sess.run([output_name], {input_name: predict_data[start:end, :]})
                 elif self.params["operator"] == "lgbm" or "rf":
-                    if i == iterations - 1 and self.remainder_model is not None:
+                    if total_size > batch_size and i == iterations - 1 and self.remainder_model is not None:
                         pred = remainder_sess.run([output_name], {input_name: predict_data[start:end, :]})
                     else:
                         pred = sess.run([output_name], {input_name: predict_data[start:end, :]})
