@@ -161,29 +161,28 @@ class ONNXMLBackend(ScoreBackend):
                     initial_type = [("input", FloatTensorType([remainder, self.params["input_size"]]))]
                     self.remainder_model = converter(model, initial_types=initial_type, target_opset=11)
 
+            import onnxruntime as ort
+            self.remainder_sess = None
+            sess_options = ort.SessionOptions()
+            sess_options.intra_op_num_threads = self.params["nthread"]
+            sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+            self.sess = ort.InferenceSession(self.model.SerializeToString(), sess_options=sess_options)
+            if self.remainder_model is not None:
+                self.remainder_sess = ort.InferenceSession(self.remainder_model.SerializeToString(), sess_options=sess_options)
+
         return t.interval
 
     def predict(self, predict_data):
-        import onnxruntime as ort
-
         assert self.model is not None
 
-        remainder_sess = None
-        sess_options = ort.SessionOptions()
-        sess_options.intra_op_num_threads = self.params["nthread"]
-        sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
-        sess = ort.InferenceSession(self.model.SerializeToString(), sess_options=sess_options)
-        if self.remainder_model is not None:
-            remainder_sess = ort.InferenceSession(self.remainder_model.SerializeToString(), sess_options=sess_options)
-
         batch_size = 1 if self.params["operator"] == "xgb" else self.params["batch_size"]
-        input_name = sess.get_inputs()[0].name
-
         if self.is_regression:
             output_name_index = 0
         else:
             output_name_index = 1
-        output_name = sess.get_outputs()[output_name_index].name
+
+        input_name = self.sess.get_inputs()[0].name
+        output_name = self.sess.get_outputs()[output_name_index].name
 
         with Timer() as t:
             total_size = len(predict_data)
@@ -196,12 +195,12 @@ class ONNXMLBackend(ScoreBackend):
                 end = min(start + batch_size, total_size)
 
                 if self.params["operator"] == "xgb":
-                    self.predictions[start:end, :] = sess.run([output_name], {input_name: predict_data[start:end, :]})
+                    self.predictions[start:end, :] = self.sess.run([output_name], {input_name: predict_data[start:end, :]})
                 elif self.params["operator"] == "lgbm" or "rf":
                     if total_size > batch_size and i == iterations - 1 and self.remainder_model is not None:
-                        pred = remainder_sess.run([output_name], {input_name: predict_data[start:end, :]})
+                        pred = self.remainder_sess.run([output_name], {input_name: predict_data[start:end, :]})
                     else:
-                        pred = sess.run([output_name], {input_name: predict_data[start:end, :]})
+                        pred = self.sess.run([output_name], {input_name: predict_data[start:end, :]})
 
                     if self.is_regression:
                         self.predictions[start:end, :] = pred[0]
@@ -210,9 +209,6 @@ class ONNXMLBackend(ScoreBackend):
 
         if self.is_regression:
             self.predictions = self.predictions.flatten()
-        del sess
-        if remainder_sess is not None:
-            del remainder_sess
 
         return t.interval
 
