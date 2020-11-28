@@ -108,7 +108,7 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
                     values.append(nodes[-1])
                 else:
                     values.append(nodes[-1] * torch.ones_like(conditions[0]))
-            # In a tie, argmax returns the index of the first element
+            # In a tie, argmax returns the index of the first element.
             index = torch.argmax(torch.cat(conditions, dim=1).int(), dim=1, keepdim=True)
             values = torch.cat(values, dim=1)
             return torch.gather(values, 1, index), project_node_def_stack
