@@ -421,7 +421,12 @@ class _PyTorchBackendModel(torch.nn.Module, object):
                 if len(map) == len(names):
                     break
             for name in names:
-                new_names.append(map[name])
+                if name in map:
+                    new_names.append(map[name])
+                else:
+                    # Sometimes the input dataframe used for tracing can have columns which are never used.
+                    # We keep the original name of those columns.
+                    new_names.append(name)
             return new_names
 
         self._input_names = _fix_var_naming(operators, input_names)

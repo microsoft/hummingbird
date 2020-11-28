@@ -81,6 +81,37 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
             project_node_def_stack = project_node_def_stack[1:]
             param, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             return op(param), project_node_def_stack
+        # Handles CASE statement.
+        elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.CaseWhen':
+            project_node_def_stack = project_node_def_stack[1:]
+            nodes = []
+            while len(project_node_def_stack) > 0:
+                n, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
+                nodes.append(n)
+
+            conditions = []
+            values = []
+            for i in range(0, len(nodes) - 1, 2):
+                conditions.append(nodes[i])
+                if type(nodes[i + 1]) == torch.tensor:
+                    values.append(nodes[i + 1])
+                else:
+                    values.append(nodes[i + 1] * torch.ones_like(conditions[0]))
+
+            conditions.append(torch.ones_like(conditions[0]).bool())
+            if len(nodes) % 2 == 0:
+                # No defined else condition. We return NaN to confirm to the SQL semantics.
+                # Division by zero results in a NaN tensor.
+                values.append(torch.zeros_like(conditions[0]) / 0.0)
+            else:
+                if type(nodes[-1]) == torch.tensor:
+                    values.append(nodes[-1])
+                else:
+                    values.append(nodes[-1] * torch.ones_like(conditions[0]))
+            # In a tie, argmax returns the index of the first element
+            index = torch.argmax(torch.cat(conditions, dim=1).int(), dim=1, keepdim=True)
+            values = torch.cat(values, dim=1)
+            return torch.gather(values, 1, index), project_node_def_stack
         else:
             raise RuntimeError('SQLTransformer encountered unsupported operator type: {}'.format(project_node_def_stack[0]['class']))
 
