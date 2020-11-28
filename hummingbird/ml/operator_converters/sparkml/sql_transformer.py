@@ -81,6 +81,21 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
             project_node_def_stack = project_node_def_stack[1:]
             param, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             return op(param), project_node_def_stack
+        # Handles IN clause statement.
+        elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.In':
+            n_right_elements = len(project_node_def_stack[0]['list'])
+            project_node_def_stack = project_node_def_stack[1:]
+            left, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
+            right_elements = []
+            for _ in range(n_right_elements):
+                right, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
+                right_elements.append(right)
+
+            right_elements = torch.tensor(right_elements, dtype=left.dtype)
+            x = left == right_elements
+            x = x.float()
+            x = torch.sum(x, axis=1, keepdim=True) >= 1.0
+            return x, project_node_def_stack
         # Handles CASE statement.
         elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.CaseWhen':
             project_node_def_stack = project_node_def_stack[1:]
