@@ -9,9 +9,10 @@ Collection of utility functions used throughout Hummingbird.
 """
 
 from distutils.version import LooseVersion
+import torch
 import warnings
 
-from .exceptions import ConstantError
+from hummingbird.ml.exceptions import ConstantError
 
 
 def torch_installed():
@@ -45,6 +46,18 @@ def onnx_runtime_installed():
     """
     try:
         import onnxruntime
+
+        return True
+    except ImportError:
+        return False
+
+
+def sparkml_installed():
+    """
+    Checks that *Spark ML/PySpark* is available.
+    """
+    try:
+        import pyspark
 
         return True
     except ImportError:
@@ -94,11 +107,67 @@ def xgboost_installed():
     from xgboost import __version__
 
     vers = LooseVersion(__version__)
-    allowed_min = LooseVersion("0.70")
-    allowed_max = LooseVersion("0.90")
-    if vers < allowed_min or vers > allowed_max:
-        warnings.warn("The converter works for xgboost >= 0.7 and <= 0.9. Different versions might not.")
+    allowed_min = LooseVersion("0.90")
+    if vers < allowed_min:
+        warnings.warn("The converter works for xgboost >= 0.9. Different versions might not.")
     return True
+
+
+def tvm_installed():
+    """
+    Checks that *TVM* is available.
+    """
+    try:
+        import tvm
+        from tvm import relay
+    except ImportError:
+        return False
+    return True
+
+
+def pandas_installed():
+    """
+    Checks that *Pandas* is available.
+    """
+    try:
+        import pandas
+    except ImportError:
+        return False
+    return True
+
+
+def is_pandas_dataframe(df):
+    import pandas as pd
+
+    if type(df) == pd.DataFrame:
+        return True
+    else:
+        return False
+
+
+def is_spark_dataframe(df):
+    if not sparkml_installed():
+        return False
+
+    import pyspark
+
+    if type(df) == pyspark.sql.DataFrame:
+        return True
+    else:
+        return False
+
+
+def _get_device(model):
+    """
+    Convenient function used to get the runtime device for the model.
+    """
+    assert issubclass(model.__class__, torch.nn.Module)
+
+    device = None
+    if len(list(model.parameters())) > 0:
+        device = next(model.parameters()).device  # Assuming we are using a single device for all parameters
+
+    return device
 
 
 class _Constants(object):

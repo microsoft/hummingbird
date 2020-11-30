@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, StandardScaler, RobustScaler
 import torch
 
-from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, lightgbm_installed
+from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed
 from hummingbird.ml import convert
 
 if onnx_runtime_installed():
@@ -36,8 +36,7 @@ class TestONNXScaler(unittest.TestCase):
         onnx_ml_pred = session.run(output_names, inputs)
 
         # Get the predictions for the ONNX model
-        session = ort.InferenceSession(onnx_model.SerializeToString())
-        onnx_pred = session.run(output_names, inputs)
+        onnx_pred = onnx_model.transform(X)
 
         return onnx_ml_pred, onnx_pred
 

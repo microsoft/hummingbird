@@ -24,11 +24,3 @@ from .convert import convert  # noqa: F401, E402
 
 # Add the supported backends in scope.
 from .supported import backends  # noqa: F401, E402
-
-
-# Pdoc stuff.
-__pdoc__ = {}
-__pdoc__["hummingbird._container"] = True
-__pdoc__["hummingbird._parse"] = True
-__pdoc__["hummingbird._supported_operators"] = True
-__pdoc__["hummingbird._utils"] = True

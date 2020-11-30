@@ -21,14 +21,22 @@ with open(README) as f:
     if start_pos >= 0:
         long_description = long_description[start_pos:]
 
-install_requires = ["numpy>=1.15", "onnxconverter-common>=1.6.0", "scikit-learn==0.22.1"]
-if sys.platform == "darwin":
-    install_requires.append("torch")
-else:
-    if sys.version_info[1] == 5:
-        install_requires.append("torch==1.5.1+cpu")
-    else:
-        install_requires.append("torch==1.6.0+cpu")
+install_requires = [
+    "numpy>=1.15,<=1.19.2",
+    "onnxconverter-common>=1.6.0,<=1.7.0",
+    "scikit-learn>=0.21.3,<=0.23.2",
+    "torch>=1.4.*,<=1.7.0",
+    "psutil",
+]
+onnx_requires = [
+    "onnxruntime>=1.0.0",
+    "onnxmltools>=1.6.0",
+]
+extra_requires = [
+    # The need each for these depends on which libraries you plan to convert from
+    "xgboost>=0.90",
+    "lightgbm>=2.2,<3",
+]
 setup(
     name="hummingbird-ml",
     version=version_str,
@@ -44,13 +52,10 @@ setup(
     install_requires=install_requires,
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
-        "docs": ["pdoc3==0.8.1"],
-        "onnx": ["onnxruntime>=1.0.0", "onnxmltools>=1.6.0"],
-        "extra": [
-            # The need each for these depends on which libraries you plan to convert from
-            "xgboost==0.90",
-            "lightgbm>=2.2",
-        ],
+        "sparkml": ["pyspark>=2.4.4"],
+        "onnx": onnx_requires,
+        "extra": extra_requires,
+        "benchmark": onnx_requires + extra_requires + ["memory-profiler", "psutil"],
     },
     classifiers=[
         "Environment :: Console",

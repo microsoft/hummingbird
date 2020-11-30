@@ -124,6 +124,9 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
     def apply_softmax(x):
         return torch.softmax(x, dim=1)
 
+    def apply_tweedie(x):
+        return torch.exp(x)
+
     # For models following the Sklearn API we need to build the post transform ourselves.
     if classes is not None and constants.POST_TRANSFORM not in extra_config:
         if len(classes) <= 2:
@@ -143,6 +146,11 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
                 extra_config[constants.POST_TRANSFORM] = lambda x: apply_softmax(apply_base_prediction(base_prediction)(x))
             else:
                 extra_config[constants.POST_TRANSFORM] = apply_softmax
+        elif extra_config[constants.POST_TRANSFORM] == constants.TWEEDIE:
+            if constants.BASE_PREDICTION in extra_config:
+                extra_config[constants.POST_TRANSFORM] = lambda x: apply_tweedie(apply_base_prediction(base_prediction)(x))
+            else:
+                extra_config[constants.POST_TRANSFORM] = apply_tweedie
         else:
             raise NotImplementedError("Post transform {} not implemeneted yet".format(extra_config[constants.POST_TRANSFORM]))
     elif constants.BASE_PREDICTION in extra_config:

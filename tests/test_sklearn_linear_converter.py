@@ -7,8 +7,11 @@ import warnings
 import numpy as np
 import torch
 from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV
+from sklearn import datasets
 
 import hummingbird.ml
+from hummingbird.ml._utils import tvm_installed
+from hummingbird.ml import constants
 
 
 class TestSklearnLinearClassifiers(unittest.TestCase):
@@ -48,11 +51,35 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     def test_logistic_regression_multi_ovr(self):
         self._test_logistic_regression(3, multi_class="ovr")
 
-    # LogisticRegression with multi+multinomial
-    def test_logistic_regression_multi_multin(self):
+    # LogisticRegression with multi+multinomial+sag
+    def test_logistic_regression_multi_multin_sag(self):
         warnings.filterwarnings("ignore")
         # this will not converge due to small test size
         self._test_logistic_regression(3, multi_class="multinomial", solver="sag")
+
+    # LogisticRegression binary lbfgs
+    def test_logistic_regression_bi_lbfgs(self):
+        warnings.filterwarnings("ignore")
+        # this will not converge due to small test size
+        self._test_logistic_regression(2, solver="lbfgs")
+
+    # LogisticRegression with multi+lbfgs
+    def test_logistic_regression_multi_lbfgs(self):
+        warnings.filterwarnings("ignore")
+        # this will not converge due to small test size
+        self._test_logistic_regression(3, solver="lbfgs")
+
+    # LogisticRegression with multi+multinomial+lbfgs
+    def test_logistic_regression_multi_multin_lbfgs(self):
+        warnings.filterwarnings("ignore")
+        # this will not converge due to small test size
+        self._test_logistic_regression(3, multi_class="multinomial", solver="lbfgs")
+
+    # LogisticRegression with multi+ovr+lbfgs
+    def test_logistic_regression_multi_ovr_lbfgs(self):
+        warnings.filterwarnings("ignore")
+        # this will not converge due to small test size
+        self._test_logistic_regression(3, multi_class="ovr", solver="lbfgs")
 
     # LinearRegression test function to be parameterized
     def _test_linear_regression(self, y_input):
@@ -182,6 +209,59 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    # Test Torschscript backend.
+    def test_logistic_regression_ts(self):
+
+        model = LogisticRegression(solver="liblinear")
+
+        data = datasets.load_iris()
+        X, y = data.data, data.target
+        X = X.astype(np.float32)
+
+        model.fit(X, y)
+
+        ts_model = hummingbird.ml.convert(model, "torch.jit", X)
+        self.assertTrue(ts_model is not None)
+        np.testing.assert_allclose(model.predict(X), ts_model.predict(X), rtol=1e-6, atol=1e-6)
+        np.testing.assert_allclose(model.predict_proba(X), ts_model.predict_proba(X), rtol=1e-6, atol=1e-6)
+
+    # Test TVM backends.
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_sgd_classifier_tvm(self):
+
+        model = SGDClassifier(loss="log")
+
+        np.random.seed(0)
+        num_classes = 3
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        tvm_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertTrue(tvm_model is not None)
+        np.testing.assert_allclose(model.predict(X), tvm_model.predict(X), rtol=1e-6, atol=1e-6)
+        np.testing.assert_allclose(model.predict_proba(X), tvm_model.predict_proba(X), rtol=1e-6, atol=1e-6)
+
+    @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    def test_lr_tvm(self):
+
+        model = LinearRegression()
+
+        np.random.seed(0)
+        num_classes = 1000
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
+        self.assertTrue(tvm_model is not None)
+
+        np.testing.assert_allclose(model.predict(X), tvm_model.predict(X), rtol=1e-6, atol=1e-3)
 
 
 if __name__ == "__main__":

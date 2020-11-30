@@ -34,7 +34,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         )
 
         # Create ONNX model
-        onnx_model = convert(onnx_ml_model, "onnx", X, extra_config)
+        onnx_model = convert(onnx_ml_model, "onnx", extra_config=extra_config)
 
         # Get the predictions for the ONNX-ML model
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
@@ -43,20 +43,18 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         inputs = {session.get_inputs()[0].name: X}
         pred = session.run(output_names, inputs)
         for i in range(len(output_names)):
-            if output_names[i] == "label":
+            if "label" in output_names[i]:
                 onnx_ml_pred[1] = pred[i]
             else:
                 onnx_ml_pred[0] = pred[i]
 
         # Get the predictions for the ONNX model
-        session = ort.InferenceSession(onnx_model.SerializeToString())
         onnx_pred = [[] for i in range(len(output_names))]
-        pred = session.run(output_names, inputs)
-        for i in range(len(output_names)):
-            if output_names[i] == "label":
-                onnx_pred[1] = pred[i]
-            else:
-                onnx_pred[0] = pred[i]
+        if len(output_names) == 1:  # regression
+            onnx_pred = onnx_model.predict(X)
+        else:  # classification
+            onnx_pred[0] = onnx_model.predict_proba(X)
+            onnx_pred[1] = onnx_model.predict(X)
 
         return onnx_ml_pred, onnx_pred, output_names
 
@@ -76,11 +74,12 @@ class TestONNXLightGBMConverter(unittest.TestCase):
             list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
         )  # probs
 
-    # Check that ONNXML models can only target the ONNX backend.
+    # Check that ONNXML models can also target other backends.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
-    def test_lightgbm_pytorch(self):
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lightgbm_onnx_pytorch(self):
         warnings.filterwarnings("ignore")
         X = [[0, 1], [1, 1], [2, 0]]
         X = np.array(X, dtype=np.float32)
@@ -93,38 +92,23 @@ class TestONNXLightGBMConverter(unittest.TestCase):
             model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
         )
 
-        self.assertRaises(RuntimeError, convert, onnx_ml_model, "torch")
+        pt_model = convert(onnx_ml_model, "torch", X)
+        assert pt_model
 
-    # Check converter with extra configs.
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
-    def test_lightgbm_pytorch_extra_config(self):
-        warnings.filterwarnings("ignore")
-        X = [[0, 1], [1, 1], [2, 0]]
-        X = np.array(X, dtype=np.float32)
-        y = np.array([100, -10, 50], dtype=np.float32)
-        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
-        model.fit(X, y)
+        # Get the predictions for the ONNX-ML model
+        session = ort.InferenceSession(onnx_ml_model.SerializeToString())
+        output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
+        onnx_ml_pred = [[] for i in range(len(output_names))]
+        inputs = {session.get_inputs()[0].name: X}
+        onnx_ml_pred = session.run(output_names, inputs)
 
-        # Create ONNX-ML model
-        onnx_ml_model = convert_lightgbm(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
-        )
-
-        # Create ONNX model
-        model_name = "hummingbird.ml.test.lightgbm"
-        extra_config = {}
-        extra_config[constants.ONNX_OUTPUT_MODEL_NAME] = model_name
-        extra_config[constants.ONNX_INITIAL_TYPES] = [("input", FloatTensorType([X.shape[0], X.shape[1]]))]
-        onnx_model = convert(onnx_ml_model, "onnx", extra_config=extra_config)
-
-        assert onnx_model.graph.name == model_name
+        np.testing.assert_allclose(onnx_ml_pred[0].flatten(), pt_model.predict(X))
 
     # Basic regression test.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_onnxml_model_regressor(self):
         warnings.filterwarnings("ignore")
         n_features = 28
@@ -143,6 +127,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_regressor(self):
         warnings.filterwarnings("ignore")
         X = [[0, 1], [1, 1], [2, 0]]
@@ -156,6 +141,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_regressor1(self):
         warnings.filterwarnings("ignore")
         model = lgb.LGBMRegressor(n_estimators=1, min_child_samples=1)
@@ -169,6 +155,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_regressor2(self):
         warnings.filterwarnings("ignore")
         model = lgb.LGBMRegressor(n_estimators=2, max_depth=1, min_child_samples=1)
@@ -182,6 +169,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_booster_regressor(self):
         warnings.filterwarnings("ignore")
         X = [[0, 1], [1, 1], [2, 0]]
@@ -198,6 +186,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_onnxml_model_binary(self):
         warnings.filterwarnings("ignore")
         n_features = 28
@@ -212,10 +201,33 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         model.fit(X, y)
         self._test_classifier(X, model)
 
+    # Binary classication test with float64.
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_onnxml_model_binary_float64(self):
+        warnings.filterwarnings("ignore")
+        n_features = 28
+        n_total = 100
+        np.random.seed(0)
+        X = np.random.rand(n_total, n_features)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=n_total)
+
+        # Create LightGBM model
+        model = lgb.LGBMClassifier()
+        model.fit(X, y)
+
+        onnx_model = convert(model, "onnx", X)
+
+        np.testing.assert_allclose(model.predict(X), onnx_model.predict(X))
+
     # Binary classification test with 3 estimators (taken from ONNXMLTOOLS).
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_classifier(self):
         warnings.filterwarnings("ignore")
         model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
@@ -229,6 +241,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_classifier_zipmap(self):
         warnings.filterwarnings("ignore")
         X = [[0, 1], [1, 1], [2, 0], [1, 2]]
@@ -242,6 +255,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_booster_classifier(self):
         warnings.filterwarnings("ignore")
         X = [[0, 1], [1, 1], [2, 0], [1, 2]]
@@ -255,6 +269,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_booster_classifier_zipmap(self):
         warnings.filterwarnings("ignore")
         X = [[0, 1], [1, 1], [2, 0], [1, 2]]
@@ -268,6 +283,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_onnxml_model_multi(self):
         warnings.filterwarnings("ignore")
         n_features = 28
@@ -286,6 +302,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_classifier_multi(self):
         warnings.filterwarnings("ignore")
         model = lgb.LGBMClassifier(n_estimators=3, min_child_samples=1)
@@ -299,6 +316,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lightgbm_booster_multi_classifier(self):
         warnings.filterwarnings("ignore")
         X = [[0, 1], [1, 1], [2, 0], [1, 2], [-1, 2], [1, -2]]

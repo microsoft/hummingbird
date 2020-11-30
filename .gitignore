@@ -26,6 +26,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+website/sphinx/_build/
+website/public/
+website/sphinx/api/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -77,4 +80,7 @@ dmypy.json
 .vscode/*
 configs/db/*.config
 configs/github/*.token
+
+# MAC
+**.DS_STORE
 
