@@ -97,6 +97,10 @@ class SklearnContainer(ABC):
         else:
             total_size = inputs.shape[0]
 
+        if total_size == self._batch_size:
+            # A single batch inference case
+            return function(*inputs)
+
         iterations = total_size // self._batch_size
         iterations += 1 if total_size % self._batch_size > 0 else 0
         iterations = max(1, iterations)
