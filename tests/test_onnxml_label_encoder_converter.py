@@ -28,16 +28,16 @@ class TestONNXLabelEncoder(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    def test_model_label_encoder_int_onnxml(self):
+    def test_model_label_encoder_int_onnxml(self, rtol=1e-06, atol=1e-06):
         model = LabelEncoder()
-        data = np.array([1, 4, 5, 2, 0, 2], dtype=np.int32)
-        model.fit(data)
+        X = np.array([1, 4, 5, 2, 0, 2], dtype=np.int32)
+        model.fit(X)
 
         # Create ONNX-ML model
-        onnx_ml_model = convert_sklearn(model, initial_types=[("int_input", LongTensorType_onnx(data.shape))])
+        onnx_ml_model = convert_sklearn(model, initial_types=[("int_input", LongTensorType_onnx(X.shape))])
 
         # Create ONNX model by calling converter
-        onnx_model = convert(onnx_ml_model, "onnx", data)
+        onnx_model = convert(onnx_ml_model, "onnx", X)
 
         # Get the predictions for the ONNX-ML model
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
@@ -85,6 +85,7 @@ class TestONNXLabelEncoder(unittest.TestCase):
     #     onnx_pred = session.run(output_names, inputs_pyt)
 
     #     return onnx_ml_pred, onnx_pred
+
 
 if __name__ == "__main__":
     unittest.main()
