@@ -30,22 +30,23 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
     is_strings = False
     keys = None
     for attr in operator.origin.attribute:
-        if attr.name == 'keys_int64s':
+        if attr.name == "keys_int64s":
             keys = np.array(attr.ints)
         # TODO: it's not clear to me how this is used in ONNX.
-        #elif attr.name == 'values_int64s':
+        # elif attr.name == 'values_int64s':
         #    keys = attr.f
-        elif attr.name == 'keys_strings':
+        elif attr.name == "keys_strings":
             is_strings = True
-            keys = np.array([x.decode('UTF-8') for x in attr.strings])
+            keys = np.array([x.decode("UTF-8") for x in attr.strings])
 
     if keys is None:
         print("keys: {}".format(keys))
-        raise RuntimeError('Error parsing LabelEncoder, found unexpected None')
+        raise RuntimeError("Error parsing LabelEncoder, found unexpected None")
 
     if is_strings:
         return StringLabelEncoder(keys, device)
     else:
         return NumericLabelEncoder(keys, device)
+
 
 register_converter("ONNXMLLabelEncoder", convert_onnx_label_encoder)

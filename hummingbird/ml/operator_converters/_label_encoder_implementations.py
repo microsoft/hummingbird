@@ -14,6 +14,7 @@ import numpy as np
 
 from ._base_operator import BaseOperator
 
+
 class StringLabelEncoder(BaseOperator, torch.nn.Module):
     def __init__(self, classes, device):
         super(StringLabelEncoder, self).__init__()
@@ -50,7 +51,7 @@ class NumericLabelEncoder(BaseOperator, torch.nn.Module):
         x = x.view(-1, 1)
         try:  # has GPU.
             return torch.argmax(torch.eq(x, self.check_tensor), dim=1)
-        except Exception:  # Tensorflow issue?: https://github.com/allenai/allennlp/issues/3455
+        except Exception:  # torch issue?: https://github.com/allenai/allennlp/issues/3455 TODO check on this
             # fix by casting bool to int
             def convert(row):
                 return [0 if not x else 1 for x in row]
