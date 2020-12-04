@@ -64,6 +64,7 @@ class SklearnContainer(ABC):
         self._n_threads = n_threads
         self._extra_config = extra_config
         self._last_iteration = False
+        self._batch_size = batch_size
 
     @property
     def model(self):
