@@ -63,7 +63,6 @@ class SklearnContainer(ABC):
         self._model = model
         self._n_threads = n_threads
         self._extra_config = extra_config
-        self._last_iteration = False
         self._batch_size = batch_size
 
     @property
@@ -103,7 +102,7 @@ class BatchContainer:
             self._remainder_model_container = base_container
             self._remainder_size = base_container._batch_size
 
-    def __get_attr__(self, name):
+    def __getattr__(self, name):
         return getattr(self._base_container, name)
 
     def predict(self, *inputs, concatenate_outputs=True):
