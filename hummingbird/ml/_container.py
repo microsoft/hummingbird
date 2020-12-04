@@ -526,7 +526,7 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer, SklearnContainerRegre
         if self._is_regression:
             assert len(self._output_names) == 1
 
-            return np.array(self._session.run(self._output_names, named_inputs))
+            return np.array(self._session.run(self._output_names, named_inputs))[0].ravel()
         elif self._is_anomaly_detection:
             assert len(self._output_names) == 2
 
