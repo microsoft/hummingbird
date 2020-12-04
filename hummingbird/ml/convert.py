@@ -95,7 +95,7 @@ def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     topology = parse_sklearn_api_model(model, extra_config)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
+    hb_model = topology_converter(topology, backend, test_input, device, extra_config=extra_config)
     return hb_model
 
 
@@ -241,7 +241,7 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     topology = parse_onnx_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
+    hb_model = topology_converter(topology, backend, test_input, device, extra_config=extra_config)
     return hb_model
 
 
@@ -259,7 +259,7 @@ def _convert_sparkml(model, backend, test_input, device, extra_config={}):
     topology = parse_sparkml_api_model(model, extra_config)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
+    hb_model = topology_converter(topology, backend, test_input, device, extra_config=extra_config)
     return hb_model
 
 

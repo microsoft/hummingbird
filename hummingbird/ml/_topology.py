@@ -95,7 +95,7 @@ def _compile_tvm_model(topology, torch_model, trace_input, target, ctx, config, 
     return tvm_model
 
 
-def convert(topology, backend, device, extra_config={}):
+def convert(topology, backend, test_input, device, extra_config={}):
     """
     This function is used to convert a `onnxconverter_common.topology.Topology` object into a *backend* model.
 
@@ -158,8 +158,6 @@ def convert(topology, backend, device, extra_config={}):
     torch_model = _PyTorchBackendModel(
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
-
-    test_input = None if constants.TEST_INPUT not in extra_config else extra_config[constants.TEST_INOUT]
 
     # TODO comment
     remainder_model = None
