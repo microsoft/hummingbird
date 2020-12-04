@@ -73,6 +73,14 @@ def _get_trace_input_from_test_input(input, remainder_size):
     return (trace_input, remainder)
 
 
+def _get_batch_size(batch):
+    if isinstance(batch, tuple):
+        return batch[0].shape[0]
+
+    assert isinstance(batch, np.ndarray)
+    return batch.shape[0]
+
+
 def _compile_tvm_model(topology, torch_model, trace_input, target, ctx, config, extra_config):
     import tvm
     from tvm import relay
@@ -362,11 +370,15 @@ def convert(topology, backend, test_input, device, extra_config={}):
             container = PyTorchSklearnContainerClassification
 
     n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
-    batch_size = None if constants.TEST_INPUT not in extra_config else test_input.shape[0]
+    batch_size = None if constants.TEST_INPUT not in extra_config else _get_batch_size(test_input)
     hb_container = container(hb_model, n_threads, batch_size, extra_config=extra_config)
 
     if remainder_model:
         aux_container = container(remainder_model, n_threads, remainder_size, extra_config=extra_config)
+        return BatchContainer(hb_container, aux_container)
+    elif remainder_size is not None and remainder_size > 0:
+        # torch backend case
+        aux_container = container(hb_model, n_threads, remainder_size, extra_config=extra_config)
         return BatchContainer(hb_container, aux_container)
     elif remainder_size is not None:
         assert remainder_size == 0, "remainder_size is non zero but no remainder_model has been created"
