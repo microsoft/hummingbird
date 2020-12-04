@@ -604,7 +604,9 @@ class TestExtraConf(unittest.TestCase):
 
         batch_size = 10
         remainder_size = X.shape[0] % batch_size
-        torch_model = hummingbird.ml.convert_batch(pipeline, "torch", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size)
+        torch_model = hummingbird.ml.convert_batch(
+            pipeline, "torch", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(torch_model is not None)
 
@@ -635,7 +637,9 @@ class TestExtraConf(unittest.TestCase):
 
         batch_size = 10
         remainder_size = X.shape[0] % batch_size
-        torch_model = hummingbird.ml.convert_batch(pipeline, "torch.jit", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size)
+        torch_model = hummingbird.ml.convert_batch(
+            pipeline, "torch.jit", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(torch_model is not None)
 
@@ -667,8 +671,9 @@ class TestExtraConf(unittest.TestCase):
 
         batch_size = 10
         remainder_size = X.shape[0] % batch_size
-        hb_model = hummingbird.ml.convert_batch(pipeline, "onnx", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size)
-
+        hb_model = hummingbird.ml.convert_batch(
+            pipeline, "onnx", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(hb_model is not None)
 
@@ -713,7 +718,9 @@ class TestExtraConf(unittest.TestCase):
 
         batch_size = 10
         remainder_size = X.shape[0] % batch_size
-        hb_model = hummingbird.ml.convert_batch(onnx_ml_model, "onnx", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size)
+        hb_model = hummingbird.ml.convert_batch(
+            onnx_ml_model, "onnx", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(hb_model is not None)
 
@@ -745,7 +752,9 @@ class TestExtraConf(unittest.TestCase):
 
         batch_size = 10
         remainder_size = X.shape[0] % batch_size
-        hb_model = hummingbird.ml.convert_batch(pipeline, "tvm", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size)
+        hb_model = hummingbird.ml.convert_batch(
+            pipeline, "tvm", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(hb_model is not None)
 
