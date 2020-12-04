@@ -121,6 +121,14 @@ class BatchContainer:
             concatenate_outputs=concatenate_outputs
         )
 
+    def score_samples(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.score_samples,
+            self._remainder_model_container.score_samples,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
+
     def predict(self, *inputs, concatenate_outputs=True):
         return self._predict_common(
             self._base_container.predict,
@@ -509,10 +517,8 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer, SklearnContainerTran
 
     def _transform(self, *inputs):
         assert len(self._output_names) == 1
-
         named_inputs = self._get_named_inputs(inputs)
-
-        return np.array(self._session.run(self._output_names, named_inputs))
+        return np.array(self._session.run(self._output_names, named_inputs))[0]
 
 
 class ONNXSklearnContainerRegression(ONNXSklearnContainer, SklearnContainerRegression):
@@ -525,15 +531,12 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer, SklearnContainerRegre
 
         if self._is_regression:
             assert len(self._output_names) == 1
-
             return np.array(self._session.run(self._output_names, named_inputs))[0].ravel()
         elif self._is_anomaly_detection:
             assert len(self._output_names) == 2
-
             return np.array(self._session.run([self._output_names[0]], named_inputs))[0].ravel()
         else:
             assert len(self._output_names) == 2
-
             return np.array(self._session.run([self._output_names[0]], named_inputs))[0]
 
 
