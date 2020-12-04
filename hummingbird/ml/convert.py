@@ -231,7 +231,10 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
 
     # Set the number of features. Some converter requires to know in advance the number of features.
     if constants.N_FEATURES not in extra_config:
-        extra_config[constants.N_FEATURES] = test_input.shape[1]
+        if len(test_input.shape) < 2:
+            extra_config[constants.N_FEATURES] = 1
+        else:
+            extra_config[constants.N_FEATURES] = test_input.shape[1]
     # Set the initializers. Some converter requires the access to initializers.
     initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
     extra_config[constants.ONNX_INITIALIZERS] = initializers

@@ -29,7 +29,7 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
     """
     is_strings = False
     keys = None
-    for attr in operator.origin.attribute:
+    for attr in operator.original_operator.origin.attribute:
         if attr.name == "keys_int64s":
             keys = np.array(attr.ints)
         # TODO: it's not clear to me how this is used in ONNX.
