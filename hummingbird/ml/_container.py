@@ -84,7 +84,7 @@ class SklearnContainer(ABC):
         return function(*inputs)
 
 
-class BatchContainer():
+class BatchContainer:
     def __init__(self, base_container, remainder_model_container=None):
         """
         TODO comment
@@ -106,24 +106,34 @@ class BatchContainer():
     def __get_attr__(self, name):
         return getattr(self._base_container, name)
 
-    def predict(self, *inputs):
-        return self._predict_common(self._base_container.predict,
-                                    self._remainder_model_container.predict, *inputs)
+    def predict(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.predict,
+            self._remainder_model_container.predict,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
 
-    def predict_proba(self, *inputs):
-        return self._predict_common(self._base_container.predict_proba,
-                                    self._remainder_model_container.predict_proba, *inputs)
+    def predict_proba(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.predict_proba,
+            self._remainder_model_container.predict_proba,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
 
-    def _predict_common(self, predict_func, remainder_predict_func, *inputs, reshape=False):
-        """
-        This function either score the full dataset at once or triggers batch inference.
-        """
+    def _predict_common(self, predict_func, remainder_predict_func, *inputs, concatenate_outputs=True, reshape=False):
         if DataFrame is not None and type(inputs[0]) == DataFrame:
             # Split the dataframe into column ndarrays.
             inputs = inputs[0]
             input_names = list(inputs.columns)
             splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
             inputs = [df.to_numpy().reshape(-1, 1) for df in splits]
+
+        def output_proc(predictions):
+            if concatenate_outputs:
+                return np.concatenate(predictions)
+            return predictions
 
         is_tuple = isinstance(inputs, tuple)
 
@@ -134,7 +144,7 @@ class BatchContainer():
 
         if total_size == self._batch_size:
             # A single batch inference case
-            return [predict_func(*inputs)]
+            return output_proc([predict_func(*inputs)])
 
         iterations = total_size // self._batch_size
         iterations += 1 if total_size % self._batch_size > 0 else 0
@@ -161,7 +171,7 @@ class BatchContainer():
         # if reshape:
         #     return np.array(predictions).ravel().reshape(total_size, -1)
         # return np.array(predictions).ravel()
-        return predictions
+        return output_proc(predictions)
 
 
 class SklearnContainerTransformer(SklearnContainer):

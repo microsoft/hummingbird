@@ -34,7 +34,7 @@ from hummingbird.ml._container import (
     TVMSklearnContainerClassification,
     TVMSklearnContainerTransformer,
     TVMSklearnContainerAnomalyDetection,
-    BatchContainer
+    BatchContainer,
 )
 from hummingbird.ml._utils import pandas_installed, tvm_installed, _get_device
 from hummingbird.ml.exceptions import MissingConverter
@@ -63,7 +63,7 @@ def _get_trace_input_from_test_input(input, remainder_size):
     remainder = None
     if isinstance(input, tuple):
         trace_input = tuple([torch.from_numpy(i) for i in input])
-        if remainder_size is not None and remainder_size != 0 :
+        if remainder_size is not None and remainder_size != 0:
             remainder = tuple([inp[0:remainder_size, :] for inp in trace_input])
     else:
         trace_input = torch.from_numpy(input)
@@ -144,7 +144,6 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
     # Set the parameters for the model / container
     n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
-
 
     # We set the number of threads for torch here to avoid errors in case we JIT.
     # We set intra op concurrency while we force operators to run sequentially.
@@ -257,9 +256,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
             config["relay.FuseOps.max_depth"] = extra_config[constants.TVM_MAX_FUSE_DEPTH]
 
         # First we need to generate the torchscript model.
-        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
-            test_input, remainder_size
-        )
+        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(test_input, remainder_size)
 
         tvm_model = _compile_tvm_model(topology, torch_model, batch_trace_input, target, ctx, config, extra_config)
 

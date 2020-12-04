@@ -31,7 +31,7 @@ from benchmarks.timer import Timer
 from benchmarks.datasets import LearningTask
 
 from hummingbird.ml import constants
-from hummingbird.ml import convert
+from hummingbird.ml import convert, convert_batch
 
 
 class ScoreBackend(ABC):
@@ -97,27 +97,14 @@ class HBBackend(ScoreBackend):
         self.batch_benchmark = args.batch_benchmark
         extra_config = {constants.N_THREADS: self.params["nthread"]}
 
-
         with Timer() as t:
             if self.batch_benchmark:
-                self.model = convert(
-                    model,
-                    self.backend,
-                    test_data,
-                    device=self.params["device"],
-                    extra_config=extra_config},
-                )
+                self.model = convert(model, self.backend, test_data, device=self.params["device"], extra_config=extra_config)
             else:
                 remainder_size = test_data.shape[0] % self.params["batch_size"]
                 self.model = convert_batch(
-                    model,
-                    self.backend,
-                    test_data,
-                    remainder_size,
-                    device=self.params["device"],
-                    extra_config=extra_config},
+                    model, self.backend, test_data, remainder_size, device=self.params["device"], extra_config=extra_config
                 )
-
 
         if data.learning_task == LearningTask.REGRESSION:
             self.predict_fn = self.model.predict
@@ -129,8 +116,13 @@ class HBBackend(ScoreBackend):
     def predict(self, predict_data):
         assert self.predict_fn is not None
 
+        # For the batch by batch prediction case, we do not want to include the cost of
+        # doing final outputs concatenation into time measurement
         with Timer() as t:
-            self.predictions = self.predict_fn(predict_data)
+            if self.batch_benchmark:
+                self.predictions = self.predict_fn(predict_data)
+            else:
+                self.predictions = self.predict_fn(predict_data, concatenate_outputs=False)
 
         if not self.batch_benchmark:
             self.predictions = np.concatenate(self.predictions)
@@ -181,6 +173,7 @@ class ONNXMLBackend(ScoreBackend):
                     self.remainder_model = converter(model, initial_types=initial_type, target_opset=11)
 
             import onnxruntime as ort
+
             self.remainder_sess = None
             sess_options = ort.SessionOptions()
             sess_options.intra_op_num_threads = self.params["nthread"]
