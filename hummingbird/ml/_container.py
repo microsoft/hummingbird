@@ -105,6 +105,22 @@ class BatchContainer:
     def __getattr__(self, name):
         return getattr(self._base_container, name)
 
+    def decision_function(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.decision_function,
+            self._remainder_model_container.decision_function,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
+
+    def transform(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.transform,
+            self._remainder_model_container.transform,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
+
     def predict(self, *inputs, concatenate_outputs=True):
         return self._predict_common(
             self._base_container.predict,
