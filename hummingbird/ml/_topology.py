@@ -271,7 +271,9 @@ def convert(topology, backend, device, extra_config={}):
         tvm_model = _compile_tvm_model(topology, torch_model, batch_trace_input, target, ctx, config, extra_config)
 
         if remainder_trace_input is not None:
-            tvm_remainder_model = _compile_tvm_model(topology, torch_model, remainder_trace_input, target, ctx, config, extra_config)
+            tvm_remainder_model = _compile_tvm_model(
+                topology, torch_model, remainder_trace_input, target, ctx, config, extra_config
+            )
             extra_config[constants.TVM_REMAINDER_MODEL] = tvm_remainder_model
 
         # In the container we will be using the context to properly configure the input tensors.
