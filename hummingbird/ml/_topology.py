@@ -34,6 +34,7 @@ from hummingbird.ml._container import (
     TVMSklearnContainerClassification,
     TVMSklearnContainerTransformer,
     TVMSklearnContainerAnomalyDetection,
+    BatchContainer
 )
 from hummingbird.ml._utils import pandas_installed, tvm_installed, _get_device
 from hummingbird.ml.exceptions import MissingConverter
@@ -54,29 +55,20 @@ def _jit_model(torch_model, trace_input, device, extra_config):
     return torch.jit.trace(torch_model, trace_input).eval()
 
 
-def _get_trace_input_from_test_input(input, batch_size):
+def _get_trace_input_from_test_input(input, remainder_size):
     """
     Utility function used to properly put the inputs into a format understandable by torch.
-    If a not None batch_size is passed, the function generates a tracing input of batch_size.
-    If input size % batch_size is not 0, a tracing input of the remainder is also generated.
+    TODO comment
     """
     remainder = None
-    if type(input) is tuple:
-        if batch_size is not None:
-            trace_input = tuple([torch.from_numpy(i)[0:batch_size, :] for i in input])
-            if len(input) > 0 and input[0].shape[0] % batch_size != 0:
-                remainder_size = input[0].shape[0] % batch_size
-                remainder = tuple([torch.from_numpy(i)[0:remainder_size, :] for i in input])
-        else:
-            trace_input = tuple([torch.from_numpy(i) for i in input])
+    if isinstance(input, tuple):
+        trace_input = tuple([torch.from_numpy(i) for i in input])
+        if remainder_size is not None and remainder_size != 0 :
+            remainder = tuple([inp[0:remainder_size, :] for inp in trace_input])
     else:
         trace_input = torch.from_numpy(input)
-        if batch_size is not None:
-            batch_input = trace_input[0:batch_size, :]
-            remainder_size = len(input) % batch_size
-            if remainder_size != 0:
-                remainder = trace_input[0:remainder_size, :]
-            trace_input = batch_input
+        if remainder_size is not None and remainder_size != 0:
+            remainder = trace_input[0:remainder_size, :]
 
     return (trace_input, remainder)
 
@@ -152,7 +144,7 @@ def convert(topology, backend, device, extra_config={}):
 
     # Set the parameters for the model / container
     n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
-    batch_size = None if constants.BATCH_SIZE not in extra_config else extra_config[constants.BATCH_SIZE]
+
 
     # We set the number of threads for torch here to avoid errors in case we JIT.
     # We set intra op concurrency while we force operators to run sequentially.
@@ -166,6 +158,12 @@ def convert(topology, backend, device, extra_config={}):
     torch_model = _PyTorchBackendModel(
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
+
+    test_input = None if constants.TEST_INPUT not in extra_config else extra_config[constants.TEST_INOUT]
+
+    # TODO comment
+    remainder_model = None
+    remainder_size = None if constants.REMAINDER_SIZE not in extra_config else extra_config[constants.REMAINDER_SIZE]
 
     if backend == onnx.__name__:
         onnx_model_name = output_model_name = None
@@ -181,7 +179,7 @@ def convert(topology, backend, device, extra_config={}):
             output_model_name = str(uuid4().hex) + ".onnx"
 
         # Put the tracing test input into the right format.
-        batch_trace_input, _ = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
+        batch_trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size)
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -262,16 +260,16 @@ def convert(topology, backend, device, extra_config={}):
 
         # First we need to generate the torchscript model.
         batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
-            extra_config[constants.TEST_INPUT], batch_size
+            test_input, remainder_size
         )
 
         tvm_model = _compile_tvm_model(topology, torch_model, batch_trace_input, target, ctx, config, extra_config)
 
         if remainder_trace_input is not None:
-            tvm_remainder_model = _compile_tvm_model(
+            remainder_model = _compile_tvm_model(
                 topology, torch_model, remainder_trace_input, target, ctx, config, extra_config
             )
-            extra_config[constants.TVM_REMAINDER_MODEL] = tvm_remainder_model
+            extra_config[constants.TVM_REMAINDER_MODEL] = remainder_model
 
         # In the container we will be using the context to properly configure the input tensors.
         extra_config[constants.TVM_CONTEXT] = ctx
@@ -286,7 +284,7 @@ def convert(topology, backend, device, extra_config={}):
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
-            trace_input, _ = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
+            trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size)
             if device != "cpu":
                 trace_input.to(device)
             torch_model = torch.jit.trace(torch_model, trace_input).eval()
@@ -369,10 +367,14 @@ def convert(topology, backend, device, extra_config={}):
             container = PyTorchSklearnContainerClassification
 
     n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
-    batch_size = None if constants.BATCH_SIZE not in extra_config else extra_config[constants.BATCH_SIZE]
-    hb_model = container(hb_model, n_threads, batch_size, extra_config=extra_config)
+    batch_size = None if constants.TEST_INPUT not in extra_config else test_input.shape[0]
+    hb_container = container(hb_model, n_threads, batch_size, extra_config=extra_config)
 
-    return hb_model
+    if remainder_model:
+        aux_container = container(remainder_model, n_threads, remainder_size, extra_config=extra_config)
+        return BatchContainer(hb_container, aux_container, batch_size, remainder_size)
+
+    return hb_container
 
 
 class _PyTorchBackendModel(torch.nn.Module, object):

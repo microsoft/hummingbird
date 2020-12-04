@@ -454,5 +454,5 @@ N_THREADS = "n_threads"
 """Select how many threads to use for scoring. This paremeter will set the number of intra-op threads.
 Inter-op threads are by default set to 1 in Hummingbird. Check `tests.test_extra_conf.py` for usage examples."""
 
-BATCH_SIZE = "batch_size"
-"""Select whether to partition the input dataset at inference time in N batch_size partitions."""
+REMAINDER_SIZE = "remainder_size"
+"""TODO"""
