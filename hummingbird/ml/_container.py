@@ -85,26 +85,34 @@ class SklearnContainer(ABC):
 
 
 class BatchContainer():
-    def __init__(self, base_container, remainder_model_container, batch_size, remainder_size):
+    def __init__(self, base_container, remainder_model_container=None):
         """
         TODO comment
         """
+        assert base_container._batch_size is not None
         self._base_container = base_container
-        self._remainder_model_container = remainder_model_container
-        self._last_iteration = False
-        self._batch_size = batch_size
-        self._remainder_size = remainder_size
+        self._batch_size = base_container._batch_size
+
+        if remainder_model_container:
+            assert remainder_model_container._batch_size is not None
+            self._remainder_model_container = remainder_model_container
+            self._remainder_size = remainder_model_container._batch_size
+        else:
+            # This is remainder_size == 0 case
+            # We repurpose base_container as a remainder_model_container
+            self._remainder_model_container = base_container
+            self._remainder_size = base_container._batch_size
 
     def __get_attr__(self, name):
         return getattr(self._base_container, name)
 
     def predict(self, *inputs):
         return self._predict_common(self._base_container.predict,
-                                    self._remainder_model_container.predict, inputs)
+                                    self._remainder_model_container.predict, *inputs)
 
     def predict_proba(self, *inputs):
         return self._predict_common(self._base_container.predict_proba,
-                                    self._remainder_model_container.predict_proba, inputs)
+                                    self._remainder_model_container.predict_proba, *inputs)
 
     def _predict_common(self, predict_func, remainder_predict_func, *inputs, reshape=False):
         """
@@ -117,7 +125,8 @@ class BatchContainer():
             splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
             inputs = [df.to_numpy().reshape(-1, 1) for df in splits]
 
-        is_tuple = type(inputs) is tuple
+        is_tuple = isinstance(inputs, tuple)
+
         if is_tuple:
             total_size = inputs[0].shape[0]
         else:

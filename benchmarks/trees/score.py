@@ -133,7 +133,7 @@ class HBBackend(ScoreBackend):
             self.predictions = self.predict_fn(predict_data)
 
         if not self.batch_benchmark:
-            self.predictions = np.stack(self.predictions)
+            self.predictions = np.concatenate(self.predictions)
 
         return t.interval
 

@@ -404,6 +404,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     Returns:
         A model implemented in *backend*, which is equivalent to the input model
     """
+    assert constants.REMAINDER_SIZE not in extra_config
     return _convert_common(model, backend, test_input, device, extra_config)
 
 

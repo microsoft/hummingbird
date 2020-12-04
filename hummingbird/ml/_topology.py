@@ -370,7 +370,10 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
     if remainder_model:
         aux_container = container(remainder_model, n_threads, remainder_size, extra_config=extra_config)
-        return BatchContainer(hb_container, aux_container, batch_size, remainder_size)
+        return BatchContainer(hb_container, aux_container)
+    elif remainder_size is not None:
+        assert remainder_size == 0, "remainder_size is non zero but no remainder_model has been created"
+        return BatchContainer(hb_container)
 
     return hb_container
 
