@@ -81,6 +81,31 @@ def _get_trace_input_from_test_input(input, batch_size):
     return (trace_input, remainder)
 
 
+def _compile_tvm_model(topology, torch_model, trace_input, target, ctx, config, extra_config):
+    import tvm
+    from tvm import relay
+    from tvm.contrib import graph_runtime
+
+    ts_model = _jit_model(torch_model, trace_input, "cpu", extra_config)
+    test_input = [
+        (
+            topology.raw_model.input_names[i],
+            trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,
+        )
+        for i in range(len(topology.raw_model.input_names))
+    ]
+
+    model, params = relay.frontend.from_pytorch(ts_model, test_input)
+
+    with tvm.transform.PassContext(opt_level=3, config=config):
+        graph, lib, params = relay.build(model, target=target, params=params)
+
+    tvm_model = graph_runtime.create(graph, lib, ctx)
+    tvm_model.set_input(**params)
+
+    return tvm_model
+
+
 def convert(topology, backend, device, extra_config={}):
     """
     This function is used to convert a `onnxconverter_common.topology.Topology` object into a *backend* model.
@@ -103,8 +128,6 @@ def convert(topology, backend, device, extra_config={}):
 
     if tvm_installed():
         import tvm
-        from tvm import relay
-        from tvm.contrib import graph_runtime
 
         tvm_backend = tvm.__name__
 
@@ -219,31 +242,6 @@ def convert(topology, backend, device, extra_config={}):
 
         fix_graph(hb_model.graph)
     elif backend == tvm_backend:
-        # First we need to generate the torchscript model.
-        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
-            extra_config[constants.TEST_INPUT], batch_size
-        )
-        ts_model = _jit_model(torch_model, batch_trace_input, "cpu", extra_config)
-        if remainder_trace_input is not None:
-            remainder_ts_model = _jit_model(torch_model, remainder_trace_input, "cpu", extra_config)
-
-        # Generate the test input in the TVM format. In case we have a remainder beyond the batch, generate a remainder test input as well.
-        test_input = [
-            (
-                topology.raw_model.input_names[i],
-                batch_trace_input[i].shape if type(batch_trace_input) is tuple else batch_trace_input.shape,
-            )
-            for i in range(len(topology.raw_model.input_names))
-        ]
-        if remainder_trace_input is not None:
-            remainder_test_input = [
-                (
-                    topology.raw_model.input_names[i],
-                    remainder_trace_input[i].shape if type(remainder_trace_input) is tuple else remainder_trace_input.shape,
-                )
-                for i in range(len(topology.raw_model.input_names))
-            ]
-
         # Pick the proper target.
         if device == "cuda":
             target = tvm.target.cuda()
@@ -258,35 +256,29 @@ def convert(topology, backend, device, extra_config={}):
             raise RuntimeError("Device {} not recognized".format(device))
 
         # Get configuration parameters.
-        config = {}
+        # 50 is a good depth for operator fusion. More than that will probably hurt performance.
+        # https://github.com/microsoft/hummingbird/issues/232#issuecomment-697979508
+        config = {"relay.FuseOps.max_depth": 50}
+
         if constants.TVM_MAX_FUSE_DEPTH in extra_config:
             config["relay.FuseOps.max_depth"] = extra_config[constants.TVM_MAX_FUSE_DEPTH]
-        else:
-            # 50 is a good depth for operator fusion. More than that will probably hurt performance.
-            # https://github.com/microsoft/hummingbird/issues/232#issuecomment-697979508
-            config["relay.FuseOps.max_depth"] = 50
 
-        # Create the relay version of the model.
-        model, params = relay.frontend.from_pytorch(ts_model, test_input)
-        if remainder_trace_input is not None:
-            remainder_model, remainder_params = relay.frontend.from_pytorch(remainder_ts_model, remainder_test_input)
+        # First we need to generate the torchscript model.
+        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
+            extra_config[constants.TEST_INPUT], batch_size
+        )
 
-        # Generate the model. We set opt_level=3 to enable all optimizations.
-        with tvm.transform.PassContext(opt_level=3, config=config):
-            graph, lib, params = relay.build(model, target=target, params=params)
-        tvm_model = graph_runtime.create(graph, lib, ctx)
-        tvm_model.set_input(**params)
+        tvm_model = _compile_tvm_model(topology, torch_model, batch_trace_input, target, ctx, config, extra_config)
+
         if remainder_trace_input is not None:
-            with tvm.transform.PassContext(opt_level=3, config=config):
-                graph, lib, params = relay.build(remainder_model, target=target, params=remainder_params)
-            tvm_remainder_model = graph_runtime.create(graph, lib, ctx)
-            tvm_remainder_model.set_input(**params)
+            tvm_remainder_model = _compile_tvm_model(
+                topology, torch_model, remainder_trace_input, target, ctx, config, extra_config
+            )
+            extra_config[constants.TVM_REMAINDER_MODEL] = tvm_remainder_model
 
         # In the container we will be using the context to properly configure the input tensors.
         extra_config[constants.TVM_CONTEXT] = ctx
         extra_config[constants.TVM_INPUT_NAMES] = topology.raw_model.input_names
-        if remainder_trace_input is not None:
-            extra_config[constants.TVM_REMAINDER_MODEL] = tvm_remainder_model
 
         hb_model = tvm_model
     else:
