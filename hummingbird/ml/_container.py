@@ -143,7 +143,7 @@ class BatchContainer:
             inputs = inputs[0]
             input_names = list(inputs.columns)
             splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
-            inputs = [df.to_numpy().reshape(-1, 1) for df in splits]
+            inputs = tuple([df.to_numpy().reshape(-1, 1) for df in splits])
 
         def output_proc(predictions):
             if concatenate_outputs:
