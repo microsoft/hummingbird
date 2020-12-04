@@ -263,39 +263,7 @@ def _convert_sparkml(model, backend, test_input, device, extra_config={}):
     return hb_model
 
 
-def convert(model, backend, test_input=None, device="cpu", extra_config={}):
-    """
-    This function converts the specified input *model* into an implementation targeting *backend*.
-    *Convert* supports [Sklearn], [LightGBM], [XGBoost], [ONNX], and [SparkML] models.
-    For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
-    The detailed list of models and backends can be found at `hummingbird.ml.supported`.
-    The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
-    The *torch.jit* and *tvm* backends requires a test_input.
-    [Sklearn]: https://scikit-learn.org/
-    [LightGBM]: https://lightgbm.readthedocs.io/
-    [XGBoost]: https://xgboost.readthedocs.io/
-    [ONNX]: https://onnx.ai/
-    [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
-    [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
-    [Spark-ML]: https://spark.apache.org/docs/latest/api/python/pyspark.ml.html
-
-    Args:
-        model: An input model
-        backend: The target for the conversion
-        test_input: Some input data used to trace the model execution.
-                    Multiple inputs can be passed as `tuple` objects or pandas Dataframes.
-                    When possible, (`numpy`)`arrays` are suggested.
-        device: The target device the model should be run. This parameter is only used by the *torch** backends and *tvm*, and
-                the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
-        extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
-
-    Examples:
-        >>> pytorch_model = convert(sklearn_model,`torch`)
-
-    Returns:
-        A model implemented in *backend*, which is equivalent to the input model
-    """
+def _convert_common(model, backend, test_input=None, device="cpu", extra_config={}):
     assert model is not None
 
     # We destroy extra_config during conversion, we create a copy here.
@@ -401,3 +369,47 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         return _convert_sparkml(model, backend, test_input, device, extra_config)
 
     return _convert_sklearn(model, backend, test_input, device, extra_config)
+
+
+def convert(model, backend, test_input=None, device="cpu", extra_config={}):
+    """
+    This function converts the specified input *model* into an implementation targeting *backend*.
+    *Convert* supports [Sklearn], [LightGBM], [XGBoost], [ONNX], and [SparkML] models.
+    For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
+    The detailed list of models and backends can be found at `hummingbird.ml.supported`.
+    The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
+    The *torch.jit* and *tvm* backends requires a test_input.
+    [Sklearn]: https://scikit-learn.org/
+    [LightGBM]: https://lightgbm.readthedocs.io/
+    [XGBoost]: https://xgboost.readthedocs.io/
+    [ONNX]: https://onnx.ai/
+    [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
+    [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
+    [Spark-ML]: https://spark.apache.org/docs/latest/api/python/pyspark.ml.html
+
+    Args:
+        model: An input model
+        backend: The target for the conversion
+        test_input: Some input data used to trace the model execution.
+                    Multiple inputs can be passed as `tuple` objects or pandas Dataframes.
+                    When possible, (`numpy`)`arrays` are suggested.
+        device: The target device the model should be run. This parameter is only used by the *torch** backends and *tvm*, and
+                the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
+
+    Examples:
+        >>> pytorch_model = convert(sklearn_model,`torch`)
+
+    Returns:
+        A model implemented in *backend*, which is equivalent to the input model
+    """
+    return _convert_common(model, backend, test_input, device, extra_config)
+
+
+def convert_batch(model, backend, test_input, remainder_size=0, device="cpu", extra_config={}):
+    """
+    TODO comment
+    """
+    extra_config[constants.REMAINDER_SIZE] = remainder_size
+    return _convert_common(model, backend, test_input, device, extra_config)
