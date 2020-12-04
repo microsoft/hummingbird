@@ -90,18 +90,34 @@ class HBBackend(ScoreBackend):
         super(HBBackend, self).__init__()
         self.backend = backend
         self.predict_fn = None
+        self.batch_benchmark = False
 
     def convert(self, model, data, test_data, args, model_name):
         self.configure(data, model, args)
+        self.batch_benchmark = args.batch_benchmark
+        extra_config = {constants.N_THREADS: self.params["nthread"]}
+
 
         with Timer() as t:
-            self.model = convert(
-                model,
-                self.backend,
-                test_data,
-                device=self.params["device"],
-                extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
-            )
+            if self.batch_benchmark:
+                self.model = convert(
+                    model,
+                    self.backend,
+                    test_data,
+                    device=self.params["device"],
+                    extra_config=extra_config},
+                )
+            else:
+                remainder_size = test_data.shape[0] % self.params["batch_size"]
+                self.model = convert_batch(
+                    model,
+                    self.backend,
+                    test_data,
+                    remainder_size,
+                    device=self.params["device"],
+                    extra_config=extra_config},
+                )
+
 
         if data.learning_task == LearningTask.REGRESSION:
             self.predict_fn = self.model.predict
@@ -115,6 +131,9 @@ class HBBackend(ScoreBackend):
 
         with Timer() as t:
             self.predictions = self.predict_fn(predict_data)
+
+        if not self.batch_benchmark:
+            self.predictions = np.stack(self.predictions)
 
         return t.interval
 
