@@ -312,7 +312,7 @@ class TestLGBMConverter(unittest.TestCase):
         # Create ONNX model
         onnx_model = hummingbird.ml.convert(model, "onnx", X)
 
-        np.testing.assert_allclose(onnx_model.predict(X)[0].flatten(), model.predict(X))
+        np.testing.assert_allclose(onnx_model.predict(X).flatten(), model.predict(X))
 
     # TVM backend tests.
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
