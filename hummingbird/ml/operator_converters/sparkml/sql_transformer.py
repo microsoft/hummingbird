@@ -12,9 +12,12 @@ from onnxconverter_common.registration import register_converter
 from .._base_operator import BaseOperator
 from .. import constants
 
-# List of supported unary SQL ops.
-SUPPORTED_UNARY_OPS = {
-    'org.apache.spark.sql.catalyst.expressions.Sqrt': torch.sqrt
+# List of supported scalar SQL ops.
+SUPPORTED_SCALAR_OPS = {
+    'org.apache.spark.sql.catalyst.expressions.Sqrt': torch.sqrt,
+    'org.apache.spark.sql.catalyst.expressions.IsNotNull': lambda x: torch.logical_not(torch.isnan(x)),
+    # We rely on PyTorch's automatic type broadcast option.
+    'org.apache.spark.sql.catalyst.expressions.Cast': lambda x: x
 }
 
 # List of supported binary SQL ops.
@@ -64,6 +67,9 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
     def calculate_output_feature(self, project_node_def_stack, inputs_dict):
         # Handles reading of a feature column.
         if project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
+            if project_node_def_stack[0]['name'] not in inputs_dict:
+                print('')
+                pass
             return inputs_dict[project_node_def_stack[0]['name']], project_node_def_stack[1:]
         # Handles reading of a constant value.
         elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Literal':
@@ -75,9 +81,9 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
             left, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             right, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             return op(left, right), project_node_def_stack
-        # Handles unary ops e.g., Sqrt.
-        elif project_node_def_stack[0]['class'] in SUPPORTED_UNARY_OPS:
-            op = SUPPORTED_UNARY_OPS[project_node_def_stack[0]['class']]
+        # Handles scalar ops e.g., Sqrt.
+        elif project_node_def_stack[0]['class'] in SUPPORTED_SCALAR_OPS:
+            op = SUPPORTED_SCALAR_OPS[project_node_def_stack[0]['class']]
             project_node_def_stack = project_node_def_stack[1:]
             param, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             return op(param), project_node_def_stack
@@ -131,6 +137,40 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
             raise RuntimeError('SQLTransformer encountered unsupported operator type: {}'.format(project_node_def_stack[0]['class']))
 
 
+class SQLOrderByModel(BaseOperator, torch.nn.Module):
+
+    def __init__(self, input_names, sort_nodes, device):
+        super(SQLOrderByModel, self).__init__()
+        self.transformer = True
+        self.input_names = input_names
+        self.sort_nodes = sort_nodes
+        sort_nodes.reverse()
+        self.sort_nodes = []
+        for n in sort_nodes:
+            self.sort_nodes.append(
+                (
+                    SQLSelectModel(input_names, n[1:], device),
+                    # Ascending ?
+                    n[0]['direction']['object'] == 'org.apache.spark.sql.catalyst.expressions.Ascending$',
+                    # NULLs last ?
+                    n[0]['nullOrdering']['object'] == 'org.apache.spark.sql.catalyst.expressions.NullsLast$'
+                )
+            )
+
+    def forward(self, *x):
+        # TODO: Implement null ordering logic.
+        order = None
+        for select_node, asc, nulls_last in self.sort_nodes:
+            vals = select_node(*x)
+            if order is not None:
+                vals = torch.index_select(vals, 0, order)
+                order = torch.index_select(order, 0, torch.argsort(vals.view(-1), descending=not asc))
+            else:
+                order = torch.argsort(vals.view(-1), descending=not asc)
+
+        return [torch.index_select(c, 0, order) for c in x]
+
+
 def convert_sparkml_sql_select(operator, device, extra_config):
     """
     Converter for SELECT statement in `pyspark.ml.feature.SQLTransformer`
@@ -164,5 +204,22 @@ def convert_sparkml_sql_where(operator, device, extra_config):
     return SQLWhereModel(input_names, operator.raw_operator, device)
 
 
+def convert_sparkml_sql_order_by(operator, device, extra_config):
+    """
+    Converter for ORDER BY statement in `pyspark.ml.feature.SQLTransformer`
+
+    Args:
+        operator: JSON encoded sort_order extracted from SparkSQL parsed tree
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    input_names = [input.raw_name for input in operator.inputs]
+    return SQLOrderByModel(input_names, operator.raw_operator, device)
+
+
 register_converter("SparkMLSQLSelectModel", convert_sparkml_sql_select)
 register_converter("SparkMLSQLWhereModel", convert_sparkml_sql_where)
+register_converter("SparkMLSQLOrderByModel", convert_sparkml_sql_order_by)

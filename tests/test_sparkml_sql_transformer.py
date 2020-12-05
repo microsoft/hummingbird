@@ -114,6 +114,32 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
         torch_output_np = torch_model.transform(pd_df)
         np.testing.assert_allclose(spark_output_np, torch_output_np, rtol=1e-06, atol=1e-06)
 
+    @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
+    def test_sql_transformer_converter4(self):
+        df = spark.createDataFrame(
+            [
+                (1, 101, 5),  # create your data here, be consistent in the types.
+                (2, 100, 7),
+                (3, None, 1),
+                (4, 100, 9),
+                (5, 102, 8),
+            ],
+            ['id', 'val1', 'val2']  # add your columns label here
+        )
+
+        model = SQLTransformer(statement="SELECT *, val2 AS val FROM __THIS__ WHERE id > 0 ORDER BY val1/2 NULLS LAST")
+        output_col_names = ['val']
+
+        test_df = df
+        torch_model = convert(model, "torch", test_df)
+        self.assertTrue(torch_model is not None)
+
+        spark_output = model.transform(test_df).toPandas()[output_col_names]
+        spark_output_np = [spark_output[x].to_numpy().reshape(-1, 1) for x in output_col_names][0]
+        torch_output_np = torch_model.transform(df.toPandas())
+        np.testing.assert_allclose(spark_output_np, torch_output_np, rtol=1e-06, atol=1e-06)
+
 
 if __name__ == "__main__":
     unittest.main()

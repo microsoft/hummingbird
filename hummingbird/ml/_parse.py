@@ -356,24 +356,44 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
 
     # SELECT clause
     sql_transformer_outputs = []
-    project_trees = [p for p in [node['projectList'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Project'][0]
-                     if p[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Alias']
+    project_trees = [node['projectList'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Project']
+    if len(project_trees) > 0:
+        project_trees = [p for p in project_trees[0] if p[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Alias']
 
-    for project_tree in project_trees:
-        output_name = project_tree[0]['name']
-        input_names = []
-        for project_tree_node in project_tree[1:]:
-            if project_tree_node['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
-                name = project_tree_node['name']
-                if name not in input_names:
-                    input_names.append(name)
+        for project_tree in project_trees:
+            output_name = project_tree[0]['name']
+            input_names = []
+            for project_tree_node in project_tree[1:]:
+                if project_tree_node['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
+                    name = project_tree_node['name']
+                    if name not in input_names:
+                        input_names.append(name)
 
-        select_operator = scope.declare_local_operator("SparkMLSQLSelectModel", project_tree)
-        temp = {i.raw_name: i for i in all_inputs if i.raw_name in input_names and not i.is_abandoned}
-        select_operator.inputs = [temp[i] for i in input_names]
-        output = scope.declare_local_variable(output_name)
-        select_operator.outputs.append(output)
-        sql_transformer_outputs.append(output)
+            select_operator = scope.declare_local_operator("SparkMLSQLSelectModel", project_tree)
+            temp = {i.raw_name: i for i in all_inputs if i.raw_name in input_names and not i.is_abandoned}
+            select_operator.inputs = [temp[i] for i in input_names]
+            output = scope.declare_local_variable(output_name)
+            select_operator.outputs.append(output)
+            sql_transformer_outputs.append(output)
+
+    # ORDER BY clause
+    sort_order_trees = [node['order'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Sort']
+    if len(sort_order_trees) > 0:
+        order_trees = sort_order_trees[0]
+        orderby_operator = scope.declare_local_operator("SparkMLSQLOrderByModel", order_trees)
+        orderby_operator.inputs = all_inputs + sql_transformer_outputs
+        for input in all_inputs:
+            if not input.is_abandoned:
+                output = scope.declare_local_variable(input.raw_name)
+                input.is_abandoned = True
+                orderby_operator.outputs.append(output)
+        all_inputs = orderby_operator.outputs
+
+        for input in sql_transformer_outputs:
+            if not input.is_abandoned:
+                output = scope.declare_local_variable(input.raw_name)
+                input.is_abandoned = True
+                orderby_operator.outputs.append(output)
 
     return sql_transformer_outputs, all_inputs + sql_transformer_outputs
 
