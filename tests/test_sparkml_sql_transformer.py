@@ -128,7 +128,7 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
             ['id', 'val1', 'val2']  # add your columns label here
         )
 
-        model = SQLTransformer(statement="SELECT *, val2 AS val FROM __THIS__ WHERE id > 0 ORDER BY val1/2 NULLS LAST")
+        model = SQLTransformer(statement="SELECT *, val2 AS val FROM __THIS__ WHERE id > 0 ORDER BY val1/2 NULLS LAST, id DESC")
         output_col_names = ['val']
 
         test_df = df
