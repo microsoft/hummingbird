@@ -12,6 +12,7 @@ import numpy as np
 import torch
 
 from ._base_operator import BaseOperator
+from . import constants
 
 
 class OneHotEncoderString(BaseOperator, torch.nn.Module):
@@ -21,7 +22,7 @@ class OneHotEncoderString(BaseOperator, torch.nn.Module):
     Because we are dealing with tensors, strings require additional length information for processing.
     """
 
-    def __init__(self, categories, device):
+    def __init__(self, categories, device, extra_config={}):
         super(OneHotEncoderString, self).__init__(transformer=True)
 
         self.num_columns = len(categories)
@@ -30,6 +31,11 @@ class OneHotEncoderString(BaseOperator, torch.nn.Module):
         # Strings are casted to int32, therefore we need to properly size the tensor to me dividable by 4.
         while self.max_word_length % 4 != 0:
             self.max_word_length += 1
+
+        max_length = 0
+        if constants.MAX_STRING_LENGTH in extra_config:
+            max_length = extra_config[constants.MAX_STRING_LENGTH]
+        extra_config[constants.MAX_STRING_LENGTH] = max(max_length, self.max_word_length)
 
         # We build condition tensors as a 2d tensor of integers.
         # The first dimension is of size num words, the second dimension is fixed to the max word length (// 4).

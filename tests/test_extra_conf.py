@@ -11,7 +11,7 @@ import numpy as np
 from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType
 from sklearn import datasets
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, IsolationForest
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 import torch
@@ -142,7 +142,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "torch", extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -160,7 +162,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "torch", extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -178,7 +182,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "torch", extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -198,7 +204,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "torch", extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -216,7 +224,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "torch", extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -231,7 +241,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X)
 
-        hb_model = hummingbird.ml.convert(model, "torch", extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
@@ -249,7 +261,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "torch.jit", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch.jit", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -267,7 +281,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "torch.jit", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch.jit", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -285,7 +301,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "torch.jit", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch.jit", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -302,7 +320,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X)
 
-        hb_model = hummingbird.ml.convert(model, "torch.jit", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "torch.jit", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
@@ -320,7 +340,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X)
 
-        hb_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "onnx", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
@@ -341,7 +363,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "onnx", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -362,7 +386,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "onnx", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -383,7 +409,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "onnx", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -401,7 +429,8 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        hb_model = hummingbird.ml.convert_batch(model, "tvm", X[:batch_size, :])
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
@@ -414,13 +443,15 @@ class TestExtraConf(unittest.TestCase):
         num_classes = 2
         model = GradientBoostingRegressor(n_estimators=10, max_depth=max_depth)
         np.random.seed(0)
-        X = np.random.rand(100, 200)
+        X = np.random.rand(103, 200)
         X = np.array(X, dtype=np.float32)
-        y = np.random.randint(num_classes, size=100)
+        y = np.random.randint(num_classes, size=103)
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "tvm", X[:batch_size, :], remainder_size=remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -439,7 +470,8 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        hb_model = hummingbird.ml.convert_batch(model, "tvm", X[:batch_size, :])
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -458,7 +490,8 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        hb_model = hummingbird.ml.convert_batch(model, "tvm", X[:batch_size, :])
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -476,7 +509,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "tvm", X[:batch_size, :], remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.transform(X), hb_model.transform(X), rtol=1e-06, atol=1e-06)
@@ -495,7 +530,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "tvm", X[:batch_size, :], remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -514,7 +551,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "tvm", X[:batch_size, :], remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -533,7 +572,9 @@ class TestExtraConf(unittest.TestCase):
 
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(model, "tvm", X[:batch_size, :], remainder_size)
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
@@ -561,7 +602,11 @@ class TestExtraConf(unittest.TestCase):
 
         pipeline.fit(X_train, y)
 
-        torch_model = hummingbird.ml.convert(pipeline, "torch", X_train, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        torch_model = hummingbird.ml.convert_batch(
+            pipeline, "torch", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(torch_model is not None)
 
@@ -590,7 +635,11 @@ class TestExtraConf(unittest.TestCase):
 
         pipeline.fit(X_train, y)
 
-        torch_model = hummingbird.ml.convert(pipeline, "torch.jit", X_train, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        torch_model = hummingbird.ml.convert_batch(
+            pipeline, "torch.jit", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(torch_model is not None)
 
@@ -620,7 +669,11 @@ class TestExtraConf(unittest.TestCase):
 
         pipeline.fit(X_train, y)
 
-        hb_model = hummingbird.ml.convert(pipeline, "onnx", X_train, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(
+            pipeline, "onnx", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(hb_model is not None)
 
@@ -663,7 +716,11 @@ class TestExtraConf(unittest.TestCase):
             target_opset=9,
         )
 
-        hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx", extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(
+            onnx_ml_model, "onnx", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(hb_model is not None)
 
@@ -693,7 +750,11 @@ class TestExtraConf(unittest.TestCase):
 
         pipeline.fit(X_train, y)
 
-        hb_model = hummingbird.ml.convert(pipeline, "tvm", X_train, extra_config={constants.BATCH_SIZE: 10})
+        batch_size = 10
+        remainder_size = X.shape[0] % batch_size
+        hb_model = hummingbird.ml.convert_batch(
+            pipeline, "tvm", pandas.DataFrame(X[:batch_size], columns=columns), remainder_size
+        )
 
         self.assertTrue(hb_model is not None)
 
@@ -739,6 +800,21 @@ class TestExtraConf(unittest.TestCase):
         hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Test max string lentgh
+    def test_max_str_length(self):
+        model = LabelEncoder()
+        data = [
+            "paris",
+            "tokyo",
+            "amsterdam",
+            "tokyo",
+        ]
+        model.fit(data)
+
+        torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.MAX_STRING_LENGTH: 20})
+
+        np.testing.assert_allclose(model.transform(data), torch_model.transform(data), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":

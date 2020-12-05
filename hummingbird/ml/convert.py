@@ -77,7 +77,9 @@ def _supported_backend_check_config(model, backend, extra_config):
 
         tvm_backend = tvm.__name__
 
-    if (backend == torch.jit.__name__ or backend == tvm_backend) and constants.TEST_INPUT not in extra_config:
+    if (
+        (backend == torch.jit.__name__ and not _is_onnx_model(model)) or backend == tvm_backend
+    ) and constants.TEST_INPUT not in extra_config:
         raise RuntimeError("Backend {} requires test inputs. Please pass some test input to the convert.".format(backend))
 
 
@@ -95,7 +97,7 @@ def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     topology = parse_sklearn_api_model(model, extra_config)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
+    hb_model = topology_converter(topology, backend, test_input, device, extra_config=extra_config)
     return hb_model
 
 
@@ -155,68 +157,79 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     # Test inputs can be either provided or generate from the input schema of the model.
     # Generate some test input if necessary.
     if test_input is None:
-        if backend == onnx.__name__:
-            from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
+        import torch
+        from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
 
-            # Generate inputs from the ONNX schema.
-            initial_types = []
-            for input in model.graph.input:
-                name = input.name if hasattr(input, "name") else None
-                data_type = (
-                    input.type.tensor_type.elem_type
-                    if hasattr(input, "type")
-                    and hasattr(input.type, "tensor_type")
-                    and hasattr(input.type.tensor_type, "elem_type")
-                    else None
+        tvm_backend = None
+        if tvm_installed():
+            import tvm
+
+            tvm_backend = tvm.__name__
+
+        # Get the input information from the ONNX schema.
+        initial_types = []
+        for input in model.graph.input:
+            name = input.name if hasattr(input, "name") else None
+            data_type = (
+                input.type.tensor_type.elem_type
+                if hasattr(input, "type")
+                and hasattr(input.type, "tensor_type")
+                and hasattr(input.type.tensor_type, "elem_type")
+                else None
+            )
+            if name is None:
+                raise RuntimeError(
+                    "Cannot fetch input name or data_type from the ONNX schema. Please provide some test input."
                 )
-                if name is None:
-                    raise RuntimeError(
-                        "Cannot fetch input name or data_type from the ONNX schema. Please provide some test input."
-                    )
-                if data_type is None:
-                    raise RuntimeError(
-                        "Cannot fetch input data_type from the ONNX schema, or data type is not tensor_type. Please provide some test input."
-                    )
-                if not hasattr(input.type.tensor_type, "shape"):
-                    raise RuntimeError("Cannot fetch input shape from ONNX schema. Please provide some test input.")
-                shape = [dim.dim_value for dim in input.type.tensor_type.shape.dim]
+            if data_type is None:
+                raise RuntimeError(
+                    "Cannot fetch input data_type from the ONNX schema, or data type is not tensor_type. Please provide some test input."
+                )
+            if not hasattr(input.type.tensor_type, "shape"):
+                raise RuntimeError("Cannot fetch input shape from ONNX schema. Please provide some test input.")
+            shape = [dim.dim_value for dim in input.type.tensor_type.shape.dim]
 
-                if data_type == 1:
-                    initial_types.append((name, FloatTensorType(shape)))
-                elif data_type == 11:
-                    initial_types.append((name, DoubleTensorType(shape)))
-                elif data_type == 6:
-                    initial_types.append((name, Int32TensorType(shape)))
-                elif data_type == 7:
-                    initial_types.append((name, Int64TensorType(shape)))
-                else:
-                    raise RuntimeError(
-                        "Input data type {} not supported. Please fill an issue at https://github.com/microsoft/hummingbird/.".format(
-                            data_type
-                        )
+            if len(shape) == 1:
+                shape = [1, shape[0]]
+            assert len(shape) == 2
+            # In ONNX dynamic dimensions will have a shape of 0. Fix the 0-shape in the batch dimension if they exist.
+            if shape[0] == 0:
+                shape[0] = 1
+
+            if data_type == 1:
+                initial_types.append((name, FloatTensorType(shape)))
+            elif data_type == 11:
+                initial_types.append((name, DoubleTensorType(shape)))
+            elif data_type == 6:
+                initial_types.append((name, Int32TensorType(shape)))
+            elif data_type == 7:
+                initial_types.append((name, Int64TensorType(shape)))
+            else:
+                raise RuntimeError(
+                    "Input data type {} not supported. Please fill an issue at https://github.com/microsoft/hummingbird/, or pass some test_input".format(
+                        data_type
                     )
+                )
 
-            assert all(
-                map(lambda x: len(x[1].shape) == 2, initial_types)
-            ), "Hummingbird currently supports only inputs with len(shape) == 2."
-            first_shape = initial_types[0][1].shape
-            assert all(
-                map(lambda x: x[1].shape == first_shape, initial_types)
-            ), "Hummingbird currently supports only inputs with same shape."
-            extra_config[constants.N_INPUTS] = len(initial_types)
-            extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS] * first_shape[1]
+        first_shape = initial_types[0][1].shape
+        assert all(
+            map(lambda x: x[1].shape == first_shape, initial_types)
+        ), "Hummingbird currently supports only inputs with same shape."
+        extra_config[constants.N_INPUTS] = len(initial_types)
+        extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS] * first_shape[1]
 
+        # Generate some random input data if necessary for the model conversion.
+        if backend == onnx.__name__ or backend == tvm_backend or backend == torch.jit.__name__:
             test_input = []
             for i, it in enumerate(initial_types):
-                test_data = np.random.rand(first_shape[0], first_shape[1])
                 if type(it[1]) is FloatTensorType:
-                    test_input.append(np.array(test_data, dtype=np.float32))
+                    test_input.append(np.array(np.random.rand(first_shape[0], first_shape[1]), dtype=np.float32))
                 elif type(it[1]) is DoubleTensorType:
-                    test_input.append(np.array(test_data, dtype=np.float64))
+                    test_input.append(np.random.rand(first_shape[0], first_shape[1]))
                 elif type(it[1]) is Int32TensorType:
-                    test_input.append(np.array(test_data, dtype=np.int32))
+                    test_input.append(np.array(np.random.randint(100, size=first_shape), dtype=np.int32))
                 elif type(it[1]) is Int64TensorType:
-                    test_input.append(np.array(test_data, dtype=np.int64))
+                    test_input.append(np.random.randint(100, size=first_shape))
                 else:
                     raise RuntimeError(
                         "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
@@ -230,8 +243,12 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
             extra_config[constants.TEST_INPUT] = test_input
 
     # Set the number of features. Some converter requires to know in advance the number of features.
-    if constants.N_FEATURES not in extra_config:
-        extra_config[constants.N_FEATURES] = test_input.shape[1]
+    if constants.N_FEATURES not in extra_config and test_input is not None:
+        if len(test_input.shape) < 2:
+            extra_config[constants.N_FEATURES] = 1
+        else:
+            extra_config[constants.N_FEATURES] = test_input.shape[1]
+
     # Set the initializers. Some converter requires the access to initializers.
     initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
     extra_config[constants.ONNX_INITIALIZERS] = initializers
@@ -240,7 +257,7 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     topology = parse_onnx_api_model(model)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
+    hb_model = topology_converter(topology, backend, test_input, device, extra_config=extra_config)
     return hb_model
 
 
@@ -258,42 +275,13 @@ def _convert_sparkml(model, backend, test_input, device, extra_config={}):
     topology = parse_sparkml_api_model(model, extra_config)
 
     # Convert the Topology object into a PyTorch model.
-    hb_model = topology_converter(topology, backend, device, extra_config=extra_config)
+    hb_model = topology_converter(topology, backend, test_input, device, extra_config=extra_config)
     return hb_model
 
 
-def convert(model, backend, test_input=None, device="cpu", extra_config={}):
+def _convert_common(model, backend, test_input=None, device="cpu", extra_config={}):
     """
-    This function converts the specified input *model* into an implementation targeting *backend*.
-    *Convert* supports [Sklearn], [LightGBM], [XGBoost], [ONNX], and [SparkML] models.
-    For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
-    The detailed list of models and backends can be found at `hummingbird.ml.supported`.
-    The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
-    The *torch.jit* and *tvm* backends requires a test_input.
-    [Sklearn]: https://scikit-learn.org/
-    [LightGBM]: https://lightgbm.readthedocs.io/
-    [XGBoost]: https://xgboost.readthedocs.io/
-    [ONNX]: https://onnx.ai/
-    [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
-    [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
-    [Spark-ML]: https://spark.apache.org/docs/latest/api/python/pyspark.ml.html
-
-    Args:
-        model: An input model
-        backend: The target for the conversion
-        test_input: Some input data used to trace the model execution.
-                    Multiple inputs can be passed as `tuple` objects or pandas Dataframes.
-                    When possible, (`numpy`)`arrays` are suggested.
-        device: The target device the model should be run. This parameter is only used by the *torch** backends and *tvm*, and
-                the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
-        extra_config: Extra configurations to be used by the individual operator converters.
-                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
-
-    Examples:
-        >>> pytorch_model = convert(sklearn_model,`torch`)
-
-    Returns:
-        A model implemented in *backend*, which is equivalent to the input model
+    A common function called by convert(...) and convert_batch(...) below.
     """
     assert model is not None
 
@@ -380,6 +368,8 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         test_input = extra_config[constants.TEST_INPUT]
 
     # We do some normalization on backends.
+    if type(backend) != str:
+        raise ValueError("Backend must be a string: {}".format(backend))
     backend = backend.lower()
     backend = backends[backend]
 
@@ -400,3 +390,79 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         return _convert_sparkml(model, backend, test_input, device, extra_config)
 
     return _convert_sklearn(model, backend, test_input, device, extra_config)
+
+
+def convert(model, backend, test_input=None, device="cpu", extra_config={}):
+    """
+    This function converts the specified input *model* into an implementation targeting *backend*.
+    *Convert* supports [Sklearn], [LightGBM], [XGBoost], [ONNX], and [SparkML] models.
+    For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
+    The detailed list of models and backends can be found at `hummingbird.ml.supported`.
+    The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
+    The *torch.jit* and *tvm* backends require a test_input.
+    For *tvm* backend, the output container can do prediction only on the test data with the same size as test_input.
+    [Sklearn]: https://scikit-learn.org/
+    [LightGBM]: https://lightgbm.readthedocs.io/
+    [XGBoost]: https://xgboost.readthedocs.io/
+    [ONNX]: https://onnx.ai/
+    [ONNX-ML]: https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md
+    [ONNX operators]: https://github.com/onnx/onnx/blob/master/docs/Operators.md
+    [Spark-ML]: https://spark.apache.org/docs/latest/api/python/pyspark.ml.html
+
+    Args:
+        model: An input model
+        backend: The target for the conversion
+        test_input: Some input data used to trace the model execution.
+                    Multiple inputs can be passed as `tuple` objects or pandas Dataframes.
+                    When possible, (`numpy`)`arrays` are suggested.
+                    The number of rows becomes the batch size when tracing PyTorch models and compiling with TVM.
+        device: The target device the model should be run. This parameter is only used by the *torch** backends and *tvm*, and
+                the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
+
+    Examples:
+        >>> pytorch_model = convert(sklearn_model,`torch`)
+
+    Returns:
+        A model implemented in *backend*, which is equivalent to the input model
+    """
+    assert constants.REMAINDER_SIZE not in extra_config
+    return _convert_common(model, backend, test_input, device, extra_config)
+
+
+def convert_batch(model, backend, test_input, remainder_size=0, device="cpu", extra_config={}):
+    """
+    A convert function for batch by batch prediction use cases.
+    For some backends such as TVM, a container returned by `convert(...)` function above has a strict requirement on the
+    allowable input shape.
+    The container returned by this function is more flexible in that it can predict on the input of size
+    `test_input.shape[0] * k + remainder_size`, where `k` is any integer.
+    `test_input.shape[0]`, the number of rows in the `test_input`, is interpreted as a batch size, and at test time
+    prediction proceeds in a batch by batch fashion.
+    See the documentation for *convert(...)* above for more information.
+
+    Args:
+        model: An input model
+        backend: The target for the conversion
+        test_input: Some input data used to trace the model execution.
+                    Multiple inputs can be passed as `tuple` objects or pandas Dataframes.
+                    When possible, (`numpy`)`arrays` are suggested.
+                    The number of rows becomes the batch size when tracing PyTorch models and compiling with TVM.
+        remainder_size: An integer that together with test_input determines the size of test data that can be predicted.
+                    The input to the returned container can be of size `test_input.shape[0] * k + remainder_size`, where `k`
+                    is any integer.
+        device: The target device the model should be run. This parameter is only used by the *torch** backends and *tvm*, and
+                the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
+
+    Examples:
+        >>> tvm_model = convert_batch(sklearn_model,`tvm`, X)
+        >>> tvm_model = convert_batch(sklearn_model,`tvm`, X, remainder_size=50)
+
+    Returns:
+        A `BatchContainer` object that wraps one or two containers created by `convert(...)` function above.
+    """
+    extra_config[constants.REMAINDER_SIZE] = remainder_size
+    return _convert_common(model, backend, test_input, device, extra_config)

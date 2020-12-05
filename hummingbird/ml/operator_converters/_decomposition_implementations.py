@@ -27,7 +27,7 @@ class Decomposition(BaseOperator, torch.nn.Module):
     def forward(self, x):
         if self.mean is not None:
             x = x - self.mean
-        return torch.mm(x, self.transform_matrix)
+        return torch.mm(x, self.transform_matrix).float()
 
 
 class KernelPCA(BaseOperator, torch.nn.Module):

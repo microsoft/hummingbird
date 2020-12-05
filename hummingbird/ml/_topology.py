@@ -34,8 +34,9 @@ from hummingbird.ml._container import (
     TVMSklearnContainerClassification,
     TVMSklearnContainerTransformer,
     TVMSklearnContainerAnomalyDetection,
+    BatchContainer,
 )
-from hummingbird.ml._utils import pandas_installed, tvm_installed, _get_device
+from hummingbird.ml._utils import pandas_installed, tvm_installed, get_device, from_strings_to_ints
 from hummingbird.ml.exceptions import MissingConverter
 from hummingbird.ml.operator_converters import constants
 
@@ -54,40 +55,81 @@ def _jit_model(torch_model, trace_input, device, extra_config):
     return torch.jit.trace(torch_model, trace_input).eval()
 
 
-def _get_trace_input_from_test_input(input, batch_size):
+def _get_trace_input_from_test_input(input, remainder_size=None, extra_config={}):
     """
     Utility function used to properly put the inputs into a format understandable by torch.
-    If a not None batch_size is passed, the function generates a tracing input of batch_size.
-    If input size % batch_size is not 0, a tracing input of the remainder is also generated.
+    If `remainder_size` is provided, also return inputs for a remainder model (see below).
     """
     remainder = None
-    if type(input) is tuple:
-        if batch_size is not None:
-            trace_input = tuple([torch.from_numpy(i)[0:batch_size, :] for i in input])
-            if len(input) > 0 and input[0].shape[0] % batch_size != 0:
-                remainder_size = input[0].shape[0] % batch_size
-                remainder = tuple([torch.from_numpy(i)[0:remainder_size, :] for i in input])
-        else:
-            trace_input = tuple([torch.from_numpy(i) for i in input])
+    if isinstance(input, tuple):
+        trace_input = []
+        for input_ in input:
+            # Convert string arrays into int32.
+            if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
+                assert constants.MAX_STRING_LENGTH in extra_config
+                max_string_length = extra_config[constants.MAX_STRING_LENGTH]
+
+                input_ = from_strings_to_ints(input_, max_string_length)
+            trace_input.append(torch.from_numpy(input_))
+        trace_input = tuple(trace_input)
+        if remainder_size is not None and remainder_size != 0:
+            remainder = tuple([inp[0:remainder_size, :] for inp in trace_input])
     else:
+        # Convert string arrays into int32.
+        if input.dtype.kind in constants.SUPPORTED_STRING_TYPES:
+            assert constants.MAX_STRING_LENGTH in extra_config
+            max_string_length = extra_config[constants.MAX_STRING_LENGTH]
+
+            input = from_strings_to_ints(input, max_string_length)
         trace_input = torch.from_numpy(input)
-        if batch_size is not None:
-            batch_input = trace_input[0:batch_size, :]
-            remainder_size = len(input) % batch_size
-            if remainder_size != 0:
-                remainder = trace_input[0:remainder_size, :]
-            trace_input = batch_input
+        if remainder_size is not None and remainder_size != 0:
+            remainder = trace_input[0:remainder_size, :]
 
     return (trace_input, remainder)
 
 
-def convert(topology, backend, device, extra_config={}):
+def _get_batch_size(batch):
+    if isinstance(batch, tuple):
+        return batch[0].shape[0]
+
+    assert isinstance(batch, np.ndarray)
+    return batch.shape[0]
+
+
+def _compile_tvm_model(topology, torch_model, trace_input, target, ctx, config, extra_config):
+    import tvm
+    from tvm import relay
+    from tvm.contrib import graph_runtime
+
+    ts_model = _jit_model(torch_model, trace_input, "cpu", extra_config)
+    test_input = [
+        (topology.raw_model.input_names[i], trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,)
+        for i in range(len(topology.raw_model.input_names))
+    ]
+
+    model, params = relay.frontend.from_pytorch(ts_model, test_input)
+
+    with tvm.transform.PassContext(opt_level=3, config=config):
+        graph, lib, params = relay.build(model, target=target, params=params)
+
+    tvm_model = graph_runtime.create(graph, lib, ctx)
+    tvm_model.set_input(**params)
+
+    extra_config[constants.TVM_GRAPH] = graph
+    extra_config[constants.TVM_LIB] = lib
+    extra_config[constants.TVM_PARAMS] = params
+
+    return tvm_model
+
+
+def convert(topology, backend, test_input, device, extra_config={}):
     """
     This function is used to convert a `onnxconverter_common.topology.Topology` object into a *backend* model.
 
     Args:
         topology: The `onnxconverter_common.topology.Topology` object that will be converted into a backend model
         backend: Which backend the model should be run on
+        test_input: Inputs for PyTorch model tracing
         device: Which device the translated model will be run on
         extra_config: Extra configurations to be used by individual operator converters
 
@@ -103,8 +145,6 @@ def convert(topology, backend, device, extra_config={}):
 
     if tvm_installed():
         import tvm
-        from tvm import relay
-        from tvm.contrib import graph_runtime
 
         tvm_backend = tvm.__name__
 
@@ -132,7 +172,6 @@ def convert(topology, backend, device, extra_config={}):
 
     # Set the parameters for the model / container
     n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
-    batch_size = None if constants.BATCH_SIZE not in extra_config else extra_config[constants.BATCH_SIZE]
 
     # We set the number of threads for torch here to avoid errors in case we JIT.
     # We set intra op concurrency while we force operators to run sequentially.
@@ -146,6 +185,10 @@ def convert(topology, backend, device, extra_config={}):
     torch_model = _PyTorchBackendModel(
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
+
+    # if constants.REMAINDER_SIZE is present in extra_config, we are in the convert_batch mode.
+    remainder_model = None
+    remainder_size = None if constants.REMAINDER_SIZE not in extra_config else extra_config[constants.REMAINDER_SIZE]
 
     if backend == onnx.__name__:
         onnx_model_name = output_model_name = None
@@ -161,7 +204,7 @@ def convert(topology, backend, device, extra_config={}):
             output_model_name = str(uuid4().hex) + ".onnx"
 
         # Put the tracing test input into the right format.
-        batch_trace_input, _ = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
+        batch_trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -219,31 +262,6 @@ def convert(topology, backend, device, extra_config={}):
 
         fix_graph(hb_model.graph)
     elif backend == tvm_backend:
-        # First we need to generate the torchscript model.
-        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(
-            extra_config[constants.TEST_INPUT], batch_size
-        )
-        ts_model = _jit_model(torch_model, batch_trace_input, "cpu", extra_config)
-        if remainder_trace_input is not None:
-            remainder_ts_model = _jit_model(torch_model, remainder_trace_input, "cpu", extra_config)
-
-        # Generate the test input in the TVM format. In case we have a remainder beyond the batch, generate a remainder test input as well.
-        test_input = [
-            (
-                topology.raw_model.input_names[i],
-                batch_trace_input[i].shape if type(batch_trace_input) is tuple else batch_trace_input.shape,
-            )
-            for i in range(len(topology.raw_model.input_names))
-        ]
-        if remainder_trace_input is not None:
-            remainder_test_input = [
-                (
-                    topology.raw_model.input_names[i],
-                    remainder_trace_input[i].shape if type(remainder_trace_input) is tuple else remainder_trace_input.shape,
-                )
-                for i in range(len(topology.raw_model.input_names))
-            ]
-
         # Pick the proper target.
         if device == "cuda":
             target = tvm.target.cuda()
@@ -258,35 +276,26 @@ def convert(topology, backend, device, extra_config={}):
             raise RuntimeError("Device {} not recognized".format(device))
 
         # Get configuration parameters.
-        config = {}
+        # 50 is a good depth for operator fusion. More than that will probably hurt performance.
+        # https://github.com/microsoft/hummingbird/issues/232#issuecomment-697979508
+        config = {"relay.FuseOps.max_depth": 50}
+
         if constants.TVM_MAX_FUSE_DEPTH in extra_config:
             config["relay.FuseOps.max_depth"] = extra_config[constants.TVM_MAX_FUSE_DEPTH]
-        else:
-            # 50 is a good depth for operator fusion. More than that will probably hurt performance.
-            # https://github.com/microsoft/hummingbird/issues/232#issuecomment-697979508
-            config["relay.FuseOps.max_depth"] = 50
 
-        # Create the relay version of the model.
-        model, params = relay.frontend.from_pytorch(ts_model, test_input)
-        if remainder_trace_input is not None:
-            remainder_model, remainder_params = relay.frontend.from_pytorch(remainder_ts_model, remainder_test_input)
+        # First we need to generate the torchscript model.
+        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
 
-        # Generate the model. We set opt_level=3 to enable all optimizations.
-        with tvm.transform.PassContext(opt_level=3, config=config):
-            graph, lib, params = relay.build(model, target=target, params=params)
-        tvm_model = graph_runtime.create(graph, lib, ctx)
-        tvm_model.set_input(**params)
+        tvm_model = _compile_tvm_model(topology, torch_model, batch_trace_input, target, ctx, config, extra_config)
+
         if remainder_trace_input is not None:
-            with tvm.transform.PassContext(opt_level=3, config=config):
-                graph, lib, params = relay.build(remainder_model, target=target, params=remainder_params)
-            tvm_remainder_model = graph_runtime.create(graph, lib, ctx)
-            tvm_remainder_model.set_input(**params)
+            remainder_model = _compile_tvm_model(
+                topology, torch_model, remainder_trace_input, target, ctx, config, extra_config
+            )
 
         # In the container we will be using the context to properly configure the input tensors.
         extra_config[constants.TVM_CONTEXT] = ctx
         extra_config[constants.TVM_INPUT_NAMES] = topology.raw_model.input_names
-        if remainder_trace_input is not None:
-            extra_config[constants.TVM_REMAINDER_MODEL] = tvm_remainder_model
 
         hb_model = tvm_model
     else:
@@ -297,7 +306,7 @@ def convert(topology, backend, device, extra_config={}):
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
-            trace_input, _ = _get_trace_input_from_test_input(extra_config[constants.TEST_INPUT], batch_size)
+            trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
             if device != "cpu":
                 trace_input.to(device)
             torch_model = torch.jit.trace(torch_model, trace_input).eval()
@@ -380,10 +389,26 @@ def convert(topology, backend, device, extra_config={}):
             container = PyTorchSklearnContainerClassification
 
     n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
-    batch_size = None if constants.BATCH_SIZE not in extra_config else extra_config[constants.BATCH_SIZE]
-    hb_model = container(hb_model, n_threads, batch_size, extra_config=extra_config)
+    batch_size = None if constants.TEST_INPUT not in extra_config else _get_batch_size(test_input)
+    hb_container = container(hb_model, n_threads, batch_size, extra_config=extra_config)
 
-    return hb_model
+    if remainder_model:
+        aux_container = container(remainder_model, n_threads, remainder_size, extra_config=extra_config)
+        return BatchContainer(hb_container, aux_container)
+    elif remainder_size is not None and remainder_size > 0:
+        # remainder_size is non zero but remainder_model is not created
+        # -> torch backend case
+        aux_container = container(hb_model, n_threads, remainder_size, extra_config=extra_config)
+        return BatchContainer(hb_container, aux_container)
+    elif remainder_size is not None:
+        # remainder_size is not None but remainder_model is not created
+        # -> remainder_size must be zero (no need to create remainder_model)
+        assert remainder_size == 0, "remainder_size is non zero but no remainder_model has been created"
+        # remainder_size is not None only if called by convert_batch(...), so we return BatchContainer
+        # for this code path, even though there is no remainder_model created.
+        return BatchContainer(hb_container)
+
+    return hb_container
 
 
 class _PyTorchBackendModel(torch.nn.Module, object):
@@ -433,6 +458,10 @@ class _PyTorchBackendModel(torch.nn.Module, object):
         self._output_names = _fix_var_naming(reversed(operators), output_names, "output")
         self._operator_map = torch.nn.ModuleDict(operator_map)
         self._operators = operators
+        self.max_string_length = None
+
+        if constants.MAX_STRING_LENGTH in extra_config:
+            self.max_string_length = extra_config[constants.MAX_STRING_LENGTH]
 
     def forward(self, *inputs):
         with torch.no_grad():
@@ -451,22 +480,28 @@ class _PyTorchBackendModel(torch.nn.Module, object):
                 inputs = tuple(splits)
             inputs = [*inputs]
             variable_map = {}
-            device = _get_device(self)
+            device = get_device(self)
 
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self._input_names):
-                if type(inputs[i]) is list:
-                    inputs[i] = np.array(inputs[i])
-                if type(inputs[i]) is np.ndarray:
-                    inputs[i] = torch.from_numpy(inputs[i])
-                    if inputs[i].dtype == torch.float64:
-                        # We convert double precision arrays into single precision. Sklearn does the same.
-                        inputs[i] = inputs[i].float()
-                elif type(inputs[i]) is not torch.Tensor:
-                    raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(inputs[i])))
+                input_ = inputs[i]
+                if type(input_) is list:
+                    input_ = np.array(input_)
+                if type(input_) is np.ndarray:
+                    # Convert string arrays into int32.
+                    if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
+                        assert self.max_string_length is not None
+
+                        input_ = from_strings_to_ints(input_, self.max_string_length)
+                    input_ = torch.from_numpy(input_)
+                elif type(input_) is not torch.Tensor:
+                    raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(input_)))
+                if input_.dtype == torch.float64:
+                    # We convert double precision arrays into single precision. Sklearn does the same.
+                    input_ = input_.float()
                 if device is not None and device.type != "cpu":
-                    inputs[i] = inputs[i].to(device)
-                variable_map[input_name] = inputs[i]
+                    input_ = input_.to(device)
+                variable_map[input_name] = input_
 
             # Evaluate all the operators in the topology by properly wiring inputs \ outputs
             for operator in self._operators:
@@ -483,4 +518,4 @@ class _PyTorchBackendModel(torch.nn.Module, object):
             if len(self._output_names) == 1:
                 return variable_map[self._output_names[0]]
             else:
-                return list(variable_map[output_name] for output_name in self._output_names)
+                return tuple(variable_map[output_name] for output_name in self._output_names)
