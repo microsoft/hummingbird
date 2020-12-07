@@ -37,7 +37,7 @@ class TestONNXBinarizer(unittest.TestCase):
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
         output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
         inputs = {session.get_inputs()[0].name: X}
-        onnx_ml_pred = session.run(output_names, inputs)
+        onnx_ml_pred = session.run(output_names, inputs)[0]
 
         # Get the predictions for the ONNX model
         onnx_pred = onnx_model.transform(X)
