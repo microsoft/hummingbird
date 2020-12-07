@@ -34,7 +34,7 @@ from benchmarks.timer import Timer
 from benchmarks.datasets import LearningTask
 
 from hummingbird.ml import constants
-from hummingbird.ml import convert, convert_batch
+from hummingbird.ml import convert_batch
 
 
 class ScoreBackend(ABC):

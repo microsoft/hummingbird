@@ -583,9 +583,9 @@ class TVMSklearnContainer(SklearnContainer):
 
     def _to_tvm_tensor(self, *inputs):
         tvm_tensors = {}
-        msg = "The number of input rows %d is different from the batch size %d the TVM model is compiled for."
+        msg = "The number of input rows {} is different from the batch size {} the TVM model is compiled for."
         for i, inp in enumerate(inputs):
-            assert inp.shape[0] == self._batch_size, msg % (inp.shape[0], self._batch_size)
+            assert inp.shape[0] == self._batch_size, msg.format(inp.shape[0], self._batch_size)
             tvm_tensors[self._input_names[i]] = self._to_tvm_array(inp)
         return tvm_tensors
 
