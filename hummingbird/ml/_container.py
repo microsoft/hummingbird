@@ -145,7 +145,7 @@ class BatchContainer:
             concatenate_outputs=concatenate_outputs
         )
 
-    def _predict_common(self, predict_func, remainder_predict_func, *inputs, concatenate_outputs=True, reshape=False):
+    def _predict_common(self, predict_func, remainder_predict_func, *inputs, concatenate_outputs=True):
         if DataFrame is not None and type(inputs[0]) == DataFrame:
             # Split the dataframe into column ndarrays.
             inputs = inputs[0]
@@ -190,10 +190,6 @@ class BatchContainer:
 
             predictions.append(out)
 
-        # TODO: what to do with reshape (transform?)
-        # if reshape:
-        #     return np.array(predictions).ravel().reshape(total_size, -1)
-        # return np.array(predictions).ravel()
         return output_proc(predictions)
 
 
