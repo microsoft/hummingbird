@@ -88,10 +88,7 @@ def _compile_tvm_model(topology, torch_model, trace_input, target, ctx, config, 
 
     ts_model = _jit_model(torch_model, trace_input, "cpu", extra_config)
     test_input = [
-        (
-            topology.raw_model.input_names[i],
-            trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,
-        )
+        (topology.raw_model.input_names[i], trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,)
         for i in range(len(topology.raw_model.input_names))
     ]
 
@@ -446,11 +443,11 @@ class _PyTorchBackendModel(torch.nn.Module, object):
                     inputs[i] = np.array(inputs[i])
                 if type(inputs[i]) is np.ndarray:
                     inputs[i] = torch.from_numpy(inputs[i])
-                    if inputs[i].dtype == torch.float64:
-                        # We convert double precision arrays into single precision. Sklearn does the same.
-                        inputs[i] = inputs[i].float()
                 elif type(inputs[i]) is not torch.Tensor:
                     raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(inputs[i])))
+                if inputs[i].dtype == torch.float64:
+                    # We convert double precision arrays into single precision. Sklearn does the same.
+                    inputs[i] = inputs[i].float()
                 if device is not None and device.type != "cpu":
                     inputs[i] = inputs[i].to(device)
                 variable_map[input_name] = inputs[i]
