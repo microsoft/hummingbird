@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macos-latest, windows-2019]
+        os: [ macos-latest]
         python-version: [3.5, 3.6, 3.7, 3.8]
 
     steps:
