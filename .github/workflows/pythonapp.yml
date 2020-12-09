@@ -124,6 +124,9 @@ jobs:
       run: |
         python setup.py install
     # We don't run pytest for Linux py3.7 since we do coverage for that case.
+    - name: Setup tmate session
+      if: ${{ matrix.python-version == '3.7' || matrix.os == 'ubuntu-18.04' }}
+      uses: mxschmitt/action-tmate@v3
     - name: Test with pytest
       if: ${{ matrix.python-version != '3.7' || matrix.os != 'ubuntu-18.04' }}
       run: pytest
