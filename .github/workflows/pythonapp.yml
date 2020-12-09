@@ -76,7 +76,7 @@ jobs:
       if: ${{ matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
       id: cache
       env:
-        CACHE_NUMBER: 1
+        CACHE_NUMBER: 2
       with:
         path: ../../../incubator-tvm
         key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-tvm-0.7
