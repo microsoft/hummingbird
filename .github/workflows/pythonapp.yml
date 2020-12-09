@@ -126,14 +126,11 @@ jobs:
     # We don't run pytest for Linux py3.7 since we do coverage for that case.
     - name: Test with pytest
       if: ${{ matrix.python-version != '3.7' || matrix.os != 'ubuntu-18.04' }}
-      run: |
-        pwd
-        pytest
+      run: pytest
     # Run and push coverage only for two runs (Linux py3.7 and py3.5).
     - name: Coverage 3.7 Linux
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       run: |
-        pwd
         coverage run -a -m pytest tests
         coverage xml
     - name: Coverage 3.5 Linux
