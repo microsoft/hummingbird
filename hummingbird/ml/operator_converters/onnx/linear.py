@@ -40,7 +40,8 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
         elif attr.name == "classlabels_ints":
             classes = np.array(attr.ints)
         elif attr.name == "multi_class":
-            if attr.i != 0:  # https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md#ai.onnx.ml.LinearClassifier
+            if len(classes) > 2 and attr.i != 0:
+                # https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md#ai.onnx.ml.LinearClassifier
                 multi_class = "multinomial"
 
     if any(v is None for v in [coefficients, intercepts, classes]):

@@ -181,6 +181,11 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
                     raise RuntimeError("Cannot fetch input shape from ONNX schema. Please provide some test input.")
                 shape = [dim.dim_value for dim in input.type.tensor_type.shape.dim]
 
+                assert len(shape) == 2
+                # In ONNX dynamic dimensions will have a shape of 0. Fix the 0-shape in the batch dimension if they exist.
+                if shape[0] == 0:
+                    shape[0] = 1
+
                 if data_type == 1:
                     initial_types.append((name, FloatTensorType(shape)))
                 elif data_type == 11:
@@ -196,9 +201,6 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
                         )
                     )
 
-            assert all(
-                map(lambda x: len(x[1].shape) == 2, initial_types)
-            ), "Hummingbird currently supports only inputs with len(shape) == 2."
             first_shape = initial_types[0][1].shape
             assert all(
                 map(lambda x: x[1].shape == first_shape, initial_types)
@@ -208,15 +210,14 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
 
             test_input = []
             for i, it in enumerate(initial_types):
-                test_data = np.random.rand(first_shape[0], first_shape[1])
                 if type(it[1]) is FloatTensorType:
-                    test_input.append(np.array(test_data, dtype=np.float32))
+                    test_input.append(np.array(np.random.rand(first_shape[0], first_shape[1]), dtype=np.float32))
                 elif type(it[1]) is DoubleTensorType:
-                    test_input.append(np.array(test_data, dtype=np.float64))
+                    test_input.append(np.random.rand(first_shape[0], first_shape[1]))
                 elif type(it[1]) is Int32TensorType:
-                    test_input.append(np.array(test_data, dtype=np.int32))
+                    test_input.append(np.array(np.random.randint(100, size=first_shape), dtype=np.int32))
                 elif type(it[1]) is Int64TensorType:
-                    test_input.append(np.array(test_data, dtype=np.int64))
+                    test_input.append(np.random.randint(100, size=first_shape))
                 else:
                     raise RuntimeError(
                         "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
@@ -231,10 +232,7 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
 
     # Set the number of features. Some converter requires to know in advance the number of features.
     if constants.N_FEATURES not in extra_config and test_input is not None:
-        if len(test_input.shape) < 2:
-            extra_config[constants.N_FEATURES] = 1
-        else:
-            extra_config[constants.N_FEATURES] = test_input.shape[1]
+        extra_config[constants.N_FEATURES] = test_input.shape[1]
     # Set the initializers. Some converter requires the access to initializers.
     initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
     extra_config[constants.ONNX_INITIALIZERS] = initializers
