@@ -230,7 +230,7 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
             extra_config[constants.TEST_INPUT] = test_input
 
     # Set the number of features. Some converter requires to know in advance the number of features.
-    if constants.N_FEATURES not in extra_config:
+    if constants.N_FEATURES not in extra_config and test_input is not None:
         if len(test_input.shape) < 2:
             extra_config[constants.N_FEATURES] = 1
         else:

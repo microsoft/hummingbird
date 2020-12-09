@@ -73,6 +73,7 @@ XGBRegressor,
 "Binarizer"
 "Cast",
 "Concat",
+"FeatureVectorizer"
 "LabelEncoder",
 "LinearClassifier",
 "LinearRegressor",
@@ -292,6 +293,7 @@ def _build_onnxml_operator_list():
             # Preprocessing
             "ArrayFeatureExtractor",
             "Binarizer",
+            "FeatureVectorizer",
             "LabelEncoder",
             "OneHotEncoder",
             "Normalizer",
