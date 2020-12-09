@@ -25,10 +25,16 @@ class Scaler(BaseOperator, torch.nn.Module):
         self.scale = scale
 
         if offset is not None:
-            self.offset = torch.nn.Parameter(torch.FloatTensor([offset]), requires_grad=False)
+            if offset.dtype == "float64":
+                self.offset = torch.nn.Parameter(torch.DoubleTensor([offset]), requires_grad=False)
+            else:
+                self.offset = torch.nn.Parameter(torch.FloatTensor([offset]), requires_grad=False)
 
         if scale is not None:
-            self.scale = torch.nn.Parameter(torch.FloatTensor([scale]), requires_grad=False)
+            if scale.dtype == "float64":
+                self.scale = torch.nn.Parameter(torch.DoubleTensor([scale]), requires_grad=False)
+            else:
+                self.scale = torch.nn.Parameter(torch.FloatTensor([scale]), requires_grad=False)
 
     def forward(self, x):
         if self.offset is not None:
