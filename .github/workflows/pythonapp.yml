@@ -93,7 +93,7 @@ jobs:
         git submodule update --recursive --init
         cmake -E make_directory build
     - name: Get LLVM on Linux
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'ubuntu-18.04' }}
       working-directory: ../../../incubator-tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
@@ -125,38 +125,38 @@ jobs:
         python setup.py install
     # We don't run pytest for Linux py3.7 since we do coverage for that case.
     - name: Test with pytest
-      if: ${{ matrix.python-version != '3.7' || matrix.os != 'ubuntu-latest' }}
+      if: ${{ matrix.python-version != '3.7' || matrix.os != 'ubuntu-18.04' }}
       run: pytest
     # Run and push coverage only for two runs (Linux py3.7 and py3.5).
     - name: Coverage 3.7 Linux
-      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
     - name: Coverage 3.5 Linux
-      if: ${{ matrix.python-version == '3.5' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.python-version == '3.5' && matrix.os == 'ubuntu-18.04' }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov 3.7
-      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
         flags: unittests
     - name: Upload coverage to Codecov 3.5
-      if: ${{ matrix.python-version == '3.5' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.python-version == '3.5' && matrix.os == 'ubuntu-18.04' }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
         flags: unittests
     # Compile and push documentation only for one of the runs (Linux py3.7).
     - name: Generate Documentation
-      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       run: |
         make sphinx-site -C website/
     - name: Deploy to GitHub pages
-      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       uses: JamesIves/github-pages-deploy-action@3.6.2
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
