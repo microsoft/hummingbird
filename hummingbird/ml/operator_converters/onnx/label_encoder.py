@@ -40,8 +40,7 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
             keys = np.array([x.decode("UTF-8") for x in attr.strings])
 
     if keys is None:
-        print("keys: {}".format(keys))
-        raise RuntimeError("Error parsing LabelEncoder, found unexpected None")
+        raise RuntimeError("Error parsing LabelEncoder, found unexpected None for keys")
 
     if is_strings:
         return StringLabelEncoder(keys, device)

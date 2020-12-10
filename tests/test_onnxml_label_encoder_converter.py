@@ -84,6 +84,22 @@ class TestONNXLabelEncoder(unittest.TestCase):
     #     # Check that predicted values match
     #     np.testing.assert_allclose(onnx_ml_pred, onnx_pred,  rtol=1e-06, atol=1e-06)
 
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    # if the model is corrupt, we should get a RuntimeError
+    def test_onnx_label_encoder_converter_raises_rt(self):
+        warnings.filterwarnings("ignore")
+        model = LabelEncoder()
+        X = np.array([1, 4, 5, 2, 0, 2], dtype=np.int64)
+        model.fit(X)
+
+        # generate test input
+        onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
+        onnx_ml_model.graph.node[0].attribute[0].name = "".encode()
+
+        self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
+
 
 if __name__ == "__main__":
     unittest.main()
