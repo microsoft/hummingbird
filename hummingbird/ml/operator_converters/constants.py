@@ -35,9 +35,6 @@ REORDER_TREES = "reorder_trees"
 ONNX_INITIALIZERS = "onnx_initializers"
 """The initializers of the onnx model."""
 
-ONNX_INPUTS = "onnx_inputs"
-"""The input of the onnx model."""
-
 TVM_CONTEXT = "tvm_context"
 """The context for TVM containing information on the target."""
 

@@ -97,6 +97,10 @@ class SklearnContainer(ABC):
         else:
             total_size = inputs.shape[0]
 
+        if total_size == self._batch_size:
+            # A single batch inference case
+            return function(*inputs)
+
         iterations = total_size // self._batch_size
         iterations += 1 if total_size % self._batch_size > 0 else 0
         iterations = max(1, iterations)
@@ -518,6 +522,14 @@ class TVMSklearnContainer(SklearnContainer):
     def _to_tvm_tensor(self, *inputs):
         return {self._input_names[i]: self._to_tvm_array(inputs[i]) for i in range(len(inputs))}
 
+    def _predict_common(self, output_index, *inputs):
+        if self._last_iteration and self._remainder_model is not None:
+            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
+            return self._remainder_model.get_output(output_index).asnumpy()
+
+        self.model.run(**self._to_tvm_tensor(*inputs))
+        return self.model.get_output(output_index).asnumpy()
+
 
 class TVMSklearnContainerTransformer(TVMSklearnContainer, SklearnContainerTransformer):
     """
@@ -525,11 +537,7 @@ class TVMSklearnContainerTransformer(TVMSklearnContainer, SklearnContainerTransf
     """
 
     def _transform(self, *inputs):
-        if self._last_iteration and self._remainder_model is not None:
-            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
-            return self._remainder_model.get_output(0).asnumpy()
-        self.model.run(**self._to_tvm_tensor(*inputs))
-        return self.model.get_output(0).asnumpy()
+        return self._predict_common(0, *inputs)
 
 
 class TVMSklearnContainerRegression(TVMSklearnContainer, SklearnContainerRegression):
@@ -538,11 +546,8 @@ class TVMSklearnContainerRegression(TVMSklearnContainer, SklearnContainerRegress
     """
 
     def _predict(self, *inputs):
-        if self._last_iteration and self._remainder_model is not None:
-            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
-            return self._remainder_model.get_output(0).asnumpy().ravel()
-        self.model.run(**self._to_tvm_tensor(*inputs))
-        return self.model.get_output(0).asnumpy().ravel()
+        out = self._predict_common(0, *inputs)
+        return out.ravel()
 
 
 class TVMSklearnContainerClassification(TVMSklearnContainerRegression, SklearnContainerClassification):
@@ -551,11 +556,7 @@ class TVMSklearnContainerClassification(TVMSklearnContainerRegression, SklearnCo
     """
 
     def _predict_proba(self, *inputs):
-        if self._last_iteration and self._remainder_model is not None:
-            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
-            return self._remainder_model.get_output(1).asnumpy()
-        self.model.run(**self._to_tvm_tensor(*inputs))
-        return self.model.get_output(1).asnumpy()
+        return self._predict_common(1, *inputs)
 
 
 class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression, SklearnContainerAnomalyDetection):
@@ -564,9 +565,5 @@ class TVMSklearnContainerAnomalyDetection(TVMSklearnContainerRegression, Sklearn
     """
 
     def _decision_function(self, *inputs):
-        if self._last_iteration and self._remainder_model is not None:
-            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
-            return self._remainder_model.get_output(1).asnumpy().ravel()
-        else:
-            self.model.run(**self._to_tvm_tensor(*inputs))
-            return self.model.get_output(1).asnumpy().ravel()
+        out = self._predict_common(1, *inputs)
+        return out.ravel()

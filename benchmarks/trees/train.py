@@ -33,11 +33,7 @@
 from abc import ABC, abstractmethod
 import lightgbm as lgb
 import numpy as np
-import os.path
-import pandas as pd
-import pickle
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import accuracy_score
 import xgboost as xgb
 
 from benchmarks.timer import Timer
@@ -46,23 +42,20 @@ from benchmarks.datasets import LearningTask
 
 class TrainEnsembleAlgorithm(ABC):
     @staticmethod
-    def create(name):  # pylint: disable=too-many-return-statements
+    def create(name, learning_task):  # pylint: disable=too-many-return-statements
         if name == "xgb":
-            return XgbAlgorithm()
+            return XgbAlgorithm(learning_task)
         if name == "lgbm":
-            return LgbmAlgorithm()
+            return LgbmAlgorithm(learning_task)
         if name == "rf":
-            return RandomForestAlgorithm()
+            return RandomForestAlgorithm(learning_task)
         raise ValueError("Unknown algorithm: " + name)
 
-    @staticmethod
-    def get_data(data, start, end):
-        return data[start:end, :] if isinstance(data, np.ndarray) else data.iloc[start:end, :]
-
-    def __init__(self):
+    def __init__(self, learning_task):
         self.params = {}
         self.model = None
         self.predictions = []
+        self.learning_task = learning_task
 
     @abstractmethod
     def fit(self, data, args):
@@ -70,33 +63,38 @@ class TrainEnsembleAlgorithm(ABC):
 
     def test(self, data):
         assert self.model is not None
-        return self.model.predict(data.X_test)
+        return self.model.predict(data)
 
-    def predict(self, model, data, args):
+    def predict(self, model, predict_data, args):
         batch_size = args.batch_size
-        predict_data = data.X_test
+
+        if self.learning_task == LearningTask.REGRESSION:
+            predict_fn = model.predict
+        else:
+            predict_fn = model.predict_proba
 
         with Timer() as t:
             total_size = len(predict_data)
             iterations = total_size // batch_size
-            iterations += 1 if total_size % batch_size > 0 else 0
-            iterations = max(1, iterations)
 
-            if data.learning_task == LearningTask.CLASSIFICATION:
-                self.predictions = np.empty([total_size, 2], dtype="f4")
-                predict_fn = model.predict_proba
-            if data.learning_task == LearningTask.MULTICLASS_CLASSIFICATION:
-                self.predictions = np.empty([total_size, model.n_classes_], dtype="f4")
-                predict_fn = model.predict_proba
-            if data.learning_task == LearningTask.REGRESSION:
-                self.predictions = np.empty([total_size], dtype="f4")
-                predict_fn = model.predict
+            if total_size == batch_size:
+                self.predictions = predict_fn(predict_data)
+            else:
+                iterations += 1 if total_size % batch_size > 0 else 0
+                iterations = max(1, iterations)
 
-            for i in range(0, iterations):
-                start = i * batch_size
-                end = min(start + batch_size, total_size)
-                batch = TrainEnsembleAlgorithm.get_data(predict_data, start, end)
-                self.predictions[start:end] = predict_fn(batch)
+                if self.learning_task == LearningTask.CLASSIFICATION:
+                    self.predictions = np.empty([total_size, 2], dtype="f4")
+                if self.learning_task == LearningTask.MULTICLASS_CLASSIFICATION:
+                    self.predictions = np.empty([total_size, model.n_classes_], dtype="f4")
+                if self.learning_task == LearningTask.REGRESSION:
+                    self.predictions = np.empty([total_size], dtype="f4")
+
+                for i in range(0, iterations):
+                    start = i * batch_size
+                    end = min(start + batch_size, total_size)
+                    batch = predict_data[start:end]
+                    self.predictions[start:end] = predict_fn(batch)
 
         return t.interval
 
@@ -109,14 +107,14 @@ class TrainEnsembleAlgorithm(ABC):
 
 
 # learning parameters shared by all algorithms, using the xgboost convention
-shared_params = {"max_depth": 8, "learning_rate": 0.1, "reg_lambda": 1}
+shared_params = {"learning_rate": 0.1, "reg_lambda": 1}
 
 
 class XgbAlgorithm(TrainEnsembleAlgorithm):
     def configure(self, data, args):
         params = shared_params.copy()
         params.update({"tree_method": "hist"})
-        params.update({"max_leaves": 256, "nthread": args.cpus, "ntrees": args.ntrees})
+        params.update({"max_leaves": 256, "nthread": args.cpus, "max_depth": args.max_depth, "ntrees": args.ntrees})
         if data.learning_task == LearningTask.REGRESSION:
             params["objective"] = "reg:squarederror"
             params["args"] = {}
@@ -138,6 +136,13 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
     def fit(self, data, args):
         params = self.configure(data, args)
 
+        tree_method = params["tree_method"]
+        predictor = "cpu_predictor"
+
+        if args.gpu:
+            tree_method = "gpu_hist"
+            predictor = "gpu_predictor"
+
         if data.learning_task == LearningTask.REGRESSION:
             self.model = xgb.XGBRegressor(
                 max_depth=params["max_depth"],
@@ -146,7 +151,8 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
                 learning_rate=params["learning_rate"],
                 objective=params["objective"],
                 nthread=params["nthread"],
-                tree_method=params["tree_method"],
+                predictor=predictor,
+                tree_method=tree_method,
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
@@ -158,7 +164,8 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
                 learning_rate=params["learning_rate"],
                 objective=params["objective"],
                 nthread=params["nthread"],
-                tree_method=params["tree_method"],
+                predictor=predictor,
+                tree_method=tree_method,
                 reg_lambda=params["reg_lambda"],
                 **(params["args"])
             )
@@ -172,7 +179,7 @@ class XgbAlgorithm(TrainEnsembleAlgorithm):
 class LgbmAlgorithm(TrainEnsembleAlgorithm):
     def configure(self, data, args):
         params = shared_params.copy()
-        params.update({"max_leaves": 256, "njobs": args.cpus, "ntrees": args.ntrees})
+        params.update({"max_leaves": 256, "njobs": args.cpus, "max_depth": args.max_depth, "ntrees": args.ntrees})
         if data.learning_task == LearningTask.REGRESSION:
             params["objective"] = "regression"
             params["args"] = {}
@@ -222,7 +229,7 @@ class LgbmAlgorithm(TrainEnsembleAlgorithm):
 class RandomForestAlgorithm(TrainEnsembleAlgorithm):
     def configure(self, data, args):
         params = shared_params.copy()
-        params.update({"njobs": args.cpus, "ntrees": args.ntrees})
+        params.update({"njobs": args.cpus, "ntrees": args.ntrees, "max_depth": args.max_depth})
         params.update(args.extra)
 
         return params
