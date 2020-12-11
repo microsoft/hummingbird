@@ -32,7 +32,7 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
     for attr in operator.original_operator.origin.attribute:
         if attr.name == "keys_int64s":
             keys = np.array(attr.ints)
-        # TODO: it's not clear to me how this is used in ONNX.
+        # TODO: it's not clear to me how this is used in ONNX.  Maybe this attr was only certain onnx versions.
         # elif attr.name == 'values_int64s':
         #    keys = attr.f
         elif attr.name == "keys_strings":

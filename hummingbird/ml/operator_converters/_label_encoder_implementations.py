@@ -17,7 +17,7 @@ from ._base_operator import BaseOperator
 
 class StringLabelEncoder(BaseOperator, torch.nn.Module):
     def __init__(self, classes, device):
-        super(StringLabelEncoder, self).__init__()
+        super(StringLabelEncoder, self).__init__(transformer=True)
         self.regression = False
         self.num_columns = len(classes)
         self.max_word_length = max([max([len(c) for c in cat]) for cat in classes])

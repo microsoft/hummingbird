@@ -28,7 +28,7 @@ class TestONNXLabelEncoder(unittest.TestCase):
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    def test_model_label_encoder_int_onnxml(self):
+    def _test_model_label_encoder_int_onnxml(self):
         model = LabelEncoder()
         X = np.array([1, 4, 5, 2, 0, 2], dtype=np.int64)
         model.fit(X)
@@ -51,26 +51,28 @@ class TestONNXLabelEncoder(unittest.TestCase):
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=1e-06, atol=1e-06)
 
-    # # Test LabelEncoder with strings
-    # @unittest.skipIf(
-    #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
-    # )
-    # def test_model_label_encoder_str_onnxml(self):
-    #     onnx_ml_model = LabelEncoder()
-    #     data = ["paris", "tokyo", "amsterdam", "tokyo",]
-    #     onnx_ml_model.fit(data)
+    # Test LabelEncoder with strings
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_model_label_encoder_str_onnxml(self):
+        model = LabelEncoder()
+        data = ["paris", "tokyo", "amsterdam", "milan", "sydney"]
+        model.fit(data)
 
-    #     # max word length is the smallest number which is divisible by 4 and larger than or equal to the length of any word
-    #     max_word_length = 12
-    #     num_columns = 4
-    #     pytorch_input = torch.from_numpy(np.array(data, dtype='|S'+str(max_word_length)).view(np.int32)).view(-1, num_columns, max_word_length // 4)
+        # max word length is the smallest number which is divisible by 4 and larger than or equal to the length of any word
+        max_word_length = 12
+        num_columns = len(data)
+        str_dtype = "|S" + str(max_word_length)
+        view_args = [-1, num_columns, max_word_length // 4]
+        data_np = np.array(data, dtype=str_dtype).view(np.int32).reshape(*view_args)
+        pytorch_input = torch.from_numpy(data_np).view(*view_args)
 
-    #     onnx_model = convert(onnx_ml_model, "onnx", data)
+        onnx_ml_model = convert_sklearn(
+            model, initial_types=[("input", LongTensorType_onnx([1, num_columns, max_word_length // 4]))]
+        )
 
-    #     pytorch_input = np.array(data, dtype='|S'+str(max_word_length)).view(np.int32).reshape(-1, num_columns, max_word_length // 4)
-
-    #     # Create ONNX model by calling converter
-    #     onnx_model = convert(onnx_ml_model, "onnx", pytorch_input)
+        onnx_model = convert(onnx_ml_model, "onnx", data_np)
 
     #     # Get the predictions for the ONNX-ML model
     #     session = ort.InferenceSession(onnx_ml_model.SerializeToString())
@@ -78,17 +80,17 @@ class TestONNXLabelEncoder(unittest.TestCase):
     #     inputs = {session.get_inputs()[0].name: data}
     #     onnx_ml_pred = session.run(output_names, inputs)
 
-    #     # Get the predictions for the ONNX model
-    #     onnx_pred = onnx_model.transform(data)
+    # Get the predictions for the ONNX model
+    # onnx_pred = onnx_model.transform(data_np)
 
     #     # Check that predicted values match
-    #     np.testing.assert_allclose(onnx_ml_pred, onnx_pred,  rtol=1e-06, atol=1e-06)
+    #    np.testing.assert_allclose(onnx_ml_pred, onnx_pred,  rtol=1e-06, atol=1e-06)
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
     # if the model is corrupt, we should get a RuntimeError
-    def test_onnx_label_encoder_converter_raises_rt(self):
+    def _test_onnx_label_encoder_converter_raises_rt(self):
         warnings.filterwarnings("ignore")
         model = LabelEncoder()
         X = np.array([1, 4, 5, 2, 0, 2], dtype=np.int64)
