@@ -21,9 +21,8 @@ class TestSklearnLabelEncoderConverter(unittest.TestCase):
         self.assertTrue(pytorch_model is not None)
         np.testing.assert_allclose(model.transform(data), pytorch_model.transform(data), rtol=1e-06, atol=1e-06)
 
-    def skip_test_model_label_encoder_str(self):
+    def test_model_label_encoder_str(self):
         model = LabelEncoder()
-        # data = ['a', 'r', 'x', 'a']
         data = [
             "paris",
             "tokyo",
@@ -35,14 +34,12 @@ class TestSklearnLabelEncoderConverter(unittest.TestCase):
         # max word length is the smallest number which is divisible by 4 and larger than or equal to the length of any word
         max_word_length = 4
         num_columns = 4
-        pytorch_model = hummingbird.ml.convert(model, [("input", Int32TensorType([4, 4, max_word_length // 4]))])
+        pytorch_model = hummingbird.ml.convert(model, "torch")
 
-        ref = model.transform(data)
         pytorch_input = torch.from_numpy(np.array(data, dtype="|S" + str(max_word_length)).view(np.int32)).view(
             -1, num_columns, max_word_length // 4
         )
-        mine = pytorch_model(pytorch_input).data.numpy()
-        self.assertTrue(np.allclose(ref, mine))
+        np.testing.assert_allclose(model.transform(data), pytorch_model.transform(pytorch_input), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":
