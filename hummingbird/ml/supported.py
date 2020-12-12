@@ -31,6 +31,7 @@ KernelPCA,
 KBinsDiscretizer,
 KNeighborsClassifier,
 KNeighborsRegressor,
+LabelEncoder,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -151,6 +152,7 @@ def _build_sklearn_operator_list():
         from sklearn.preprocessing import (
             Binarizer,
             KBinsDiscretizer,
+            LabelEncoder,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -207,6 +209,7 @@ def _build_sklearn_operator_list():
             # Preprocessing
             Binarizer,
             KBinsDiscretizer,
+            LabelEncoder,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
