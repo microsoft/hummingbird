@@ -243,6 +243,15 @@ class TestBackends(unittest.TestCase):
         # Test backends are not case sensitive
         self.assertRaises(RuntimeError, hummingbird.ml.convert, onnx_ml_model, "onnx")
 
+    def test_forgotten_backend_string(self):
+        from sklearn.preprocessing import LabelEncoder
+
+        model = LabelEncoder()
+        data = np.array([1, 4, 5, 2, 0, 2], dtype=np.int32)
+        model.fit(data)
+
+        self.assertRaises(ValueError, hummingbird.ml.convert, model, [("input", Int32TensorType([6, 1]))])
+
 
 if __name__ == "__main__":
     unittest.main()

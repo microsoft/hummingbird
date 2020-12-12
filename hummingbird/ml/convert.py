@@ -384,6 +384,8 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         test_input = extra_config[constants.TEST_INPUT]
 
     # We do some normalization on backends.
+    if type(backend) != str:
+        raise ValueError("Backend must be a string: {}".format(backend))
     backend = backend.lower()
     backend = backends[backend]
 
