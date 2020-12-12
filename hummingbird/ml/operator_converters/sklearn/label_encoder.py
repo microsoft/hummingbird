@@ -26,9 +26,7 @@ def convert_sklearn_label_encoder(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    if all([type(x) == str for x in operator.raw_operator.classes_]):
-        raise RuntimeError("String labels are not supported yet in skl2pytorch LabelEncoder")
-    elif all([type(x) in [int, np.int32, np.int64] for x in operator.raw_operator.classes_]):
+    if all([type(x) in [int, np.int32, np.int64] for x in operator.raw_operator.classes_]):
         return NumericLabelEncoder(operator.raw_operator.classes_, device)
     else:
         return StringLabelEncoder(operator.raw_operator.classes_, device)
