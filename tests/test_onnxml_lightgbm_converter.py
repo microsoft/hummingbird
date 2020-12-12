@@ -121,7 +121,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
         # Create LightGBM model
         model = lgb.LGBMRegressor()
         model.fit(X, y)
-        self._test_regressor(X, model, rtol=1e-05, atol=1e-04)
+        self._test_regressor(X, model)
 
     # Regression test with 3 estimators (taken from ONNXMLTOOLS).
     @unittest.skipIf(
