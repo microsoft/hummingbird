@@ -35,9 +35,9 @@ class StringLabelEncoder(BaseOperator, torch.nn.Module):
         x = x.view(-1, 1)
         try:
             return torch.from_numpy(np.array([(self.condition_tensors == v).nonzero() for v in x]))
-        except KeyError:
+        except ValueError as ve:
             raise ValueError(
-                "x ({}) contains previously unseen labels. condition_tensors: {}".format(x, self.condition_tensors)
+                "{}. x ({}) contains previously unseen labels. condition_tensors: {}".format(ve, x, self.condition_tensors)
             )
 
 
