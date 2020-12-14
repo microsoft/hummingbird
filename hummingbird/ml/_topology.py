@@ -273,7 +273,6 @@ def convert(topology, backend, test_input, device, extra_config={}):
             remainder_model = _compile_tvm_model(
                 topology, torch_model, remainder_trace_input, target, ctx, config, extra_config
             )
-            extra_config[constants.TVM_REMAINDER_MODEL] = remainder_model
 
         # In the container we will be using the context to properly configure the input tensors.
         extra_config[constants.TVM_CONTEXT] = ctx

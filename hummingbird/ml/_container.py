@@ -69,9 +69,9 @@ class SklearnContainer(ABC):
     def model(self):
         return self._model
 
-    def _run(self, function, *inputs, reshape=False):
+    def _run(self, function, *inputs):
         """
-        This function either score the full dataset at once or triggers batch inference.
+        This function scores the full dataset at once. See BatchContainer below for batched scoring.
         """
         if DataFrame is not None and type(inputs[0]) == DataFrame:
             # Split the dataframe into column ndarrays.
@@ -221,7 +221,7 @@ class SklearnContainerTransformer(SklearnContainer):
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        return self._run(self._transform, *inputs, reshape=True)
+        return self._run(self._transform, *inputs)
 
 
 class SklearnContainerRegression(SklearnContainer):
@@ -278,7 +278,7 @@ class SklearnContainerClassification(SklearnContainerRegression):
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
         """
-        return self._run(self._predict_proba, *inputs, reshape=True)
+        return self._run(self._predict_proba, *inputs)
 
 
 class SklearnContainerAnomalyDetection(SklearnContainerRegression):
@@ -409,7 +409,7 @@ class TorchScriptSklearnContainerTransformer(PyTorchSklearnContainerTransformer)
         f = super(TorchScriptSklearnContainerTransformer, self)._transform
         f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return self._run(f_wrapped, *inputs, reshape=True)
+        return self._run(f_wrapped, *inputs)
 
 
 class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
@@ -442,7 +442,7 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
         f = super(TorchScriptSklearnContainerClassification, self)._predict_proba
         f_wrapped = lambda *x: _torchscript_wrapper(device, f, *x)  # noqa: E731
 
-        return self._run(f_wrapped, *inputs, reshape=True)
+        return self._run(f_wrapped, *inputs)
 
 
 class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomalyDetection):
