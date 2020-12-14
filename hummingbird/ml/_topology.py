@@ -55,10 +55,10 @@ def _jit_model(torch_model, trace_input, device, extra_config):
     return torch.jit.trace(torch_model, trace_input).eval()
 
 
-def _get_trace_input_from_test_input(input, remainder_size):
+def _get_trace_input_from_test_input(input, remainder_size=None):
     """
     Utility function used to properly put the inputs into a format understandable by torch.
-    TODO comment
+    If `remainder_size` is provided, also return inputs for a remainder model (see below).
     """
     remainder = None
     if isinstance(input, tuple):
@@ -110,6 +110,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
     Args:
         topology: The `onnxconverter_common.topology.Topology` object that will be converted into a backend model
         backend: Which backend the model should be run on
+        test_input: Inputs for PyTorch model tracing
         device: Which device the translated model will be run on
         extra_config: Extra configurations to be used by individual operator converters
 
@@ -166,7 +167,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
 
-    # TODO comment
+    # if constants.REMAINDER_SIZE is present in extra_config, we are in the convert_batch mode.
     remainder_model = None
     remainder_size = None if constants.REMAINDER_SIZE not in extra_config else extra_config[constants.REMAINDER_SIZE]
 
@@ -377,11 +378,16 @@ def convert(topology, backend, test_input, device, extra_config={}):
         aux_container = container(remainder_model, n_threads, remainder_size, extra_config=extra_config)
         return BatchContainer(hb_container, aux_container)
     elif remainder_size is not None and remainder_size > 0:
-        # torch backend case
+        # remainder_size is non zero but remainder_model is not created
+        # -> torch backend case
         aux_container = container(hb_model, n_threads, remainder_size, extra_config=extra_config)
         return BatchContainer(hb_container, aux_container)
     elif remainder_size is not None:
+        # remainder_size is not None but remainder_model is not created
+        # -> remainder_size must be zero (no need to create remainder_model)
         assert remainder_size == 0, "remainder_size is non zero but no remainder_model has been created"
+        # remainder_size is not None only if called by convert_batch(...), so we return BatchContainer
+        # for this code path, even though there is no remainder_model created.
         return BatchContainer(hb_container)
 
     return hb_container

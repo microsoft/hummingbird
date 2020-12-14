@@ -86,7 +86,18 @@ class SklearnContainer(ABC):
 class BatchContainer:
     def __init__(self, base_container, remainder_model_container=None):
         """
-        TODO comment
+        A wrapper around one or two containers to do batch by batch prediction. The batch size is
+        fixed when `base_container` is created. Together with `remainder_model_container`, this class
+        enables prediction on a dataset of size `base_container._batch_size` * k +
+        `remainder_model_container._batch_size`, where k is any integer. Its `predict` related method
+        optionally takes `concatenate_outputs` argument, which when set to True causes the outputs to
+        be returned as a list of individual prediction. This avoids an extra allocation of an output array
+        and copying of each batch prediction into it.
+
+        Args:
+            base_container: One of subclasses of `SklearnContainer`.
+            remainder_model_container: An auxiliary container that is used in the last iteration,
+            if the test input batch size is not devisible by `base_container._batch_size`.
         """
         assert base_container._batch_size is not None
         self._base_container = base_container
@@ -567,6 +578,7 @@ class TVMSklearnContainer(SklearnContainer):
     """
     Base container for TVM models.
     The container allows to mirror the Sklearn API.
+    The test input size must be the same as the batch size this container is created.
     """
 
     def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):

@@ -264,6 +264,9 @@ def _convert_sparkml(model, backend, test_input, device, extra_config={}):
 
 
 def _convert_common(model, backend, test_input=None, device="cpu", extra_config={}):
+    """
+    A common function called by convert(...) and convert_batch(...) below.
+    """
     assert model is not None
 
     # We destroy extra_config during conversion, we create a copy here.
@@ -378,7 +381,8 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
     The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
-    The *torch.jit* and *tvm* backends requires a test_input.
+    The *torch.jit* and *tvm* backends require a test_input.
+    For *tvm* backend, the output container can do prediction only on the test data with the same size as test_input.
     [Sklearn]: https://scikit-learn.org/
     [LightGBM]: https://lightgbm.readthedocs.io/
     [XGBoost]: https://xgboost.readthedocs.io/
@@ -393,6 +397,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
         test_input: Some input data used to trace the model execution.
                     Multiple inputs can be passed as `tuple` objects or pandas Dataframes.
                     When possible, (`numpy`)`arrays` are suggested.
+                    The number of rows becomes the batch size when tracing PyTorch models and compiling with TVM.
         device: The target device the model should be run. This parameter is only used by the *torch** backends and *tvm*, and
                 the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
         extra_config: Extra configurations to be used by the individual operator converters.
@@ -410,7 +415,36 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
 
 def convert_batch(model, backend, test_input, remainder_size=0, device="cpu", extra_config={}):
     """
-    TODO comment
+    A convert function for batch by batch prediction use cases.
+    For some backends such as TVM, a container returned by `convert(...)` function above has a strict requirement on the
+    allowable input shape.
+    The container returned by this function is more flexible in that it can predict on the input of size
+    `test_input.shape[0] * k + remainder_size`, where `k` is any integer.
+    `test_input.shape[0]`, the number of rows in the `test_input`, is interpreted as a batch size, and at test time
+    prediction proceeds in a batch by batch fashion.
+    See the documentation for *convert(...)* above for more information.
+
+    Args:
+        model: An input model
+        backend: The target for the conversion
+        test_input: Some input data used to trace the model execution.
+                    Multiple inputs can be passed as `tuple` objects or pandas Dataframes.
+                    When possible, (`numpy`)`arrays` are suggested.
+                    The number of rows becomes the batch size when tracing PyTorch models and compiling with TVM.
+        remainder_size: An integer that together with test_input determines the size of test data that can be predicted.
+                    The input to the returned container can be of size `test_input.shape[0] * k + remainder_size`, where `k`
+                    is any integer.
+        device: The target device the model should be run. This parameter is only used by the *torch** backends and *tvm*, and
+                the devices supported are the one supported by PyTorch, i.e., 'cpu' or 'cuda'.
+        extra_config: Extra configurations to be used by the individual operator converters.
+                      The set of supported extra configurations can be found at `hummingbird.ml.supported`
+
+    Examples:
+        >>> tvm_model = convert_batch(sklearn_model,`tvm`, X)
+        >>> tvm_model = convert_batch(sklearn_model,`tvm`, X, remainder_size=50)
+
+    Returns:
+        A `BatchContainer` object that wraps one or two containers created by `convert(...)` function above.
     """
     extra_config[constants.REMAINDER_SIZE] = remainder_size
     return _convert_common(model, backend, test_input, device, extra_config)
