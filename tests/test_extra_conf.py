@@ -149,7 +149,7 @@ class TestExtraConf(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
 
-    # test pytorch classifier with batching.
+    # Test pytorch classifier with batching.
     def test_torch_classification_batch(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
