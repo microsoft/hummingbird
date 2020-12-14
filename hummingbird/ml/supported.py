@@ -458,4 +458,4 @@ BATCH_SIZE = "batch_size"
 """Select whether to partition the input dataset at inference time in N batch_size partitions."""
 
 REMAINDER_SIZE = "remainder_size"
-"""Determines the number of rows that an axillary remainder model can accept."""
+"""Determines the number of rows that an auxiliary remainder model can accept."""
