@@ -455,7 +455,7 @@ N_THREADS = "n_threads"
 Inter-op threads are by default set to 1 in Hummingbird. Check `tests.test_extra_conf.py` for usage examples."""
 
 BATCH_SIZE = "batch_size"
-""" TODO """
+"""Select whether to partition the input dataset at inference time in N batch_size partitions."""
 
 REMAINDER_SIZE = "remainder_size"
-"""TODO"""
+"""Determines the number of rows that an axillary remainder model can accept."""
