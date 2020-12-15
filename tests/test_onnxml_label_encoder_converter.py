@@ -43,10 +43,10 @@ class TestONNXLabelEncoder(unittest.TestCase):
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
         output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
         inputs = {session.get_inputs()[0].name: X}
-        onnx_ml_pred = np.array(session.run(output_names, inputs))
+        onnx_ml_pred = np.array(session.run(output_names, inputs)).ravel()
 
         # Get the predictions for the ONNX model
-        onnx_pred = onnx_model.transform(X)
+        onnx_pred = onnx_model.transform(X).ravel()
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=1e-06, atol=1e-06)
