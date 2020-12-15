@@ -33,8 +33,9 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
         if attr.name == "keys_int64s":
             keys = np.array(attr.ints)
         elif attr.name == "keys_strings":
-            is_strings = True
-            keys = np.array([x.decode("UTF-8") for x in attr.strings])
+            raise NotImplementedError("OneHotEncoder does not yet support Strings for Onnx")
+            # is_strings = True
+            # keys = np.array([x.decode("UTF-8") for x in attr.strings])
 
     if keys is None:
         raise RuntimeError("Error parsing LabelEncoder, found unexpected None for keys")
