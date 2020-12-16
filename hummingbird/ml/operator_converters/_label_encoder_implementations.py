@@ -16,6 +16,11 @@ from ._base_operator import BaseOperator
 
 
 class StringLabelEncoder(BaseOperator, torch.nn.Module):
+    """
+    LabelEncoder over string data types.
+    When the ONNX backend is selected, this operator only works for PyTorch => 1.8.0.
+    """
+
     def __init__(self, classes, device):
         super(StringLabelEncoder, self).__init__(transformer=True)
         self.regression = False
