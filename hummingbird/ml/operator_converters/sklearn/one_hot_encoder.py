@@ -26,7 +26,7 @@ def convert_sklearn_one_hot_encoder(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    if all([np.array(c).dtype == object for c in operator.raw_operator.categories_]):
+    if all([np.array(c).dtype == object or np.array(c).dtype.kind in {"S", "U"} for c in operator.raw_operator.categories_]):
         categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
         return OneHotEncoderString(categories, device, extra_config)
     else:

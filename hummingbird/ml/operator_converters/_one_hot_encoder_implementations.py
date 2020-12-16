@@ -34,7 +34,7 @@ class OneHotEncoderString(BaseOperator, torch.nn.Module):
 
         max_length = 0
         if constants.MAX_STRING_LENGTH in extra_config:
-            extra_config[constants.MAX_STRING_LENGTH]
+            max_length = extra_config[constants.MAX_STRING_LENGTH]
         extra_config[constants.MAX_STRING_LENGTH] = max(max_length, self.max_word_length)
 
         # We build condition tensors as a 2d tensor of integers.
