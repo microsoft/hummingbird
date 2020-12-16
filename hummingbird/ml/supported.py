@@ -459,3 +459,6 @@ BATCH_SIZE = "batch_size"
 
 REMAINDER_SIZE = "remainder_size"
 """Determines the number of rows that an auxiliary remainder model can accept."""
+
+MAX_STRING_LENGTH = "max_string_length"
+"""Maximum expected length for string features. By deafult this value is set using the training information."""

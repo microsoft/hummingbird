@@ -28,7 +28,7 @@ def convert_sklearn_one_hot_encoder(operator, device, extra_config):
     """
     if all([np.array(c).dtype == object for c in operator.raw_operator.categories_]):
         categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
-        return OneHotEncoderString(categories, device)
+        return OneHotEncoderString(categories, device, extra_config)
     else:
         return OneHotEncoder(operator.raw_operator.categories_, device)
 
