@@ -89,7 +89,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the GEMM strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, n_features, classes, n_classes=None, **kwargs):
+    def __init__(self, tree_parameters, n_features, classes, n_classes=None, extra_config={}, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -136,6 +136,11 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")))
 
         self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype("float32")))
+
+        # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
+        # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = extra_config[constants.BASE_PREDICTION]
 
     def aggregation(self, x):
         return x
@@ -222,6 +227,11 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         nodes_offset = [[i * self.num_nodes for i in range(self.num_trees)]]
         self.nodes_offset = torch.nn.Parameter(torch.LongTensor(nodes_offset), requires_grad=False)
 
+        # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
+        # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = extra_config[constants.BASE_PREDICTION]
+
     def aggregation(self, x):
         return x
 
@@ -263,7 +273,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, **kwargs):
+    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, extra_config={}, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -316,6 +326,11 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.leaf_nodes = torch.nn.Parameter(
             torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype("float32")), requires_grad=False
         )
+
+        # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
+        # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = extra_config[constants.BASE_PREDICTION]
 
     def aggregation(self, x):
         return x

@@ -109,6 +109,7 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
     # Define the post transform.
     if constants.BASE_PREDICTION in extra_config:
         base_prediction = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False)
+        extra_config[constants.BASE_PREDICTION] = base_prediction
 
     def apply_base_prediction(base_prediction):
         def apply(x):
