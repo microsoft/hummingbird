@@ -485,7 +485,7 @@ class GEMMGBDTImpl(GEMMTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(GEMMGBDTImpl, self).__init__(tree_parameters, n_features, classes, 1)
+        super(GEMMGBDTImpl, self).__init__(tree_parameters, n_features, classes, 1, extra_config)
 
         self.n_gbdt_classes = 1
         self.post_transform = lambda x: x
@@ -551,7 +551,7 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(PerfectTreeTraversalGBDTImpl, self).__init__(tree_parameters, max_depth, n_features, classes, 1)
+        super(PerfectTreeTraversalGBDTImpl, self).__init__(tree_parameters, max_depth, n_features, classes, 1, extra_config)
 
         self.n_gbdt_classes = 1
         self.post_transform = lambda x: x
