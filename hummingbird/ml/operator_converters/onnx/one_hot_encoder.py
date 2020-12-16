@@ -45,7 +45,7 @@ def convert_onnx_one_hot_encoder(operator, device=None, extra_config={}):
 
     # if is_strings:
     #     return OneHotEncoderString(categories, device)
-    return OneHotEncoder(categories, device, extra_config)
+    return OneHotEncoder(categories, device)
 
 
 register_converter("ONNXMLOneHotEncoder", convert_onnx_one_hot_encoder)
