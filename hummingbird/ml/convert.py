@@ -181,6 +181,8 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
                     raise RuntimeError("Cannot fetch input shape from ONNX schema. Please provide some test input.")
                 shape = [dim.dim_value for dim in input.type.tensor_type.shape.dim]
 
+                if len(shape) == 1:
+                    shape = [1, shape[0]]
                 assert len(shape) == 2
                 # In ONNX dynamic dimensions will have a shape of 0. Fix the 0-shape in the batch dimension if they exist.
                 if shape[0] == 0:
@@ -196,7 +198,7 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
                     initial_types.append((name, Int64TensorType(shape)))
                 else:
                     raise RuntimeError(
-                        "Input data type {} not supported. Please fill an issue at https://github.com/microsoft/hummingbird/.".format(
+                        "Input data type {} not supported. Please fill an issue at https://github.com/microsoft/hummingbird/, or pass some test_input".format(
                             data_type
                         )
                     )
