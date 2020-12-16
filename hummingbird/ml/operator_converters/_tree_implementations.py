@@ -139,7 +139,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
         # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
-        if extra_config[constants.BASE_PREDICTION] is not None:
+        if constants.BASE_PREDICTION in extra_config:
             self.base_prediction = extra_config[constants.BASE_PREDICTION]
 
     def aggregation(self, x):
@@ -229,7 +229,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
         # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
-        if extra_config[constants.BASE_PREDICTION] is not None:
+        if constants.BASE_PREDICTION in extra_config:
             self.base_prediction = extra_config[constants.BASE_PREDICTION]
 
     def aggregation(self, x):
@@ -329,7 +329,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
         # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
-        if extra_config[constants.BASE_PREDICTION] is not None:
+        if constants.BASE_PREDICTION in extra_config:
             self.base_prediction = extra_config[constants.BASE_PREDICTION]
 
     def aggregation(self, x):
