@@ -70,7 +70,7 @@ def _get_trace_input_from_test_input(input, remainder_size=None, extra_config={}
                 max_string_length = extra_config[constants.MAX_STRING_LENGTH]
 
                 input_ = from_strings_to_ints(input_, max_string_length)
-                trace_input.append(torch.from_numpy(input_))
+            trace_input.append(torch.from_numpy(input_))
         trace_input = tuple(trace_input)
         if remainder_size is not None and remainder_size != 0:
             remainder = tuple([inp[0:remainder_size, :] for inp in trace_input])

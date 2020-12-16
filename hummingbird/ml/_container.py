@@ -400,7 +400,7 @@ def _torchscript_wrapper(device, function, *inputs, extra_config={}):
                     inputs[i] = from_strings_to_ints(inputs[i], extra_config[constants.MAX_STRING_LENGTH])
                 if inputs[i].dtype == np.float64:
                     # We convert double precision arrays into single precision. Sklearn does the same.
-                    inputs[i] = inputs[i].float()
+                    inputs[i] = inputs[i].astype("float32")
                 inputs[i] = torch.from_numpy(inputs[i])
             elif type(inputs[i]) is not torch.Tensor:
                 raise RuntimeError("Inputer tensor {} of not supported type {}".format(i, type(inputs[i])))
