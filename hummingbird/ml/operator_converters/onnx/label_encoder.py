@@ -27,23 +27,18 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    is_strings = False
-    keys = None
+
     for attr in operator.original_operator.origin.attribute:
         if attr.name == "keys_int64s":
-            keys = np.array(attr.ints)
+            return NumericLabelEncoder(np.array(attr.ints), device)
         elif attr.name == "keys_strings":
             raise NotImplementedError("LabelEncoder does not yet support Strings for Onnx")
-            # is_strings = True
+            # TODO: uncomment the below when implemented.
             # keys = np.array([x.decode("UTF-8") for x in attr.strings])
+            # return NumericLabelEncoder(keys, device)
 
-    if keys is None:
-        raise RuntimeError("Error parsing LabelEncoder, found unexpected None for keys")
-
-    if is_strings:
-        return StringLabelEncoder(keys, device)
-    else:
-        return NumericLabelEncoder(keys, device)
+    # If we reach here, we have a parsing error.
+    raise RuntimeError("Error parsing LabelEncoder, found unexpected None for keys")
 
 
 register_converter("ONNXMLLabelEncoder", convert_onnx_label_encoder)

@@ -243,6 +243,7 @@ class TestBackends(unittest.TestCase):
         # Test backends are not case sensitive
         self.assertRaises(RuntimeError, hummingbird.ml.convert, onnx_ml_model, "onnx")
 
+    # Test for when the user forgets to add a target (ex: convert(model, output) rather than convert(model, 'torch')) due to API change
     def test_forgotten_backend_string(self):
         from sklearn.preprocessing import LabelEncoder
 
