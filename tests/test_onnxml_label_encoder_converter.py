@@ -95,6 +95,35 @@ class TestONNXLabelEncoder(unittest.TestCase):
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=1e-06, atol=1e-06)
 
+    # Test LabelEncoder String temporary failcase
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_ohe_string_raises_notimpl_onnx(self):
+        warnings.filterwarnings("ignore")
+        model = LabelEncoder()
+        data = [
+            "paris",
+            "milan",
+            "amsterdam",
+            "tokyo",
+        ]
+        model.fit(data)
+
+        # max word length is the smallest number which is divisible by 4 and larger than or equal to the length of any word
+        max_word_length = 12
+        view_args = [-1, max_word_length // 4]
+        str_dtype = "|S" + str(max_word_length)
+        np_arr = np.array(data, dtype=str_dtype).view(np.int32)
+
+        # pytorch_input = torch.from_numpy(np_arr).view(*view_args)
+        data_np = np_arr.reshape(*view_args)
+
+        onnx_ml_model = convert_sklearn(model, initial_types=[("input", LongTensorType_onnx([4, max_word_length // 4]))])
+
+        # Create ONNX model by calling converter, should raise error for strings
+        self.assertRaises(NotImplementedError, convert, onnx_ml_model, "onnx", data_np)
+
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
