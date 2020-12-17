@@ -32,10 +32,8 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
         if attr.name == "keys_int64s":
             return NumericLabelEncoder(np.array(attr.ints), device)
         elif attr.name == "keys_strings":
-            raise NotImplementedError("LabelEncoder does not yet support Strings for Onnx")
-            # TODO: uncomment the below when implemented.
-            # keys = np.array([x.decode("UTF-8") for x in attr.strings])
-            # return NumericLabelEncoder(keys, device)
+            keys = np.array([x.decode("UTF-8") for x in attr.strings])
+            return StringLabelEncoder(keys, device)
 
     # If we reach here, we have a parsing error.
     raise RuntimeError("Error parsing LabelEncoder, found unexpected None for keys")

@@ -52,7 +52,7 @@ class TestONNXLabelEncoder(unittest.TestCase):
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=1e-06, atol=1e-06)
 
-    # Test LabelEncoder with strings
+    # Test LabelEncoder with strings on Pytorch >=1.8.0
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
@@ -95,11 +95,15 @@ class TestONNXLabelEncoder(unittest.TestCase):
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=1e-06, atol=1e-06)
 
-    # Test LabelEncoder String temporary failcase
+    # Test LabelEncoder String failcase for torch < 1.8.0
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
-    def test_ohe_string_raises_notimpl_onnx(self):
+    @unittest.skipIf(
+        LooseVersion(torch.__version__) >= LooseVersion("1.8.0"),
+        reason="PyTorch exporter supports nonzero only from version 1.8.0 and should fail on older versions",
+    )
+    def test_le_string_raises_notimpl_onnx(self):
         warnings.filterwarnings("ignore")
         model = LabelEncoder()
         data = [

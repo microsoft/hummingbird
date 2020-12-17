@@ -40,14 +40,11 @@ class StringLabelEncoder(BaseOperator, torch.nn.Module):
 
     def forward(self, x):
         x = x.view(-1, 1, self.max_word_length)
-        try:
-            result = torch.prod(self.condition_tensors == x, dim=2).nonzero(as_tuple=True)[1]
-            assert result.shape[0] == x.shape[0]
-            return result
-        except AssertionError:
-            raise ValueError(
-                "x ({}) contains previously unseen labels. condition_tensors: {}".format(x, self.condition_tensors)
-            )
+        result = torch.prod(self.condition_tensors == x, dim=2).nonzero(as_tuple=True)[1]
+        assert result.shape[0] == x.shape[0], "x ({}) contains previously unseen labels. condition_tensors: {}".format(
+            x, self.condition_tensors
+        )
+        return result
 
 
 class NumericLabelEncoder(BaseOperator, torch.nn.Module):

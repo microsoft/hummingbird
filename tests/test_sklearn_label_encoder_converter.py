@@ -40,8 +40,8 @@ class TestSklearnLabelEncoderConverter(unittest.TestCase):
 
         np.testing.assert_allclose(model.transform(data), torch_model.transform(torch_input), rtol=1e-06, atol=1e-06)
 
-    # if the user gives unseen string input, we should get a ValueError
-    def test_skl_label_encoder_converter_raises_ve(self):
+    # if the user gives unseen string input, we should get a failed assert
+    def test_skl_label_encoder_converter_raises_err(self):
         model = LabelEncoder()
         data = [
             "paris",
@@ -61,7 +61,7 @@ class TestSklearnLabelEncoderConverter(unittest.TestCase):
             -1, max_word_length // 4
         )
 
-        self.assertRaises(ValueError, torch_model.transform, bad_torch_input)
+        self.assertRaises(AssertionError, torch_model.transform, bad_torch_input)
 
 
 if __name__ == "__main__":
