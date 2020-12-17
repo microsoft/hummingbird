@@ -126,7 +126,7 @@ class TestONNXLabelEncoder(unittest.TestCase):
         onnx_ml_model = convert_sklearn(model, initial_types=[("input", LongTensorType_onnx([4, max_word_length // 4]))])
 
         # Create ONNX model by calling converter, should raise error for strings
-        self.assertRaises(NotImplementedError, convert, onnx_ml_model, "onnx", data_np)
+        self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", data_np)
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
