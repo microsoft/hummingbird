@@ -120,9 +120,7 @@ class TestONNXLabelEncoder(unittest.TestCase):
         str_dtype = "|S" + str(max_word_length)
         np_arr = np.array(data, dtype=str_dtype).view(np.int32)
 
-        # pytorch_input = torch.from_numpy(np_arr).view(*view_args)
         data_np = np_arr.reshape(*view_args)
-
         onnx_ml_model = convert_sklearn(model, initial_types=[("input", LongTensorType_onnx([4, max_word_length // 4]))])
 
         # Create ONNX model by calling converter, should raise error for strings
