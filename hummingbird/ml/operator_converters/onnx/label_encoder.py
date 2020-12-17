@@ -32,6 +32,7 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
         if attr.name == "keys_int64s":
             return NumericLabelEncoder(np.array(attr.ints), device)
         elif attr.name == "keys_strings":
+            # Note that these lines will fail later on for pytorch < 1.8
             keys = np.array([x.decode("UTF-8") for x in attr.strings])
             return StringLabelEncoder(keys, device)
 

@@ -103,7 +103,7 @@ class TestONNXLabelEncoder(unittest.TestCase):
         LooseVersion(torch.__version__) >= LooseVersion("1.8.0"),
         reason="PyTorch exporter supports nonzero only from version 1.8.0 and should fail on older versions",
     )
-    def test_le_string_raises_notimpl_onnx(self):
+    def test_le_string_raises_rt_onnx(self):
         warnings.filterwarnings("ignore")
         model = LabelEncoder()
         data = [
