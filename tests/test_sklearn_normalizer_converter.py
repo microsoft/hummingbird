@@ -80,7 +80,7 @@ class TestSklearnNormalizer(unittest.TestCase):
 
             self.assertIsNotNone(hb_model)
             np.testing.assert_allclose(
-                model.transform(data), hb_model.transform(data_tensor)[0], rtol=1e-06, atol=1e-06,
+                model.transform(data), hb_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
     # TVM backend

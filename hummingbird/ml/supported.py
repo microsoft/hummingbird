@@ -31,6 +31,7 @@ KernelPCA,
 KBinsDiscretizer,
 KNeighborsClassifier,
 KNeighborsRegressor,
+LabelEncoder,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -152,6 +153,7 @@ def _build_sklearn_operator_list():
         from sklearn.preprocessing import (
             Binarizer,
             KBinsDiscretizer,
+            LabelEncoder,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -208,6 +210,7 @@ def _build_sklearn_operator_list():
             # Preprocessing
             Binarizer,
             KBinsDiscretizer,
+            LabelEncoder,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -460,3 +463,6 @@ Inter-op threads are by default set to 1 in Hummingbird. Check `tests.test_extra
 
 BATCH_SIZE = "batch_size"
 """Select whether to partition the input dataset at inference time in N batch_size partitions."""
+
+REMAINDER_SIZE = "remainder_size"
+"""Determines the number of rows that an auxiliary remainder model can accept."""

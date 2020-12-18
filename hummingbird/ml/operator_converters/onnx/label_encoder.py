@@ -27,26 +27,17 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    is_strings = False
-    keys = None
+
     for attr in operator.original_operator.origin.attribute:
         if attr.name == "keys_int64s":
-            keys = np.array(attr.ints)
-        # TODO: it's not clear to me how this is used in ONNX.
-        # elif attr.name == 'values_int64s':
-        #    keys = attr.f
+            return NumericLabelEncoder(np.array(attr.ints), device)
         elif attr.name == "keys_strings":
-            is_strings = True
+            # Note that these lines will fail later on for pytorch < 1.8
             keys = np.array([x.decode("UTF-8") for x in attr.strings])
+            return StringLabelEncoder(keys, device)
 
-    if keys is None:
-        print("keys: {}".format(keys))
-        raise RuntimeError("Error parsing LabelEncoder, found unexpected None")
-
-    if is_strings:
-        return StringLabelEncoder(keys, device)
-    else:
-        return NumericLabelEncoder(keys, device)
+    # If we reach here, we have a parsing error.
+    raise RuntimeError("Error parsing LabelEncoder, found unexpected None for keys")
 
 
 register_converter("ONNXMLLabelEncoder", convert_onnx_label_encoder)

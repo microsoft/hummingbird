@@ -23,7 +23,7 @@ Hummingbird also provides a convenient uniform "inference" API following the Skl
 
 ## How Hummingbird Works
 
-Hummingbird works by reconfiguring algorithmic operators such that we can perform more regular computations which are amenable to vectorized and GPU execution. Each operator is slightly different, and we incorporate multiple strategies. This example explains one of Hummingbird’s strategies for translating a decision tree into tensors involving GEMM  (GEneric Matrix Multiplication), where we implement the traversal of the tree using matrix multiplications.  (GEMM is one of the three tree conversion strategies we currently support.)
+Hummingbird works by reconfiguring algorithmic operators such that we can perform more regular computations which are amenable to vectorized and GPU execution. Each operator is slightly different, and we incorporate multiple strategies. This example explains one of Hummingbird's strategies for translating a decision tree into tensors involving GEMM  (GEneric Matrix Multiplication), where we implement the traversal of the tree using matrix multiplications.  (GEMM is one of the three tree conversion strategies we currently support.)
 
 
 <p align="center">

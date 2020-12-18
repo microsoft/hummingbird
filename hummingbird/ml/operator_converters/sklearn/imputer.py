@@ -20,7 +20,8 @@ class SimpleImputer(BaseOperator, torch.nn.Module):
 
     def __init__(self, sklearn_imputer, device):
         super(SimpleImputer, self).__init__()
-        b_mask = np.logical_not(np.isnan(sklearn_imputer.statistics_))
+        stats = [float(stat) for stat in sklearn_imputer.statistics_ if isinstance(stat, float)]
+        b_mask = np.logical_not(np.isnan(stats))
         i_mask = [i for i in range(len(b_mask)) if b_mask[i]]
         self.transformer = True
         self.do_mask = sklearn_imputer.strategy == "constant" or all(b_mask)
@@ -37,12 +38,12 @@ class SimpleImputer(BaseOperator, torch.nn.Module):
 
     def forward(self, x):
         if self.is_nan:
-            result = torch.where(torch.isnan(x), self.replace_values, x)
+            result = torch.where(torch.isnan(x), self.replace_values.expand(x.shape), x)
             if self.do_mask:
                 return result
             return torch.index_select(result, 1, self.mask)
         else:
-            return torch.where(torch.eq(x, self.missing_values), self.replace_values, x)
+            return torch.where(torch.eq(x, self.missing_values), self.replace_values.expand(x.shape), x)
 
 
 def convert_sklearn_simple_imputer(operator, device, extra_config):

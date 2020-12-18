@@ -62,17 +62,16 @@ class SklearnContainer(ABC):
         """
         self._model = model
         self._n_threads = n_threads
-        self._batch_size = batch_size
         self._extra_config = extra_config
-        self._last_iteration = False
+        self._batch_size = batch_size
 
     @property
     def model(self):
         return self._model
 
-    def _run(self, function, *inputs, reshape=False):
+    def _run(self, function, *inputs):
         """
-        This function either score the full dataset at once or triggers batch inference.
+        This function scores the full dataset at once. See BatchContainer below for batched scoring.
         """
         if DataFrame is not None and type(inputs[0]) == DataFrame:
             # Split the dataframe into column ndarrays.
@@ -81,17 +80,97 @@ class SklearnContainer(ABC):
             splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
             inputs = [df.to_numpy().reshape(-1, 1) for df in splits]
 
-        if self._batch_size is None:
-            return function(*inputs)
+        return function(*inputs)
+
+
+class BatchContainer:
+    def __init__(self, base_container, remainder_model_container=None):
+        """
+        A wrapper around one or two containers to do batch by batch prediction. The batch size is
+        fixed when `base_container` is created. Together with `remainder_model_container`, this class
+        enables prediction on a dataset of size `base_container._batch_size` * k +
+        `remainder_model_container._batch_size`, where k is any integer. Its `predict` related method
+        optionally takes `concatenate_outputs` argument, which when set to True causes the outputs to
+        be returned as a list of individual prediction. This avoids an extra allocation of an output array
+        and copying of each batch prediction into it.
+
+        Args:
+            base_container: One of subclasses of `SklearnContainer`.
+            remainder_model_container: An auxiliary container that is used in the last iteration,
+            if the test input batch size is not devisible by `base_container._batch_size`.
+        """
+        assert base_container._batch_size is not None
+        self._base_container = base_container
+        self._batch_size = base_container._batch_size
+
+        if remainder_model_container:
+            assert remainder_model_container._batch_size is not None
+            self._remainder_model_container = remainder_model_container
+            self._remainder_size = remainder_model_container._batch_size
         else:
-            return self._run_batch_inference(function, *inputs, reshape=reshape)
+            # This is remainder_size == 0 case
+            # We repurpose base_container as a remainder_model_container
+            self._remainder_model_container = base_container
+            self._remainder_size = base_container._batch_size
 
-    def _run_batch_inference(self, function, *inputs, reshape=False):
-        """
-        This function contains the code to run batched inference.
-        """
+    def __getattr__(self, name):
+        return getattr(self._base_container, name)
 
-        is_tuple = type(inputs) is tuple
+    def decision_function(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.decision_function,
+            self._remainder_model_container.decision_function,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
+
+    def transform(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.transform,
+            self._remainder_model_container.transform,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
+
+    def score_samples(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.score_samples,
+            self._remainder_model_container.score_samples,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
+
+    def predict(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.predict,
+            self._remainder_model_container.predict,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
+
+    def predict_proba(self, *inputs, concatenate_outputs=True):
+        return self._predict_common(
+            self._base_container.predict_proba,
+            self._remainder_model_container.predict_proba,
+            *inputs,
+            concatenate_outputs=concatenate_outputs
+        )
+
+    def _predict_common(self, predict_func, remainder_predict_func, *inputs, concatenate_outputs=True):
+        if DataFrame is not None and type(inputs[0]) == DataFrame:
+            # Split the dataframe into column ndarrays.
+            inputs = inputs[0]
+            input_names = list(inputs.columns)
+            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+            inputs = tuple([df.to_numpy().reshape(-1, 1) for df in splits])
+
+        def output_proc(predictions):
+            if concatenate_outputs:
+                return np.concatenate(predictions)
+            return predictions
+
+        is_tuple = isinstance(inputs, tuple)
+
         if is_tuple:
             total_size = inputs[0].shape[0]
         else:
@@ -99,7 +178,7 @@ class SklearnContainer(ABC):
 
         if total_size == self._batch_size:
             # A single batch inference case
-            return function(*inputs)
+            return output_proc([predict_func(*inputs)])
 
         iterations = total_size // self._batch_size
         iterations += 1 if total_size % self._batch_size > 0 else 0
@@ -113,14 +192,16 @@ class SklearnContainer(ABC):
                 batch = tuple([input[start:end, :] for input in inputs])
             else:
                 batch = inputs[start:end, :]
-            # Tell function that we are in the last iteration and do proper actions in case
-            # (e.g., for TVM we may want to use the raminder model).
-            self._last_iteration = i == iterations - 1
-            predictions.extend(function(*batch).ravel())
 
-        if reshape:
-            return np.array(predictions).ravel().reshape(total_size, -1)
-        return np.array(predictions).ravel()
+            if i == iterations - 1:
+                assert (end - start) == self._remainder_size
+                out = remainder_predict_func(*batch)
+            else:
+                out = predict_func(*batch)
+
+            predictions.append(out)
+
+        return output_proc(predictions)
 
 
 class SklearnContainerTransformer(SklearnContainer):
@@ -140,7 +221,7 @@ class SklearnContainerTransformer(SklearnContainer):
         Utility functions used to emulate the behavior of the Sklearn API.
         On data transformers it returns transformed output data
         """
-        return self._run(self._transform, *inputs, reshape=True)
+        return self._run(self._transform, *inputs)
 
 
 class SklearnContainerRegression(SklearnContainer):
@@ -197,7 +278,7 @@ class SklearnContainerClassification(SklearnContainerRegression):
         Utility functions used to emulate the behavior of the Sklearn API.
         On classification tasks returns the probability estimates.
         """
-        return self._run(self._predict_proba, *inputs, reshape=True)
+        return self._run(self._predict_proba, *inputs)
 
 
 class SklearnContainerAnomalyDetection(SklearnContainerRegression):
@@ -328,7 +409,7 @@ class TorchScriptSklearnContainerTransformer(PyTorchSklearnContainerTransformer)
         f = super(TorchScriptSklearnContainerTransformer, self)._transform
         f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
 
-        return self._run(f_wrapped, *inputs, reshape=True)
+        return self._run(f_wrapped, *inputs)
 
 
 class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
@@ -361,7 +442,7 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
         f = super(TorchScriptSklearnContainerClassification, self)._predict_proba
         f_wrapped = lambda *x: _torchscript_wrapper(device, f, *x)  # noqa: E731
 
-        return self._run(f_wrapped, *inputs, reshape=True)
+        return self._run(f_wrapped, *inputs)
 
 
 class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomalyDetection):
@@ -443,10 +524,8 @@ class ONNXSklearnContainerTransformer(ONNXSklearnContainer, SklearnContainerTran
 
     def _transform(self, *inputs):
         assert len(self._output_names) == 1
-
         named_inputs = self._get_named_inputs(inputs)
-
-        return np.array(self._session.run(self._output_names, named_inputs))
+        return np.array(self._session.run(self._output_names, named_inputs))[0]
 
 
 class ONNXSklearnContainerRegression(ONNXSklearnContainer, SklearnContainerRegression):
@@ -459,15 +538,12 @@ class ONNXSklearnContainerRegression(ONNXSklearnContainer, SklearnContainerRegre
 
         if self._is_regression:
             assert len(self._output_names) == 1
-
-            return np.array(self._session.run(self._output_names, named_inputs))
+            return np.array(self._session.run(self._output_names, named_inputs))[0].ravel()
         elif self._is_anomaly_detection:
             assert len(self._output_names) == 2
-
             return np.array(self._session.run([self._output_names[0]], named_inputs))[0].ravel()
         else:
             assert len(self._output_names) == 2
-
             return np.array(self._session.run([self._output_names[0]], named_inputs))[0]
 
 
@@ -502,6 +578,7 @@ class TVMSklearnContainer(SklearnContainer):
     """
     Base container for TVM models.
     The container allows to mirror the Sklearn API.
+    The test input size must be the same as the batch size this container is created.
     """
 
     def __init__(self, model, n_threads=None, batch_size=None, extra_config={}):
@@ -512,21 +589,19 @@ class TVMSklearnContainer(SklearnContainer):
 
         self._ctx = self._extra_config[constants.TVM_CONTEXT]
         self._input_names = self._extra_config[constants.TVM_INPUT_NAMES]
-        self._remainder_model = None
-        if constants.TVM_REMAINDER_MODEL in self._extra_config:
-            self._remainder_model = self._extra_config[constants.TVM_REMAINDER_MODEL]
         self._to_tvm_array = lambda x: tvm.nd.array(x, self._ctx)
 
         os.environ["TVM_NUM_THREADS"] = str(self._n_threads)
 
     def _to_tvm_tensor(self, *inputs):
-        return {self._input_names[i]: self._to_tvm_array(inputs[i]) for i in range(len(inputs))}
+        tvm_tensors = {}
+        msg = "The number of input rows {} is different from the batch size {} the TVM model is compiled for."
+        for i, inp in enumerate(inputs):
+            assert inp.shape[0] == self._batch_size, msg.format(inp.shape[0], self._batch_size)
+            tvm_tensors[self._input_names[i]] = self._to_tvm_array(inp)
+        return tvm_tensors
 
     def _predict_common(self, output_index, *inputs):
-        if self._last_iteration and self._remainder_model is not None:
-            self._remainder_model.run(**self._to_tvm_tensor(*inputs))
-            return self._remainder_model.get_output(output_index).asnumpy()
-
         self.model.run(**self._to_tvm_tensor(*inputs))
         return self.model.get_output(output_index).asnumpy()
 

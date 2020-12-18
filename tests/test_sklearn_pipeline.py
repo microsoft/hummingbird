@@ -3,11 +3,12 @@ import numpy as np
 from sklearn import datasets
 
 from sklearn.compose import ColumnTransformer
+from sklearn.datasets import make_regression
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.pipeline import Pipeline, FeatureUnion, make_pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
 
 import hummingbird.ml
@@ -600,6 +601,21 @@ class TestSklearnPipeline(unittest.TestCase):
         np.testing.assert_allclose(
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
+
+    # Taken from https://github.com/microsoft/hummingbird/issues/388https://github.com/microsoft/hummingbird/issues/388
+    def test_pipeline_pca_rf(self):
+        X, y = make_regression(n_samples=1000, n_features=8, n_informative=5, n_targets=1, random_state=0, shuffle=True)
+        pca = PCA(n_components=8, svd_solver="randomized", whiten=True)
+        clf = make_pipeline(StandardScaler(), pca, RandomForestRegressor(n_estimators=10, max_depth=30, random_state=0))
+        clf.fit(X, y)
+
+        model = hummingbird.ml.convert(clf, "pytorch")
+
+        prediction_sk = clf.predict([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
+
+        prediction_hb = model.predict([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
+
+        np.testing.assert_allclose(prediction_sk, prediction_hb, rtol=1e-06, atol=1e-06)
 
     @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not onnx_runtime_installed(), reason="Test requires ORT installed")

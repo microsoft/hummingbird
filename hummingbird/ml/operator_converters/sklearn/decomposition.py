@@ -32,7 +32,7 @@ def convert_sklearn_pca(operator, device, extra_config):
     if operator.raw_operator.whiten:
         transform_matrix = transform_matrix / np.sqrt(operator.raw_operator.explained_variance_)
 
-    return Decomposition(mean.astype("float32"), transform_matrix.astype("float32"), device)
+    return Decomposition(mean, transform_matrix, device)
 
 
 def convert_sklearn_kernel_pca(operator, device, extra_config):
