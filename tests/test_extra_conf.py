@@ -11,7 +11,7 @@ import numpy as np
 from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType
 from sklearn import datasets
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, IsolationForest
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 import torch
@@ -800,6 +800,21 @@ class TestExtraConf(unittest.TestCase):
         hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Test max string lentgh
+    def test_max_str_length(self):
+        model = LabelEncoder()
+        data = [
+            "paris",
+            "tokyo",
+            "amsterdam",
+            "tokyo",
+        ]
+        model.fit(data)
+
+        torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.MAX_STRING_LENGTH: 20})
+
+        np.testing.assert_allclose(model.transform(data), torch_model.transform(data), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":
