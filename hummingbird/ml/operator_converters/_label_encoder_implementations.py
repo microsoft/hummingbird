@@ -37,8 +37,9 @@ class StringLabelEncoder(BaseOperator, torch.nn.Module):
         extra_config[constants.MAX_STRING_LENGTH] = max(max_length, self.max_word_length)
 
         # Sort the classes and convert to torch.int32
+        self.max_word_length = self.max_word_length // 4
         classes_conv = torch.from_numpy(np.array(sorted(set(classes)), dtype=data_type).view(np.int32))
-        classes_conv = classes_conv.view(1, -1, self.max_word_length // 4)
+        classes_conv = classes_conv.view(1, -1, self.max_word_length)
 
         self.condition_tensors = torch.nn.Parameter(torch.IntTensor(classes_conv), requires_grad=False)
 

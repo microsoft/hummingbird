@@ -29,23 +29,17 @@ def convert_onnx_one_hot_encoder(operator, device=None, extra_config={}):
     """
 
     categories = []
-    # is_strings = False
     operator = operator.raw_operator
 
     for attr in operator.origin.attribute:
         if attr.name == "cats_int64s":
             categories.append(np.array(attr.ints))
+            return OneHotEncoder(categories, device)
         elif attr.name == "cats_strings":
-            raise NotImplementedError("OneHotEncoder does not yet support Strings (Issue #209)")
-        #    categories.append([x.decode("UTF-8") for x in attr.strings])
-        #    is_strings = True
+            categories.append([x.decode("UTF-8") for x in attr.strings])
+            return OneHotEncoderString(categories, device, extra_config)
 
-    if categories == []:
-        raise RuntimeError("Error parsing OneHotEncoder, no categories")
-
-    # if is_strings:
-    #     return OneHotEncoderString(categories, device)
-    return OneHotEncoder(categories, device)
+    raise RuntimeError("Error parsing OneHotEncoder, no categories")
 
 
 register_converter("ONNXMLOneHotEncoder", convert_onnx_one_hot_encoder)

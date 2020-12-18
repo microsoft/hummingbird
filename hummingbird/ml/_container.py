@@ -507,6 +507,7 @@ class ONNXSklearnContainer(SklearnContainer):
             self._session = ort.InferenceSession(self._model.SerializeToString(), sess_options=sess_options)
             self._output_names = [self._session.get_outputs()[i].name for i in range(len(self._session.get_outputs()))]
             self._input_names = [input.name for input in self._session.get_inputs()]
+            self._extra_config = extra_config
         else:
             raise RuntimeError("ONNX Container requires ONNX runtime installed.")
 
@@ -522,7 +523,12 @@ class ONNXSklearnContainer(SklearnContainer):
         named_inputs = {}
 
         for i in range(len(inputs)):
-            named_inputs[self._input_names[i]] = np.array(inputs[i])
+            input_ = np.array(inputs[i])
+            if input_.dtype.kind in {"U", "S"}:
+                assert constants.MAX_STRING_LENGTH in self._extra_config
+
+                input_ = from_strings_to_ints(input_, self._extra_config[constants.MAX_STRING_LENGTH])
+            named_inputs[self._input_names[i]] = input_
 
         return named_inputs
 
