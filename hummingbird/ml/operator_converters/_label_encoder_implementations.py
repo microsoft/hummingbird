@@ -17,6 +17,11 @@ from . import constants
 
 
 class StringLabelEncoder(BaseOperator, torch.nn.Module):
+    """
+    LabelEncoder over string data types.
+    When the ONNX backend is selected, this operator only works for PyTorch => 1.8.0.
+    """
+
     def __init__(self, classes, device, extra_config={}):
         super(StringLabelEncoder, self).__init__(transformer=True)
         self.regression = False
@@ -39,14 +44,11 @@ class StringLabelEncoder(BaseOperator, torch.nn.Module):
 
     def forward(self, x):
         x = x.view(-1, 1, self.max_word_length)
-        try:
-            result = torch.prod(self.condition_tensors == x, dim=2).nonzero(as_tuple=True)[1]
-            assert result.shape[0] == x.shape[0]
-            return result
-        except AssertionError:
-            raise ValueError(
-                "x ({}) contains previously unseen labels. condition_tensors: {}".format(x, self.condition_tensors)
-            )
+        result = torch.prod(self.condition_tensors == x, dim=2).nonzero(as_tuple=True)[1]
+        assert result.shape[0] == x.shape[0], "x ({}) contains previously unseen labels. condition_tensors: {}".format(
+            x, self.condition_tensors
+        )
+        return result
 
 
 class NumericLabelEncoder(BaseOperator, torch.nn.Module):

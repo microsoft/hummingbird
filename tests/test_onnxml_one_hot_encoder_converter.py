@@ -1,5 +1,5 @@
 """
-Tests onnxml scaler converter
+Tests onnxml OneHotEncoderconverter
 """
 import unittest
 import warnings
