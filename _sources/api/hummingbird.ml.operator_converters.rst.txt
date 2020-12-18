@@ -18,6 +18,7 @@ hummingbird.ml.operator\_converters
    hummingbird.ml.operator_converters._discretizer_implementations
    hummingbird.ml.operator_converters._gbdt_commons
    hummingbird.ml.operator_converters._kneighbors_implementations
+   hummingbird.ml.operator_converters._label_encoder_implementations
    hummingbird.ml.operator_converters._linear_implementations
    hummingbird.ml.operator_converters._mlp_implementations
    hummingbird.ml.operator_converters._nb_implementations

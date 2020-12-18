@@ -14,6 +14,7 @@ hummingbird.ml.operator\_converters.onnx
 
    hummingbird.ml.operator_converters.onnx.array_feature_extractor
    hummingbird.ml.operator_converters.onnx.binarizer
+   hummingbird.ml.operator_converters.onnx.label_encoder
    hummingbird.ml.operator_converters.onnx.linear
    hummingbird.ml.operator_converters.onnx.normalizer
    hummingbird.ml.operator_converters.onnx.one_hot_encoder

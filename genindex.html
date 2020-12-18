@@ -104,6 +104,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._kneighbors_implementations.html">hummingbird.ml.operator_converters._kneighbors_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html">hummingbird.ml.operator_converters._label_encoder_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._linear_implementations.html">hummingbird.ml.operator_converters._linear_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._mlp_implementations.html">hummingbird.ml.operator_converters._mlp_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
@@ -280,6 +281,10 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._kneighbors_implementations.html#hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel._abc_impl">(hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel attribute)</a>
 </li>
+        <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder._abc_impl">(hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder attribute)</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder._abc_impl">(hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder attribute)</a>
+</li>
         <li><a href="api/hummingbird.ml.operator_converters._linear_implementations.html#hummingbird.ml.operator_converters._linear_implementations.LinearModel._abc_impl">(hummingbird.ml.operator_converters._linear_implementations.LinearModel attribute)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._mlp_implementations.html#hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel._abc_impl">(hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel attribute)</a>
@@ -361,10 +366,10 @@
 </li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_sparkml_api_operator_name_map">_build_sparkml_api_operator_name_map() (in module hummingbird.ml.supported)</a>
 </li>
-      <li><a href="api/hummingbird.ml._parse.html#hummingbird.ml._parse._build_sparkml_api_parsers_map">_build_sparkml_api_parsers_map() (in module hummingbird.ml._parse)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hummingbird.ml._parse.html#hummingbird.ml._parse._build_sparkml_api_parsers_map">_build_sparkml_api_parsers_map() (in module hummingbird.ml._parse)</a>
+</li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_sparkml_operator_list">_build_sparkml_operator_list() (in module hummingbird.ml.supported)</a>
 </li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_xgboost_operator_list">_build_xgboost_operator_list() (in module hummingbird.ml.supported)</a>
@@ -627,6 +632,8 @@
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.onnx.onnx_operator.html#hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_concat">convert_onnx_concat() (in module hummingbird.ml.operator_converters.onnx.onnx_operator)</a>
 </li>
+      <li><a href="api/hummingbird.ml.operator_converters.onnx.label_encoder.html#hummingbird.ml.operator_converters.onnx.label_encoder.convert_onnx_label_encoder">convert_onnx_label_encoder() (in module hummingbird.ml.operator_converters.onnx.label_encoder)</a>
+</li>
       <li><a href="api/hummingbird.ml.operator_converters.onnx.linear.html#hummingbird.ml.operator_converters.onnx.linear.convert_onnx_linear_model">convert_onnx_linear_model() (in module hummingbird.ml.operator_converters.onnx.linear)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.onnx.linear.html#hummingbird.ml.operator_converters.onnx.linear.convert_onnx_linear_regression_model">convert_onnx_linear_regression_model() (in module hummingbird.ml.operator_converters.onnx.linear)</a>
@@ -678,6 +685,8 @@
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.kneighbors.html#hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_classification_model">convert_sklearn_kneighbors_classification_model() (in module hummingbird.ml.operator_converters.sklearn.kneighbors)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.kneighbors.html#hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_regression_model">convert_sklearn_kneighbors_regression_model() (in module hummingbird.ml.operator_converters.sklearn.kneighbors)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters.sklearn.label_encoder.html#hummingbird.ml.operator_converters.sklearn.label_encoder.convert_sklearn_label_encoder">convert_sklearn_label_encoder() (in module hummingbird.ml.operator_converters.sklearn.label_encoder)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.lightgbm.html#hummingbird.ml.operator_converters.lightgbm.convert_sklearn_lgbm_classifier">convert_sklearn_lgbm_classifier() (in module hummingbird.ml.operator_converters.lightgbm)</a>
 </li>
@@ -777,6 +786,10 @@
         <li><a href="api/hummingbird.ml.operator_converters._discretizer_implementations.html#hummingbird.ml.operator_converters._discretizer_implementations.KBinsDiscretizer.forward">(hummingbird.ml.operator_converters._discretizer_implementations.KBinsDiscretizer method)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._kneighbors_implementations.html#hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel.forward">(hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel method)</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder.forward">(hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder method)</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder.forward">(hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder method)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._linear_implementations.html#hummingbird.ml.operator_converters._linear_implementations.LinearModel.forward">(hummingbird.ml.operator_converters._linear_implementations.LinearModel method)</a>
 </li>
@@ -971,6 +984,13 @@
 </li>
       </ul></li>
       <li>
+    hummingbird.ml.operator_converters._label_encoder_implementations
+
+      <ul>
+        <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#module-hummingbird.ml.operator_converters._label_encoder_implementations">module</a>
+</li>
+      </ul></li>
+      <li>
     hummingbird.ml.operator_converters._linear_implementations
 
       <ul>
@@ -1069,14 +1089,21 @@
 </li>
       </ul></li>
       <li>
+    hummingbird.ml.operator_converters.onnx.label_encoder
+
+      <ul>
+        <li><a href="api/hummingbird.ml.operator_converters.onnx.label_encoder.html#module-hummingbird.ml.operator_converters.onnx.label_encoder">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
     hummingbird.ml.operator_converters.onnx.linear
 
       <ul>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.linear.html#module-hummingbird.ml.operator_converters.onnx.linear">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     hummingbird.ml.operator_converters.onnx.normalizer
 
@@ -1173,6 +1200,13 @@
 
       <ul>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.kneighbors.html#module-hummingbird.ml.operator_converters.sklearn.kneighbors">module</a>
+</li>
+      </ul></li>
+      <li>
+    hummingbird.ml.operator_converters.sklearn.label_encoder
+
+      <ul>
+        <li><a href="api/hummingbird.ml.operator_converters.sklearn.label_encoder.html#module-hummingbird.ml.operator_converters.sklearn.label_encoder">module</a>
 </li>
       </ul></li>
       <li>
@@ -1384,6 +1418,8 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._kneighbors_implementations.html#module-hummingbird.ml.operator_converters._kneighbors_implementations">hummingbird.ml.operator_converters._kneighbors_implementations</a>
 </li>
+        <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#module-hummingbird.ml.operator_converters._label_encoder_implementations">hummingbird.ml.operator_converters._label_encoder_implementations</a>
+</li>
         <li><a href="api/hummingbird.ml.operator_converters._linear_implementations.html#module-hummingbird.ml.operator_converters._linear_implementations">hummingbird.ml.operator_converters._linear_implementations</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._mlp_implementations.html#module-hummingbird.ml.operator_converters._mlp_implementations">hummingbird.ml.operator_converters._mlp_implementations</a>
@@ -1411,6 +1447,8 @@
         <li><a href="api/hummingbird.ml.operator_converters.onnx.array_feature_extractor.html#module-hummingbird.ml.operator_converters.onnx.array_feature_extractor">hummingbird.ml.operator_converters.onnx.array_feature_extractor</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.binarizer.html#module-hummingbird.ml.operator_converters.onnx.binarizer">hummingbird.ml.operator_converters.onnx.binarizer</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters.onnx.label_encoder.html#module-hummingbird.ml.operator_converters.onnx.label_encoder">hummingbird.ml.operator_converters.onnx.label_encoder</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.linear.html#module-hummingbird.ml.operator_converters.onnx.linear">hummingbird.ml.operator_converters.onnx.linear</a>
 </li>
@@ -1441,6 +1479,8 @@
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.imputer.html#module-hummingbird.ml.operator_converters.sklearn.imputer">hummingbird.ml.operator_converters.sklearn.imputer</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.kneighbors.html#module-hummingbird.ml.operator_converters.sklearn.kneighbors">hummingbird.ml.operator_converters.sklearn.kneighbors</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters.sklearn.label_encoder.html#module-hummingbird.ml.operator_converters.sklearn.label_encoder">hummingbird.ml.operator_converters.sklearn.label_encoder</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.linear.html#module-hummingbird.ml.operator_converters.sklearn.linear">hummingbird.ml.operator_converters.sklearn.linear</a>
 </li>
@@ -1496,6 +1536,8 @@
       <li><a href="api/hummingbird.ml.operator_converters._normalizer_implementations.html#hummingbird.ml.operator_converters._normalizer_implementations.Normalizer">Normalizer (class in hummingbird.ml.operator_converters._normalizer_implementations)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.constants.html#hummingbird.ml.operator_converters.constants.NUM_TREES">NUM_TREES (in module hummingbird.ml.operator_converters.constants)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder">NumericLabelEncoder (class in hummingbird.ml.operator_converters._label_encoder_implementations)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1646,6 +1688,8 @@
       <li><a href="api/hummingbird.ml.operator_converters.constants.html#hummingbird.ml.operator_converters.constants.SOFTMAX">SOFTMAX (in module hummingbird.ml.operator_converters.constants)</a>
 </li>
       <li><a href="api/hummingbird.ml._utils.html#hummingbird.ml._utils.sparkml_installed">sparkml_installed() (in module hummingbird.ml._utils)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder">StringLabelEncoder (class in hummingbird.ml.operator_converters._label_encoder_implementations)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.sv.html#hummingbird.ml.operator_converters.sklearn.sv.SVC">SVC (class in hummingbird.ml.operator_converters.sklearn.sv)</a>
 </li>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hummingbird.ml.operator_converters.sklearn.decision_tree &mdash; hummingbird  documentation</title>
+  <title>hummingbird.ml.operator_converters._label_encoder_implementations &mdash; hummingbird  documentation</title>
   
 
   
@@ -38,8 +38,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hummingbird.ml.operator_converters.sklearn.decomposition" href="hummingbird.ml.operator_converters.sklearn.decomposition.html" />
-    <link rel="prev" title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor" href="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.html" /> 
+    <link rel="next" title="hummingbird.ml.operator_converters._linear_implementations" href="hummingbird.ml.operator_converters._linear_implementations.html" />
+    <link rel="prev" title="hummingbird.ml.operator_converters._kneighbors_implementations" href="hummingbird.ml.operator_converters._kneighbors_implementations.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -106,7 +106,7 @@
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._kneighbors_implementations.html">hummingbird.ml.operator_converters._kneighbors_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._label_encoder_implementations.html">hummingbird.ml.operator_converters._label_encoder_implementations</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">hummingbird.ml.operator_converters._label_encoder_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._linear_implementations.html">hummingbird.ml.operator_converters._linear_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._mlp_implementations.html">hummingbird.ml.operator_converters._mlp_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
@@ -120,7 +120,7 @@
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.xgb.html">hummingbird.ml.operator_converters.xgb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.onnx.html">hummingbird.ml.operator_converters.onnx</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.html">hummingbird.ml.operator_converters.sklearn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.html">hummingbird.ml.operator_converters.sklearn</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sparkml.html">hummingbird.ml.operator_converters.sparkml</a></li>
 </ul>
 </li>
@@ -180,15 +180,13 @@
         
           <li><a href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a> &raquo;</li>
         
-          <li><a href="hummingbird.ml.operator_converters.sklearn.html">hummingbird.ml.operator_converters.sklearn</a> &raquo;</li>
-        
-      <li>hummingbird.ml.operator_converters.sklearn.decision_tree</li>
+      <li>hummingbird.ml.operator_converters._label_encoder_implementations</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/api/hummingbird.ml.operator_converters.sklearn.decision_tree.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/hummingbird.ml.operator_converters._label_encoder_implementations.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -201,63 +199,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-hummingbird.ml.operator_converters.sklearn.decision_tree">
-<span id="hummingbird-ml-operator-converters-sklearn-decision-tree"></span><h1>hummingbird.ml.operator_converters.sklearn.decision_tree<a class="headerlink" href="#module-hummingbird.ml.operator_converters.sklearn.decision_tree" title="Permalink to this headline">¶</a></h1>
-<p>Converters for scikit-learn decision-tree-based models: DecisionTree, RandomForest and ExtraTrees.</p>
-<dl class="py function">
-<dt id="hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_decision_tree_classifier">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.decision_tree.</code><code class="sig-name descname">convert_sklearn_decision_tree_classifier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/abb0759/hummingbirdhummingbird/ml/operator_converters/sklearn/decision_tree.py#L80"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_decision_tree_classifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converter for <cite>sklearn.tree.DecisionTreeClassifier</cite>.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>operator: An operator wrapping a <cite>sklearn.tree.DecisionTreeClassifier</cite> model
-device: String defining the type of device the converted operator should be run on
-extra_config: Extra configuration used to select the best conversion strategy</p>
-</dd>
-<dt>Returns:</dt><dd><p>A PyTorch model</p>
-</dd>
-</dl>
+  <div class="section" id="module-hummingbird.ml.operator_converters._label_encoder_implementations">
+<span id="hummingbird-ml-operator-converters-label-encoder-implementations"></span><h1>hummingbird.ml.operator_converters._label_encoder_implementations<a class="headerlink" href="#module-hummingbird.ml.operator_converters._label_encoder_implementations" title="Permalink to this headline">¶</a></h1>
+<p>Base classes for LabelEncoders</p>
+<dl class="py class">
+<dt id="hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder">
+<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml.operator_converters._label_encoder_implementations.</code><code class="sig-name descname">NumericLabelEncoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">classes</span></em>, <em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/abb0759/hummingbirdhummingbird/ml/operator_converters/_label_encoder_implementations.py#L50"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._base_operator.html#hummingbird.ml.operator_converters._base_operator.BaseOperator" title="hummingbird.ml.operator_converters._base_operator.BaseOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._base_operator.BaseOperator</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<dl class="py attribute">
+<dt id="hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/abb0759/hummingbirdhummingbird/ml/operator_converters/_label_encoder_implementations.py#L56"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
 </dd></dl>
 
-<dl class="py function">
-<dt id="hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_decision_tree_regressor">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.decision_tree.</code><code class="sig-name descname">convert_sklearn_decision_tree_regressor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/abb0759/hummingbirdhummingbird/ml/operator_converters/sklearn/decision_tree.py#L98"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_decision_tree_regressor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converter for <cite>sklearn.tree.DecisionTreeRegressor</cite>.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>operator: An operator wrapping a <cite>sklearn.tree.DecisionTreeRegressor</cite> model
-device: String defining the type of device the converted operator should be run on
-extra_config: Extra configuration used to select the best conversion strategy</p>
-</dd>
-<dt>Returns:</dt><dd><p>A PyTorch model</p>
-</dd>
-</dl>
 </dd></dl>
 
-<dl class="py function">
-<dt id="hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_random_forest_classifier">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.decision_tree.</code><code class="sig-name descname">convert_sklearn_random_forest_classifier</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/abb0759/hummingbirdhummingbird/ml/operator_converters/sklearn/decision_tree.py#L19"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_random_forest_classifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converter for <cite>sklearn.ensemble.RandomForestClassifier</cite> and <cite>sklearn.ensemble.ExtraTreesClassifier</cite>.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>operator: An operator wrapping a tree (ensemble) classifier model
-device: String defining the type of device the converted operator should be run on
-extra_config: Extra configuration used to select the best conversion strategy</p>
-</dd>
-<dt>Returns:</dt><dd><p>A PyTorch model</p>
-</dd>
-</dl>
+<dl class="py class">
+<dt id="hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder">
+<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml.operator_converters._label_encoder_implementations.</code><code class="sig-name descname">StringLabelEncoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">classes</span></em>, <em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/abb0759/hummingbirdhummingbird/ml/operator_converters/_label_encoder_implementations.py#L18"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._base_operator.html#hummingbird.ml.operator_converters._base_operator.BaseOperator" title="hummingbird.ml.operator_converters._base_operator.BaseOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._base_operator.BaseOperator</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<p>LabelEncoder over string data types.
+When the ONNX backend is selected, this operator only works for PyTorch =&gt; 1.8.0.</p>
+<dl class="py attribute">
+<dt id="hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder._abc_impl">
+<code class="sig-name descname">_abc_impl</code><em class="property"> = &lt;_abc_data object&gt;</em><a class="headerlink" href="#hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/abb0759/hummingbirdhummingbird/ml/operator_converters/_label_encoder_implementations.py#L41"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
 </dd></dl>
 
-<dl class="py function">
-<dt id="hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_random_forest_regressor">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.decision_tree.</code><code class="sig-name descname">convert_sklearn_random_forest_regressor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/abb0759/hummingbirdhummingbird/ml/operator_converters/sklearn/decision_tree.py#L50"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_random_forest_regressor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converter for <cite>sklearn.ensemble.RandomForestRegressor</cite> and <cite>sklearn.ensemble.ExtraTreesRegressor</cite></p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>operator: An operator wrapping the RandomForestRegressor and ExtraTreesRegressor model
-device: String defining the type of device the converted operator should be run on
-extra_config: Extra configuration used to select the best conversion strategy</p>
-</dd>
-<dt>Returns:</dt><dd><p>A PyTorch model</p>
-</dd>
-</dl>
 </dd></dl>
 
 </div>
@@ -270,10 +264,10 @@ extra_config: Extra configuration used to select the best conversion strategy</p
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="hummingbird.ml.operator_converters.sklearn.decomposition.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters.sklearn.decomposition" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="hummingbird.ml.operator_converters._linear_implementations.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters._linear_implementations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="hummingbird.ml.operator_converters._kneighbors_implementations.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters._kneighbors_implementations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

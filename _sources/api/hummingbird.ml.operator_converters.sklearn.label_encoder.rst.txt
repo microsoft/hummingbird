@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.sklearn.label\_encoder
+==========================================================
+
+.. automodule:: hummingbird.ml.operator_converters.sklearn.label_encoder
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

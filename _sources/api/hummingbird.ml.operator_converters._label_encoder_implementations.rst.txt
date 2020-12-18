@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.\_label\_encoder\_implementations
+=====================================================================
+
+.. automodule:: hummingbird.ml.operator_converters._label_encoder_implementations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
