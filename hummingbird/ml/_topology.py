@@ -65,7 +65,7 @@ def _get_trace_input_from_test_input(input, remainder_size=None, extra_config={}
         trace_input = []
         for input_ in input:
             # Convert string arrays into int32.
-            if input_.dtype.kind in {"U", "S"}:
+            if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
                 assert constants.MAX_STRING_LENGTH in extra_config
                 max_string_length = extra_config[constants.MAX_STRING_LENGTH]
 
@@ -76,7 +76,7 @@ def _get_trace_input_from_test_input(input, remainder_size=None, extra_config={}
             remainder = tuple([inp[0:remainder_size, :] for inp in trace_input])
     else:
         # Convert string arrays into int32.
-        if input.dtype.kind in {"U", "S"}:
+        if input.dtype.kind in constants.SUPPORTED_STRING_TYPES:
             assert constants.MAX_STRING_LENGTH in extra_config
             max_string_length = extra_config[constants.MAX_STRING_LENGTH]
 
@@ -480,7 +480,7 @@ class _PyTorchBackendModel(torch.nn.Module, object):
                     input_ = np.array(input_)
                 if type(input_) is np.ndarray:
                     # Convert string arrays into int32.
-                    if input_.dtype.kind in {"U", "S"}:
+                    if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
                         assert self.max_string_length is not None
 
                         input_ = from_strings_to_ints(input_, self.max_string_length)

@@ -394,7 +394,7 @@ def _torchscript_wrapper(device, function, *inputs, extra_config={}):
                 inputs[i] = np.array(inputs[i])
             if type(inputs[i]) is np.ndarray:
                 # Convert string arrays into int32.
-                if inputs[i].dtype.kind in {"U", "S"}:
+                if inputs[i].dtype.kind in constants.SUPPORTED_STRING_TYPES:
                     assert constants.MAX_STRING_LENGTH in extra_config
 
                     inputs[i] = from_strings_to_ints(inputs[i], extra_config[constants.MAX_STRING_LENGTH])
@@ -524,7 +524,7 @@ class ONNXSklearnContainer(SklearnContainer):
 
         for i in range(len(inputs)):
             input_ = np.array(inputs[i])
-            if input_.dtype.kind in {"U", "S"}:
+            if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
                 assert constants.MAX_STRING_LENGTH in self._extra_config
 
                 input_ = from_strings_to_ints(input_, self._extra_config[constants.MAX_STRING_LENGTH])
