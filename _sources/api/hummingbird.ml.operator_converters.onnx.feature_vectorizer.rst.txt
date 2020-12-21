@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.onnx.feature\_vectorizer
+============================================================
+
+.. automodule:: hummingbird.ml.operator_converters.onnx.feature_vectorizer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
