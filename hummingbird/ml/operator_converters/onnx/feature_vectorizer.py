@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 """
-Converter for ONNX-ML Array Feature Extractor.
+Converter for ONNX-ML Array Feature Vectorizer.
 """
 
 from onnxconverter_common.registration import register_converter
