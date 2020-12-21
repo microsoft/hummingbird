@@ -61,3 +61,6 @@ MAX_SAMPLES = "max_samples"
 
 N_FEATURES = "n_features"
 """Number of features expected in the input data."""
+
+SUPPORTED_STRING_TYPES = {"S", "U"}
+"""Numpy string types suppoted by Humingbird."""

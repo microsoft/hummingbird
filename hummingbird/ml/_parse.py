@@ -177,7 +177,7 @@ def _declare_input_variables(scope, raw_model_container, extra_config):
                 input_type = Int32TensorType(input.shape)
             elif input.dtype == np.int64:
                 input_type = Int64TensorType(input.shape)
-            elif input.dtype.kind in {"S", "U"}:
+            elif input.dtype.kind in constants.SUPPORTED_STRING_TYPES:
                 input_type = StringTensorType(input.shape)
             else:
                 raise NotImplementedError(
