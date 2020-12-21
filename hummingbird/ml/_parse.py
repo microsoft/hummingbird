@@ -470,6 +470,10 @@ def _parse_onnx_single_operator(scope, operator):
         model: An ONNX operator
     """
 
+    # Identify nodes can just be skipped.
+    if operator.op_type == "Identity":
+        return
+
     # Add the operator in the scope.
     alias = get_onnxml_api_operator_name(operator.op_type)
     this_operator = scope.declare_local_operator(alias, operator)
