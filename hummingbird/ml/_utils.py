@@ -9,6 +9,7 @@ Collection of utility functions used throughout Hummingbird.
 """
 
 from distutils.version import LooseVersion
+import numpy as np
 import torch
 import warnings
 
@@ -157,7 +158,7 @@ def is_spark_dataframe(df):
         return False
 
 
-def _get_device(model):
+def get_device(model):
     """
     Convenient function used to get the runtime device for the model.
     """
@@ -168,6 +169,15 @@ def _get_device(model):
         device = next(model.parameters()).device  # Assuming we are using a single device for all parameters
 
     return device
+
+
+def from_strings_to_ints(input, max_string_length):
+    """
+    Utility function used to transform string inputs into a numerical representation.
+    """
+    shape = list(input.shape)
+    shape.append(max_string_length // 4)
+    return np.array(input, dtype="|S" + str(max_string_length)).view(np.int32).reshape(shape)
 
 
 class _Constants(object):

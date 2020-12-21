@@ -18,7 +18,7 @@ from onnxconverter_common.container import CommonSklearnModelContainer
 import torch
 
 from hummingbird.ml.operator_converters import constants
-from hummingbird.ml._utils import onnx_runtime_installed, tvm_installed, pandas_installed, _get_device
+from hummingbird.ml._utils import onnx_runtime_installed, tvm_installed, pandas_installed, get_device, from_strings_to_ints
 
 if pandas_installed():
     from pandas import DataFrame
@@ -372,7 +372,7 @@ class PyTorchSklearnContainerAnomalyDetection(PyTorchSklearnContainerRegression,
 
 
 # TorchScript containers.
-def _torchscript_wrapper(device, function, *inputs):
+def _torchscript_wrapper(device, function, *inputs, extra_config={}):
     """
     This function contains the code to enable predictions over torchscript models.
     It is used to translates inputs in the proper torch format.
@@ -390,8 +390,18 @@ def _torchscript_wrapper(device, function, *inputs):
 
         # Maps data inputs to the expected type and device.
         for i in range(len(inputs)):
+            if type(inputs[i]) is list:
+                inputs[i] = np.array(inputs[i])
             if type(inputs[i]) is np.ndarray:
-                inputs[i] = torch.from_numpy(inputs[i]).float()
+                # Convert string arrays into int32.
+                if inputs[i].dtype.kind in constants.SUPPORTED_STRING_TYPES:
+                    assert constants.MAX_STRING_LENGTH in extra_config
+
+                    inputs[i] = from_strings_to_ints(inputs[i], extra_config[constants.MAX_STRING_LENGTH])
+                if inputs[i].dtype == np.float64:
+                    # We convert double precision arrays into single precision. Sklearn does the same.
+                    inputs[i] = inputs[i].astype("float32")
+                inputs[i] = torch.from_numpy(inputs[i])
             elif type(inputs[i]) is not torch.Tensor:
                 raise RuntimeError("Inputer tensor {} of not supported type {}".format(i, type(inputs[i])))
             if device.type != "cpu" and device is not None:
@@ -405,9 +415,9 @@ class TorchScriptSklearnContainerTransformer(PyTorchSklearnContainerTransformer)
     """
 
     def transform(self, *inputs):
-        device = _get_device(self.model)
+        device = get_device(self.model)
         f = super(TorchScriptSklearnContainerTransformer, self)._transform
-        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x, extra_config=self._extra_config)  # noqa: E731
 
         return self._run(f_wrapped, *inputs)
 
@@ -418,9 +428,9 @@ class TorchScriptSklearnContainerRegression(PyTorchSklearnContainerRegression):
     """
 
     def predict(self, *inputs):
-        device = _get_device(self.model)
+        device = get_device(self.model)
         f = super(TorchScriptSklearnContainerRegression, self)._predict
-        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x, extra_config=self._extra_config)  # noqa: E731
 
         return self._run(f_wrapped, *inputs)
 
@@ -431,16 +441,16 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
     """
 
     def predict(self, *inputs):
-        device = _get_device(self.model)
+        device = get_device(self.model)
         f = super(TorchScriptSklearnContainerClassification, self)._predict
-        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x, extra_config=self._extra_config)  # noqa: E731
 
         return self._run(f_wrapped, *inputs)
 
     def predict_proba(self, *inputs):
-        device = _get_device(self.model)
+        device = get_device(self.model)
         f = super(TorchScriptSklearnContainerClassification, self)._predict_proba
-        f_wrapped = lambda *x: _torchscript_wrapper(device, f, *x)  # noqa: E731
+        f_wrapped = lambda *x: _torchscript_wrapper(device, f, *x, extra_config=self._extra_config)  # noqa: E731
 
         return self._run(f_wrapped, *inputs)
 
@@ -451,16 +461,16 @@ class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomaly
     """
 
     def predict(self, *inputs):
-        device = _get_device(self.model)
+        device = get_device(self.model)
         f = super(TorchScriptSklearnContainerAnomalyDetection, self)._predict
-        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x, extra_config=self._extra_config)  # noqa: E731
 
         return self._run(f_wrapped, *inputs)
 
     def decision_function(self, *inputs):
-        device = _get_device(self.model)
+        device = get_device(self.model)
         f = super(TorchScriptSklearnContainerAnomalyDetection, self)._decision_function
-        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x, extra_config=self._extra_config)  # noqa: E731
 
         scores = self._run(f_wrapped, *inputs)
 
@@ -469,9 +479,9 @@ class TorchScriptSklearnContainerAnomalyDetection(PyTorchSklearnContainerAnomaly
         return scores
 
     def score_samples(self, *inputs):
-        device = _get_device(self.model)
+        device = get_device(self.model)
         f = self.decision_function
-        f_wrapped = lambda x: _torchscript_wrapper(device, f, x)  # noqa: E731
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, x, extra_config=self._extra_config)  # noqa: E731
 
         return self._run(f_wrapped, *inputs) + self._extra_config[constants.OFFSET]
 
@@ -497,6 +507,7 @@ class ONNXSklearnContainer(SklearnContainer):
             self._session = ort.InferenceSession(self._model.SerializeToString(), sess_options=sess_options)
             self._output_names = [self._session.get_outputs()[i].name for i in range(len(self._session.get_outputs()))]
             self._input_names = [input.name for input in self._session.get_inputs()]
+            self._extra_config = extra_config
         else:
             raise RuntimeError("ONNX Container requires ONNX runtime installed.")
 
@@ -512,7 +523,12 @@ class ONNXSklearnContainer(SklearnContainer):
         named_inputs = {}
 
         for i in range(len(inputs)):
-            named_inputs[self._input_names[i]] = np.array(inputs[i])
+            input_ = np.array(inputs[i])
+            if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
+                assert constants.MAX_STRING_LENGTH in self._extra_config
+
+                input_ = from_strings_to_ints(input_, self._extra_config[constants.MAX_STRING_LENGTH])
+            named_inputs[self._input_names[i]] = input_
 
         return named_inputs
 
