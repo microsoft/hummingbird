@@ -12,6 +12,7 @@ In Hummingbird we use two types of containers:
 """
 
 from abc import ABC, abstractmethod
+import dill
 import os
 import numpy as np
 from onnxconverter_common.container import CommonSklearnModelContainer
@@ -68,6 +69,10 @@ class SklearnContainer(ABC):
     @property
     def model(self):
         return self._model
+
+    @abstractmethod
+    def save(self, location):
+        return
 
     def _run(self, function, *inputs):
         """
@@ -319,11 +324,34 @@ class SklearnContainerAnomalyDetection(SklearnContainerRegression):
 
 
 # PyTorch containers.
-class PyTorchSklearnContainer(ABC):
+class PyTorchSklearnContainer(SklearnContainer):
     """
     Base container for PyTorch models.
-    We used this container to surface PyTorch-specific functionalities in the containers.
     """
+
+    def save(self, location):
+        assert self.model is not None, "Saving a None model is undefined."
+
+        if constants.TEST_INPUT in self._extra_config:
+            self._extra_config[constants.TEST_INPUT] = None
+
+        if not location.endswith("pkl"):
+            location += "pkl"
+        with open(location, "wb") as file:
+            dill.dump(self, file)
+
+    @staticmethod
+    def load(location):
+        model = None
+        with open(location, "rb") as file:
+            model = dill.load(file)
+
+        if model._n_threads is not None:
+            if torch.get_num_interop_threads() != 1:
+                torch.set_num_interop_threads(1)
+            torch.set_num_threads(model._n_threads)
+
+        return model
 
     def to(self, device):
         self.model.to(device)
@@ -353,7 +381,7 @@ class PyTorchSklearnContainerRegression(SklearnContainerRegression, PyTorchSklea
             return self.model.forward(*inputs)[0].cpu().numpy().ravel()
 
 
-class PyTorchSklearnContainerClassification(PyTorchSklearnContainerRegression, SklearnContainerClassification):
+class PyTorchSklearnContainerClassification(SklearnContainerClassification, PyTorchSklearnContainerRegression):
     """
     Container for PyTorch models mirroring Sklearn classifiers API.
     """
@@ -500,6 +528,10 @@ class ONNXSklearnContainer(SklearnContainer):
         else:
             raise RuntimeError("ONNX Container requires ONNX runtime installed.")
 
+    def save(self, location):
+        with open(location, "wb") as file:
+            dill.dump(self, file)
+
     def _get_named_inputs(self, inputs):
         """
         Retrieve the inputs names from the session object.
@@ -592,6 +624,76 @@ class TVMSklearnContainer(SklearnContainer):
         self._to_tvm_array = lambda x: tvm.nd.array(x, self._ctx)
 
         os.environ["TVM_NUM_THREADS"] = str(self._n_threads)
+
+    def save(self, location):
+        assert self.model is not None, "Saving a None model is undefined."
+        from tvm.contrib import util
+        from tvm import relay
+
+        assert not os.path.exists(location), "Directory {} already exists.".format(location)
+        os.makedirs(location)
+        path_lib = os.path.join(location, "deploy_lib.tar")
+        self._extra_config[constants.TVM_LIB].export_library(path_lib)
+        with open(os.path.join(location, "deploy_graph.json"), "w") as fo:
+            fo.write(self._extra_config[constants.TVM_GRAPH])
+        with open(os.path.join(location, "deploy_param.params"), "wb") as fo:
+            fo.write(relay.save_param_dict(self._extra_config[constants.TVM_PARAMS]))
+
+        # Remove all information that cannot be pickled
+        if constants.TEST_INPUT in self._extra_config:
+            self._extra_config[constants.TEST_INPUT] = None
+        lib = self._extra_config[constants.TVM_LIB]
+        graph = self._extra_config[constants.TVM_GRAPH]
+        params = self._extra_config[constants.TVM_PARAMS]
+        ctx = self._extra_config[constants.TVM_CONTEXT]
+        model = self._model
+        self._extra_config[constants.TVM_LIB] = None
+        self._extra_config[constants.TVM_GRAPH] = None
+        self._extra_config[constants.TVM_PARAMS] = None
+        self._extra_config[constants.TVM_CONTEXT] = None
+        self._ctx = "cpu" if self._ctx.device_type == 1 else "cuda"
+        self._model = None
+
+        with open(os.path.join(location, "container.pkl"), "wb") as file:
+            dill.dump(self, file)
+
+        # Restore the information
+        self._extra_config[constants.TVM_LIB] = lib
+        self._extra_config[constants.TVM_GRAPH] = graph
+        self._extra_config[constants.TVM_PARAMS] = params
+        self._extra_config[constants.TVM_CONTEXT] = ctx
+        self._ctx = ctx
+        self._model = model
+
+    @staticmethod
+    def load(location):
+        assert tvm_installed()
+        import tvm
+        from tvm.contrib import util, graph_runtime
+        from tvm import relay
+
+        container = None
+        assert os.path.exists(location), "Directory {} not found.".format(location)
+        path_lib = os.path.join(location, "deploy_lib.tar")
+        graph = open(os.path.join(location, "deploy_graph.json")).read()
+        lib = tvm.runtime.module.load_module(path_lib)
+        params = relay.load_param_dict(open(os.path.join(location, "deploy_param.params"), "rb").read())
+        # params = bytearray(open(os.path.join(location, "deploy_param.params"), "rb").read())
+        with open(os.path.join(location, "container.pkl"), "rb") as file:
+            container = dill.load(file)
+
+        assert container is not None, "Failed to load the model container."
+
+        ctx = tvm.cpu() if container._ctx == "cpu" else tvm.gpu
+        container._model = graph_runtime.create(graph, lib, ctx)
+        container._model.set_input(**params)
+
+        container._extra_config[constants.TVM_GRAPH] = graph
+        container._extra_config[constants.TVM_LIB] = lib
+        container._extra_config[constants.TVM_PARAMS] = params
+        container._extra_config[constants.TVM_CONTEXT] = ctx
+        container._ctx = ctx
+        return container
 
     def _to_tvm_tensor(self, *inputs):
         tvm_tensors = {}

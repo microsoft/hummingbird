@@ -38,6 +38,15 @@ ONNX_INITIALIZERS = "onnx_initializers"
 TVM_CONTEXT = "tvm_context"
 """The context for TVM containing information on the target."""
 
+TVM_GRAPH = "tvm_graph"
+"""The graph defining the TVM model. This parameter is used for saving and loading a TVM model."""
+
+TVM_LIB = "tvm_lib"
+"""The lib for the TVM model. This parameter is used for saving and loading a TVM model."""
+
+TVM_PARAMS = "tvm_params"
+"""The params for the TVM model. This parameter is used for saving and loading a TVM model."""
+
 TVM_INPUT_NAMES = "tvm_input_names"
 """TVM expects named inputs. This is used to set the names for the inputs."""
 

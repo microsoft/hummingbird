@@ -3,6 +3,8 @@ Tests Hummingbird's backends.
 """
 import unittest
 import warnings
+import os
+import shutil
 import numpy as np
 
 from sklearn.ensemble import GradientBoostingClassifier
@@ -64,6 +66,28 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
+    # Test pytorch save and load
+    def test_pytorch_save_load(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "pytOrCh")
+        self.assertIsNotNone(hb_model)
+        hb_model.save("pt-tmp.pkl")
+
+        hb_model_loaded = hummingbird.ml.PyTorchSklearnContainer.load("pt-tmp.pkl")
+        np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+        os.remove("pt-tmp.pkl")
+
     # Test not supported backends
     def test_unsupported_backend(self):
         warnings.filterwarnings("ignore")
@@ -112,6 +136,29 @@ class TestBackends(unittest.TestCase):
 
         # Test tvm requires test_input
         self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "tvm")
+
+    # Test pytorch save and load
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_save_load(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertIsNotNone(hb_model)
+        hb_model.save("tvm-tmp")
+
+        hb_model_loaded = hummingbird.ml.TVMSklearnContainer.load("tvm-tmp")
+        np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+        shutil.rmtree("tvm-tmp")
 
     # Test onnx requires test_data or initial_types
     @unittest.skipIf(
