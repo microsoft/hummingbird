@@ -72,6 +72,12 @@ class SklearnContainer(ABC):
 
     @abstractmethod
     def save(self, location):
+        """
+        Method used to save the container for future use.
+
+        Args:
+            location: The location on the file system where to save the model.
+        """
         return
 
     def _run(self, function, *inputs):
@@ -335,23 +341,53 @@ class PyTorchSklearnContainer(SklearnContainer):
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
 
-        if not location.endswith("pkl"):
-            location += "pkl"
-        with open(location, "wb") as file:
-            dill.dump(self, file)
+        if "torch.jit" in str(type(self.model)):
+            assert not os.path.exists(location), "Directory {} already exists.".format(location)
+            os.makedirs(location)
+            self.model.save(os.path.join(location, "deploy_model.zip"))
+            model = self.model
+            self._model = None
+            with open(os.path.join(location, "container.pkl"), "wb") as file:
+                dill.dump(self, file)
+            self._model = model
+        else:
+            if not location.endswith("pkl"):
+                location += "pkl"
+            assert not os.path.exists(location), "File {} already exists.".format(location)
+            with open(location, "wb") as file:
+                dill.dump(self, file)
 
     @staticmethod
     def load(location):
-        model = None
-        with open(location, "rb") as file:
-            model = dill.load(file)
+        """
+        Method used to load a container from the file system.
 
-        if model._n_threads is not None:
+        Args:
+            location: The location on the file system where to load the model.
+
+        Returns:
+            The loaded model.
+        """
+        assert os.path.exists(location), "Model location {} does not exist.".format(location)
+
+        container = None
+        if os.path.isdir(location):
+            # This is a torch.jit model
+            model = torch.jit.load(os.path.join(location, "deploy_model.zip"))
+            with open(os.path.join(location, "container.pkl"), "rb") as file:
+                container = dill.load(file)
+            container._model = model
+        else:
+            # This is a pytorch  model
+            with open(location, "rb") as file:
+                container = dill.load(file)
+
+        if container._n_threads is not None:
             if torch.get_num_interop_threads() != 1:
                 torch.set_num_interop_threads(1)
-            torch.set_num_threads(model._n_threads)
+            torch.set_num_threads(container._n_threads)
 
-        return model
+        return container
 
     def to(self, device):
         self.model.to(device)
@@ -529,8 +565,55 @@ class ONNXSklearnContainer(SklearnContainer):
             raise RuntimeError("ONNX Container requires ONNX runtime installed.")
 
     def save(self, location):
-        with open(location, "wb") as file:
+        assert self.model is not None, "Saving a None model is undefined."
+        import onnx
+
+        if constants.TEST_INPUT in self._extra_config:
+            self._extra_config[constants.TEST_INPUT] = None
+
+        assert not os.path.exists(location), "Directory {} already exists.".format(location)
+        os.makedirs(location)
+        onnx.save(self.model, os.path.join(location, "deploy_model.onnx"))
+        model = self.model
+        session = self._session
+        self._model = None
+        self._session = None
+        with open(os.path.join(location, "container.pkl"), "wb") as file:
             dill.dump(self, file)
+        self._model = model
+        self._session = session
+
+    @staticmethod
+    def load(location):
+        """
+        Method used to load a container from the file system.
+
+        Args:
+            location: The location on the file system where to load the model.
+
+        Returns:
+            The loaded model.
+        """
+
+        assert os.path.exists(location), "Model location {} does not exist.".format(location)
+        assert onnx_runtime_installed
+        import onnx
+        import onnxruntime as ort
+
+        container = None
+        model = onnx.load(os.path.join(location, "deploy_model.onnx"))
+        with open(os.path.join(location, "container.pkl"), "rb") as file:
+            container = dill.load(file)
+        container._model = model
+
+        sess_options = ort.SessionOptions()
+        if container._n_threads is not None:
+            sess_options.intra_op_num_threads = container._n_threads
+            sess_options.inter_op_num_threads = 1
+            sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+        container._session = ort.InferenceSession(container._model.SerializeToString(), sess_options=sess_options)
+
+        return container
 
     def _get_named_inputs(self, inputs):
         """
@@ -667,6 +750,16 @@ class TVMSklearnContainer(SklearnContainer):
 
     @staticmethod
     def load(location):
+        """
+        Method used to load a container from the file system.
+
+        Args:
+            location: The location on the file system where to load the model.
+
+        Returns:
+            The loaded model.
+        """
+
         assert tvm_installed()
         import tvm
         from tvm.contrib import util, graph_runtime
@@ -693,6 +786,9 @@ class TVMSklearnContainer(SklearnContainer):
         container._extra_config[constants.TVM_PARAMS] = params
         container._extra_config[constants.TVM_CONTEXT] = ctx
         container._ctx = ctx
+
+        os.environ["TVM_NUM_THREADS"] = str(container._n_threads)
+
         return container
 
     def _to_tvm_tensor(self, *inputs):
