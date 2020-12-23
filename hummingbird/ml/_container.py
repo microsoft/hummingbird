@@ -342,20 +342,24 @@ class PyTorchSklearnContainer(SklearnContainer):
             self._extra_config[constants.TEST_INPUT] = None
 
         if "torch.jit" in str(type(self.model)):
+            # This is a torchscript model.
             assert not os.path.exists(location), "Directory {} already exists.".format(location)
             os.makedirs(location)
-            self.model.save(os.path.join(location, "deploy_model.zip"))
+            self.model.save(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
             model = self.model
             self._model = None
             with open(os.path.join(location, "container.pkl"), "wb") as file:
                 dill.dump(self, file)
             self._model = model
-        else:
+        elif "PyTorchBackendModel" in str(type(self.model)):
+            # This is a pytorch model.
             if not location.endswith("pkl"):
                 location += "pkl"
             assert not os.path.exists(location), "File {} already exists.".format(location)
             with open(location, "wb") as file:
                 dill.dump(self, file)
+        else:
+            raise RuntimeError("Model type {} not recognized.".format(type(self.model)))
 
     @staticmethod
     def load(location):
@@ -373,7 +377,7 @@ class PyTorchSklearnContainer(SklearnContainer):
         container = None
         if os.path.isdir(location):
             # This is a torch.jit model
-            model = torch.jit.load(os.path.join(location, "deploy_model.zip"))
+            model = torch.jit.load(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
             with open(os.path.join(location, "container.pkl"), "rb") as file:
                 container = dill.load(file)
             container._model = model
@@ -382,6 +386,7 @@ class PyTorchSklearnContainer(SklearnContainer):
             with open(location, "rb") as file:
                 container = dill.load(file)
 
+        # Need to set the number of threads to use as set in the original container.
         if container._n_threads is not None:
             if torch.get_num_interop_threads() != 1:
                 torch.set_num_interop_threads(1)
@@ -573,12 +578,12 @@ class ONNXSklearnContainer(SklearnContainer):
 
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
-        onnx.save(self.model, os.path.join(location, "deploy_model.onnx"))
+        onnx.save(self.model, os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
         model = self.model
         session = self._session
         self._model = None
         self._session = None
-        with open(os.path.join(location, "container.pkl"), "wb") as file:
+        with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "wb") as file:
             dill.dump(self, file)
         self._model = model
         self._session = session
@@ -601,13 +606,14 @@ class ONNXSklearnContainer(SklearnContainer):
         import onnxruntime as ort
 
         container = None
-        model = onnx.load(os.path.join(location, "deploy_model.onnx"))
-        with open(os.path.join(location, "container.pkl"), "rb") as file:
+        model = onnx.load(os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
+        with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
             container = dill.load(file)
         container._model = model
 
         sess_options = ort.SessionOptions()
         if container._n_threads is not None:
+            # Need to set the number of threads to use as set in the original container.
             sess_options.intra_op_num_threads = container._n_threads
             sess_options.inter_op_num_threads = 1
             sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
@@ -715,11 +721,11 @@ class TVMSklearnContainer(SklearnContainer):
 
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
-        path_lib = os.path.join(location, "deploy_lib.tar")
+        path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)
         self._extra_config[constants.TVM_LIB].export_library(path_lib)
-        with open(os.path.join(location, "deploy_graph.json"), "w") as fo:
+        with open(os.path.join(location, constants.SAVE_LOAD_TVM_GRAPH_PATH), "w") as fo:
             fo.write(self._extra_config[constants.TVM_GRAPH])
-        with open(os.path.join(location, "deploy_param.params"), "wb") as fo:
+        with open(os.path.join(location, constants.SAVE_LOAD_TVM_PARAMS_PATH), "wb") as fo:
             fo.write(relay.save_param_dict(self._extra_config[constants.TVM_PARAMS]))
 
         # Remove all information that cannot be pickled
@@ -737,7 +743,7 @@ class TVMSklearnContainer(SklearnContainer):
         self._ctx = "cpu" if self._ctx.device_type == 1 else "cuda"
         self._model = None
 
-        with open(os.path.join(location, "container.pkl"), "wb") as file:
+        with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "wb") as file:
             dill.dump(self, file)
 
         # Restore the information
@@ -767,12 +773,12 @@ class TVMSklearnContainer(SklearnContainer):
 
         container = None
         assert os.path.exists(location), "Directory {} not found.".format(location)
-        path_lib = os.path.join(location, "deploy_lib.tar")
-        graph = open(os.path.join(location, "deploy_graph.json")).read()
+        path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)
+        graph = open(os.path.join(location, constants.SAVE_LOAD_TVM_GRAPH_PATH)).read()
         lib = tvm.runtime.module.load_module(path_lib)
-        params = relay.load_param_dict(open(os.path.join(location, "deploy_param.params"), "rb").read())
+        params = relay.load_param_dict(open(os.path.join(location, constants.SAVE_LOAD_TVM_PARAMS_PATH), "rb").read())
         # params = bytearray(open(os.path.join(location, "deploy_param.params"), "rb").read())
-        with open(os.path.join(location, "container.pkl"), "rb") as file:
+        with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
             container = dill.load(file)
 
         assert container is not None, "Failed to load the model container."
@@ -787,6 +793,7 @@ class TVMSklearnContainer(SklearnContainer):
         container._extra_config[constants.TVM_CONTEXT] = ctx
         container._ctx = ctx
 
+        # Need to set the number of threads to use as set in the original container.
         os.environ["TVM_NUM_THREADS"] = str(container._n_threads)
 
         return container
