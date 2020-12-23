@@ -115,6 +115,10 @@ def _compile_tvm_model(topology, torch_model, trace_input, target, ctx, config, 
     tvm_model = graph_runtime.create(graph, lib, ctx)
     tvm_model.set_input(**params)
 
+    extra_config[constants.TVM_GRAPH] = graph
+    extra_config[constants.TVM_LIB] = lib
+    extra_config[constants.TVM_PARAMS] = params
+
     return tvm_model
 
 
