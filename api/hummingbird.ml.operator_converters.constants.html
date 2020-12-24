@@ -274,6 +274,42 @@
 </dd></dl>
 
 <dl class="py data">
+<dt id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_CONTAINER_PATH">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">SAVE_LOAD_CONTAINER_PATH</code><em class="property"> = 'container.pkl'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_CONTAINER_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the container when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_ONNX_PATH">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">SAVE_LOAD_ONNX_PATH</code><em class="property"> = 'deploy_model.onnx'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_ONNX_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the onnx model when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_TORCH_JIT_PATH">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">SAVE_LOAD_TORCH_JIT_PATH</code><em class="property"> = 'deploy_model.zip'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_TORCH_JIT_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the torchscript model when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_GRAPH_PATH">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">SAVE_LOAD_TVM_GRAPH_PATH</code><em class="property"> = 'deploy_graph.json'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_GRAPH_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the TVM graph when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_LIB_PATH">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">SAVE_LOAD_TVM_LIB_PATH</code><em class="property"> = 'deploy_lib.tar'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_LIB_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the TVM lib when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_PARAMS_PATH">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">SAVE_LOAD_TVM_PARAMS_PATH</code><em class="property"> = 'deploy_param.params'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_PARAMS_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the TVM params when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt id="hummingbird.ml.operator_converters.constants.SIGMOID">
 <code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">SIGMOID</code><em class="property"> = 'LOGISTIC'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SIGMOID" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sigmoid post transform.</p>
@@ -304,9 +340,27 @@
 </dd></dl>
 
 <dl class="py data">
+<dt id="hummingbird.ml.operator_converters.constants.TVM_GRAPH">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">TVM_GRAPH</code><em class="property"> = 'tvm_graph'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TVM_GRAPH" title="Permalink to this definition">¶</a></dt>
+<dd><p>The graph defining the TVM model. This parameter is used for saving and loading a TVM model.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt id="hummingbird.ml.operator_converters.constants.TVM_INPUT_NAMES">
 <code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">TVM_INPUT_NAMES</code><em class="property"> = 'tvm_input_names'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TVM_INPUT_NAMES" title="Permalink to this definition">¶</a></dt>
 <dd><p>TVM expects named inputs. This is used to set the names for the inputs.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.operator_converters.constants.TVM_LIB">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">TVM_LIB</code><em class="property"> = 'tvm_lib'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TVM_LIB" title="Permalink to this definition">¶</a></dt>
+<dd><p>The lib for the TVM model. This parameter is used for saving and loading a TVM model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt id="hummingbird.ml.operator_converters.constants.TVM_PARAMS">
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.constants.</code><code class="sig-name descname">TVM_PARAMS</code><em class="property"> = 'tvm_params'</em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TVM_PARAMS" title="Permalink to this definition">¶</a></dt>
+<dd><p>The params for the TVM model. This parameter is used for saving and loading a TVM model.</p>
 </dd></dl>
 
 <dl class="py data">
