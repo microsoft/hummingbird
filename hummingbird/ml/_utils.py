@@ -180,6 +180,47 @@ def from_strings_to_ints(input, max_string_length):
     return np.array(input, dtype="|S" + str(max_string_length)).view(np.int32).reshape(shape)
 
 
+def load(location):
+    """
+    Utility function used to load arbitrary Hummingbird models.
+    """
+    # Add load capabilities
+    from ._container import PyTorchSklearnContainer
+    from ._container import TVMSklearnContainer
+    from ._container import ONNXSklearnContainer
+
+    model = None
+
+    # Try as TVM model.
+    try:
+        model = TVMSklearnContainer.load(location)
+
+        assert model.model is not None
+        return model
+    except:  # noqa: E722
+        pass
+
+    # Try as ONNX model.
+    try:
+        model = ONNXSklearnContainer.load(location)
+
+        assert model.model is not None
+        return model
+    except:  # noqa: E722
+        pass
+
+    # Try as pytorch \ torchscript model.
+    try:
+        model = PyTorchSklearnContainer.load(location)
+
+        assert model.model is not None
+        return model
+    except:  # noqa: E722
+        pass
+
+    raise RuntimeError("Cannot load model at location {}.".format(location))
+
+
 class _Constants(object):
     """
     Class enabling the proper definition of constants.
