@@ -732,7 +732,6 @@ class TVMSklearnContainer(SklearnContainer):
 
     def save(self, location):
         assert self.model is not None, "Saving a None model is undefined."
-        from tvm.contrib import util
         from tvm import relay
 
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
@@ -784,7 +783,7 @@ class TVMSklearnContainer(SklearnContainer):
 
         assert tvm_installed()
         import tvm
-        from tvm.contrib import util, graph_runtime
+        from tvm.contrib import graph_runtime
         from tvm import relay
 
         container = None
