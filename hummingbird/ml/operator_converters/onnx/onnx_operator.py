@@ -58,6 +58,14 @@ class Sum(BaseOperator, torch.nn.Module):
         return torch.sum(x)
 
 
+class Less(BaseOperator, torch.nn.Module):
+    def __init__(self):
+        super(Less, self).__init__()
+
+    def forward(self, x):
+        return torch.less(x)
+
+
 class Neg(BaseOperator, torch.nn.Module):
     def __init__(self):
         super(Neg, self).__init__()
@@ -72,6 +80,22 @@ class Abs(BaseOperator, torch.nn.Module):
 
     def forward(self, x):
         return torch.abs(x)
+
+
+class Mul(BaseOperator, torch.nn.Module):
+    def __init__(self):
+        super(Mul, self).__init__()
+
+    def forward(self, x):
+        return torch.multiply(x)
+
+
+class Div(BaseOperator, torch.nn.Module):
+    def __init__(self):
+        super(Div, self).__init__()
+
+    def forward(self, x):
+        return torch.divide(x)
 
 
 def convert_onnx_cast(operator, device=None, extra_config={}):
@@ -192,9 +216,67 @@ def convert_onnx_abs(operator, device=None, extra_config={}):
     return Abs()
 
 
+def convert_onnx_mul(operator, device=None, extra_config={}):
+    """
+    Converter for `ai.onnx.Mul`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Mul` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    # Generate the model.
+    return Mul()
+
+
+def convert_onnx_div(operator, device=None, extra_config={}):
+    """
+    Converter for `ai.onnx.Div`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Div` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    # Generate the model.
+    return Div()
+
+
+def convert_onnx_less(operator, device=None, extra_config={}):
+    """
+    Converter for `ai.onnx.Less`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Less` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    # Generate the model.
+    return Less()
+
+
 register_converter("ONNXMLAbs", convert_onnx_abs)
+register_converter("ONNXMLAdd", convert_onnx_sum)
 register_converter("ONNXMLCast", convert_onnx_cast)
 register_converter("ONNXMLConcat", convert_onnx_concat)
+register_converter("ONNXMLDiv", convert_onnx_div)
+register_converter("ONNXMLLess", convert_onnx_less)
+register_converter("ONNXMLMul", convert_onnx_mul)
 register_converter("ONNXMLNeg", convert_onnx_neg)
 register_converter("ONNXMLReshape", convert_onnx_reshape)
 register_converter("ONNXMLSum", convert_onnx_sum)

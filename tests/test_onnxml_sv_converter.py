@@ -18,7 +18,7 @@ if onnx_ml_tools_installed():
     from onnxmltools.convert.common.data_types import FloatTensorType as FloatTensorType_onnx
 
 
-class TestONNXLinear(unittest.TestCase):
+class TestONNXSVC(unittest.TestCase):
     def _test_sv(self, classes):
         """
         This helper function tests conversion of `ai.onnx.ml.SVMClassifier`
