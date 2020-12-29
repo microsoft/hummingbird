@@ -342,6 +342,8 @@ class PyTorchSklearnContainer(SklearnContainer):
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
 
+        if location.endswith("zip"):
+            location = location[:-4]
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
 
@@ -400,7 +402,7 @@ class PyTorchSklearnContainer(SklearnContainer):
             if not location.endswith("zip"):
                 zip_location = location + ".zip"
             else:
-                location = zip_location[-4]
+                location = zip_location[:-4]
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)
@@ -623,6 +625,8 @@ class ONNXSklearnContainer(SklearnContainer):
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
 
+        if location.endswith("zip"):
+            location = location[:-4]
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
 
@@ -676,7 +680,7 @@ class ONNXSklearnContainer(SklearnContainer):
             if not location.endswith("zip"):
                 zip_location = location + ".zip"
             else:
-                location = zip_location[-4]
+                location = zip_location[:-4]
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)
@@ -808,6 +812,8 @@ class TVMSklearnContainer(SklearnContainer):
         assert self.model is not None, "Saving a None model is undefined."
         from tvm import relay
 
+        if location.endswith("zip"):
+            location = location[:-4]
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
 
@@ -881,7 +887,7 @@ class TVMSklearnContainer(SklearnContainer):
             if not location.endswith("zip"):
                 zip_location = location + ".zip"
             else:
-                location = zip_location[-4]
+                location = zip_location[:-4]
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)
