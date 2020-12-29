@@ -11,6 +11,7 @@ Collection of utility functions used throughout Hummingbird.
 from distutils.version import LooseVersion
 import numpy as np
 import torch
+import os
 import warnings
 
 from hummingbird.ml.exceptions import ConstantError
@@ -189,36 +190,37 @@ def load(location):
     from ._container import TVMSklearnContainer
     from ._container import ONNXSklearnContainer
 
+    import shutil
+    from hummingbird.ml.operator_converters import constants
+
     model = None
+    model_type = None
 
-    # Try as TVM model.
-    try:
-        model = TVMSklearnContainer.load(location)
+    # Unzip the dir.
+    zip_location = location
+    if not location.endswith("zip"):
+        zip_location = location + ".zip"
+    else:
+        location = zip_location[-4]
+    shutil.unpack_archive(zip_location, location, format="zip")
 
-        assert model.model is not None
-        return model
-    except:  # noqa: E722
-        pass
+    assert os.path.exists(location), "Model location {} does not exist.".format(location)
 
-    # Try as ONNX model.
-    try:
-        model = ONNXSklearnContainer.load(location)
+    # Load the model type.
+    with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
+        model_type = file.readline()
 
-        assert model.model is not None
-        return model
-    except:  # noqa: E722
-        pass
+    if "torch" in model_type:
+        model = PyTorchSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+    elif "onnx" in model_type:
+        model = ONNXSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+    elif "tvm" in model_type:
+        model = TVMSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+    else:
+        raise RuntimeError("Model type {} not recognized.".format(model_type))
 
-    # Try as pytorch \ torchscript model.
-    try:
-        model = PyTorchSklearnContainer.load(location)
-
-        assert model.model is not None
-        return model
-    except:  # noqa: E722
-        pass
-
-    raise RuntimeError("Cannot load model at location {}.".format(location))
+    assert model.model is not None
+    return model
 
 
 class _Constants(object):
