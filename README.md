@@ -111,6 +111,12 @@ model.predict(X)
 # Run predictions on GPU
 model.to('cuda')
 model.predict(X)
+
+# Save the model
+model.save('hb_model.pkl')
+
+# Load the model back
+model = hummingbird.ml.load('hb_model.pkl')
 ```
 
 # Documentation
