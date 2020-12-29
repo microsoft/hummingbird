@@ -113,10 +113,10 @@ model.to('cuda')
 model.predict(X)
 
 # Save the model
-model.save('hb_model.pkl')
+model.save('hb_model')
 
 # Load the model back
-model = hummingbird.ml.load('hb_model.pkl')
+model = hummingbird.ml.load('hb_model')
 ```
 
 # Documentation
