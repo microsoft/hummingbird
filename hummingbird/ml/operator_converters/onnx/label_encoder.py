@@ -34,7 +34,7 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
         elif attr.name == "keys_strings":
             # Note that these lines will fail later on for pytorch < 1.8
             keys = np.array([x.decode("UTF-8") for x in attr.strings])
-            return StringLabelEncoder(keys, device)
+            return StringLabelEncoder(keys, device, extra_config)
 
     # If we reach here, we have a parsing error.
     raise RuntimeError("Error parsing LabelEncoder, found unexpected None for keys")

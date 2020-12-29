@@ -20,6 +20,7 @@ constants = _Constants(converter_constants, hummingbird_constants)
 from .onnx import onnx_operator  # noqa: E402
 from .onnx import array_feature_extractor as onnx_afe  # noqa: E402, F811
 from .onnx import binarizer as onnx_binarizer  # noqa: E402, F811
+from .onnx import feature_vectorizer  # noqa: E402
 from .onnx import label_encoder as onnx_label_encoder  # noqa: E402, F811
 from .onnx import linear as onnx_linear  # noqa: E402, F811
 from .onnx import normalizer as onnx_normalizer  # noqa: E402, F811

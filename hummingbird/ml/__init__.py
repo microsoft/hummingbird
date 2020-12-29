@@ -24,3 +24,8 @@ from .convert import convert, convert_batch  # noqa: F401, E402
 
 # Add the supported backends in scope.
 from .supported import backends  # noqa: F401, E402
+
+# Add load capabilities
+from ._container import PyTorchSklearnContainer  # noqa: F401, E402
+from ._container import TVMSklearnContainer  # noqa: F401, E402
+from ._container import ONNXSklearnContainer  # noqa: F401, E402

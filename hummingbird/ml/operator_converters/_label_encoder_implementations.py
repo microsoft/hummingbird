@@ -13,6 +13,7 @@ import torch
 import numpy as np
 
 from ._base_operator import BaseOperator
+from . import constants
 
 
 class StringLabelEncoder(BaseOperator, torch.nn.Module):
@@ -21,7 +22,7 @@ class StringLabelEncoder(BaseOperator, torch.nn.Module):
     When the ONNX backend is selected, this operator only works for PyTorch => 1.8.0.
     """
 
-    def __init__(self, classes, device):
+    def __init__(self, classes, device, extra_config={}):
         super(StringLabelEncoder, self).__init__(transformer=True)
         self.regression = False
         self.num_columns = len(classes)
@@ -30,9 +31,13 @@ class StringLabelEncoder(BaseOperator, torch.nn.Module):
             self.max_word_length += 1
 
         data_type = "|S" + str(self.max_word_length)
-        self.max_word_length = self.max_word_length // 4
+        max_length = 0
+        if constants.MAX_STRING_LENGTH in extra_config:
+            extra_config[constants.MAX_STRING_LENGTH]
+        extra_config[constants.MAX_STRING_LENGTH] = max(max_length, self.max_word_length)
 
         # Sort the classes and convert to torch.int32
+        self.max_word_length = self.max_word_length // 4
         classes_conv = torch.from_numpy(np.array(sorted(set(classes)), dtype=data_type).view(np.int32))
         classes_conv = classes_conv.view(1, -1, self.max_word_length)
 

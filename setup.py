@@ -27,6 +27,7 @@ install_requires = [
     "scikit-learn>=0.21.3,<=0.23.2",
     "torch>=1.4.*,<=1.7.0",
     "psutil",
+    "dill",
 ]
 onnx_requires = [
     "onnxruntime>=1.0.0",

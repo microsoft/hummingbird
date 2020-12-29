@@ -36,7 +36,7 @@ from hummingbird.ml._container import (
     TVMSklearnContainerAnomalyDetection,
     BatchContainer,
 )
-from hummingbird.ml._utils import pandas_installed, tvm_installed, _get_device
+from hummingbird.ml._utils import pandas_installed, tvm_installed, get_device, from_strings_to_ints
 from hummingbird.ml.exceptions import MissingConverter
 from hummingbird.ml.operator_converters import constants
 
@@ -55,17 +55,32 @@ def _jit_model(torch_model, trace_input, device, extra_config):
     return torch.jit.trace(torch_model, trace_input).eval()
 
 
-def _get_trace_input_from_test_input(input, remainder_size=None):
+def _get_trace_input_from_test_input(input, remainder_size=None, extra_config={}):
     """
     Utility function used to properly put the inputs into a format understandable by torch.
     If `remainder_size` is provided, also return inputs for a remainder model (see below).
     """
     remainder = None
     if isinstance(input, tuple):
-        trace_input = tuple([torch.from_numpy(i) for i in input])
+        trace_input = []
+        for input_ in input:
+            # Convert string arrays into int32.
+            if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
+                assert constants.MAX_STRING_LENGTH in extra_config
+                max_string_length = extra_config[constants.MAX_STRING_LENGTH]
+
+                input_ = from_strings_to_ints(input_, max_string_length)
+            trace_input.append(torch.from_numpy(input_))
+        trace_input = tuple(trace_input)
         if remainder_size is not None and remainder_size != 0:
             remainder = tuple([inp[0:remainder_size, :] for inp in trace_input])
     else:
+        # Convert string arrays into int32.
+        if input.dtype.kind in constants.SUPPORTED_STRING_TYPES:
+            assert constants.MAX_STRING_LENGTH in extra_config
+            max_string_length = extra_config[constants.MAX_STRING_LENGTH]
+
+            input = from_strings_to_ints(input, max_string_length)
         trace_input = torch.from_numpy(input)
         if remainder_size is not None and remainder_size != 0:
             remainder = trace_input[0:remainder_size, :]
@@ -99,6 +114,10 @@ def _compile_tvm_model(topology, torch_model, trace_input, target, ctx, config, 
 
     tvm_model = graph_runtime.create(graph, lib, ctx)
     tvm_model.set_input(**params)
+
+    extra_config[constants.TVM_GRAPH] = graph
+    extra_config[constants.TVM_LIB] = lib
+    extra_config[constants.TVM_PARAMS] = params
 
     return tvm_model
 
@@ -185,7 +204,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
             output_model_name = str(uuid4().hex) + ".onnx"
 
         # Put the tracing test input into the right format.
-        batch_trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size)
+        batch_trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -265,7 +284,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
             config["relay.FuseOps.max_depth"] = extra_config[constants.TVM_MAX_FUSE_DEPTH]
 
         # First we need to generate the torchscript model.
-        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(test_input, remainder_size)
+        batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
 
         tvm_model = _compile_tvm_model(topology, torch_model, batch_trace_input, target, ctx, config, extra_config)
 
@@ -287,7 +306,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
-            trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size)
+            trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
             if device != "cpu":
                 trace_input.to(device)
             torch_model = torch.jit.trace(torch_model, trace_input).eval()
@@ -434,6 +453,10 @@ class _PyTorchBackendModel(torch.nn.Module, object):
         self._output_names = _fix_var_naming(reversed(operators), output_names, "output")
         self._operator_map = torch.nn.ModuleDict(operator_map)
         self._operators = operators
+        self.max_string_length = None
+
+        if constants.MAX_STRING_LENGTH in extra_config:
+            self.max_string_length = extra_config[constants.MAX_STRING_LENGTH]
 
     def forward(self, *inputs):
         with torch.no_grad():
@@ -452,22 +475,28 @@ class _PyTorchBackendModel(torch.nn.Module, object):
                 inputs = tuple(splits)
             inputs = [*inputs]
             variable_map = {}
-            device = _get_device(self)
+            device = get_device(self)
 
             # Maps data inputs to the expected variables.
             for i, input_name in enumerate(self._input_names):
-                if type(inputs[i]) is list:
-                    inputs[i] = np.array(inputs[i])
-                if type(inputs[i]) is np.ndarray:
-                    inputs[i] = torch.from_numpy(inputs[i])
-                elif type(inputs[i]) is not torch.Tensor:
-                    raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(inputs[i])))
-                if inputs[i].dtype == torch.float64:
+                input_ = inputs[i]
+                if type(input_) is list:
+                    input_ = np.array(input_)
+                if type(input_) is np.ndarray:
+                    # Convert string arrays into int32.
+                    if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
+                        assert self.max_string_length is not None
+
+                        input_ = from_strings_to_ints(input_, self.max_string_length)
+                    input_ = torch.from_numpy(input_)
+                elif type(input_) is not torch.Tensor:
+                    raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(input_)))
+                if input_.dtype == torch.float64:
                     # We convert double precision arrays into single precision. Sklearn does the same.
-                    inputs[i] = inputs[i].float()
+                    input_ = input_.float()
                 if device is not None and device.type != "cpu":
-                    inputs[i] = inputs[i].to(device)
-                variable_map[input_name] = inputs[i]
+                    input_ = input_.to(device)
+                variable_map[input_name] = input_
 
             # Evaluate all the operators in the topology by properly wiring inputs \ outputs
             for operator in self._operators:

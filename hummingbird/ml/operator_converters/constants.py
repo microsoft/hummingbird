@@ -38,8 +38,35 @@ ONNX_INITIALIZERS = "onnx_initializers"
 TVM_CONTEXT = "tvm_context"
 """The context for TVM containing information on the target."""
 
+TVM_GRAPH = "tvm_graph"
+"""The graph defining the TVM model. This parameter is used for saving and loading a TVM model."""
+
+TVM_LIB = "tvm_lib"
+"""The lib for the TVM model. This parameter is used for saving and loading a TVM model."""
+
+TVM_PARAMS = "tvm_params"
+"""The params for the TVM model. This parameter is used for saving and loading a TVM model."""
+
 TVM_INPUT_NAMES = "tvm_input_names"
 """TVM expects named inputs. This is used to set the names for the inputs."""
+
+SAVE_LOAD_CONTAINER_PATH = "container.pkl"
+"""Path where to find the container when saving or loading."""
+
+SAVE_LOAD_TVM_LIB_PATH = "deploy_lib.tar"
+"""Path where to find the TVM lib when saving or loading."""
+
+SAVE_LOAD_TVM_GRAPH_PATH = "deploy_graph.json"
+"""Path where to find the TVM graph when saving or loading."""
+
+SAVE_LOAD_TVM_PARAMS_PATH = "deploy_param.params"
+"""Path where to find the TVM params when saving or loading."""
+
+SAVE_LOAD_TORCH_JIT_PATH = "deploy_model.zip"
+"""Path where to find the torchscript model when saving or loading."""
+
+SAVE_LOAD_ONNX_PATH = "deploy_model.onnx"
+"""Path where to find the onnx model when saving or loading."""
 
 TEST_INPUT = "test_input"
 """The test input data for models that need to be traced."""
@@ -61,3 +88,6 @@ MAX_SAMPLES = "max_samples"
 
 N_FEATURES = "n_features"
 """Number of features expected in the input data."""
+
+SUPPORTED_STRING_TYPES = {"S", "U"}
+"""Numpy string types suppoted by Humingbird."""

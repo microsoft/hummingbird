@@ -70,18 +70,9 @@ class TestONNXLabelEncoder(unittest.TestCase):
         ]
         model.fit(data)
 
-        # max word length is the smallest number which is divisible by 4 and larger than or equal to the length of any word
-        max_word_length = 12
-        view_args = [-1, max_word_length // 4]
-        str_dtype = "|S" + str(max_word_length)
-        np_arr = np.array(data, dtype=str_dtype).view(np.int32)
-
-        # pytorch_input = torch.from_numpy(np_arr).view(*view_args)
-        data_np = np_arr.reshape(*view_args)
-
         onnx_ml_model = convert_sklearn(model, initial_types=[("input", StringTensorType_onnx([4]))])
 
-        onnx_model = convert(onnx_ml_model, "onnx", data_np)
+        onnx_model = convert(onnx_ml_model, "onnx", data)
 
         # Get the predictions for the ONNX-ML model
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
@@ -90,10 +81,10 @@ class TestONNXLabelEncoder(unittest.TestCase):
         onnx_ml_pred = session.run(output_names, inputs)
 
         # Get the predictions for the ONNX model
-        onnx_pred = onnx_model.transform(data_np)
+        onnx_pred = onnx_model.transform(data)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=1e-06, atol=1e-06)
+        np.testing.assert_allclose(onnx_ml_pred[0], onnx_pred, rtol=1e-06, atol=1e-06)
 
     # Test LabelEncoder String failcase for torch < 1.8.0
     @unittest.skipIf(
@@ -114,17 +105,10 @@ class TestONNXLabelEncoder(unittest.TestCase):
         ]
         model.fit(data)
 
-        # max word length is the smallest number which is divisible by 4 and larger than or equal to the length of any word
-        max_word_length = 12
-        view_args = [-1, max_word_length // 4]
-        str_dtype = "|S" + str(max_word_length)
-        np_arr = np.array(data, dtype=str_dtype).view(np.int32)
-
-        data_np = np_arr.reshape(*view_args)
-        onnx_ml_model = convert_sklearn(model, initial_types=[("input", LongTensorType_onnx([4, max_word_length // 4]))])
+        onnx_ml_model = convert_sklearn(model, initial_types=[("input", StringTensorType_onnx([4]))])
 
         # Create ONNX model by calling converter, should raise error for strings
-        self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", data_np)
+        self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", data)
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
