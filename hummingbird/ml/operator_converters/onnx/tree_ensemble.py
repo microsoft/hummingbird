@@ -175,7 +175,9 @@ def _get_tree_infos_from_tree_ensemble(operator, device=None, extra_config={}):
     """
     Base method for extracting parameters from `ai.onnx.ml.TreeEnsemble`s.
     """
-    assert constants.N_FEATURES in extra_config
+    assert (
+        constants.N_FEATURES in extra_config
+    ), "Cannot retrive the number of features. Please fill an issue at https://github.com/microsoft/hummingbird."
 
     # Get the number of features.
     n_features = extra_config[constants.N_FEATURES]

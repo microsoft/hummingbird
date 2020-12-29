@@ -513,4 +513,4 @@ class _PyTorchBackendModel(torch.nn.Module, object):
             if len(self._output_names) == 1:
                 return variable_map[self._output_names[0]]
             else:
-                return list(variable_map[output_name] for output_name in self._output_names)
+                return tuple(variable_map[output_name] for output_name in self._output_names)
