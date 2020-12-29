@@ -878,6 +878,7 @@ class TVMSklearnContainer(SklearnContainer):
         """
         assert tvm_installed()
         import tvm
+        from tvm.relay import load_param_dict
         from tvm.contrib import graph_runtime
 
         container = None
@@ -902,7 +903,7 @@ class TVMSklearnContainer(SklearnContainer):
         path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)
         graph = open(os.path.join(location, constants.SAVE_LOAD_TVM_GRAPH_PATH)).read()
         lib = tvm.runtime.module.load_module(path_lib)
-        params = tvm.relay.load_param_dict(open(os.path.join(location, constants.SAVE_LOAD_TVM_PARAMS_PATH), "rb").read())
+        params = load_param_dict(open(os.path.join(location, constants.SAVE_LOAD_TVM_PARAMS_PATH), "rb").read())
 
         # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
