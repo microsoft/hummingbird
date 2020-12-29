@@ -16,6 +16,7 @@ import dill
 import os
 import numpy as np
 from onnxconverter_common.container import CommonSklearnModelContainer
+import shutil
 import torch
 
 from hummingbird.ml.operator_converters import constants
@@ -341,50 +342,85 @@ class PyTorchSklearnContainer(SklearnContainer):
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
 
+        assert not os.path.exists(location), "Directory {} already exists.".format(location)
+        os.makedirs(location)
+
         if "torch.jit" in str(type(self.model)):
             # This is a torchscript model.
-            assert not os.path.exists(location), "Directory {} already exists.".format(location)
-            os.makedirs(location)
+            # Save the model type.
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
+                file.write("torch.jit")
+
+            # Save the actual model.
             self.model.save(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
+
             model = self.model
             self._model = None
+
+            # Save the container.
             with open(os.path.join(location, "container.pkl"), "wb") as file:
                 dill.dump(self, file)
+
             self._model = model
         elif "PyTorchBackendModel" in str(type(self.model)):
             # This is a pytorch model.
-            if not location.endswith("pkl"):
-                location += "pkl"
-            assert not os.path.exists(location), "File {} already exists.".format(location)
-            with open(location, "wb") as file:
+            # Save the model type.
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
+                file.write("torch")
+
+            # Save the actual model plus the container
+            with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "wb") as file:
                 dill.dump(self, file)
         else:
             raise RuntimeError("Model type {} not recognized.".format(type(self.model)))
 
+        # Zip the dir.
+        shutil.make_archive(location, "zip", location)
+
+        # Remove the directory.
+        shutil.rmtree(location)
+
     @staticmethod
-    def load(location):
+    def load(location, do_unzip_and_model_type_check=True):
         """
         Method used to load a container from the file system.
 
         Args:
             location: The location on the file system where to load the model.
+            do_unzip_and_model_type_check: Whether to unzip the model and check the type.
 
         Returns:
             The loaded model.
         """
-        assert os.path.exists(location), "Model location {} does not exist.".format(location)
-
         container = None
-        if os.path.isdir(location):
+
+        # Unzip the dir.
+        if do_unzip_and_model_type_check:
+            zip_location = location
+            if not location.endswith("zip"):
+                zip_location = location + ".zip"
+            else:
+                location = zip_location[-4]
+            shutil.unpack_archive(zip_location, location, format="zip")
+
+            assert os.path.exists(location), "Model location {} does not exist.".format(location)
+
+        # Load the model type.
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
+            model_type = file.readline()
+
+        if model_type == "torch.jit":
             # This is a torch.jit model
             model = torch.jit.load(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
             with open(os.path.join(location, "container.pkl"), "rb") as file:
                 container = dill.load(file)
             container._model = model
-        else:
+        elif model_type == "torch":
             # This is a pytorch  model
-            with open(location, "rb") as file:
+            with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "rb") as file:
                 container = dill.load(file)
+        else:
+            raise RuntimeError("Model type {} not recognized".format(model_type))
 
         # Need to set the number of threads to use as set in the original container.
         if container._n_threads is not None:
@@ -589,39 +625,77 @@ class ONNXSklearnContainer(SklearnContainer):
 
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
+
+        # Save the model type.
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
+            file.write("onnx")
+
+        # Save the actual model.
         onnx.save(self.model, os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
+
         model = self.model
         session = self._session
         self._model = None
         self._session = None
+
+        # Save the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "wb") as file:
             dill.dump(self, file)
+
+        # Zip the dir.
+        shutil.make_archive(location, "zip", location)
+
+        # Remove the directory.
+        shutil.rmtree(location)
+
         self._model = model
         self._session = session
 
     @staticmethod
-    def load(location):
+    def load(location, do_unzip_and_model_type_check=True):
         """
         Method used to load a container from the file system.
 
         Args:
             location: The location on the file system where to load the model.
+            do_unzip_and_model_type_check: Whether to unzip the model and check the type.
 
         Returns:
             The loaded model.
         """
 
-        assert os.path.exists(location), "Model location {} does not exist.".format(location)
         assert onnx_runtime_installed
         import onnx
         import onnxruntime as ort
 
         container = None
+
+        if do_unzip_and_model_type_check:
+            # Unzip the dir.
+            zip_location = location
+            if not location.endswith("zip"):
+                zip_location = location + ".zip"
+            else:
+                location = zip_location[-4]
+            shutil.unpack_archive(zip_location, location, format="zip")
+
+            assert os.path.exists(location), "Model location {} does not exist.".format(location)
+
+            # Load the model type.
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
+                model_type = file.readline()
+                assert model_type == "onnx", "Expected ONNX model type, got {}".format(model_type)
+
+        # Load the actual model.
         model = onnx.load(os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
+
+        # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
             container = dill.load(file)
-        container._model = model
+        assert container is not None, "Failed to load the model container."
 
+        # Setup the container.
+        container._model = model
         sess_options = ort.SessionOptions()
         if container._n_threads is not None:
             # Need to set the number of threads to use as set in the original container.
@@ -732,11 +806,16 @@ class TVMSklearnContainer(SklearnContainer):
 
     def save(self, location):
         assert self.model is not None, "Saving a None model is undefined."
-        from tvm.contrib import util
         from tvm import relay
 
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
+
+        # Save the model type.
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
+            file.write("tvm")
+
+        # Save the actual model.
         path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)
         self._extra_config[constants.TVM_LIB].export_library(path_lib)
         with open(os.path.join(location, constants.SAVE_LOAD_TVM_GRAPH_PATH), "w") as fo:
@@ -759,8 +838,15 @@ class TVMSklearnContainer(SklearnContainer):
         self._ctx = "cpu" if self._ctx.device_type == 1 else "cuda"
         self._model = None
 
+        # Save the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "wb") as file:
             dill.dump(self, file)
+
+        # Zip the dir.
+        shutil.make_archive(location, "zip", location)
+
+        # Remove the directory.
+        shutil.rmtree(location)
 
         # Restore the information
         self._extra_config[constants.TVM_LIB] = lib
@@ -771,34 +857,52 @@ class TVMSklearnContainer(SklearnContainer):
         self._model = model
 
     @staticmethod
-    def load(location):
+    def load(location, do_unzip_and_model_type_check=True):
         """
         Method used to load a container from the file system.
 
         Args:
             location: The location on the file system where to load the model.
+            do_unzip_and_model_type_check: Whether to unzip the model and check the type.
 
         Returns:
             The loaded model.
         """
-
         assert tvm_installed()
         import tvm
-        from tvm.contrib import util, graph_runtime
+        from tvm.contrib import graph_runtime
         from tvm import relay
 
         container = None
-        assert os.path.exists(location), "Directory {} not found.".format(location)
+
+        if do_unzip_and_model_type_check:
+            # Unzip the dir.
+            zip_location = location
+            if not location.endswith("zip"):
+                zip_location = location + ".zip"
+            else:
+                location = zip_location[-4]
+            shutil.unpack_archive(zip_location, location, format="zip")
+
+            assert os.path.exists(location), "Model location {} does not exist.".format(location)
+
+            # Load the model type.
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
+                model_type = file.readline()
+                assert model_type == "tvm", "Expected TVM model type, got {}".format(model_type)
+
+        # Load the actual model.
         path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)
         graph = open(os.path.join(location, constants.SAVE_LOAD_TVM_GRAPH_PATH)).read()
         lib = tvm.runtime.module.load_module(path_lib)
         params = relay.load_param_dict(open(os.path.join(location, constants.SAVE_LOAD_TVM_PARAMS_PATH), "rb").read())
-        # params = bytearray(open(os.path.join(location, "deploy_param.params"), "rb").read())
+
+        # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
             container = dill.load(file)
-
         assert container is not None, "Failed to load the model container."
 
+        # Setup the container.
         ctx = tvm.cpu() if container._ctx == "cpu" else tvm.gpu
         container._model = graph_runtime.create(graph, lib, ctx)
         container._model.set_input(**params)

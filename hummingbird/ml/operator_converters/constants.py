@@ -50,6 +50,9 @@ TVM_PARAMS = "tvm_params"
 TVM_INPUT_NAMES = "tvm_input_names"
 """TVM expects named inputs. This is used to set the names for the inputs."""
 
+SAVE_LOAD_MODEL_TYPE_PATH = "model_type.txt"
+"""Path where to find the model type when saving or loading."""
+
 SAVE_LOAD_CONTAINER_PATH = "container.pkl"
 """Path where to find the container when saving or loading."""
 
