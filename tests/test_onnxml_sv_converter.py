@@ -19,7 +19,7 @@ if onnx_ml_tools_installed():
 
 
 class TestONNXLinear(unittest.TestCase):
-    def _test_linear(self, classes):
+    def _test_sv(self, classes):
         """
         This helper function tests conversion of `ai.onnx.ml.SVMClassifier`
         which is created from a scikit-learn SVC.
@@ -38,7 +38,6 @@ class TestONNXLinear(unittest.TestCase):
 
         # Create ONNX-ML model
         onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
-
         # Create ONNX model by calling converter
         onnx_model = convert(onnx_ml_model, "onnx", X)
 
@@ -69,7 +68,7 @@ class TestONNXLinear(unittest.TestCase):
     )
     # test ai.onnx.ml.SVMClassifier with 2 classes
     def test_logistic_regression_onnxml_binary(self, rtol=1e-06, atol=1e-06):
-        onnx_ml_pred, onnx_pred = self._test_linear(2)
+        onnx_ml_pred, onnx_pred = self._test_sv(2)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
@@ -82,7 +81,7 @@ class TestONNXLinear(unittest.TestCase):
     # )
     # # test ai.onnx.ml.LinearClassifier with 3 classes
     # def test_logistic_regression_onnxml_multi(self, rtol=1e-06, atol=1e-06):
-    #     onnx_ml_pred, onnx_pred = self._test_linear(3)
+    #     onnx_ml_pred, onnx_pred = self._test_sv(3)
 
     #     # Check that predicted values match
     #     np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels

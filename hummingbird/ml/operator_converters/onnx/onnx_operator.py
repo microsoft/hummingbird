@@ -50,6 +50,30 @@ class Reshape(BaseOperator, torch.nn.Module):
         return torch.reshape(x, self.shape)
 
 
+class Sum(BaseOperator, torch.nn.Module):
+    def __init__(self):
+        super(Sum, self).__init__()
+
+    def forward(self, x):
+        return torch.sum(x)
+
+
+class Neg(BaseOperator, torch.nn.Module):
+    def __init__(self):
+        super(Neg, self).__init__()
+
+    def forward(self, x):
+        return torch.neg(x)
+
+
+class Abs(BaseOperator, torch.nn.Module):
+    def __init__(self):
+        super(Abs, self).__init__()
+
+    def forward(self, x):
+        return torch.abs(x)
+
+
 def convert_onnx_cast(operator, device=None, extra_config={}):
     """
     Converter for `ai.onnx.Cast`.
@@ -114,6 +138,63 @@ def convert_onnx_reshape(operator, device=None, extra_config={}):
     return Reshape(shape)
 
 
+def convert_onnx_sum(operator, device=None, extra_config={}):
+    """
+    Converter for `ai.onnx.Sum`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Sum` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    # Generate the model.
+    return Sum()
+
+
+def convert_onnx_neg(operator, device=None, extra_config={}):
+    """
+    Converter for `ai.onnx.Neg`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Neg` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    # Generate the model.
+    return Neg()
+
+
+def convert_onnx_abs(operator, device=None, extra_config={}):
+    """
+    Converter for `ai.onnx.Abs`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Abs` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    # Generate the model.
+    return Abs()
+
+
+register_converter("ONNXMLAbs", convert_onnx_abs)
 register_converter("ONNXMLCast", convert_onnx_cast)
 register_converter("ONNXMLConcat", convert_onnx_concat)
+register_converter("ONNXMLNeg", convert_onnx_neg)
 register_converter("ONNXMLReshape", convert_onnx_reshape)
+register_converter("ONNXMLSum", convert_onnx_sum)
