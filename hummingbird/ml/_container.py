@@ -342,6 +342,8 @@ class PyTorchSklearnContainer(SklearnContainer):
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
 
+        if location.endswith("zip"):
+            location = location[:-4]
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
 
@@ -623,6 +625,8 @@ class ONNXSklearnContainer(SklearnContainer):
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
 
+        if location.endswith("zip"):
+            location = location[:-4]
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
 
@@ -808,6 +812,8 @@ class TVMSklearnContainer(SklearnContainer):
         assert self.model is not None, "Saving a None model is undefined."
         from tvm import relay
 
+        if location.endswith("zip"):
+            location = location[:-4]
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
 
