@@ -400,7 +400,7 @@ class PyTorchSklearnContainer(SklearnContainer):
             if not location.endswith("zip"):
                 zip_location = location + ".zip"
             else:
-                location = zip_location[-4]
+                location = zip_location[:-4]
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)
@@ -676,7 +676,7 @@ class ONNXSklearnContainer(SklearnContainer):
             if not location.endswith("zip"):
                 zip_location = location + ".zip"
             else:
-                location = zip_location[-4]
+                location = zip_location[:-4]
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)
@@ -881,7 +881,7 @@ class TVMSklearnContainer(SklearnContainer):
             if not location.endswith("zip"):
                 zip_location = location + ".zip"
             else:
-                location = zip_location[-4]
+                location = zip_location[:-4]
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)

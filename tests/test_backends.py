@@ -255,6 +255,30 @@ class TestBackends(unittest.TestCase):
         os.remove("tvm-tmp.zip")
         shutil.rmtree("tvm-tmp")
 
+    # Test tvm save and load zip file
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_save_load_zip(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertIsNotNone(hb_model)
+        hb_model.save("tvm-tmp.zip")
+
+        hb_model_loaded = hummingbird.ml.TVMContainer.load("tvm-tmp.zip")
+        np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+        os.remove("tvm-tmp.zip")
+        shutil.rmtree("tvm-tmp")
+
     # Test onnx requires test_data or initial_types
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
