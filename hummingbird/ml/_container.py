@@ -809,8 +809,10 @@ class TVMSklearnContainer(SklearnContainer):
         os.environ["TVM_NUM_THREADS"] = str(self._n_threads)
 
     def save(self, location):
+        assert tvm_installed()
         assert self.model is not None, "Saving a None model is undefined."
-        from tvm import relay
+
+        import tvm
 
         if location.endswith("zip"):
             location = location[:-4]
@@ -824,12 +826,12 @@ class TVMSklearnContainer(SklearnContainer):
         # Save the actual model.
         path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)
         self._extra_config[constants.TVM_LIB].export_library(path_lib)
-        with open(os.path.join(location, constants.SAVE_LOAD_TVM_GRAPH_PATH), "w") as fo:
-            fo.write(self._extra_config[constants.TVM_GRAPH])
-        with open(os.path.join(location, constants.SAVE_LOAD_TVM_PARAMS_PATH), "wb") as fo:
-            fo.write(relay.save_param_dict(self._extra_config[constants.TVM_PARAMS]))
+        with open(os.path.join(location, constants.SAVE_LOAD_TVM_GRAPH_PATH), "w") as file:
+            file.write(self._extra_config[constants.TVM_GRAPH])
+        with open(os.path.join(location, constants.SAVE_LOAD_TVM_PARAMS_PATH), "wb") as file:
+            file.write(tvm.relay.save_param_dict(self._extra_config[constants.TVM_PARAMS]))
 
-        # Remove all information that cannot be pickled
+        # Remove all information that cannot be pickled.
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
         lib = self._extra_config[constants.TVM_LIB]
@@ -877,7 +879,6 @@ class TVMSklearnContainer(SklearnContainer):
         assert tvm_installed()
         import tvm
         from tvm.contrib import graph_runtime
-        from tvm import relay
 
         container = None
 
@@ -901,7 +902,7 @@ class TVMSklearnContainer(SklearnContainer):
         path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)
         graph = open(os.path.join(location, constants.SAVE_LOAD_TVM_GRAPH_PATH)).read()
         lib = tvm.runtime.module.load_module(path_lib)
-        params = relay.load_param_dict(open(os.path.join(location, constants.SAVE_LOAD_TVM_PARAMS_PATH), "rb").read())
+        params = tvm.relay.load_param_dict(open(os.path.join(location, constants.SAVE_LOAD_TVM_PARAMS_PATH), "rb").read())
 
         # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
