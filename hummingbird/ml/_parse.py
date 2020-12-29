@@ -18,7 +18,7 @@ import numpy as np
 from onnxconverter_common.container import CommonSklearnModelContainer
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 from onnxconverter_common.topology import Topology
-from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
+from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType, StringTensorType
 from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
@@ -181,6 +181,9 @@ def _declare_input_variables(scope, raw_model_container, extra_config):
                 input_type = Int64TensorType(input.shape)
             elif input.dtype.kind in constants.SUPPORTED_STRING_TYPES:
                 input_type = StringTensorType(input.shape)
+            elif input.dtype == np.datetime64:
+                input_type = Int64TensorType(input.shape)
+
             else:
                 raise NotImplementedError(
                     "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
@@ -329,6 +332,8 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
             np_type = np.int32
         elif type(onnx_type) == Int64TensorType:
             np_type = np.int64
+        elif type(onnx_type) == StringTensorType:
+            np_type = np.uint8
         else:
             raise RuntimeError('Unsupport ONNX datatype {} encounted in SQLTransformer.'.format(onnx_type))
 
@@ -336,7 +341,7 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
         # If the second dimension is 1, we treat the column as a vector.
         if len(shape) == 2 and shape[1] == 1:
             shape = shape[:1]
-
+        print("sample col shape",onnx_input, shape)
         return np.zeros(shape=shape, dtype=np_type).tolist()
 
     # We create a sample input data frame to obtain the Catalyst optimized paln.
@@ -375,11 +380,13 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
                 if project_tree_node['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
                     name = project_tree_node['name']
                     if name not in input_names:
-                        input_names.append(name)
+                        input_names.append(name.lower())
 
             select_operator = scope.declare_local_operator("SparkMLSQLSelectModel", project_tree)
-            temp = {i.raw_name: i for i in all_inputs if i.raw_name in input_names and not i.is_abandoned}
-            select_operator.inputs = [temp[i] for i in input_names]
+            print("input_names", input_names)
+            temp = {i.raw_name.lower(): i for i in all_inputs if i.raw_name.lower() in input_names and not i.is_abandoned}
+            print("temp", temp)
+            select_operator.inputs = [temp[i.lower()] for i in input_names]
             output = scope.declare_local_variable(output_name)
             select_operator.outputs.append(output)
             sql_transformer_outputs.append(output)

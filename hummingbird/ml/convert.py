@@ -326,7 +326,7 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
             extra_config[constants.INPUT_NAMES] = input_names
         elif sparkml_installed() and is_spark_dataframe(extra_config[constants.TEST_INPUT]):
             from pyspark.ml.linalg import DenseVector, SparseVector, VectorUDT
-            from pyspark.sql.types import ArrayType, FloatType, DoubleType, IntegerType, LongType
+            from pyspark.sql.types import ArrayType, FloatType, DoubleType, IntegerType, LongType, StringType, DateType, TimestampType
 
             df = extra_config[constants.TEST_INPUT]
             input_names = [field.name for field in df.schema.fields]
@@ -334,10 +334,16 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
             extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
 
             size = df.count()
+            print(df)
+            arr = np.array(df.take(2))
+            print("arrary",arr )
+            print("dtypes", arr.dtype, arr.shape)
             row_dict = df.take(1)[0].asDict()
             splits = []
             for field in df.schema.fields:
                 data_col = row_dict[field.name]
+                print("dc", data_col)
+                
                 spark_dtype = type(field.dataType)
                 shape = 1
                 if spark_dtype in [DenseVector, VectorUDT]:
@@ -357,9 +363,15 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
                     np_dtype = np.float64
                 elif spark_dtype == LongType:
                     np_dtype = np.int64
+                elif spark_dtype == StringType:
+                    print("dc size" , len(data_col))
+                    shape = len(data_col)
+                    np_dtype = np.string_
+                elif spark_dtype == TimestampType:
+                    np_dtype = np.datetime64
                 else:
                     raise ValueError("Unrecognized data type: {}".format(spark_dtype))
-
+                print("sizes", (size,shape))
                 splits.append(np.zeros((size, shape), np_dtype))
 
             extra_config[constants.TEST_INPUT] = tuple(splits) if len(splits) > 1 else splits[0]

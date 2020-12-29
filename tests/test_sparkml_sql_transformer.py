@@ -140,6 +140,51 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
         torch_output_np = torch_model.transform(df.toPandas())
         np.testing.assert_allclose(spark_output_np, torch_output_np, rtol=1e-06, atol=1e-06)
 
+    def test_sql_transformer_tpc_h_6(self):
+        from datetime import datetime
+        to_date = lambda x: datetime.strptime(x, '%m/%d/%Y')
+        lineitem_df = spark.createDataFrame(
+            [
+                (1,1, 155190, 7706, 1,	17,21168.23, 0.04, 0.02, "N", "O", to_date("3/13/1996"), to_date("2/12/1996"), to_date("3/22/1996"),"DELIVER IN PERSON", "TRUCK","egular courts above the|"),
+                (2,2, 106170, 1191, 1,38, 44694.46, 0.0, 0.05, "N", "O", to_date("1/28/1997"), to_date("1/14/1997"), to_date("2/2/1997"),"TAKE BACK RETURN", "RAIL", "ven requests. deposits breach a|"),
+                (3,3, 4297, 1798, 1, 45, 54058.05, 0.06, 0.0, "R", "F", to_date("2/2/1994"), to_date("1/4/1994"), to_date("2/23/1994"),"NONE", "AIR","ongside of the furiously brave acco|"),
+                (4,4, 88035, 5560, 1, 30, 30690.9, 0.03, 0.08, "N", "O", to_date("1/10/1996"), to_date("12/14/1995"), to_date("1/18/1996"), "DELIVER IN PERSON", "REG AIR", "- quickly regular packages sleep. idly|"),
+                (5,5, 108570, 8571,1, 15, 23678.55, 0.02, 0.04, "R", "F", to_date("10/31/1994"), to_date("8/31/1994"), to_date("11/20/1994"), "NONE", "AIR", "ts wake furiously |")
+            ],
+            [ "rownumber", "L_ORDERKEY", "L_PARTKEY", "L_SUPPKEY", "L_LINENUMBER", "L_QUANTITY", 
+            "L_EXTENDEDPRICE", "L_DISCOUNT", "L_TAX", "L_RETURNFLAG", "L_LINESTATUS", "L_SHIPDATE", "L_COMMITDATE", "L_RECEIPTDATE", 
+            "L_SHIPINSTRUCT", "L_SHIPMODE", "L_COMMENT"]  # add your columns label here
+        )
+
+        # query = """select
+        #         sum(l_extendedprice * l_discount) as revenue
+        #         from
+        #         __THIS__
+        #         where
+        #         l_shipdate >= date '1994-01-01'
+        #         and l_shipdate < date '1994-01-01' + interval '1' year
+        #         and l_discount between .06 - 0.01 and .06 + 0.01
+        #         and l_quantity < 24"""
+        query = """select
+                l_extendedprice * l_discount as revenue
+                from
+                __THIS__
+                where
+                l_quantity < 24"""       
+
+        model = SQLTransformer(statement=query)
+        output_col_names = ['revenue']
+
+        test_df = lineitem_df
+        torch_model = convert(model, "torch", lineitem_df)
+        self.assertTrue(torch_model is not None)
+
+        spark_output = model.transform(test_df).toPandas()[output_col_names]
+        print("spark transformer out \n", spark_output)
+        print("rev", spark_output["revenue"])
+        spark_output_np = [spark_output[x].to_numpy().reshape(-1, 1) for x in output_col_names][0]
+        torch_output_np = torch_model.transform(test_df.toPandas())
+        np.testing.assert_allclose(spark_output_np, torch_output_np, rtol=1e-06, atol=1e-06)
 
 if __name__ == "__main__":
     unittest.main()
