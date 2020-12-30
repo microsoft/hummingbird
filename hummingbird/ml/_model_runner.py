@@ -16,9 +16,9 @@ else:
     DataFrame = None
 
 
-class ModelRunner(torch.nn.Module, object):
+class ModelExecutor(torch.nn.Module, object):
     """
-    Runner class able to execute Hummingbird's internal representation of a converted pipeline.
+    Executor class able to run Hummingbird's internal representation of a converted pipeline.
     """
 
     def __init__(self, input_names, output_names, operator_map, operators, extra_config):
@@ -30,7 +30,7 @@ class ModelRunner(torch.nn.Module, object):
             operators: The list of operators (in a topological order) that will be executed by the model (in order)
             extra_config: Some additional custom configuration parameter
         """
-        super(ModelRunner, self).__init__()
+        super(ModelExecutor, self).__init__()
 
         # Define input \ output names.
         # This is required because the internal variable names may differ from the original (raw) one.
