@@ -36,7 +36,7 @@ from hummingbird.ml.containers import (
     BatchContainer,
 )
 from hummingbird.ml._utils import pandas_installed, tvm_installed, get_device, from_strings_to_ints
-from hummingbird.ml._model_runner import Executor
+from hummingbird.ml._executor import Executor
 from hummingbird.ml.exceptions import MissingConverter
 from hummingbird.ml.operator_converters import constants
 
