@@ -364,7 +364,7 @@ class PyTorchSklearnContainer(SklearnContainer):
                 dill.dump(self, file)
 
             self._model = model
-        elif "PyTorchBackendModel" in str(type(self.model)):
+        elif "ModelRunner" in str(type(self.model)):
             # This is a pytorch model.
             # Save the model type.
             with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
