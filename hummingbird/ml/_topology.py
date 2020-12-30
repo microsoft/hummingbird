@@ -17,7 +17,7 @@ from onnxconverter_common.registration import get_converter
 import onnx
 import timeit
 
-from hummingbird.ml._container import (
+from hummingbird.ml.containers import (
     PyTorchSklearnContainerRegression,
     PyTorchSklearnContainerClassification,
     PyTorchSklearnContainerTransformer,

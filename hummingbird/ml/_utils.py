@@ -13,6 +13,7 @@ import numpy as np
 import torch
 import os
 import warnings
+import shutil
 
 from hummingbird.ml.exceptions import ConstantError
 
@@ -184,12 +185,10 @@ def load(location):
     """
     Utility function used to load arbitrary Hummingbird models.
     """
-    # Add load capabilities
-    from ._container import PyTorchSklearnContainer
-    from ._container import TVMSklearnContainer
-    from ._container import ONNXSklearnContainer
-
-    import shutil
+    # Add load capabilities.
+    from hummingbird.ml.containers import PyTorchSklearnContainer
+    from hummingbird.ml.containers import TVMSklearnContainer
+    from hummingbird.ml.containers import ONNXSklearnContainer
     from hummingbird.ml.operator_converters import constants
 
     model = None
