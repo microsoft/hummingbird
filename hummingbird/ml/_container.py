@@ -878,8 +878,28 @@ class TVMSklearnContainer(SklearnContainer):
         """
         assert tvm_installed()
         import tvm
-        from tvm.relay import load_param_dict
+        import tvm._ffi
         from tvm.contrib import graph_runtime
+
+        _load_param_dict = tvm._ffi.get_global_func("tvm.relay._load_param_dict")
+
+        def load_param_dict(param_bytes):
+            """Load parameter dictionary to binary bytes.
+
+            Parameters
+            ----------
+            param_bytes: bytearray
+                Serialized parameters.
+
+            Returns
+            -------
+            params : dict of str to NDArray
+                The parameter dictionary.
+            """
+            if isinstance(param_bytes, (bytes, str)):
+                param_bytes = bytearray(param_bytes)
+            load_arr = _load_param_dict(param_bytes)
+            return {v.name: v.array for v in load_arr}
 
         container = None
 
