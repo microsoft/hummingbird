@@ -16,7 +16,7 @@ from uuid import uuid4
 from onnxconverter_common.registration import get_converter
 import onnx
 
-from hummingbird.ml._container import (
+from hummingbird.ml.containers import (
     PyTorchSklearnContainerRegression,
     PyTorchSklearnContainerClassification,
     PyTorchSklearnContainerTransformer,

@@ -21,7 +21,7 @@ from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 
-from ._container import CommonONNXModelContainer, CommonSparkMLModelContainer
+from .containers import CommonONNXModelContainer, CommonSparkMLModelContainer
 from ._utils import sklearn_installed, sparkml_installed
 from .operator_converters import constants
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name, get_sparkml_api_operator_name
