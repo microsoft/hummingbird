@@ -55,15 +55,27 @@ class Sum(BaseOperator, torch.nn.Module):
         super(Sum, self).__init__()
 
     def forward(self, x):
-        return torch.sum(x)
+        return torch.sum(x).view(1)
+
+
+class Add(BaseOperator, torch.nn.Module):
+    def __init__(self, val):
+        super(Add, self).__init__()
+
+        self.val = val
+
+    def forward(self, x):
+        return torch.add(x, self.val)
 
 
 class Less(BaseOperator, torch.nn.Module):
-    def __init__(self):
+    def __init__(self, val):
         super(Less, self).__init__()
 
+        self.val = val
+
     def forward(self, x):
-        return torch.less(x)
+        return torch.lt(x, self.val)
 
 
 class Neg(BaseOperator, torch.nn.Module):
@@ -71,7 +83,7 @@ class Neg(BaseOperator, torch.nn.Module):
         super(Neg, self).__init__()
 
     def forward(self, x):
-        return torch.neg(x)
+        return torch.neg(x).view(-1)
 
 
 class Abs(BaseOperator, torch.nn.Module):
@@ -83,11 +95,13 @@ class Abs(BaseOperator, torch.nn.Module):
 
 
 class Mul(BaseOperator, torch.nn.Module):
-    def __init__(self):
+    def __init__(self, val):
         super(Mul, self).__init__()
 
+        self.val = val
+
     def forward(self, x):
-        return torch.multiply(x)
+        return torch.multiply(x, self.val)
 
 
 class Div(BaseOperator, torch.nn.Module):
@@ -180,6 +194,26 @@ def convert_onnx_sum(operator, device=None, extra_config={}):
     return Sum()
 
 
+def convert_onnx_add(operator, device=None, extra_config={}):
+    """
+    Converter for `ai.onnx.Add`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Add` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    val = extra_config[constants.ONNX_INITIALIZERS]["cst1"]
+
+    # Generate the model.
+    return Add(val.float_data[0])  # TODO is this ever non-float?
+
+
 def convert_onnx_neg(operator, device=None, extra_config={}):
     """
     Converter for `ai.onnx.Neg`.
@@ -230,8 +264,10 @@ def convert_onnx_mul(operator, device=None, extra_config={}):
     """
     assert operator is not None
 
+    val = extra_config[constants.ONNX_INITIALIZERS]["cst3"]
+
     # Generate the model.
-    return Mul()
+    return Mul(val.float_data[0])
 
 
 def convert_onnx_div(operator, device=None, extra_config={}):
@@ -266,12 +302,14 @@ def convert_onnx_less(operator, device=None, extra_config={}):
     """
     assert operator is not None
 
+    val = extra_config[constants.ONNX_INITIALIZERS]["cst0"]
+
     # Generate the model.
-    return Less()
+    return Less(val.float_data[0])
 
 
 register_converter("ONNXMLAbs", convert_onnx_abs)
-register_converter("ONNXMLAdd", convert_onnx_sum)
+register_converter("ONNXMLAdd", convert_onnx_add)
 register_converter("ONNXMLCast", convert_onnx_cast)
 register_converter("ONNXMLConcat", convert_onnx_concat)
 register_converter("ONNXMLDiv", convert_onnx_div)
