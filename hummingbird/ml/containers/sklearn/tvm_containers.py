@@ -82,11 +82,13 @@ class TVMSklearnContainer(SklearnContainer):
         # Remove all information that cannot be pickled.
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
+        input_tensors = self._tvm_tensors
         lib = self._extra_config[constants.TVM_LIB]
         graph = self._extra_config[constants.TVM_GRAPH]
         params = self._extra_config[constants.TVM_PARAMS]
         ctx = self._extra_config[constants.TVM_CONTEXT]
         model = self._model
+        self._tvm_tensors = None
         self._extra_config[constants.TVM_LIB] = None
         self._extra_config[constants.TVM_GRAPH] = None
         self._extra_config[constants.TVM_PARAMS] = None
@@ -105,6 +107,7 @@ class TVMSklearnContainer(SklearnContainer):
         shutil.rmtree(location)
 
         # Restore the information
+        self._tvm_tensors = input_tensors
         self._extra_config[constants.TVM_LIB] = lib
         self._extra_config[constants.TVM_GRAPH] = graph
         self._extra_config[constants.TVM_PARAMS] = params
@@ -176,6 +179,7 @@ class TVMSklearnContainer(SklearnContainer):
         container._extra_config[constants.TVM_PARAMS] = params
         container._extra_config[constants.TVM_CONTEXT] = ctx
         container._ctx = ctx
+        container._tvm_tensors = {name: container._to_tvm_array(np.array([])) for name in container._input_names}
 
         # Need to set the number of threads to use as set in the original container.
         os.environ["TVM_NUM_THREADS"] = str(container._n_threads)
