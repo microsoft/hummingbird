@@ -121,7 +121,6 @@ def tvm_installed():
     """
     try:
         import tvm
-        from tvm import relay
     except ImportError:
         return False
     return True
