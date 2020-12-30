@@ -15,7 +15,8 @@ if onnx_runtime_installed():
     import onnxruntime as ort
 if onnx_ml_tools_installed():
     from onnxmltools import convert_sklearn
-    from onnxmltools.convert.common.data_types import FloatTensorType as FloatTensorType_onnx
+    from onnxmltools.convert.common.data_types import FloatTensorType
+    from onnxmltools.convert.common.data_types import DoubleTensorType
 
 
 class TestONNXScaler(unittest.TestCase):
@@ -25,7 +26,7 @@ class TestONNXScaler(unittest.TestCase):
         model.fit(X)
 
         # Create ONNX-ML model
-        onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
+        onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType(X.shape))])
 
         # Create ONNX model by calling converter
         onnx_model = convert(onnx_ml_model, "onnx", X)
@@ -129,12 +130,41 @@ class TestONNXScaler(unittest.TestCase):
         model = StandardScaler()
         model.fit(X)
 
-        # generate test input
-        onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
+        # Generate test input
+        onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType(X.shape))])
         print(onnx_ml_model.graph.node[0].attribute[0].name)
         onnx_ml_model.graph.node[0].attribute[0].name = "".encode()
 
         self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
+
+    # Test with float64
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_scaler_converter_float_64(self):
+        warnings.filterwarnings("ignore")
+        X = np.array([[0.0, 0.0, 3.0], [1.0, -1.0, 0.0], [0.0, 2.0, 1.0], [1.0, 0.0, -2.0]], dtype=np.float64)
+
+        # Create SKL model for testing
+        model = StandardScaler()
+        model.fit(X)
+
+        # Generate test input
+        onnx_ml_model = convert_sklearn(model, initial_types=[("double_input", DoubleTensorType(X.shape))])
+
+        # Create ONNX model by calling converter
+        onnx_model = convert(onnx_ml_model, "onnx", X)
+        # Get the predictions for the ONNX-ML model
+        session = ort.InferenceSession(onnx_ml_model.SerializeToString())
+        output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
+        inputs = {session.get_inputs()[0].name: X}
+        onnx_ml_pred = session.run(output_names, inputs)[0]
+
+        # Get the predictions for the ONNX model
+        onnx_pred = onnx_model.transform(X)
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":
