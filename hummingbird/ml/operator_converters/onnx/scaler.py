@@ -32,9 +32,9 @@ def convert_onnx_scaler(operator, device=None, extra_config={}):
 
     for attr in operator.origin.attribute:
         if attr.name == "offset":
-            offset = np.array(attr.floats).astype("float32")
+            offset = np.array(attr.floats)
         if attr.name == "scale":
-            scale = np.array(attr.floats).astype("float32")
+            scale = np.array(attr.floats)
 
     if any(v is None for v in [offset, scale]):
         raise RuntimeError("Error parsing Scalar, found unexpected None")
