@@ -883,19 +883,10 @@ class TVMSklearnContainer(SklearnContainer):
 
         _load_param_dict = tvm._ffi.get_global_func("tvm.relay._load_param_dict")
 
+        # We borrow this function directly from Relay.
+        # Relay when imported tryies to download schedules data,
+        # but at inference time access to disk or network could be blocked.
         def load_param_dict(param_bytes):
-            """Load parameter dictionary to binary bytes.
-
-            Parameters
-            ----------
-            param_bytes: bytearray
-                Serialized parameters.
-
-            Returns
-            -------
-            params : dict of str to NDArray
-                The parameter dictionary.
-            """
             if isinstance(param_bytes, (bytes, str)):
                 param_bytes = bytearray(param_bytes)
             load_arr = _load_param_dict(param_bytes)
