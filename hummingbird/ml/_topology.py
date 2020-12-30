@@ -36,7 +36,7 @@ from hummingbird.ml.containers import (
     BatchContainer,
 )
 from hummingbird.ml._utils import pandas_installed, tvm_installed, get_device, from_strings_to_ints
-from hummingbird.ml._model_runner import ModelRunner
+from hummingbird.ml._model_runner import Executor
 from hummingbird.ml.exceptions import MissingConverter
 from hummingbird.ml.operator_converters import constants
 
@@ -46,13 +46,13 @@ else:
     DataFrame = None
 
 
-def _jit_model(torch_model, trace_input, device, extra_config):
+def _jit_trace(executor, trace_input, device, extra_config):
     """
     Function used to convert an input pytorch model into torchscript.
     """
     if device != "cpu":
         trace_input.to(device)
-    return torch.jit.trace(torch_model, trace_input).eval()
+    return torch.jit.trace(executor, trace_input).eval()
 
 
 def _get_trace_input_from_test_input(input, remainder_size=None, extra_config={}):
@@ -96,12 +96,12 @@ def _get_batch_size(batch):
     return batch.shape[0]
 
 
-def _compile_tvm_model(topology, torch_model, trace_input, target, ctx, config, extra_config):
+def _compile_to_tvm(topology, executor, trace_input, target, ctx, config, extra_config):
     import tvm
     from tvm import relay
     from tvm.contrib import graph_runtime
 
-    ts_model = _jit_model(torch_model, trace_input, "cpu", extra_config)
+    ts_model = _jit_trace(executor, trace_input, "cpu", extra_config)
     test_input = [
         (topology.raw_model.input_names[i], trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,)
         for i in range(len(topology.raw_model.input_names))
@@ -182,7 +182,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
         torch.set_num_threads(n_threads)
 
     operators = list(topology.topological_operator_iterator())
-    torch_model = ModelRunner(
+    executor = Executor(
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
 
@@ -208,7 +208,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
         # Generate the ONNX models
         torch.onnx.export(
-            torch_model,
+            executor,
             batch_trace_input,
             output_model_name,
             input_names=topology.raw_model.input_names,
@@ -286,12 +286,10 @@ def convert(topology, backend, test_input, device, extra_config={}):
         # First we need to generate the torchscript model.
         batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
 
-        tvm_model = _compile_tvm_model(topology, torch_model, batch_trace_input, target, ctx, config, extra_config)
+        tvm_model = _compile_to_tvm(topology, executor, batch_trace_input, target, ctx, config, extra_config)
 
         if remainder_trace_input is not None:
-            remainder_model = _compile_tvm_model(
-                topology, torch_model, remainder_trace_input, target, ctx, config, extra_config
-            )
+            remainder_model = _compile_to_tvm(topology, executor, remainder_trace_input, target, ctx, config, extra_config)
 
         # In the container we will be using the context to properly configure the input tensors.
         extra_config[constants.TVM_CONTEXT] = ctx
@@ -302,17 +300,15 @@ def convert(topology, backend, test_input, device, extra_config={}):
         # Set the device for the model.
         if device != "cpu":
             if backend == torch.__name__ or torch.jit.__name__:
-                torch_model = torch_model.to(device)
+                executor = executor.to(device)
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
             trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
-            if device != "cpu":
-                trace_input.to(device)
-            torch_model = torch.jit.trace(torch_model, trace_input).eval()
-            torch.jit.optimized_execution(torch_model)
+            executor = _jit_trace(executor, trace_input)
+            torch.jit.optimized_execution(executor)
 
-        hb_model = torch_model
+        hb_model = executor
 
     # Return if the container is not needed.
     if constants.CONTAINER in extra_config and not extra_config[constants.CONTAINER]:
