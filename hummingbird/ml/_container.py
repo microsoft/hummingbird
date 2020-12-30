@@ -442,7 +442,8 @@ class PyTorchSklearnContainerTransformer(SklearnContainerTransformer, PyTorchSkl
 
     def _transform(self, *inputs):
         output = self.model.forward(*inputs)
-        if type(output) == list:
+        if type(output) == tuple:
+            # TODO hit this branch in converage more
             return [o.cpu().numpy() for o in output]
         else:
             return output.cpu().numpy()

@@ -11,6 +11,7 @@ import torch
 from onnxconverter_common.registration import register_converter
 from .._base_operator import BaseOperator
 from .. import constants
+import numpy as np
 
 # List of supported scalar SQL ops.
 SUPPORTED_SCALAR_OPS = {
@@ -48,8 +49,8 @@ class SQLWhereModel(BaseOperator, torch.nn.Module):
         self.select_op = SQLSelectModel(input_names, condition_node, device)
 
     def forward(self, *x):
-        filter_confition = self.select_op(*x)
-        return [torch.masked_select(c, filter_confition).reshape(-1, 1) for c in x]
+        filter_condition = self.select_op(*x)
+        return [torch.masked_select(c, filter_condition).reshape(-1, 1) for c in x]
 
 
 class SQLSelectModel(BaseOperator, torch.nn.Module):
@@ -61,10 +62,11 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
         self.project_node = project_node
 
     def forward(self, *x):
-        inputs_dict = {name : tensor for name, tensor in zip(self.input_names, x)}
+        inputs_dict = {name.lower() : tensor for name, tensor in zip(self.input_names, x)}
         return self.calculate_output_feature(self.project_node, inputs_dict)[0]
 
     def calculate_output_feature(self, project_node_def_stack, inputs_dict):
+        print("\ncurrent stack\n", project_node_def_stack[0])
         # Handles reading of a feature column.
         if project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
             if project_node_def_stack[0]['name'] not in inputs_dict:
@@ -73,6 +75,13 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
             return inputs_dict[project_node_def_stack[0]['name']], project_node_def_stack[1:]
         # Handles reading of a constant value.
         elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Literal':
+            if project_node_def_stack[0]['dataType'] == 'timestamp':
+                value = project_node_def_stack[0]['value'] + "0000000" # extra zeroes to match numpys precision
+                
+                time_as_int = np.datetime64(value).astype(np.int64) 
+                print("filter date", value, time_as_int)
+                return time_as_int, project_node_def_stack[1:]
+                
             return float(project_node_def_stack[0]['value']), project_node_def_stack[1:]
         # Handles binary ops e.g., Add/Subtract/Mul/Div.
         elif project_node_def_stack[0]['class'] in SUPPORTED_BINARY_OPS:
@@ -80,6 +89,7 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
             project_node_def_stack = project_node_def_stack[1:]
             left, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             right, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
+            print("\nbinary op:\n", op, "\n")
             return op(left, right), project_node_def_stack
         # Handles scalar ops e.g., Sqrt.
         elif project_node_def_stack[0]['class'] in SUPPORTED_SCALAR_OPS:
@@ -201,6 +211,8 @@ def convert_sparkml_sql_where(operator, device, extra_config):
         A PyTorch model
     """
     input_names = [input.raw_name for input in operator.inputs]
+    print("sql where statement\n", input_names, operator.inputs )
+    print("sql where condition \n", operator.raw_operator)
     return SQLWhereModel(input_names, operator.raw_operator, device)
 
 

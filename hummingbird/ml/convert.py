@@ -272,9 +272,13 @@ def _convert_sparkml(model, backend, test_input, device, extra_config={}):
     # Parse Spark-ML model as our internal data structure (i.e., Topology)
     # We modify the Spark-ML model during translation.
     model = model.copy()
-    topology = parse_sparkml_api_model(model, extra_config)
+    sample_df = extra_config["test_spark_df"]
+    assert sample_df
+    print("sample_df\n", sample_df, type(sample_df))
+    topology = parse_sparkml_api_model(model, sample_df, extra_config)
 
     # Convert the Topology object into a PyTorch model.
+    print("converting topology to torch", topology)
     hb_model = topology_converter(topology, backend, test_input, device, extra_config=extra_config)
     return hb_model
 
@@ -329,6 +333,7 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
             from pyspark.sql.types import ArrayType, FloatType, DoubleType, IntegerType, LongType, StringType, DateType, TimestampType
 
             df = extra_config[constants.TEST_INPUT]
+            extra_config["test_spark_df"] = df 
             input_names = [field.name for field in df.schema.fields]
             extra_config[constants.N_INPUTS] = len(input_names)
             extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]

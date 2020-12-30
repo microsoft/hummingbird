@@ -76,6 +76,7 @@ def _get_trace_input_from_test_input(input, remainder_size=None, extra_config={}
             remainder = tuple([inp[0:remainder_size, :] for inp in trace_input])
     else:
         # Convert string arrays into int32.
+        print("supported string types", constants.SUPPORTED_STRING_TYPES)
         if input.dtype.kind in constants.SUPPORTED_STRING_TYPES:
             assert constants.MAX_STRING_LENGTH in extra_config
             max_string_length = extra_config[constants.MAX_STRING_LENGTH]
@@ -459,6 +460,7 @@ class _PyTorchBackendModel(torch.nn.Module, object):
         self._operator_map = torch.nn.ModuleDict(operator_map)
         self._operators = operators
         self.max_string_length = None
+        self.date_units  = {}
 
         if constants.MAX_STRING_LENGTH in extra_config:
             self.max_string_length = extra_config[constants.MAX_STRING_LENGTH]
@@ -491,8 +493,17 @@ class _PyTorchBackendModel(torch.nn.Module, object):
                     # Convert string arrays into int32.
                     if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
                         assert self.max_string_length is not None
-
                         input_ = from_strings_to_ints(input_, self.max_string_length)
+                    elif input_.dtype == np.string_ or input_.dtype == np.object_:
+                        assert self.max_string_length is not None
+                        input_ = from_strings_to_ints(input_, self.max_string_length)
+
+                    if input_.dtype.kind in ["M"]:
+                        print("\nbefore convert\n", input_,"\n")
+                        self.date_units[input_name] = input_.dtype
+                        input_ = input_.astype(np.int64)
+                        print("\nafter convert\n", input_,"\n")
+
                     input_ = torch.from_numpy(input_)
                 elif type(input_) is not torch.Tensor:
                     raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(input_)))
@@ -518,4 +529,6 @@ class _PyTorchBackendModel(torch.nn.Module, object):
             if len(self._output_names) == 1:
                 return variable_map[self._output_names[0]]
             else:
+                # assert False
+                # TODO this branch is not covered by tests
                 return tuple(variable_map[output_name] for output_name in self._output_names)

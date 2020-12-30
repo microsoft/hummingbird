@@ -67,7 +67,7 @@ def parse_sklearn_api_model(model, extra_config={}):
     return topology
 
 
-def parse_sparkml_api_model(model, extra_config={}):
+def parse_sparkml_api_model(model, sample_df, extra_config={}):
     """
     Puts *Spark-ML* object into an abstract representation so that our framework can work seamlessly on models created
     with different machine learning tools.
@@ -79,7 +79,7 @@ def parse_sparkml_api_model(model, extra_config={}):
         A `onnxconverter_common.topology.Topology` object representing the input model
     """
     assert model is not None, "Cannot convert a mode of type None."
-
+    print("spark ml model", type(model))
     raw_model_container = CommonSparkMLModelContainer(model)
 
     # Declare a computational graph. It will become a representation of
@@ -95,7 +95,9 @@ def parse_sparkml_api_model(model, extra_config={}):
 
     # Parse the input Spark-ML model into its scope with the topology.
     # Get the outputs of the model.
-    current_op_outputs, _ = _parse_sparkml_api(scope, model, inputs)
+    print("parse_sparkml_api_model inputs\n", inputs)
+    current_op_outputs, _ = _parse_sparkml_api(scope, model, inputs, sample_df)
+    print("spark outputs", current_op_outputs)
 
     # Declare output variables.
     _declare_output_variables(raw_model_container, extra_config, current_op_outputs)
@@ -284,7 +286,7 @@ def _parse_sklearn_pipeline(scope, model, inputs):
     return inputs
 
 
-def _parse_sparkml_pipeline(scope, model, all_outputs):
+def _parse_sparkml_pipeline(scope, model, all_outputs, sample_df):
     """
     The basic ideas of Spark-ML parsing:
         1. Sequentially go though all stages defined in the considered
@@ -298,11 +300,11 @@ def _parse_sparkml_pipeline(scope, model, all_outputs):
     :return: A list of output variables produced by the input pipeline
     """
     for step in model.stages:
-        current_op_outputs, all_outputs = _parse_sparkml_api(scope, step, all_outputs)
+        current_op_outputs, all_outputs = _parse_sparkml_api(scope, step, all_outputs, sample_df)
     return current_op_outputs, all_outputs
 
 
-def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
+def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
     """
     Parses SparkML SQLTransformer operator which takes a slightly different approach compared to the other SparkML operators.
     :param scope: Scope object
@@ -321,7 +323,7 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
     parser = spark._jsparkSession.sessionState().sqlParser()
     plan = parser.parsePlan(operator.getStatement())
     plan_json = json.loads(plan.toJSON())
-
+    print("_parse_sparkml_sqltransformer", all_inputs)
     def _get_sample_input(onnx_input):
         onnx_type = onnx_input.type
         if type(onnx_type) == DoubleTensorType:
@@ -345,7 +347,8 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
         return np.zeros(shape=shape, dtype=np_type).tolist()
 
     # We create a sample input data frame to obtain the Catalyst optimized paln.
-    df = spark.createDataFrame(pd.DataFrame({i.raw_name: _get_sample_input(i) for i in all_inputs if not i.is_abandoned}))
+    # df = spark.createDataFrame(pd.DataFrame({i.raw_name: _get_sample_input(i) for i in all_inputs if not i.is_abandoned}))
+    df = sample_df
     catalyst_plan = operator.transform(df)._jdf.logicalPlan()
     optimized_plan = spark\
         ._jsparkSession\
@@ -353,6 +356,8 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs):
         .executePlan(catalyst_plan)\
         .optimizedPlan()
     plan_json = json.loads(optimized_plan.toJSON())
+
+    print("spark plan\n", plan_json)
 
     # WHERE clause
     filter_tree = [node for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Filter']
@@ -616,7 +621,7 @@ def _parse_onnx_single_operator(scope, operator):
         this_operator.outputs.append(variable)
 
 
-def _parse_sparkml_api(scope, model, all_inputs):
+def _parse_sparkml_api(scope, model, all_inputs, sample_df):
     """
     This function handles all input Spark-ML models.
 
@@ -628,9 +633,10 @@ def _parse_sparkml_api(scope, model, all_inputs):
     Returns:
         A list of output `onnxconverter_common.topology.Variable` which will be passed to next stage
     """
+    print("_parse_sparkml_api iinputs \n:", all_inputs)
     tmodel = type(model)
     if tmodel in sparkml_api_parsers_map:
-        outputs = sparkml_api_parsers_map[tmodel](scope, model, all_inputs)
+        outputs = sparkml_api_parsers_map[tmodel](scope, model, all_inputs, sample_df)
     else:
         outputs = _parse_sparkml_single_operator(scope, model, all_inputs)
     return outputs
