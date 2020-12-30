@@ -12,7 +12,6 @@ hummingbird.ml
 .. toctree::
    :maxdepth: 1
 
-   hummingbird.ml._container
    hummingbird.ml._parse
    hummingbird.ml._topology
    hummingbird.ml._utils
@@ -23,4 +22,5 @@ hummingbird.ml
 .. toctree::
    :maxdepth: 1
 
+   hummingbird.ml.containers
    hummingbird.ml.operator_converters

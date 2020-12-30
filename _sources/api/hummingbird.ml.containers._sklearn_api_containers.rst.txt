@@ -1,0 +1,8 @@
+hummingbird.ml.containers.\_sklearn\_api\_containers
+====================================================
+
+.. automodule:: hummingbird.ml.containers._sklearn_api_containers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

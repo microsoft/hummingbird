@@ -1,0 +1,8 @@
+hummingbird.ml.containers.sklearn.pytorch\_containers
+=====================================================
+
+.. automodule:: hummingbird.ml.containers.sklearn.pytorch_containers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

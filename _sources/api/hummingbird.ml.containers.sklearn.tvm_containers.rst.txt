@@ -1,0 +1,8 @@
+hummingbird.ml.containers.sklearn.tvm\_containers
+=================================================
+
+.. automodule:: hummingbird.ml.containers.sklearn.tvm_containers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

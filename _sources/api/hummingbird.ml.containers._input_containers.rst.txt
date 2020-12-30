@@ -1,0 +1,8 @@
+hummingbird.ml.containers.\_input\_containers
+=============================================
+
+.. automodule:: hummingbird.ml.containers._input_containers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

@@ -91,13 +91,19 @@
 <li class="toctree-l1"><a class="reference external" href="https://microsoft.github.io/hummingbird/">Main website</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="hummingbird.html">hummingbird</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="hummingbird.ml.html">hummingbird.ml</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._container.html">hummingbird.ml._container</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._parse.html">hummingbird.ml._parse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._topology.html">hummingbird.ml._topology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._utils.html">hummingbird.ml._utils</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.convert.html">hummingbird.ml.convert</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.exceptions.html">hummingbird.ml.exceptions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.supported.html">hummingbird.ml.supported</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.containers.html">hummingbird.ml.containers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.containers._input_containers.html">hummingbird.ml.containers._input_containers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.containers._sklearn_api_containers.html">hummingbird.ml.containers._sklearn_api_containers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.containers.batch_container.html">hummingbird.ml.containers.batch_container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.containers.sklearn.html">hummingbird.ml.containers.sklearn</a></li>
+</ul>
+</li>
 <li class="toctree-l3 current"><a class="reference internal" href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._array_feature_extractor_implementations.html">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._base_operator.html">hummingbird.ml.operator_converters._base_operator</a></li>
@@ -205,12 +211,12 @@
 <p>Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor.</p>
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters.sklearn.kneighbors._convert_kneighbors_model">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.kneighbors.</code><code class="sig-name descname">_convert_kneighbors_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em>, <em class="sig-param"><span class="n">is_classifier</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8dc608f/hummingbirdhummingbird/ml/operator_converters/sklearn/kneighbors.py#L51"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kneighbors._convert_kneighbors_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.kneighbors.</code><code class="sig-name descname">_convert_kneighbors_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em>, <em class="sig-param"><span class="n">is_classifier</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ec30662/hummingbirdhummingbird/ml/operator_converters/sklearn/kneighbors.py#L51"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kneighbors._convert_kneighbors_model" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_classification_model">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.kneighbors.</code><code class="sig-name descname">convert_sklearn_kneighbors_classification_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8dc608f/hummingbirdhummingbird/ml/operator_converters/sklearn/kneighbors.py#L35"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_classification_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.kneighbors.</code><code class="sig-name descname">convert_sklearn_kneighbors_classification_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ec30662/hummingbirdhummingbird/ml/operator_converters/sklearn/kneighbors.py#L35"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_classification_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converter for <cite>sklearn.neighbors.KNeighborsClassifier</cite></p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>operator: An operator wrapping a <cite>sklearn.neighbors.KNeighborsClassifier</cite> model
@@ -224,7 +230,7 @@ extra_config: Extra configuration used to select the best conversion strategy</p
 
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_regression_model">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.kneighbors.</code><code class="sig-name descname">convert_sklearn_kneighbors_regression_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8dc608f/hummingbirdhummingbird/ml/operator_converters/sklearn/kneighbors.py#L19"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_regression_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.kneighbors.</code><code class="sig-name descname">convert_sklearn_kneighbors_regression_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ec30662/hummingbirdhummingbird/ml/operator_converters/sklearn/kneighbors.py#L19"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kneighbors.convert_sklearn_kneighbors_regression_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converter for <cite>sklearn.neighbors.KNeighborsRegressor</cite></p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>operator: An operator wrapping a <cite>sklearn.neighbors.KNeighborsRegressor</cite> model

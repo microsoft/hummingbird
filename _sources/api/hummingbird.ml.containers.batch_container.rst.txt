@@ -1,0 +1,8 @@
+hummingbird.ml.containers.batch\_container
+==========================================
+
+.. automodule:: hummingbird.ml.containers.batch_container
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
