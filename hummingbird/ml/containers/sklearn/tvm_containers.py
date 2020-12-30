@@ -42,8 +42,14 @@ class TVMSklearnContainer(SklearnContainer):
         assert tvm_installed(), "TVM Container requires TVM installed."
 
         self._ctx = self._extra_config[constants.TVM_CONTEXT]
-        self._input_names = self._extra_config[constants.TVM_INPUT_NAMES]
         self._to_tvm_array = lambda x: tvm.nd.array(x, self._ctx)
+        self._input_names = self._extra_config[constants.TVM_INPUT_NAMES]
+        self._tvm_tensors = {name: self._to_tvm_array(np.array([])) for name in self._input_names}
+        self._pad_input = (
+            self._extra_config[constants.TVM_PAD_PREDICTION_INPUT]
+            if constants.TVM_PAD_PREDICTION_INPUT in self._extra_config
+            else False
+        )
 
         os.environ["TVM_NUM_THREADS"] = str(self._n_threads)
 
@@ -176,17 +182,31 @@ class TVMSklearnContainer(SklearnContainer):
 
         return container
 
-    def _to_tvm_tensor(self, *inputs):
-        tvm_tensors = {}
-        msg = "The number of input rows {} is different from the batch size {} the TVM model is compiled for."
-        for i, inp in enumerate(inputs):
-            assert inp.shape[0] == self._batch_size, msg.format(inp.shape[0], self._batch_size)
-            tvm_tensors[self._input_names[i]] = self._to_tvm_array(inp)
-        return tvm_tensors
-
     def _predict_common(self, output_index, *inputs):
-        self.model.run(**self._to_tvm_tensor(*inputs))
-        return self.model.get_output(output_index).asnumpy()
+        # Compute padding.
+        padding_size = 0
+        if self._pad_input:
+            padding_size = self._batch_size - inputs[0].shape[0]
+
+        # Prepare inputs.
+        for i, input_ in enumerate(inputs):
+            assert (
+                self._pad_input or input_.shape[0] == self._batch_size
+            ), "The number of input rows {} is different from the batch size {} the TVM model is compiled for.".format(
+                input_.shape[0], self._batch_size
+            )
+            if padding_size > 0:
+                input_ = np.pad(input_, [(0, padding_size), (0, 0)])
+            self._tvm_tensors[self._input_names[i]] = self._to_tvm_array(input_)
+
+        # Compute the predictions.
+        self.model.run(**self._tvm_tensors)
+        result = self.model.get_output(output_index).asnumpy()
+
+        # Remove padding if necessary.
+        if padding_size > 0:
+            result = result[:-padding_size]
+        return result
 
 
 class TVMSklearnContainerTransformer(TVMSklearnContainer, SklearnContainerTransformer):
