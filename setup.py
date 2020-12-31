@@ -24,6 +24,7 @@ with open(README) as f:
 install_requires = [
     "numpy>=1.15,<=1.19.4",
     "onnxconverter-common>=1.6.0,<=1.7.0",
+    "scipy<=1.5.4",
     "scikit-learn>=0.21.3,<=0.23.2",
     "torch>=1.4.*,<=1.7.0",
     "psutil",

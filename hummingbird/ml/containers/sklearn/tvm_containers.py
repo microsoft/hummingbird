@@ -42,8 +42,12 @@ class TVMSklearnContainer(SklearnContainer):
         assert tvm_installed(), "TVM Container requires TVM installed."
 
         self._ctx = self._extra_config[constants.TVM_CONTEXT]
-        self._input_names = self._extra_config[constants.TVM_INPUT_NAMES]
         self._to_tvm_array = lambda x: tvm.nd.array(x, self._ctx)
+        self._input_names = self._extra_config[constants.TVM_INPUT_NAMES]
+        self._tvm_tensors = {name: self._to_tvm_array(np.array([])) for name in self._input_names}
+        self._pad_input = (
+            self._extra_config[constants.TVM_PAD_INPUT] if constants.TVM_PAD_INPUT in self._extra_config else False
+        )
 
         os.environ["TVM_NUM_THREADS"] = str(self._n_threads)
 
@@ -76,11 +80,13 @@ class TVMSklearnContainer(SklearnContainer):
         # Remove all information that cannot be pickled.
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
+        input_tensors = self._tvm_tensors
         lib = self._extra_config[constants.TVM_LIB]
         graph = self._extra_config[constants.TVM_GRAPH]
         params = self._extra_config[constants.TVM_PARAMS]
         ctx = self._extra_config[constants.TVM_CONTEXT]
         model = self._model
+        self._tvm_tensors = None
         self._extra_config[constants.TVM_LIB] = None
         self._extra_config[constants.TVM_GRAPH] = None
         self._extra_config[constants.TVM_PARAMS] = None
@@ -99,6 +105,7 @@ class TVMSklearnContainer(SklearnContainer):
         shutil.rmtree(location)
 
         # Restore the information
+        self._tvm_tensors = input_tensors
         self._extra_config[constants.TVM_LIB] = lib
         self._extra_config[constants.TVM_GRAPH] = graph
         self._extra_config[constants.TVM_PARAMS] = params
@@ -170,23 +177,38 @@ class TVMSklearnContainer(SklearnContainer):
         container._extra_config[constants.TVM_PARAMS] = params
         container._extra_config[constants.TVM_CONTEXT] = ctx
         container._ctx = ctx
+        container._tvm_tensors = {name: container._to_tvm_array(np.array([])) for name in container._input_names}
 
         # Need to set the number of threads to use as set in the original container.
         os.environ["TVM_NUM_THREADS"] = str(container._n_threads)
 
         return container
 
-    def _to_tvm_tensor(self, *inputs):
-        tvm_tensors = {}
-        msg = "The number of input rows {} is different from the batch size {} the TVM model is compiled for."
-        for i, inp in enumerate(inputs):
-            assert inp.shape[0] == self._batch_size, msg.format(inp.shape[0], self._batch_size)
-            tvm_tensors[self._input_names[i]] = self._to_tvm_array(inp)
-        return tvm_tensors
-
     def _predict_common(self, output_index, *inputs):
-        self.model.run(**self._to_tvm_tensor(*inputs))
-        return self.model.get_output(output_index).asnumpy()
+        # Compute padding.
+        padding_size = 0
+        if self._pad_input:
+            padding_size = self._batch_size - inputs[0].shape[0]
+
+        # Prepare inputs.
+        for i, input_ in enumerate(inputs):
+            assert (
+                self._pad_input or input_.shape[0] == self._batch_size
+            ), "The number of input rows {} is different from the batch size {} the TVM model is compiled for.".format(
+                input_.shape[0], self._batch_size
+            )
+            if padding_size > 0:
+                input_ = np.pad(input_, [(0, padding_size), (0, 0)])
+            self._tvm_tensors[self._input_names[i]] = self._to_tvm_array(input_)
+
+        # Compute the predictions.
+        self.model.run(**self._tvm_tensors)
+        result = self.model.get_output(output_index).asnumpy()
+
+        # Remove padding if necessary.
+        if padding_size > 0:
+            result = result[:-padding_size]
+        return result
 
 
 class TVMSklearnContainerTransformer(TVMSklearnContainer, SklearnContainerTransformer):

@@ -786,9 +786,9 @@ class TestExtraConf(unittest.TestCase):
 
         assert onnx_model.model.graph.name == model_name
 
-    # Test max fuse depth configuration in TVM
+    # Test max fuse depth configuration in TVM.
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
-    def test_xgb_classifier_converter_tvm(self):
+    def test_tvm_max_fuse(self):
         warnings.filterwarnings("ignore")
 
         X = [[0, 1], [1, 1], [2, 0]]
@@ -801,7 +801,54 @@ class TestExtraConf(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
 
-    # Test max string lentgh
+    # Test TVM without padding returns an errror is sizes don't match.
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_no_padding(self):
+        warnings.filterwarnings("ignore")
+
+        np.random.seed(0)
+        X = np.random.rand(100, 20)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=100)
+        model = lgb.LGBMRegressor(n_estimators=10)
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertIsNotNone(hb_model)
+        self.assertRaises(AssertionError, hb_model.predict, X[:98])
+
+    # Test padding in TVM.
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_padding(self):
+        warnings.filterwarnings("ignore")
+
+        np.random.seed(0)
+        X = np.random.rand(100, 20)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=100)
+        model = lgb.LGBMRegressor(n_estimators=10)
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_PAD_INPUT: True})
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.predict(X[:98]), hb_model.predict(X[:98]), rtol=1e-06, atol=1e-06)
+
+    # Test padding in TVM does not create problems when not necessary.
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_padding_2(self):
+        warnings.filterwarnings("ignore")
+
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = np.array([100, -10, 50], dtype=np.float32)
+        model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_PAD_INPUT: True})
+        self.assertIsNotNone(hb_model)
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Test max string lentgh.
     def test_max_str_length(self):
         model = LabelEncoder()
         data = [
