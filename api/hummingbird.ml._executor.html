@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hummingbird.ml.operator_converters.sparkml.linear &mdash; hummingbird  documentation</title>
+  <title>hummingbird.ml._executor &mdash; hummingbird  documentation</title>
   
 
   
@@ -37,8 +37,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hummingbird.ml.operator_converters.sparkml.vector_assembler" href="hummingbird.ml.operator_converters.sparkml.vector_assembler.html" />
-    <link rel="prev" title="hummingbird.ml.operator_converters.sparkml.discretizer" href="hummingbird.ml.operator_converters.sparkml.discretizer.html" /> 
+    <link rel="next" title="hummingbird.ml._parse" href="hummingbird.ml._parse.html" />
+    <link rel="prev" title="hummingbird.ml" href="hummingbird.ml.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -91,7 +91,7 @@
 <li class="toctree-l1"><a class="reference external" href="https://microsoft.github.io/hummingbird/">Main website</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="hummingbird.html">hummingbird</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="hummingbird.ml.html">hummingbird.ml</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._executor.html">hummingbird.ml._executor</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">hummingbird.ml._executor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._parse.html">hummingbird.ml._parse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._topology.html">hummingbird.ml._topology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._utils.html">hummingbird.ml._utils</a></li>
@@ -105,7 +105,7 @@
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.containers.sklearn.html">hummingbird.ml.containers.sklearn</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current"><a class="reference internal" href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._array_feature_extractor_implementations.html">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._base_operator.html">hummingbird.ml.operator_converters._base_operator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
@@ -127,7 +127,7 @@
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.xgb.html">hummingbird.ml.operator_converters.xgb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.onnx.html">hummingbird.ml.operator_converters.onnx</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.html">hummingbird.ml.operator_converters.sklearn</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="hummingbird.ml.operator_converters.sparkml.html">hummingbird.ml.operator_converters.sparkml</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sparkml.html">hummingbird.ml.operator_converters.sparkml</a></li>
 </ul>
 </li>
 </ul>
@@ -184,17 +184,13 @@
         
           <li><a href="hummingbird.ml.html">hummingbird.ml</a> &raquo;</li>
         
-          <li><a href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a> &raquo;</li>
-        
-          <li><a href="hummingbird.ml.operator_converters.sparkml.html">hummingbird.ml.operator_converters.sparkml</a> &raquo;</li>
-        
-      <li>hummingbird.ml.operator_converters.sparkml.linear</li>
+      <li>hummingbird.ml._executor</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/api/hummingbird.ml.operator_converters.sparkml.linear.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/hummingbird.ml._executor.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -207,21 +203,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-hummingbird.ml.operator_converters.sparkml.linear">
-<span id="hummingbird-ml-operator-converters-sparkml-linear"></span><h1>hummingbird.ml.operator_converters.sparkml.linear<a class="headerlink" href="#module-hummingbird.ml.operator_converters.sparkml.linear" title="Permalink to this headline">¶</a></h1>
-<p>Converters for SparkML linear models: LogisticRegressionModel</p>
-<dl class="py function">
-<dt id="hummingbird.ml.operator_converters.sparkml.linear.convert_sparkml_linear_model">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sparkml.linear.</code><code class="sig-name descname">convert_sparkml_linear_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/2835c61/hummingbirdhummingbird/ml/operator_converters/sparkml/linear.py#L18"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sparkml.linear.convert_sparkml_linear_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converter for <cite>pyspark.ml.classification.LogisticRegressionModel</cite></p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>operator: An operator wrapping a <cite>pyspark.ml.classification.LogisticRegressionModel</cite>
-device: String defining the type of device the converted operator should be run on
-extra_config: Extra configuration used to select the best conversion strategy</p>
-</dd>
-<dt>Returns:</dt><dd><p>A PyTorch model</p>
-</dd>
-</dl>
+  <div class="section" id="module-hummingbird.ml._executor">
+<span id="hummingbird-ml-executor"></span><h1>hummingbird.ml._executor<a class="headerlink" href="#module-hummingbird.ml._executor" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="hummingbird.ml._executor.Executor">
+<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml._executor.</code><code class="sig-name descname">Executor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_names</span></em>, <em class="sig-param"><span class="n">output_names</span></em>, <em class="sig-param"><span class="n">operator_map</span></em>, <em class="sig-param"><span class="n">operators</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/2835c61/hummingbirdhummingbird/ml/_executor.py#L19"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Executor class able to run Hummingbird’s internal representation of a converted pipeline.</p>
+<dl class="py method">
+<dt id="hummingbird.ml._executor.Executor.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/2835c61/hummingbirdhummingbird/ml/_executor.py#L66"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -234,10 +236,10 @@ extra_config: Extra configuration used to select the best conversion strategy</p
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="hummingbird.ml.operator_converters.sparkml.vector_assembler.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters.sparkml.vector_assembler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="hummingbird.ml._parse.html" class="btn btn-neutral float-right" title="hummingbird.ml._parse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="hummingbird.ml.operator_converters.sparkml.discretizer.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters.sparkml.discretizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="hummingbird.ml.html" class="btn btn-neutral float-left" title="hummingbird.ml" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

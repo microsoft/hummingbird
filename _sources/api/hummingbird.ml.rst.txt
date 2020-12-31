@@ -12,6 +12,7 @@ hummingbird.ml
 .. toctree::
    :maxdepth: 1
 
+   hummingbird.ml._executor
    hummingbird.ml._parse
    hummingbird.ml._topology
    hummingbird.ml._utils

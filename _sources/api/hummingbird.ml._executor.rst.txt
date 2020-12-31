@@ -1,0 +1,8 @@
+hummingbird.ml.\_executor
+=========================
+
+.. automodule:: hummingbird.ml._executor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

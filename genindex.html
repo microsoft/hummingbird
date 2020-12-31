@@ -89,6 +89,7 @@
 <li class="toctree-l1"><a class="reference external" href="https://microsoft.github.io/hummingbird/">Main website</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/hummingbird.html">hummingbird</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/hummingbird.ml.html">hummingbird.ml</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/hummingbird.ml._executor.html">hummingbird.ml._executor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/hummingbird.ml._parse.html">hummingbird.ml._parse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/hummingbird.ml._topology.html">hummingbird.ml._topology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/hummingbird.ml._utils.html">hummingbird.ml._utils</a></li>
@@ -203,6 +204,7 @@
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
@@ -369,17 +371,17 @@
 </li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_sklearn_operator_list">_build_sklearn_operator_list() (in module hummingbird.ml.supported)</a>
 </li>
-      <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_sparkml_api_operator_name_map">_build_sparkml_api_operator_name_map() (in module hummingbird.ml.supported)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_sparkml_api_operator_name_map">_build_sparkml_api_operator_name_map() (in module hummingbird.ml.supported)</a>
+</li>
       <li><a href="api/hummingbird.ml._parse.html#hummingbird.ml._parse._build_sparkml_api_parsers_map">_build_sparkml_api_parsers_map() (in module hummingbird.ml._parse)</a>
 </li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_sparkml_operator_list">_build_sparkml_operator_list() (in module hummingbird.ml.supported)</a>
 </li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_xgboost_operator_list">_build_xgboost_operator_list() (in module hummingbird.ml.supported)</a>
 </li>
-      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology._compile_tvm_model">_compile_tvm_model() (in module hummingbird.ml._topology)</a>
+      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology._compile_to_tvm">_compile_to_tvm() (in module hummingbird.ml._topology)</a>
 </li>
       <li><a href="api/hummingbird.ml._utils.html#hummingbird.ml._utils._Constants">_Constants (class in hummingbird.ml._utils)</a>
 </li>
@@ -453,7 +455,7 @@
 </li>
       <li><a href="api/hummingbird.ml.convert.html#hummingbird.ml.convert._is_sparkml_model">_is_sparkml_model() (in module hummingbird.ml.convert)</a>
 </li>
-      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology._jit_model">_jit_model() (in module hummingbird.ml._topology)</a>
+      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology._jit_trace">_jit_trace() (in module hummingbird.ml._topology)</a>
 </li>
       <li><a href="api/hummingbird.ml._parse.html#hummingbird.ml._parse._parse_onnx_api">_parse_onnx_api() (in module hummingbird.ml._parse)</a>
 </li>
@@ -501,8 +503,6 @@
         <li><a href="api/hummingbird.ml.containers.sklearn.tvm_containers.html#hummingbird.ml.containers.sklearn.tvm_containers.TVMSklearnContainerClassification._predict_proba">(hummingbird.ml.containers.sklearn.tvm_containers.TVMSklearnContainerClassification method)</a>
 </li>
       </ul></li>
-      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology._PyTorchBackendModel">_PyTorchBackendModel (class in hummingbird.ml._topology)</a>
-</li>
       <li><a href="api/hummingbird.ml._parse.html#hummingbird.ml._parse._remove_zipmap">_remove_zipmap() (in module hummingbird.ml._parse)</a>
 </li>
       <li><a href="api/hummingbird.ml.containers._sklearn_api_containers.html#hummingbird.ml.containers._sklearn_api_containers.SklearnContainer._run">_run() (hummingbird.ml.containers._sklearn_api_containers.SklearnContainer method)</a>
@@ -774,10 +774,18 @@
   </ul></td>
 </tr></table>
 
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hummingbird.ml._executor.html#hummingbird.ml._executor.Executor">Executor (class in hummingbird.ml._executor)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology._PyTorchBackendModel.forward">forward() (hummingbird.ml._topology._PyTorchBackendModel method)</a>
+      <li><a href="api/hummingbird.ml._executor.html#hummingbird.ml._executor.Executor.forward">forward() (hummingbird.ml._executor.Executor method)</a>
 
       <ul>
         <li><a href="api/hummingbird.ml.operator_converters._array_feature_extractor_implementations.html#hummingbird.ml.operator_converters._array_feature_extractor_implementations.ArrayFeatureExtractor.forward">(hummingbird.ml.operator_converters._array_feature_extractor_implementations.ArrayFeatureExtractor method)</a>
@@ -901,6 +909,13 @@
 
       <ul>
         <li><a href="api/hummingbird.ml.html#module-hummingbird.ml">module</a>
+</li>
+      </ul></li>
+      <li>
+    hummingbird.ml._executor
+
+      <ul>
+        <li><a href="api/hummingbird.ml._executor.html#module-hummingbird.ml._executor">module</a>
 </li>
       </ul></li>
       <li>
@@ -1470,6 +1485,8 @@
         <li><a href="api/hummingbird.html#module-hummingbird">hummingbird</a>, <a href="index.html#module-hummingbird">[1]</a>
 </li>
         <li><a href="api/hummingbird.ml.html#module-hummingbird.ml">hummingbird.ml</a>
+</li>
+        <li><a href="api/hummingbird.ml._executor.html#module-hummingbird.ml._executor">hummingbird.ml._executor</a>
 </li>
         <li><a href="api/hummingbird.ml._parse.html#module-hummingbird.ml._parse">hummingbird.ml._parse</a>
 </li>
