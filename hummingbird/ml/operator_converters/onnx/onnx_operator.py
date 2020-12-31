@@ -101,7 +101,7 @@ class Mul(BaseOperator, torch.nn.Module):
         self.val = val
 
     def forward(self, x):
-        return torch.multiply(x, self.val)
+        return torch.mul(x, self.val)
 
 
 class Div(BaseOperator, torch.nn.Module):
