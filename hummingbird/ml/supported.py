@@ -451,7 +451,7 @@ By default Hummingbird uses a max_fuse_depth of 50, but this can be override usi
 TVM_PAD_INPUT = "tvm_pad_prediction_inputs"
 """TVM statically compiles models, therefore each input shape is fixed.
 However, at prediction time, we can have inputs with different batch size.
-This option allows to pad the inputs on the batch dimension with zeros."""
+This option allows to pad the inputs on the batch dimension with zeros. Note that enabling this option may considerably hurt performance"""
 
 INPUT_NAMES = "input_names"
 """Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs."""
