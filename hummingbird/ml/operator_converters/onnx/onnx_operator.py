@@ -62,10 +62,12 @@ class Add(BaseOperator, torch.nn.Module):
     def __init__(self, val):
         super(Add, self).__init__()
 
-        self.val = val
+        self.val = torch.nn.Parameter(torch.FloatTensor(val), requires_grad=False)
 
-    def forward(self, x):
-        return torch.add(x, self.val)
+    def forward(self, *x):
+        if len(x) == 1:
+            return torch.add(*x, self.val)
+        return torch.add(*x)
 
 
 class Less(BaseOperator, torch.nn.Module):
@@ -108,8 +110,8 @@ class Div(BaseOperator, torch.nn.Module):
     def __init__(self):
         super(Div, self).__init__()
 
-    def forward(self, x):
-        return torch.divide(x)
+    def forward(self, *x):
+        return torch.divide(*x)
 
 
 def convert_onnx_cast(operator, device=None, extra_config={}):
@@ -211,7 +213,7 @@ def convert_onnx_add(operator, device=None, extra_config={}):
     val = extra_config[constants.ONNX_INITIALIZERS]["cst1"]
 
     # Generate the model.
-    return Add(val.float_data[0])  # TODO is this ever non-float?
+    return Add(val.float_data)
 
 
 def convert_onnx_neg(operator, device=None, extra_config={}):
