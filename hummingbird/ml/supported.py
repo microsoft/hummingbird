@@ -448,7 +448,7 @@ TVM_MAX_FUSE_DEPTH = "tvm_max_fuse_depth"
 If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232).
 By default Hummingbird uses a max_fuse_depth of 50, but this can be override using this parameter."""
 
-TVM_PAD_PREDICTION_INPUT = "tvm_pad_prediction_inputs"
+TVM_PAD_INPUT = "tvm_pad_prediction_inputs"
 """TVM statically compiles models, therefore each input shape is fixed.
 However, at prediction time, we can have inputs with different batch size.
 This option allows to pad the inputs on the batch dimension with zeros."""

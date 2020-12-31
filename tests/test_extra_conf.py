@@ -829,7 +829,7 @@ class TestExtraConf(unittest.TestCase):
         model = lgb.LGBMRegressor(n_estimators=10)
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_PAD_PREDICTION_INPUT: True})
+        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_PAD_INPUT: True})
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X[:98]), hb_model.predict(X[:98]), rtol=1e-06, atol=1e-06)
 
@@ -844,7 +844,7 @@ class TestExtraConf(unittest.TestCase):
         model = lgb.LGBMRegressor(n_estimators=3, min_child_samples=1)
         model.fit(X, y)
 
-        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_PAD_PREDICTION_INPUT: True})
+        hb_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_PAD_INPUT: True})
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
 
