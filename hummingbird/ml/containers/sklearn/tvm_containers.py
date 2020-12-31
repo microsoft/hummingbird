@@ -46,9 +46,7 @@ class TVMSklearnContainer(SklearnContainer):
         self._input_names = self._extra_config[constants.TVM_INPUT_NAMES]
         self._tvm_tensors = {name: self._to_tvm_array(np.array([])) for name in self._input_names}
         self._pad_input = (
-            self._extra_config[constants.TVM_PAD_PREDICTION_INPUT]
-            if constants.TVM_PAD_PREDICTION_INPUT in self._extra_config
-            else False
+            self._extra_config[constants.TVM_PAD_INPUT] if constants.TVM_PAD_INPUT in self._extra_config else False
         )
 
         os.environ["TVM_NUM_THREADS"] = str(self._n_threads)
