@@ -801,6 +801,22 @@ class TestExtraConf(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06)
 
+    # Test TVM without padding returns an errror is sizes don't match.
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_no_padding(self):
+        warnings.filterwarnings("ignore")
+
+        np.random.seed(0)
+        X = np.random.rand(100, 20)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=100)
+        model = lgb.LGBMRegressor(n_estimators=10)
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertIsNotNone(hb_model)
+        self.assertRaises(AssertionError, hb_model.predict, X[:98])
+
     # Test padding in TVM.
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
     def test_tvm_padding(self):
