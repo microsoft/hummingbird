@@ -111,7 +111,7 @@ class Div(BaseOperator, torch.nn.Module):
         super(Div, self).__init__()
 
     def forward(self, *x):
-        return torch.divide(*x)
+        return torch.div(*x)
 
 
 def convert_onnx_cast(operator, device=None, extra_config={}):
