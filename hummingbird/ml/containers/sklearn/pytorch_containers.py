@@ -149,7 +149,11 @@ class PyTorchSklearnContainerTransformer(SklearnContainerTransformer, PyTorchSkl
     """
 
     def _transform(self, *inputs):
-        return self.model.forward(*inputs).cpu().numpy()
+        output = self.model.forward(*inputs)
+        if type(output) in [tuple, list]:
+            return [o.cpu().numpy() for o in output]
+        else:
+            return output.cpu().numpy()
 
 
 class PyTorchSklearnContainerRegression(SklearnContainerRegression, PyTorchSklearnContainer):
