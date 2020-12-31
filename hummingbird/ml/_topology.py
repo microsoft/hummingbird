@@ -305,7 +305,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
             trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
-            executor = _jit_trace(executor, trace_input)
+            executor = _jit_trace(executor, trace_input, device, extra_config)
             torch.jit.optimized_execution(executor)
 
         hb_model = executor
