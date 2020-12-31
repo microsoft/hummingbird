@@ -15,7 +15,6 @@ from uuid import uuid4
 
 from onnxconverter_common.registration import get_converter
 import onnx
-import timeit
 
 from hummingbird.ml.containers import (
     PyTorchSklearnContainerRegression,
@@ -37,6 +36,7 @@ from hummingbird.ml.containers import (
     BatchContainer,
 )
 from hummingbird.ml._utils import pandas_installed, tvm_installed, get_device, from_strings_to_ints
+from hummingbird.ml._executor import Executor
 from hummingbird.ml.exceptions import MissingConverter
 from hummingbird.ml.operator_converters import constants
 
@@ -46,13 +46,13 @@ else:
     DataFrame = None
 
 
-def _jit_model(torch_model, trace_input, device, extra_config):
+def _jit_trace(executor, trace_input, device, extra_config):
     """
     Function used to convert an input pytorch model into torchscript.
     """
     if device != "cpu":
         trace_input.to(device)
-    return torch.jit.trace(torch_model, trace_input).eval()
+    return torch.jit.trace(executor, trace_input).eval()
 
 
 def _get_trace_input_from_test_input(input, remainder_size=None, extra_config={}):
@@ -96,12 +96,12 @@ def _get_batch_size(batch):
     return batch.shape[0]
 
 
-def _compile_tvm_model(topology, torch_model, trace_input, target, ctx, config, extra_config):
+def _compile_to_tvm(topology, executor, trace_input, target, ctx, config, extra_config):
     import tvm
     from tvm import relay
     from tvm.contrib import graph_runtime
 
-    ts_model = _jit_model(torch_model, trace_input, "cpu", extra_config)
+    ts_model = _jit_trace(executor, trace_input, "cpu", extra_config)
     test_input = [
         (topology.raw_model.input_names[i], trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,)
         for i in range(len(topology.raw_model.input_names))
@@ -182,7 +182,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
         torch.set_num_threads(n_threads)
 
     operators = list(topology.topological_operator_iterator())
-    torch_model = _PyTorchBackendModel(
+    executor = Executor(
         topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
     ).eval()
 
@@ -208,7 +208,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
         # Generate the ONNX models
         torch.onnx.export(
-            torch_model,
+            executor,
             batch_trace_input,
             output_model_name,
             input_names=topology.raw_model.input_names,
@@ -286,12 +286,10 @@ def convert(topology, backend, test_input, device, extra_config={}):
         # First we need to generate the torchscript model.
         batch_trace_input, remainder_trace_input = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
 
-        tvm_model = _compile_tvm_model(topology, torch_model, batch_trace_input, target, ctx, config, extra_config)
+        tvm_model = _compile_to_tvm(topology, executor, batch_trace_input, target, ctx, config, extra_config)
 
         if remainder_trace_input is not None:
-            remainder_model = _compile_tvm_model(
-                topology, torch_model, remainder_trace_input, target, ctx, config, extra_config
-            )
+            remainder_model = _compile_to_tvm(topology, executor, remainder_trace_input, target, ctx, config, extra_config)
 
         # In the container we will be using the context to properly configure the input tensors.
         extra_config[constants.TVM_CONTEXT] = ctx
@@ -302,17 +300,15 @@ def convert(topology, backend, test_input, device, extra_config={}):
         # Set the device for the model.
         if device != "cpu":
             if backend == torch.__name__ or torch.jit.__name__:
-                torch_model = torch_model.to(device)
+                executor = executor.to(device)
 
         # If the backend is tochscript, jit the model.
         if backend == torch.jit.__name__:
             trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
-            if device != "cpu":
-                trace_input.to(device)
-            torch_model = torch.jit.trace(torch_model, trace_input).eval()
-            torch.jit.optimized_execution(torch_model)
+            executor = _jit_trace(executor, trace_input, device, extra_config)
+            torch.jit.optimized_execution(executor)
 
-        hb_model = torch_model
+        hb_model = executor
 
     # Return if the container is not needed.
     if constants.CONTAINER in extra_config and not extra_config[constants.CONTAINER]:
@@ -409,108 +405,3 @@ def convert(topology, backend, test_input, device, extra_config={}):
         return BatchContainer(hb_container)
 
     return hb_container
-
-
-class _PyTorchBackendModel(torch.nn.Module, object):
-    """
-    Hummingbird model internal representation of a converted pipeline.
-    """
-
-    def __init__(self, input_names, output_names, operator_map, operators, extra_config):
-        """
-        Args:
-            input_names: The names of the input `onnxconverter_common.topology.Variable`s for this model
-            output_names: The names of the output `onnxconverter_common.topology.Variable`s generated by this model
-            operator_map: A dictionary of operator aliases and related PyTorch implementations
-            operators: The list of operators (in a topological order) that will be executed by the model (in order)
-            extra_config: Some additional custom configuration parameter
-        """
-        super(_PyTorchBackendModel, self).__init__()
-
-        # Define input \ output names.
-        # This is required because the internal variable names may differ from the original (raw) one.
-        # This may happen, for instance, because we force our internal naming to be unique.
-        def _fix_var_naming(operators, names, mod="input"):
-            new_names = []
-            map = {}
-
-            for op in operators:
-                if mod == "input":
-                    iter = op.inputs
-                else:
-                    iter = op.outputs
-                for i in iter:
-                    for name in names:
-                        if i.raw_name == name and name not in map:
-                            map[i.raw_name] = i.full_name
-                if len(map) == len(names):
-                    break
-            for name in names:
-                new_names.append(map[name])
-            return new_names
-
-        self._input_names = _fix_var_naming(operators, input_names)
-        self._output_names = _fix_var_naming(reversed(operators), output_names, "output")
-        self._operator_map = torch.nn.ModuleDict(operator_map)
-        self._operators = operators
-        self.max_string_length = None
-
-        if constants.MAX_STRING_LENGTH in extra_config:
-            self.max_string_length = extra_config[constants.MAX_STRING_LENGTH]
-
-    def forward(self, *inputs):
-        with torch.no_grad():
-            assert len(self._input_names) == len(inputs) or (
-                type(inputs[0]) == DataFrame and DataFrame is not None and len(self._input_names) == len(inputs[0].columns)
-            ), "number of inputs or number of columns in the dataframe do not match with the expected number of inputs {}".format(
-                self._input_names
-            )
-
-            if type(inputs[0]) == DataFrame and DataFrame is not None:
-                # Split the dataframe into column ndarrays
-                inputs = inputs[0]
-                input_names = list(inputs.columns)
-                splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
-                splits = [df.to_numpy().reshape(-1, 1) for df in splits]
-                inputs = tuple(splits)
-            inputs = [*inputs]
-            variable_map = {}
-            device = get_device(self)
-
-            # Maps data inputs to the expected variables.
-            for i, input_name in enumerate(self._input_names):
-                input_ = inputs[i]
-                if type(input_) is list:
-                    input_ = np.array(input_)
-                if type(input_) is np.ndarray:
-                    # Convert string arrays into int32.
-                    if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
-                        assert self.max_string_length is not None
-
-                        input_ = from_strings_to_ints(input_, self.max_string_length)
-                    input_ = torch.from_numpy(input_)
-                elif type(input_) is not torch.Tensor:
-                    raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(input_)))
-                if input_.dtype == torch.float64:
-                    # We convert double precision arrays into single precision. Sklearn does the same.
-                    input_ = input_.float()
-                if device is not None and device.type != "cpu":
-                    input_ = input_.to(device)
-                variable_map[input_name] = input_
-
-            # Evaluate all the operators in the topology by properly wiring inputs \ outputs
-            for operator in self._operators:
-                pytorch_op = self._operator_map[operator.full_name]
-                pytorch_outputs = pytorch_op(*(variable_map[input] for input in operator.input_full_names))
-
-                if len(operator.output_full_names) == 1:
-                    variable_map[operator.output_full_names[0]] = pytorch_outputs
-                else:
-                    for i, output in enumerate(operator.output_full_names):
-                        variable_map[output] = pytorch_outputs[i]
-
-            # Prepare and return the output.
-            if len(self._output_names) == 1:
-                return variable_map[self._output_names[0]]
-            else:
-                return tuple(variable_map[output_name] for output_name in self._output_names)
