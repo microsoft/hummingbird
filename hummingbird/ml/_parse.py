@@ -23,7 +23,7 @@ from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 
-from ._container import CommonONNXModelContainer, CommonSparkMLModelContainer
+from .containers import CommonONNXModelContainer, CommonSparkMLModelContainer
 from ._utils import sklearn_installed, sparkml_installed
 from .operator_converters import constants
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name, get_sparkml_api_operator_name
@@ -157,7 +157,13 @@ def _declare_input_variables(scope, raw_model_container, extra_config):
     if constants.INPUT_NAMES in extra_config:
         assert n_inputs == len(extra_config[constants.INPUT_NAMES])
     if constants.TEST_INPUT in extra_config:
-        from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType, Int32TensorType, Int64TensorType
+        from onnxconverter_common.data_types import (
+            FloatTensorType,
+            DoubleTensorType,
+            Int32TensorType,
+            Int64TensorType,
+            StringTensorType,
+        )
 
         test_input = extra_config[constants.TEST_INPUT] if n_inputs > 1 else [extra_config[constants.TEST_INPUT]]
         for i in range(n_inputs):
@@ -173,6 +179,8 @@ def _declare_input_variables(scope, raw_model_container, extra_config):
                 input_type = Int32TensorType(input.shape)
             elif input.dtype == np.int64:
                 input_type = Int64TensorType(input.shape)
+            elif input.dtype.kind in constants.SUPPORTED_STRING_TYPES:
+                input_type = StringTensorType(input.shape)
             else:
                 raise NotImplementedError(
                     "Type {} not supported. Please fill an issue on https://github.com/microsoft/hummingbird/.".format(
@@ -580,6 +588,10 @@ def _parse_onnx_single_operator(scope, operator):
         scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
         model: An ONNX operator
     """
+
+    # Identify nodes can just be skipped.
+    if operator.op_type == "Identity":
+        return
 
     # Add the operator in the scope.
     alias = get_onnxml_api_operator_name(operator.op_type)

@@ -5,12 +5,5 @@
 # --------------------------------------------------------------------------
 
 """
-Entrypoint for Hummingbird modules.
+Output containers matching the Scikit-learn API are listed under this package.
 """
-
-__version__ = "0.2.0"
-__author__ = "Microsoft"
-__producer__ = "hummingbird"
-__producer_version__ = __version__
-__domain__ = "microsoft.gsl"
-__model_version__ = 0

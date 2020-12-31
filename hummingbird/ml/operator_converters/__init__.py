@@ -20,6 +20,8 @@ constants = _Constants(converter_constants, hummingbird_constants)
 from .onnx import onnx_operator  # noqa: E402
 from .onnx import array_feature_extractor as onnx_afe  # noqa: E402, F811
 from .onnx import binarizer as onnx_binarizer  # noqa: E402, F811
+from .onnx import feature_vectorizer  # noqa: E402
+from .onnx import label_encoder as onnx_label_encoder  # noqa: E402, F811
 from .onnx import linear as onnx_linear  # noqa: E402, F811
 from .onnx import normalizer as onnx_normalizer  # noqa: E402, F811
 from .onnx import one_hot_encoder as onnx_ohe  # noqa: E402, F811
@@ -33,6 +35,7 @@ from .sklearn import gbdt  # noqa: E402
 from .sklearn import iforest  # noqa: E402
 from .sklearn import imputer  # noqa: E402
 from .sklearn import kneighbors  # noqa: E402
+from .sklearn import label_encoder  # noqa: E402
 from .sklearn import linear as sklearn_linear  # noqa: E402
 from .sklearn import mlp as sklearn_mlp  # noqa: E402
 from .sklearn import nb as sklearn_nb  # noqa: E402

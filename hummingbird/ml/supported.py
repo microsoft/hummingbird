@@ -31,6 +31,7 @@ KernelPCA,
 KBinsDiscretizer,
 KNeighborsClassifier,
 KNeighborsRegressor,
+LabelEncoder,
 LinearRegression,
 LinearSVC,
 LogisticRegression,
@@ -73,6 +74,8 @@ XGBRegressor,
 "Binarizer"
 "Cast",
 "Concat",
+"FeatureVectorizer"
+"LabelEncoder",
 "LinearClassifier",
 "LinearRegressor",
 "OneHotEncoder",
@@ -150,6 +153,7 @@ def _build_sklearn_operator_list():
         from sklearn.preprocessing import (
             Binarizer,
             KBinsDiscretizer,
+            LabelEncoder,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -206,6 +210,7 @@ def _build_sklearn_operator_list():
             # Preprocessing
             Binarizer,
             KBinsDiscretizer,
+            LabelEncoder,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -296,6 +301,8 @@ def _build_onnxml_operator_list():
             # Preprocessing
             "ArrayFeatureExtractor",
             "Binarizer",
+            "FeatureVectorizer",
+            "LabelEncoder",
             "OneHotEncoder",
             "Normalizer",
             "Scaler",
@@ -446,6 +453,11 @@ TVM_MAX_FUSE_DEPTH = "tvm_max_fuse_depth"
 If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232).
 By default Hummingbird uses a max_fuse_depth of 50, but this can be override using this parameter."""
 
+TVM_PAD_INPUT = "tvm_pad_prediction_inputs"
+"""TVM statically compiles models, therefore each input shape is fixed.
+However, at prediction time, we can have inputs with different batch size.
+This option allows to pad the inputs on the batch dimension with zeros. Note that enabling this option may considerably hurt performance"""
+
 INPUT_NAMES = "input_names"
 """Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs."""
 
@@ -461,3 +473,9 @@ Inter-op threads are by default set to 1 in Hummingbird. Check `tests.test_extra
 
 BATCH_SIZE = "batch_size"
 """Select whether to partition the input dataset at inference time in N batch_size partitions."""
+
+REMAINDER_SIZE = "remainder_size"
+"""Determines the number of rows that an auxiliary remainder model can accept."""
+
+MAX_STRING_LENGTH = "max_string_length"
+"""Maximum expected length for string features. By deafult this value is set using the training information."""

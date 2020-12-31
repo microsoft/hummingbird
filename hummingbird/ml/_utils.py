@@ -9,8 +9,11 @@ Collection of utility functions used throughout Hummingbird.
 """
 
 from distutils.version import LooseVersion
+import numpy as np
 import torch
+import os
 import warnings
+import shutil
 
 from hummingbird.ml.exceptions import ConstantError
 
@@ -119,7 +122,6 @@ def tvm_installed():
     """
     try:
         import tvm
-        from tvm import relay
     except ImportError:
         return False
     return True
@@ -157,7 +159,7 @@ def is_spark_dataframe(df):
         return False
 
 
-def _get_device(model):
+def get_device(model):
     """
     Convenient function used to get the runtime device for the model.
     """
@@ -168,6 +170,55 @@ def _get_device(model):
         device = next(model.parameters()).device  # Assuming we are using a single device for all parameters
 
     return device
+
+
+def from_strings_to_ints(input, max_string_length):
+    """
+    Utility function used to transform string inputs into a numerical representation.
+    """
+    shape = list(input.shape)
+    shape.append(max_string_length // 4)
+    return np.array(input, dtype="|S" + str(max_string_length)).view(np.int32).reshape(shape)
+
+
+def load(location):
+    """
+    Utility function used to load arbitrary Hummingbird models.
+    """
+    # Add load capabilities.
+    from hummingbird.ml.containers import PyTorchSklearnContainer
+    from hummingbird.ml.containers import TVMSklearnContainer
+    from hummingbird.ml.containers import ONNXSklearnContainer
+    from hummingbird.ml.operator_converters import constants
+
+    model = None
+    model_type = None
+
+    # Unzip the dir.
+    zip_location = location
+    if not location.endswith("zip"):
+        zip_location = location + ".zip"
+    else:
+        location = zip_location[:-4]
+    shutil.unpack_archive(zip_location, location, format="zip")
+
+    assert os.path.exists(location), "Model location {} does not exist.".format(location)
+
+    # Load the model type.
+    with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
+        model_type = file.readline()
+
+    if "torch" in model_type:
+        model = PyTorchSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+    elif "onnx" in model_type:
+        model = ONNXSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+    elif "tvm" in model_type:
+        model = TVMSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+    else:
+        raise RuntimeError("Model type {} not recognized.".format(model_type))
+
+    assert model.model is not None
+    return model
 
 
 class _Constants(object):
