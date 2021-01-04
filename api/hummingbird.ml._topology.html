@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.2.0
+                0.2.1
               </div>
             
           
@@ -208,30 +208,30 @@
 <p>Converters for topology IR are stored in this file.</p>
 <dl class="py function">
 <dt id="hummingbird.ml._topology._compile_to_tvm">
-<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">_compile_to_tvm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">executor</span></em>, <em class="sig-param"><span class="n">trace_input</span></em>, <em class="sig-param"><span class="n">target</span></em>, <em class="sig-param"><span class="n">ctx</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/db832d5/hummingbirdhummingbird/ml/_topology.py#L99"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology._compile_to_tvm" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">_compile_to_tvm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">executor</span></em>, <em class="sig-param"><span class="n">trace_input</span></em>, <em class="sig-param"><span class="n">target</span></em>, <em class="sig-param"><span class="n">ctx</span></em>, <em class="sig-param"><span class="n">config</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/_topology.py#L99"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology._compile_to_tvm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._topology._get_batch_size">
-<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">_get_batch_size</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">batch</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/db832d5/hummingbirdhummingbird/ml/_topology.py#L91"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology._get_batch_size" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">_get_batch_size</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">batch</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/_topology.py#L91"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology._get_batch_size" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._topology._get_trace_input_from_test_input">
-<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">_get_trace_input_from_test_input</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input</span></em>, <em class="sig-param"><span class="n">remainder_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/db832d5/hummingbirdhummingbird/ml/_topology.py#L58"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology._get_trace_input_from_test_input" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">_get_trace_input_from_test_input</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input</span></em>, <em class="sig-param"><span class="n">remainder_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/_topology.py#L58"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology._get_trace_input_from_test_input" title="Permalink to this definition">¶</a></dt>
 <dd><p>Utility function used to properly put the inputs into a format understandable by torch.
 If <cite>remainder_size</cite> is provided, also return inputs for a remainder model (see below).</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._topology._jit_trace">
-<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">_jit_trace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">executor</span></em>, <em class="sig-param"><span class="n">trace_input</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/db832d5/hummingbirdhummingbird/ml/_topology.py#L49"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology._jit_trace" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">_jit_trace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">executor</span></em>, <em class="sig-param"><span class="n">trace_input</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/_topology.py#L49"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology._jit_trace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function used to convert an input pytorch model into torchscript.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._topology.convert">
-<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">convert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">backend</span></em>, <em class="sig-param"><span class="n">test_input</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/db832d5/hummingbirdhummingbird/ml/_topology.py#L125"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology.convert" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._topology.</code><code class="sig-name descname">convert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">backend</span></em>, <em class="sig-param"><span class="n">test_input</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/_topology.py#L125"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._topology.convert" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is used to convert a <cite>onnxconverter_common.topology.Topology</cite> object into a <em>backend</em> model.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>topology: The <cite>onnxconverter_common.topology.Topology</cite> object that will be converted into a backend model
