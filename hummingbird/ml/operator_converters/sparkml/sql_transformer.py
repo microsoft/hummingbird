@@ -43,7 +43,10 @@ SUPPORTED_BINARY_OPS = {
 # List of supported SQL aggregation ops.
 SUPPORTED_AGGEGATION_OPS = {
     'org.apache.spark.sql.catalyst.expressions.aggregate.Sum': lambda x: torch.sum(x, dim=0, keepdim=True),
-    'org.apache.spark.sql.catalyst.expressions.aggregate.Count': lambda x: torch.sum(x, dim=0, keepdim=True)
+    'org.apache.spark.sql.catalyst.expressions.aggregate.Count': lambda x: torch.sum(x, dim=0, keepdim=True),
+    'org.apache.spark.sql.catalyst.expressions.aggregate.Average': lambda x: torch.mean(x, dim=0, keepdim=True),
+    'org.apache.spark.sql.catalyst.expressions.aggregate.Min': lambda x: torch.min(x, dim=0, keepdim=True)[0],
+    'org.apache.spark.sql.catalyst.expressions.aggregate.Max': lambda x: torch.max(x, dim=0, keepdim=True)[0]
 }
 
 

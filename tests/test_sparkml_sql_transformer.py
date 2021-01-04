@@ -145,17 +145,18 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
     def test_sql_transformer_group_by_project_order_by(self):
         df = spark.createDataFrame(
             [
-                (1, 101, 5),  # create your data here, be consistent in the types.
-                (2, 100, 7),
-                (3, None, 1),
-                (4, 100, 9),
-                (5, 102, 8),
+                (1, 101, 5.0),  # create your data here, be consistent in the types.
+                (2, 100, 7.0),
+                (3, None, 1.0),
+                (4, 100, 9.0),
+                (5, 102, 8.0),
             ],
             ['id', 'val1', 'val2']  # add your columns label here
         )
 
-        model = SQLTransformer(statement="SELECT val1 as val, SUM(id) as val_sum, COUNT(*) as c FROM __THIS__ GROUP BY val1 ORDER BY val NULLS LAST")
-        output_col_names = ['val', 'val_sum', 'c']
+        model = SQLTransformer(statement="SELECT val1 as val, SUM(val2) as val_sum, COUNT(*) as c, AVG(val2) as a, MIN(val2) as mi, MAX(val2) as "
+                                         "mx FROM __THIS__ GROUP BY val1 ORDER BY val NULLS LAST")
+        output_col_names = ['val', 'val_sum', 'c', 'a', 'mi', 'mx']
 
         test_df = df
         torch_model = convert(model, "torch", test_df)
