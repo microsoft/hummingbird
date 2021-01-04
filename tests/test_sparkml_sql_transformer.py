@@ -28,7 +28,7 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
     # Test SQLTransformer
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
-    def test_sql_transformer_converter1(self):
+    def test_sql_transformer_select_project(self):
         iris = load_iris()
         features = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
 
@@ -54,7 +54,7 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
 
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.7.0"), reason="Spark-ML test requires torch >= 1.7.0")
-    def test_sql_transformer_converter2(self):
+    def test_sql_transformer_project_case(self):
         iris = load_iris()
         features = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
 
@@ -89,7 +89,7 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
 
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
-    def test_sql_transformer_converter3(self):
+    def test_sql_transformer_project_case_in(self):
         iris = load_iris()
         features = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
 
@@ -116,7 +116,7 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
 
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
     @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
-    def test_sql_transformer_converter4(self):
+    def test_sql_transformer_select_project_order_by(self):
         df = spark.createDataFrame(
             [
                 (1, 101, 5),  # create your data here, be consistent in the types.
@@ -137,6 +137,32 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
 
         spark_output = model.transform(test_df).toPandas()[output_col_names]
         spark_output_np = [spark_output[x].to_numpy().reshape(-1, 1) for x in output_col_names][0]
+        torch_output_np = torch_model.transform(df.toPandas())
+        np.testing.assert_allclose(spark_output_np, torch_output_np, rtol=1e-06, atol=1e-06)
+
+    @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
+    def test_sql_transformer_group_by_project_order_by(self):
+        df = spark.createDataFrame(
+            [
+                (1, 101, 5),  # create your data here, be consistent in the types.
+                (2, 100, 7),
+                (3, None, 1),
+                (4, 100, 9),
+                (5, 102, 8),
+            ],
+            ['id', 'val1', 'val2']  # add your columns label here
+        )
+
+        model = SQLTransformer(statement="SELECT val1 as val, SUM(id) as val_sum, COUNT(*) as c FROM __THIS__ GROUP BY val1 ORDER BY val NULLS LAST")
+        output_col_names = ['val', 'val_sum', 'c']
+
+        test_df = df
+        torch_model = convert(model, "torch", test_df)
+        self.assertTrue(torch_model is not None)
+
+        spark_output = model.transform(test_df).toPandas()[output_col_names]
+        spark_output_np = [spark_output[x].to_numpy().reshape(-1, 1) for x in output_col_names]
         torch_output_np = torch_model.transform(df.toPandas())
         np.testing.assert_allclose(spark_output_np, torch_output_np, rtol=1e-06, atol=1e-06)
 
