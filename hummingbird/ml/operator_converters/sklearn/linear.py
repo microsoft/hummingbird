@@ -39,6 +39,7 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
 
     multi_class = None
+    loss = None
     if hasattr(operator.raw_operator, "multi_class"):
         if operator.raw_operator.multi_class == "ovr" or operator.raw_operator.solver in ["warn", "liblinear"]:
             multi_class = "ovr"
@@ -46,8 +47,13 @@ def convert_sklearn_linear_model(operator, device, extra_config):
             multi_class = "ovr"
         else:
             multi_class = "multinomial"
+    if hasattr(operator.raw_operator, "loss"):
+        loss = operator.raw_operator.loss
+        assert (
+            loss == "log" or loss == "modified_huber"
+        ), "predict_proba only supported when loss='log' or loss='modified_huber' ({} given)".format(loss)
 
-    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)
+    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class, loss=loss)
 
 
 def convert_sklearn_linear_regression_model(operator, device, extra_config):

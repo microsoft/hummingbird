@@ -14,7 +14,7 @@ from ._base_operator import BaseOperator
 
 
 class LinearModel(BaseOperator, torch.nn.Module):
-    def __init__(self, coefficients, intercepts, device, classes=[0], multi_class=None, is_linear_regression=False):
+    def __init__(self, coefficients, intercepts, device, classes=[0], multi_class=None, loss=None, is_linear_regression=False):
         super(LinearModel, self).__init__()
         self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients), requires_grad=False)
         self.intercepts = torch.nn.Parameter(torch.from_numpy(intercepts).view(-1), requires_grad=False)
@@ -22,6 +22,7 @@ class LinearModel(BaseOperator, torch.nn.Module):
         self.multi_class = multi_class
         self.regression = is_linear_regression
         self.classification = not is_linear_regression
+        self.loss = loss if loss is not None else "log"
 
         self.perform_class_select = False
         if min(classes) != 0 or max(classes) != len(classes) - 1:
@@ -32,15 +33,32 @@ class LinearModel(BaseOperator, torch.nn.Module):
             self.binary_classification = True
 
     def forward(self, x):
-        output = torch.addmm(self.intercepts, x.float(), self.coefficients)
+        output = torch.addmm(self.intercepts, x, self.coefficients)
         if self.multi_class == "multinomial":
             output = torch.softmax(output, dim=1)
         elif self.regression:
             return output
         else:
-            output = torch.sigmoid(output)
+            if self.loss == "log":
+                output = torch.sigmoid(output)
+            else:
+                output = torch.clip(output, -1, 1)
+                output += 1
+                output /= 2
+
             if not self.binary_classification:
-                output /= torch.sum(output, dim=1, keepdim=True)
+                if self.loss == "modified_huber":
+                    # This loss might assign zero to all classes, which doesn't
+                    # normalize neatly; work around this to produce uniform
+                    # probabilities.
+                    prob_sum = torch.sum(output, dim=1, keepdim=False)
+                    all_zero = prob_sum == 0
+                    if torch.any(all_zero):
+                        output[all_zero, :] = 1
+                        prob_sum[all_zero] = len(self.classes)
+                    output /= prob_sum.view((output.shape[0], -1))
+                else:
+                    output /= torch.sum(output, dim=1, keepdim=True)
 
         if self.binary_classification:
             output = torch.cat([1 - output, output], dim=1)
