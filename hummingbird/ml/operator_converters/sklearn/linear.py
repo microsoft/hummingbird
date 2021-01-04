@@ -50,8 +50,10 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     if hasattr(operator.raw_operator, "loss"):
         loss = operator.raw_operator.loss
         assert (
-            loss == "log" or loss == "modified_huber"
-        ), "predict_proba only supported when loss='log' or loss='modified_huber' ({} given)".format(loss)
+            loss == "log" or loss == "modified_huber" or loss == "squared_hinge"
+        ), "predict_proba for linear model currently does not support {}. Please fill an issue at https://github.com/microsoft/hummingbird".format(
+            loss
+        )
 
     return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class, loss=loss)
 
