@@ -3,6 +3,7 @@ Tests sklearn linear classifiers (LinearRegression, LogisticRegression, SGDClass
 """
 import unittest
 import warnings
+from distutils.version import LooseVersion
 
 import numpy as np
 import torch
@@ -171,6 +172,9 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         self._test_sgd_classifier(3)
 
     # SGDClassifier with modified huber loss
+    @unittest.skipIf(
+        LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Modified Huber loss test requires torch >= 1.6.0"
+    )
     def test_modified_huber(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
         Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
@@ -185,6 +189,9 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         np.testing.assert_allclose(model.predict_proba(inputs), hb_model.predict_proba(inputs), rtol=1e-6, atol=1e-6)
 
     # SGDClassifier with modified huber loss multiclass
+    @unittest.skipIf(
+        LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Modified Huber loss test requires torch >= 1.6.0"
+    )
     def test_modified_huber_multi(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
         Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])

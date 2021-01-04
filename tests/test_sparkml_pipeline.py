@@ -29,7 +29,7 @@ if pandas_installed():
 
 class TestSparkMLPipeline(unittest.TestCase):
     @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
-    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.16.0")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
     def test_pipeline_1(self):
         n_features = 10
         n_total = 100
