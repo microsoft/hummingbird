@@ -42,13 +42,13 @@ jobs:
       if: ${{ matrix.python-version == '3.5' && matrix.os == 'macos-10.15' }}
       run: pip install torch==1.5.1
     - name: Install pytorch 1.7.1 if python 3.5 (mac)
-      if: ${{ matrix.python-version != '3.5' && matrix.os == 'macos-10.14' }}
+      if: ${{ matrix.python-version != '3.5' && matrix.os == 'macos-10.15' }}
       run: pip install torch==1.7.1
     - name: Install pytorch 1.5.1+cpu if python 3.5 (not mac)
       if: ${{ matrix.python-version == '3.5' && matrix.os != 'macos-10.15' }}
       run: pip install torch==1.5.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install pytorch 1.7.1+cpu if python > 3.5 (not mac)
-      if:  ${{ matrix.python-version != '3.5' && matrix.os != 'macos-10.14' }}
+      if:  ${{ matrix.python-version != '3.5' && matrix.os != 'macos-10.15' }}
       run: pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
