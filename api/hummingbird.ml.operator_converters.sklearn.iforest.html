@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>hummingbird.ml.operator_converters.sklearn.iforest &mdash; hummingbird  documentation</title>
   
@@ -17,7 +17,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -52,7 +55,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> hummingbird
+            <a href="../index.html" class="icon icon-home"> hummingbird
           
 
           
@@ -174,6 +177,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -193,7 +198,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="../_sources/api/hummingbird.ml.operator_converters.sklearn.iforest.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -212,7 +217,7 @@
 <p>Converters for scikit-learn isolation forest.</p>
 <dl class="py class">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest.GEMMIsolationForestImpl">
-<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">GEMMIsolationForestImpl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_parameters</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L96"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.GEMMIsolationForestImpl" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">GEMMIsolationForestImpl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_parameters</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L96"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.GEMMIsolationForestImpl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._tree_implementations.html#hummingbird.ml.operator_converters._tree_implementations.GEMMTreeImpl" title="hummingbird.ml.operator_converters._tree_implementations.GEMMTreeImpl"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._tree_implementations.GEMMTreeImpl</span></code></a></p>
 <p>Class implementing the GEMM strategy (in PyTorch) for isolation forest model.</p>
 <dl class="py attribute">
@@ -222,7 +227,7 @@
 
 <dl class="py method">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest.GEMMIsolationForestImpl.aggregation">
-<code class="sig-name descname">aggregation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L122"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.GEMMIsolationForestImpl.aggregation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">aggregation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L122"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.GEMMIsolationForestImpl.aggregation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method defining the aggregation operation to execute after the model is evaluated.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>x: An input tensor</p>
@@ -236,7 +241,7 @@
 
 <dl class="py class">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest.PerfectTreeTraversalIsolationForestImpl">
-<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">PerfectTreeTraversalIsolationForestImpl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_parameters</span></em>, <em class="sig-param"><span class="n">max_depth</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L169"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.PerfectTreeTraversalIsolationForestImpl" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">PerfectTreeTraversalIsolationForestImpl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_parameters</span></em>, <em class="sig-param"><span class="n">max_depth</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L169"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.PerfectTreeTraversalIsolationForestImpl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._tree_implementations.html#hummingbird.ml.operator_converters._tree_implementations.PerfectTreeTraversalTreeImpl" title="hummingbird.ml.operator_converters._tree_implementations.PerfectTreeTraversalTreeImpl"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._tree_implementations.PerfectTreeTraversalTreeImpl</span></code></a></p>
 <p>Class implementing the Perfect Tree Traversal strategy in PyTorch for isolation forest model.</p>
 <dl class="py attribute">
@@ -246,7 +251,7 @@
 
 <dl class="py method">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest.PerfectTreeTraversalIsolationForestImpl.aggregation">
-<code class="sig-name descname">aggregation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L198"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.PerfectTreeTraversalIsolationForestImpl.aggregation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">aggregation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L198"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.PerfectTreeTraversalIsolationForestImpl.aggregation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method defining the aggregation operation to execute after the model is evaluated.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>x: An input tensor</p>
@@ -260,7 +265,7 @@
 
 <dl class="py class">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl">
-<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">TreeTraversalIsolationForestImpl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_parameters</span></em>, <em class="sig-param"><span class="n">max_depth</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L131"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">TreeTraversalIsolationForestImpl</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_parameters</span></em>, <em class="sig-param"><span class="n">max_depth</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L131"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._tree_implementations.html#hummingbird.ml.operator_converters._tree_implementations.TreeTraversalTreeImpl" title="hummingbird.ml.operator_converters._tree_implementations.TreeTraversalTreeImpl"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._tree_implementations.TreeTraversalTreeImpl</span></code></a></p>
 <p>Class implementing the Tree Traversal strategy in PyTorch for isolation forest model.</p>
 <dl class="py attribute">
@@ -270,7 +275,7 @@
 
 <dl class="py method">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl.aggregation">
-<code class="sig-name descname">aggregation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L160"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl.aggregation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">aggregation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L160"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl.aggregation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method defining the aggregation operation to execute after the model is evaluated.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>x: An input tensor</p>
@@ -284,7 +289,7 @@
 
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest._average_path_length">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">_average_path_length</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_samples_leaf</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L24"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest._average_path_length" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">_average_path_length</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_samples_leaf</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L24"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest._average_path_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Taken from sklearn implementation of isolation forest:
 <a class="reference external" href="https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/ensemble/_iforest.py#L480">https://github.com/scikit-learn/scikit-learn/blob/fd237278e/sklearn/ensemble/_iforest.py#L480</a>
 For each given number of samples in the array n_samples_leaf, this calculates average path length of unsucceesful
@@ -299,7 +304,7 @@ BST search.</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest._get_iforest_anomaly_score_per_node">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">_get_iforest_anomaly_score_per_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">children_left</span></em>, <em class="sig-param"><span class="n">children_right</span></em>, <em class="sig-param"><span class="n">n_node_samples</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L55"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest._get_iforest_anomaly_score_per_node" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">_get_iforest_anomaly_score_per_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">children_left</span></em>, <em class="sig-param"><span class="n">children_right</span></em>, <em class="sig-param"><span class="n">n_node_samples</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L55"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest._get_iforest_anomaly_score_per_node" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get anomaly score per node in isolation forest, which is node depth + _average_path_length(n_node_samples). Will
 be used to replace “value” in each tree.</p>
 <dl class="simple">
@@ -312,7 +317,7 @@ n_node_samples: number of samples per node</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest._get_parameters_for_sklearn_iforest">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">_get_parameters_for_sklearn_iforest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_infos</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L77"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest._get_parameters_for_sklearn_iforest" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">_get_parameters_for_sklearn_iforest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tree_infos</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L77"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest._get_parameters_for_sklearn_iforest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse sklearn-based isolation forest, replace existing values of node with anomaly score calculated in
 _get_iforest_anomaly_score_per_node</p>
 <dl class="simple">
@@ -325,7 +330,7 @@ _get_iforest_anomaly_score_per_node</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters.sklearn.iforest.convert_sklearn_isolation_forest">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">convert_sklearn_isolation_forest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/ff9f5b4/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L207"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.convert_sklearn_isolation_forest" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters.sklearn.iforest.</code><code class="sig-name descname">convert_sklearn_isolation_forest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/5f68a09/hummingbirdhummingbird/ml/operator_converters/sklearn/iforest.py#L207"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.iforest.convert_sklearn_isolation_forest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converter for <cite>sklearn.ensemble.IsolationForest</cite>.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>operator: An operator wrapping a tree (ensemble) isolation forest model
@@ -344,37 +349,29 @@ extra_config: Extra configuration used to select the best conversion strategy</p
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="hummingbird.ml.operator_converters.sklearn.imputer.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters.sklearn.imputer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="hummingbird.ml.operator_converters.sklearn.gbdt.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters.sklearn.gbdt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="hummingbird.ml.operator_converters.sklearn.imputer.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters.sklearn.imputer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hummingbird.ml.operator_converters.sklearn.gbdt.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters.sklearn.gbdt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Microsoft
+        &#169; Copyright 2020, Microsoft.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
