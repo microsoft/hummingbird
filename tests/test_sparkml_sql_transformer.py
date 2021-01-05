@@ -181,23 +181,15 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
         print("my schema", schema)
 
         lineitem_df = spark.read.options(header=True, inferSchema=True)\
-                            .option("dateFormat",  "MM/dd/yyyy").csv("tests/LINEITEM_1ST1M.csv")
-
-        # query = """select
-        #         sum(l_extendedprice * l_discount) as revenue
-        #         from
-        #         __THIS__
-        #         where
-        #         l_shipdate >= date '1994-01-01'
-        #         and l_shipdate < date '1994-01-01' + interval '1' year
-        #         and l_discount between .06 - 0.01 and .06 + 0.01
-        #         and l_quantity < 24"""
+                            .option("dateFormat",  "MM/dd/yyyy").csv("tests/resources/LINEITEM_1ST1M.csv")
+        # TPC-H Query 6
         query = """select
                 sum(l_extendedprice * l_discount) as revenue
                 from
                 __THIS__
                 where
                 l_shipdate >= date '1994-01-01'
+                and l_shipdate < date '1994-01-01' + interval '1' year
                 and l_discount between .06 - 0.01 and .06 + 0.01
                 and l_quantity < 24"""       
 
