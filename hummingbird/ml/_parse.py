@@ -358,6 +358,7 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
     plan_json = json.loads(optimized_plan.toJSON())
 
     print("spark plan\n", plan_json)
+    
 
     # WHERE clause
     filter_tree = [node for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Filter']
@@ -377,7 +378,7 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
     project_trees = [node['projectList'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Project']
     if len(project_trees) > 0:
         project_trees = [p for p in project_trees[0] if p[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Alias']
-
+        print("\n\nproj trees: ", project_trees)
         for project_tree in project_trees:
             output_name = project_tree[0]['name']
             input_names = []
@@ -415,6 +416,33 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
                 input.is_abandoned = True
                 orderby_operator.outputs.append(output)
 
+    # Aggregator
+    aggregators = [node['aggregateExpressions'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Aggregate']
+    if len(aggregators) > 0:
+        aggregators = [a for a in aggregators[0] if a[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Alias']
+
+        for agg in aggregators:
+            output_name = agg[0]['name']
+            input_names = []
+            for agg_node in agg[1:]:
+                if agg_node['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
+                    name = agg_node['name']
+                    if name not in input_names:
+                        input_names.append(name.lower())
+
+            select_operator = scope.declare_local_operator("SparkMLSQLAggregateModel", agg)
+            print("agg input_names", input_names)
+            temp = {i.raw_name.lower(): i for i in all_inputs if i.raw_name.lower() in input_names and not i.is_abandoned}
+            print("temp", temp)
+            select_operator.inputs = [temp[i.lower()] for i in input_names]
+            output = scope.declare_local_variable(output_name)
+            select_operator.outputs.append(output)
+            sql_transformer_outputs.append(output)
+
+    # groupbys = [node['groupingExpressions'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Aggregate']
+    # if len(groupbys) > 0:
+    #     assert False, groupbys
+        
     return sql_transformer_outputs, all_inputs + sql_transformer_outputs
 
 

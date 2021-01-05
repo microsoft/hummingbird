@@ -39,6 +39,13 @@ SUPPORTED_BINARY_OPS = {
     'org.apache.spark.sql.catalyst.expressions.EqualTo': torch.eq
 }
 
+# List of supported binary SQL ops.
+SUPPORTED_AGGREGATOR_OPS = {
+    # Arithmatic ops.
+    'org.apache.spark.sql.catalyst.expressions.aggregate.Sum': torch.sum,
+}
+
+
 
 class SQLWhereModel(BaseOperator, torch.nn.Module):
 
@@ -60,13 +67,14 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
         self.transformer = True
         self.input_names = input_names
         self.project_node = project_node
+        print("\n\nseleect node: ", project_node)
 
     def forward(self, *x):
         inputs_dict = {name.lower() : tensor for name, tensor in zip(self.input_names, x)}
         return self.calculate_output_feature(self.project_node, inputs_dict)[0]
 
     def calculate_output_feature(self, project_node_def_stack, inputs_dict):
-        print("\ncurrent stack\n", project_node_def_stack[0])
+        print("\ncurrent select stack\n", project_node_def_stack[0])
         # Handles reading of a feature column.
         if project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
             if project_node_def_stack[0]['name'] not in inputs_dict:
@@ -180,6 +188,62 @@ class SQLOrderByModel(BaseOperator, torch.nn.Module):
 
         return [torch.index_select(c, 0, order) for c in x]
 
+class SQLAggregatorModel(BaseOperator, torch.nn.Module):
+
+    def __init__(self, input_names, agg_node, device):
+        super(SQLAggregatorModel, self).__init__()
+        self.transformer = True
+        self.input_names = input_names
+        self.device =  device
+        self.agg_node = agg_node
+        print("\n\n Aggregator inputs: \n", input_names, agg_node)
+
+    def forward(self, *x):
+        self.x = x
+        inputs_dict = {name.lower() : tensor for name, tensor in zip(self.input_names, x)}
+        return self.calculate_output_feature(self.agg_node, inputs_dict)[0]
+
+    def calculate_output_feature(self, project_node_def_stack, inputs_dict):
+        print("\ncurrent aggregator stack\n", project_node_def_stack[0])
+
+        #TODO fix aliasing
+        if project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Alias':
+            return self.calculate_output_feature(project_node_def_stack[1:], inputs_dict)
+        
+        elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.aggregate.AggregateExpression':
+            return self.calculate_output_feature(project_node_def_stack[1:], inputs_dict)
+
+        # Handles reading of a feature column.
+        elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
+            if project_node_def_stack[0]['name'] not in inputs_dict:
+                print('')
+                pass
+            return inputs_dict[project_node_def_stack[0]['name']], project_node_def_stack[1:]
+
+        # Handles reading of a constant value.
+        elif project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Literal':
+            if project_node_def_stack[0]['dataType'] == 'timestamp':
+                value = project_node_def_stack[0]['value'] + "0000000" # extra zeroes to match numpys precision
+                
+                time_as_int = np.datetime64(value).astype(np.int64) 
+                print("filter date", value, time_as_int)
+                return time_as_int, project_node_def_stack[1:]
+                
+            return float(project_node_def_stack[0]['value']), project_node_def_stack[1:]
+
+        elif project_node_def_stack[0]['class'] in SUPPORTED_AGGREGATOR_OPS:
+            op = SUPPORTED_AGGREGATOR_OPS[project_node_def_stack[0]['class']]
+            project_node_def_stack = project_node_def_stack[1:]
+            select_op = SQLSelectModel(self.input_names, project_node_def_stack, self.device)
+            select = select_op(*self.x)
+            out = op(select)
+            print("\naggregator op:\n", op, "\n")
+            return op(select), project_node_def_stack
+        else:
+            raise RuntimeError('SQLTransformer aggregator encountered unsupported operator type: {}'.format(project_node_def_stack[0]['class']))
+
+
+
 
 def convert_sparkml_sql_select(operator, device, extra_config):
     """
@@ -231,7 +295,23 @@ def convert_sparkml_sql_order_by(operator, device, extra_config):
     input_names = [input.raw_name for input in operator.inputs]
     return SQLOrderByModel(input_names, operator.raw_operator, device)
 
+def convert_sparkml_sql_aggregator(operator, device, extra_config):
+    """
+    Converter for ORDER BY statement in `pyspark.ml.feature.SQLTransformer`
+
+    Args:
+        operator: JSON encoded sort_order extracted from SparkSQL parsed tree
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    input_names = [input.raw_name for input in operator.inputs]
+    # assume Alias is first operator
+    return SQLAggregatorModel(input_names, operator.raw_operator[1:], device)
 
 register_converter("SparkMLSQLSelectModel", convert_sparkml_sql_select)
 register_converter("SparkMLSQLWhereModel", convert_sparkml_sql_where)
 register_converter("SparkMLSQLOrderByModel", convert_sparkml_sql_order_by)
+register_converter("SparkMLSQLAggregateModel", convert_sparkml_sql_aggregator)

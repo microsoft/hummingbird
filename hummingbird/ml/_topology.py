@@ -499,10 +499,10 @@ class _PyTorchBackendModel(torch.nn.Module, object):
                         input_ = from_strings_to_ints(input_, self.max_string_length)
 
                     if input_.dtype.kind in ["M"]:
-                        print("\nbefore convert\n", input_,"\n")
+                        # print("\nbefore convert\n", input_,"\n")
                         self.date_units[input_name] = input_.dtype
                         input_ = input_.astype(np.int64)
-                        print("\nafter convert\n", input_,"\n")
+                        # print("\nafter convert\n", input_,"\n")
 
                     input_ = torch.from_numpy(input_)
                 elif type(input_) is not torch.Tensor:
