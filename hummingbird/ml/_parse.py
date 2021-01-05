@@ -79,7 +79,6 @@ def parse_sparkml_api_model(model, sample_df, extra_config={}):
         A `onnxconverter_common.topology.Topology` object representing the input model
     """
     assert model is not None, "Cannot convert a mode of type None."
-    print("spark ml model", type(model))
     raw_model_container = CommonSparkMLModelContainer(model)
 
     # Declare a computational graph. It will become a representation of
@@ -95,9 +94,7 @@ def parse_sparkml_api_model(model, sample_df, extra_config={}):
 
     # Parse the input Spark-ML model into its scope with the topology.
     # Get the outputs of the model.
-    print("parse_sparkml_api_model inputs\n", inputs)
     current_op_outputs, _ = _parse_sparkml_api(scope, model, inputs, sample_df)
-    print("spark outputs", current_op_outputs)
 
     # Declare output variables.
     _declare_output_variables(raw_model_container, extra_config, current_op_outputs)
@@ -323,7 +320,6 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
     parser = spark._jsparkSession.sessionState().sqlParser()
     plan = parser.parsePlan(operator.getStatement())
     plan_json = json.loads(plan.toJSON())
-    print("_parse_sparkml_sqltransformer", all_inputs)
     def _get_sample_input(onnx_input):
         onnx_type = onnx_input.type
         if type(onnx_type) == DoubleTensorType:
@@ -343,7 +339,6 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
         # If the second dimension is 1, we treat the column as a vector.
         if len(shape) == 2 and shape[1] == 1:
             shape = shape[:1]
-        print("sample col shape",onnx_input, shape)
         return np.zeros(shape=shape, dtype=np_type).tolist()
 
     # We create a sample input data frame to obtain the Catalyst optimized paln.
@@ -356,9 +351,6 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
         .executePlan(catalyst_plan)\
         .optimizedPlan()
     plan_json = json.loads(optimized_plan.toJSON())
-
-    print("spark plan\n", plan_json)
-    
 
     # WHERE clause
     filter_tree = [node for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Filter']
@@ -378,7 +370,6 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
     project_trees = [node['projectList'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Project']
     if len(project_trees) > 0:
         project_trees = [p for p in project_trees[0] if p[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Alias']
-        print("\n\nproj trees: ", project_trees)
         for project_tree in project_trees:
             output_name = project_tree[0]['name']
             input_names = []
@@ -389,9 +380,7 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
                         input_names.append(name.lower())
 
             select_operator = scope.declare_local_operator("SparkMLSQLSelectModel", project_tree)
-            print("input_names", input_names)
             temp = {i.raw_name.lower(): i for i in all_inputs if i.raw_name.lower() in input_names and not i.is_abandoned}
-            print("temp", temp)
             select_operator.inputs = [temp[i.lower()] for i in input_names]
             output = scope.declare_local_variable(output_name)
             select_operator.outputs.append(output)
@@ -431,14 +420,13 @@ def _parse_sparkml_sqltransformer(scope, operator, all_inputs, sample_df):
                         input_names.append(name.lower())
 
             select_operator = scope.declare_local_operator("SparkMLSQLAggregateModel", agg)
-            print("agg input_names", input_names)
             temp = {i.raw_name.lower(): i for i in all_inputs if i.raw_name.lower() in input_names and not i.is_abandoned}
-            print("temp", temp)
             select_operator.inputs = [temp[i.lower()] for i in input_names]
             output = scope.declare_local_variable(output_name)
             select_operator.outputs.append(output)
             sql_transformer_outputs.append(output)
 
+    # TODO groupby
     # groupbys = [node['groupingExpressions'] for node in plan_json if node['class'] == 'org.apache.spark.sql.catalyst.plans.logical.Aggregate']
     # if len(groupbys) > 0:
     #     assert False, groupbys
@@ -661,7 +649,6 @@ def _parse_sparkml_api(scope, model, all_inputs, sample_df):
     Returns:
         A list of output `onnxconverter_common.topology.Variable` which will be passed to next stage
     """
-    print("_parse_sparkml_api iinputs \n:", all_inputs)
     tmodel = type(model)
     if tmodel in sparkml_api_parsers_map:
         outputs = sparkml_api_parsers_map[tmodel](scope, model, all_inputs, sample_df)

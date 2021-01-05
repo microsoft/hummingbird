@@ -203,28 +203,19 @@ class TestSparkMLSQLTransformer(unittest.TestCase):
 
         model = SQLTransformer(statement=query)
         output_col_names = ['revenue']
-
-
         test_df = lineitem_df.limit(1000)
-        test_df.printSchema()
-        print("infered schema" , test_df.schema, "\n")
-        print(test_df.take(5))
+
+        # run spark
         spark_output = model.transform(test_df).toPandas()[output_col_names]
-        print("spark transformer out \n", spark_output)
-        print("rev", spark_output["revenue"])
         spark_output_np = [spark_output[x].to_numpy().reshape(-1, 1) for x in output_col_names][0]
-        # assert len(spark_output_np) > 3, spark_output_np
         x = test_df.toPandas()
-        # assert len(x) > 3 # check that not everything is filtered out
-        print("pandas input \n",x["L_SHIPMODE"].to_numpy().dtype)
-        print("pandas input shema", x.dtypes)
-        # assert False
+        assert len(x) > 3 # check that not everything is filtered out
+
+        # run hummingbird conversion
         torch_model = convert(model, "torch", test_df, extra_config={constants.MAX_STRING_LENGTH: 100})
         self.assertTrue(torch_model is not None)
 
         torch_output_np = torch_model.transform(x)
-        print("\ntorch out:\n", torch_output_np)
-        print("\nspark out:\n", spark_output_np)
         np.testing.assert_allclose(spark_output_np, torch_output_np, rtol=1e-06, atol=1e-06)
 
 if __name__ == "__main__":

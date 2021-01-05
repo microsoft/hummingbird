@@ -67,14 +67,12 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
         self.transformer = True
         self.input_names = input_names
         self.project_node = project_node
-        print("\n\nseleect node: ", project_node)
 
     def forward(self, *x):
         inputs_dict = {name.lower() : tensor for name, tensor in zip(self.input_names, x)}
         return self.calculate_output_feature(self.project_node, inputs_dict)[0]
 
     def calculate_output_feature(self, project_node_def_stack, inputs_dict):
-        print("\ncurrent select stack\n", project_node_def_stack[0])
         # Handles reading of a feature column.
         if project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.AttributeReference':
             if project_node_def_stack[0]['name'] not in inputs_dict:
@@ -87,7 +85,6 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
                 value = project_node_def_stack[0]['value'] + "0000000" # extra zeroes to match numpys precision
                 
                 time_as_int = np.datetime64(value).astype(np.int64) 
-                print("filter date", value, time_as_int)
                 return time_as_int, project_node_def_stack[1:]
                 
             return float(project_node_def_stack[0]['value']), project_node_def_stack[1:]
@@ -97,7 +94,6 @@ class SQLSelectModel(BaseOperator, torch.nn.Module):
             project_node_def_stack = project_node_def_stack[1:]
             left, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
             right, project_node_def_stack = self.calculate_output_feature(project_node_def_stack, inputs_dict)
-            print("\nbinary op:\n", op, "\n")
             return op(left, right), project_node_def_stack
         # Handles scalar ops e.g., Sqrt.
         elif project_node_def_stack[0]['class'] in SUPPORTED_SCALAR_OPS:
@@ -196,7 +192,6 @@ class SQLAggregatorModel(BaseOperator, torch.nn.Module):
         self.input_names = input_names
         self.device =  device
         self.agg_node = agg_node
-        print("\n\n Aggregator inputs: \n", input_names, agg_node)
 
     def forward(self, *x):
         self.x = x
@@ -204,9 +199,7 @@ class SQLAggregatorModel(BaseOperator, torch.nn.Module):
         return self.calculate_output_feature(self.agg_node, inputs_dict)[0]
 
     def calculate_output_feature(self, project_node_def_stack, inputs_dict):
-        print("\ncurrent aggregator stack\n", project_node_def_stack[0])
-
-        #TODO fix aliasing
+        #TODO fix aliasing. for now we simply skip aliasing
         if project_node_def_stack[0]['class'] == 'org.apache.spark.sql.catalyst.expressions.Alias':
             return self.calculate_output_feature(project_node_def_stack[1:], inputs_dict)
         
@@ -226,7 +219,6 @@ class SQLAggregatorModel(BaseOperator, torch.nn.Module):
                 value = project_node_def_stack[0]['value'] + "0000000" # extra zeroes to match numpys precision
                 
                 time_as_int = np.datetime64(value).astype(np.int64) 
-                print("filter date", value, time_as_int)
                 return time_as_int, project_node_def_stack[1:]
                 
             return float(project_node_def_stack[0]['value']), project_node_def_stack[1:]
@@ -237,7 +229,6 @@ class SQLAggregatorModel(BaseOperator, torch.nn.Module):
             select_op = SQLSelectModel(self.input_names, project_node_def_stack, self.device)
             select = select_op(*self.x)
             out = op(select)
-            print("\naggregator op:\n", op, "\n")
             return op(select), project_node_def_stack
         else:
             raise RuntimeError('SQLTransformer aggregator encountered unsupported operator type: {}'.format(project_node_def_stack[0]['class']))
@@ -275,8 +266,6 @@ def convert_sparkml_sql_where(operator, device, extra_config):
         A PyTorch model
     """
     input_names = [input.raw_name for input in operator.inputs]
-    print("sql where statement\n", input_names, operator.inputs )
-    print("sql where condition \n", operator.raw_operator)
     return SQLWhereModel(input_names, operator.raw_operator, device)
 
 
