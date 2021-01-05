@@ -30,6 +30,7 @@ class Node:
             feature: The feature used to make a decision (if not leaf node, ignored otherwise)
             threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
             value: The value stored in the leaf (ignored if not leaf node).
+            missing: In the case of a missingle value chosen child node id
         """
         self.id = id
         self.left = None
@@ -37,6 +38,7 @@ class Node:
         self.feature = None
         self.threshold = None
         self.value = None
+        self.missing = None
 
 
 class TreeParameters:
@@ -44,7 +46,7 @@ class TreeParameters:
     Class containing a convenient in-memory representation of a decision tree.
     """
 
-    def __init__(self, lefts, rights, features, thresholds, values):
+    def __init__(self, lefts, rights, features, thresholds, values, missings=None):
         """
         Args:
             lefts: The id of the left nodes
@@ -52,12 +54,14 @@ class TreeParameters:
             feature: The features used to make decisions
             thresholds: The thresholds used in the decisions
             values: The value stored in the leaves
+            missings: In the case of a missing value which child node to select
         """
         self.lefts = lefts
         self.rights = rights
         self.features = features
         self.thresholds = thresholds
         self.values = values
+        self.missings = missings
 
 
 def _find_max_depth(tree_parameters):
@@ -183,7 +187,7 @@ def get_parameters_for_sklearn_common(tree_infos):
     return TreeParameters(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, extra_config={}):
+def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, missings, extra_config={}):
     """
     Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
 
@@ -204,18 +208,26 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         rights = [2, -1, -1]
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
+        if missings is not None:
+            missings = [2, -1, -1]
         n_classes = values.shape[1] if type(values) is np.ndarray else 1
         values = np.array([np.array([0.0]), values[0], values[0]])
         values.reshape(3, n_classes)
 
     ids = [i for i in range(len(lefts))]
-    nodes = list(zip(ids, lefts, rights, features, thresholds, values))
+    if missings is not None:
+        nodes = list(zip(ids, lefts, rights, features, thresholds, values, missings))
+    else:
+        nodes = list(zip(ids, lefts, rights, features, thresholds, values))
 
     # Refactor the tree parameters in the proper format.
     nodes_map = {0: Node(0)}
     current_node = 0
     for i, node in enumerate(nodes):
-        id, left, right, feature, threshold, value = node
+        if missings is not None:
+            id, left, right, feature, threshold, value, missing = node
+        else:
+            id, left, right, feature, threshold, value = node
 
         if left != -1:
             l_node = Node(left)
@@ -239,6 +251,13 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         nodes_map[current_node].threshold = threshold
         nodes_map[current_node].value = value
 
+        if missings is not None:
+            m_node = l_node if missing == left else r_node
+            nodes_map[current_node].missing = m_node
+
+            if missings[i] == -1:
+                missings[i] = id
+
         current_node += 1
 
     lefts = np.array(lefts)
@@ -246,8 +265,10 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     features = np.array(features)
     thresholds = np.array(thresholds)
     values = np.array(values)
+    if missings is not None:
+        missings = np.array(missings)
 
-    return [nodes_map, ids, lefts, rights, features, thresholds, values]
+    return [nodes_map, ids, lefts, rights, features, thresholds, values, missings]
 
 
 def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, extra_config={}):
