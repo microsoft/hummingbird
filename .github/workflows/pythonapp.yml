@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, macos-10.14, windows-2019]
+        os: [ubuntu-18.04, macos-10.15, windows-2019]
         python-version: [3.5, 3.6, 3.7, 3.8]
 
     steps:
@@ -39,16 +39,16 @@ jobs:
     # PyTorch stop supporting python 3.5 from version 1.6.
     # The following cases address the situations above.
     - name: Install pytorch 1.5.1 if python 3.5 (mac)
-      if: ${{ matrix.python-version == '3.5' && matrix.os == 'macos-10.14' }}
+      if: ${{ matrix.python-version == '3.5' && matrix.os == 'macos-10.15' }}
       run: pip install torch==1.5.1
     - name: Install pytorch 1.7.0 if python 3.5 (mac)
-      if: ${{ matrix.python-version != '3.5' && matrix.os == 'macos-10.14' }}
+      if: ${{ matrix.python-version != '3.5' && matrix.os == 'macos-10.15' }}
       run: pip install torch==1.7.0
     - name: Install pytorch 1.5.1+cpu if python 3.5 (not mac)
-      if: ${{ matrix.python-version == '3.5' && matrix.os != 'macos-10.14' }}
+      if: ${{ matrix.python-version == '3.5' && matrix.os != 'macos-10.15' }}
       run: pip install torch==1.5.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install pytorch 1.7.0+cpu if python > 3.5 (not mac)
-      if:  ${{ matrix.python-version != '3.5' && matrix.os != 'macos-10.14' }}
+      if:  ${{ matrix.python-version != '3.5' && matrix.os != 'macos-10.15' }}
       run: pip install torch==1.7.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
@@ -58,7 +58,7 @@ jobs:
     - name: Coverage on basic tests without extra
       run: coverage run -a -m pytest tests/test_no_extra_install.py
     - name: If mac, install libomp to facilitate lgbm install
-      if: matrix.os == 'macos-10.14'
+      if: matrix.os == 'macos-10.15'
       run: |
         brew install libomp
         export CC=/usr/bin/clang
@@ -99,7 +99,7 @@ jobs:
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz && mv clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04 llvm
     - name: Get LLVM on Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'macos-10.14' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'macos-10.15' }}
       working-directory: ../../../incubator-tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
