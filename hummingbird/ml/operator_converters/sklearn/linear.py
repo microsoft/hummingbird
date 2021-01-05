@@ -28,6 +28,8 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    supported_loss = {"log", "modified_huber", "squared_hinge"}
+
     classes = [0] if not hasattr(operator.raw_operator, "classes_") else operator.raw_operator.classes_
 
     if not all(["int" in str(type(x)) for x in classes]):
@@ -50,8 +52,10 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     if hasattr(operator.raw_operator, "loss"):
         loss = operator.raw_operator.loss
         assert (
-            loss == "log" or loss == "modified_huber"
-        ), "predict_proba only supported when loss='log' or loss='modified_huber' ({} given)".format(loss)
+            loss in supported_loss
+        ), "predict_proba for linear models currently only support {}. (Given {}). Please fill an issue at https://github.com/microsoft/hummingbird".format(
+            supported_loss, loss
+        )
 
     return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class, loss=loss)
 

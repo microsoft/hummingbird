@@ -39,13 +39,12 @@ class LinearModel(BaseOperator, torch.nn.Module):
         elif self.regression:
             return output
         else:
-            if self.loss == "log":
-                output = torch.sigmoid(output)
-            else:
+            if self.loss == "modified_huber":
                 output = torch.clip(output, -1, 1)
                 output += 1
                 output /= 2
-
+            else:
+                output = torch.sigmoid(output)
             if not self.binary_classification:
                 if self.loss == "modified_huber":
                     # This loss might assign zero to all classes, which doesn't
