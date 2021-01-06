@@ -106,22 +106,24 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         for weight, bias in tree_parameters:
             hidden_one_size = max(hidden_one_size, weight[0].shape[0])
-            hidden_two_size = max(hidden_two_size, weight[1].shape[0])
+            hidden_two_size = max(hidden_two_size, weight[2].shape[0])
 
         n_trees = len(tree_parameters)
-        weight_1 = np.zeros((n_trees, hidden_one_size, n_features))
+        weight_1 = np.zeros((n_trees, hidden_one_size))
         bias_1 = np.zeros((n_trees, hidden_one_size))
+        missing_bias_1 = np.zeros((n_trees, hidden_one_size))
         weight_2 = np.zeros((n_trees, hidden_two_size, hidden_one_size))
         bias_2 = np.zeros((n_trees, hidden_two_size))
         weight_3 = np.zeros((n_trees, hidden_three_size, hidden_two_size))
 
         for i, (weight, bias) in enumerate(tree_parameters):
             if len(weight[0]) > 0:
-                weight_1[i, 0 : weight[0].shape[0], 0 : weight[0].shape[1]] = weight[0]
+                weight_1[i, 0 : weight[0].shape[0]] = np.argmax(weight[0], axis=1)
                 bias_1[i, 0 : bias[0].shape[0]] = bias[0]
-                weight_2[i, 0 : weight[1].shape[0], 0 : weight[1].shape[1]] = weight[1]
-                bias_2[i, 0 : bias[1].shape[0]] = bias[1]
-                weight_3[i, 0 : weight[2].shape[0], 0 : weight[2].shape[1]] = weight[2]
+                missing_bias_1[i, 0 : bias[1].shape[0]] = bias[1]
+                weight_2[i, 0 : weight[2].shape[0], 0 : weight[2].shape[1]] = weight[2]
+                bias_2[i, 0 : bias[2].shape[0]] = bias[2]
+                weight_3[i, 0 : weight[3].shape[0], 0 : weight[3].shape[1]] = weight[3]
 
         self.n_trees = n_trees
         self.n_features = n_features
@@ -129,13 +131,19 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         self.hidden_two_size = hidden_two_size
         self.hidden_three_size = hidden_three_size
 
-        self.weight_1 = torch.nn.Parameter(torch.from_numpy(weight_1.reshape(-1, self.n_features).astype("float32")))
-        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype("float32")))
+        self.weight_1 = torch.nn.Parameter(torch.from_numpy(weight_1.reshape(-1).astype("int64")), requires_grad=False)
+        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(1, -1).astype("float32")), requires_grad=False)
 
-        self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")))
-        self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")))
+        # By default when we compare nan to any value the output will be false. Thus we need to explicitly
+        # account for missing values when missings are different to rights (i.e., True condition)
+        if np.sum(missing_bias_1) > 0:
+            self.missing_bias_1 = torch.nn.Parameter(torch.from_numpy(missing_bias_1.reshape(1, -1).astype("float32")), requires_grad=False)
+        else:
+            self.missing_bias_1 = None
 
-        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype("float32")))
+        self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")), requires_grad=False)
+        self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")), requires_grad=False)
+        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype("float32")), requires_grad=False)
 
         # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
         # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
@@ -146,10 +154,12 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         return x
 
     def forward(self, x):
-        x = x.t()
-        x = torch.mm(self.weight_1, x) < self.bias_1
-        x = x.view(self.n_trees, self.hidden_one_size, -1)
-        x = x.float()
+        features = torch.index_select(x, 1, self.weight_1)
+        if self.missing_bias_1 is not None:
+            x = torch.where(torch.isnan(features), self.missing_bias_1, (features < self.bias_1).float())
+        else:
+            x = (features < self.bias_1).float()
+        x = x.view(-1, self.n_trees * self.hidden_one_size).t().view(self.n_trees, self.hidden_one_size, -1)
 
         x = torch.matmul(self.weight_2, x)
 

@@ -298,7 +298,7 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
     return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, extra_config={}):
+def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, missings, extra_config={}):
     """
     Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
 
@@ -324,20 +324,35 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
         rights = [2, -1, -1]
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
+        if missings is not None:
+            missings = [2, -1, -1]
         n_classes = values.shape[1]
         n_classes = values.shape[1]
         values = np.array([np.zeros(n_classes), values[0], values[0]])
         values.reshape(3, n_classes)
 
+    if missings is None:
+        missings = rights
+
     # First hidden layer has all inequalities.
     hidden_weights = []
     hidden_biases = []
-    for left, feature, thresh in zip(lefts, features, thresholds):
-        if left != -1:
+    hidden_missing_biases = []
+    for left, right, missing, feature, thresh in zip(lefts, rights, missings, features, thresholds):
+        if left != -1 or right != -1:
             hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
             hidden_biases.append(thresh)
+
+            if missing == right:
+                hidden_missing_biases.append(0)
+            else:
+                hidden_missing_biases.append(1)
     weights.append(np.array(hidden_weights).astype("float32"))
     biases.append(np.array(hidden_biases).astype("float32"))
+
+    # Missing value handling biases.
+    weights.append(None)
+    biases.append(np.array(hidden_missing_biases).astype("float32"))
 
     n_splits = len(hidden_weights)
 

@@ -231,7 +231,7 @@ class TestXGBoostConverter(unittest.TestCase):
     @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     def test_run_xgb_classifier_w_missing_vals_converter(self):
         warnings.filterwarnings("ignore")
-        for extra_config_param in ["tree_trav", "perf_tree_trav"]:
+        for extra_config_param in ["gemm", "tree_trav", "perf_tree_trav"]:
             model = xgb.XGBClassifier(n_estimators=10, max_depth=3)
             X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
             X[:25][y[:25] == 0, 0] = np.nan
