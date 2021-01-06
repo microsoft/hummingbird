@@ -156,7 +156,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     def forward(self, x):
         features = torch.index_select(x, 1, self.weight_1)
         if self.missing_bias_1 is not None:
-            x = torch.where(torch.isnan(features), self.missing_bias_1, (features < self.bias_1).float())
+            x = torch.where(torch.isnan(features), self.missing_bias_1 + torch.zeros_like(features), (features < self.bias_1).float())
         else:
             x = (features < self.bias_1).float()
         x = x.view(-1, self.n_trees * self.hidden_one_size).t().view(self.n_trees, self.hidden_one_size, -1)
