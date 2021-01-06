@@ -238,7 +238,7 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     if tree_type == TreeImpl.gemm:
         net_parameters = [
             get_parameters_for_gemm_common(
-                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features
+                tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, n_features, tree_param.missings
             )
             for tree_param in tree_parameters
         ]
@@ -246,7 +246,7 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
 
     net_parameters = [
         get_parameters_for_tree_trav_sklearn(
-            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values
+            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, tree_param.missings
         )
         for tree_param in tree_parameters
     ]
