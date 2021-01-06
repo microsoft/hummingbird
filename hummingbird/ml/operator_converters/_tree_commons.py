@@ -187,7 +187,7 @@ def get_parameters_for_sklearn_common(tree_infos):
     return TreeParameters(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, missings, extra_config={}):
+def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, missings=None, extra_config={}):
     """
     Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
 
@@ -298,7 +298,7 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
     return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, missings, extra_config={}):
+def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, missings=None, extra_config={}):
     """
     Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
 
