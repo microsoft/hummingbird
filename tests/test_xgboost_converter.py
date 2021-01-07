@@ -232,14 +232,15 @@ class TestXGBoostConverter(unittest.TestCase):
     def test_run_xgb_classifier_w_missing_vals_converter(self):
         warnings.filterwarnings("ignore")
         for extra_config_param in ["gemm", "tree_trav", "perf_tree_trav"]:
-            model = xgb.XGBClassifier(n_estimators=10, max_depth=3)
-            X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
-            X[:25][y[:25] == 0, 0] = np.nan
+            for missing in [None, -99999, np.nan]:
+                model = xgb.XGBClassifier(n_estimators=10, max_depth=3, missing=missing)
+                X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
+                X[:25][y[:25] == 0, 0] = np.nan if missing is None else missing
 
-            model.fit(X, y)
-            torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={"tree_implementation": extra_config_param})
-            self.assertIsNotNone(torch_model)
-            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+                model.fit(X, y)
+                torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={"tree_implementation": extra_config_param})
+                self.assertIsNotNone(torch_model)
+                np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Torchscript backends.
     # Test TorchScript backend regression.
