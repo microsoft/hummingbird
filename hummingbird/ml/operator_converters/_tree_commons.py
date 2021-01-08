@@ -14,6 +14,7 @@ import numpy as np
 from ._tree_implementations import TreeImpl
 from ._tree_implementations import GEMMDecisionTreeImpl, TreeTraversalDecisionTreeImpl, PerfectTreeTraversalDecisionTreeImpl
 from . import constants
+from hummingbird.ml.exceptions import MissingConverter
 
 
 class Node:
@@ -144,7 +145,7 @@ def get_tree_implementation_by_config_or_depth(extra_config, max_depth, low=3, h
     elif extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.perf_tree_trav.name:
         return TreeImpl.perf_tree_trav
     else:
-        raise ValueError("Tree implementation {} not found".format(extra_config))
+        raise MissingConverter("Tree implementation {} not found".format(extra_config))
 
 
 def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
@@ -205,7 +206,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
         n_classes = values.shape[1] if type(values) is np.ndarray else 1
-        values = np.array([np.array([0.0]), values[0], values[0]])
+        values = np.array([np.zeros(n_classes), values[0], values[0]])
         values.reshape(3, n_classes)
 
     ids = [i for i in range(len(lefts))]
