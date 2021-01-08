@@ -419,14 +419,14 @@ class GEMMDecisionTreeImpl(GEMMTreeImpl):
 
     """
 
-    def __init__(self, tree_parameters, n_features, classes=None):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes=None):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
         """
-        super(GEMMDecisionTreeImpl, self).__init__(tree_parameters, n_features, classes)
+        super(GEMMDecisionTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes)
 
     def aggregation(self, x):
         output = x.sum(0).t()

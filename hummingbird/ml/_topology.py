@@ -58,19 +58,37 @@ class Topology:
 
     @property
     def input_container(self):
+        """
+        Returns the input container wrapping the original input model.
+        """
         return self.onnxconverter_topology.raw_model
 
     @property
     def variables(self):
+        """
+        Returns all the logical variables of the topology.
+        """
         return self.scope.variables
 
-    def declare_logical_variable(self, input_name, type=None):
-        return self.scope.declare_local_variable(input_name, type=type)
+    def declare_logical_variable(self, original_input_name, type=None):
+        """
+        This function creates a new logical variable within the topology.
+        If original_input_name has been used to create other variables,
+        the new variable will hide all other variables created using original_input_name.
+        """
+        return self.scope.declare_local_variable(original_input_name, type=type)
 
     def declare_logical_operator(self, alias, model=None):
+        """
+        This function is used to declare new logical operator.
+        """
         return self.scope.declare_local_operator(alias, model)
 
     def topological_operator_iterator(self):
+        """
+        This is an iterator of all operators in the Topology object.
+        Operators are returned in a topological order.
+        """
         return self.onnxconverter_topology.topological_operator_iterator()
 
 
