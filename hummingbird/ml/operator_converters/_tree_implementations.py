@@ -145,8 +145,8 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(1, -1).astype("float32")), requires_grad=False)
 
         # By default when we compare nan to any value the output will be false. Thus we need to explicitly
-        # account for missing values when missings are different to rights (i.e., True condition)
-        if np.sum(missing_bias_1) > 0:
+        # account for missing values only when missings are different to lefts (i.e., False condition)
+        if np.sum(missing_bias_1) != 0:
             self.missing_bias_1 = torch.nn.Parameter(torch.from_numpy(missing_bias_1.reshape(1, -1).astype("float32")), requires_grad=False)
         else:
             self.missing_bias_1 = None
@@ -166,9 +166,9 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     def forward(self, x):
         features = torch.index_select(x, 1, self.weight_1)
         if self.missing_bias_1 is not None:
-            x = torch.where(self.missing_val_op(features), self.missing_bias_1 + torch.zeros_like(features), (features < self.bias_1).float())
+            x = torch.where(self.missing_val_op(features), self.missing_bias_1 + torch.zeros_like(features), (features >= self.bias_1).float())
         else:
-            x = (features < self.bias_1).float()
+            x = (features >= self.bias_1).float()
         x = x.view(-1, self.n_trees * self.hidden_one_size).t().view(self.n_trees, self.hidden_one_size, -1)
 
         x = torch.matmul(self.weight_2, x)

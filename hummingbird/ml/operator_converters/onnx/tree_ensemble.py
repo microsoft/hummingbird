@@ -213,7 +213,7 @@ def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}
             tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, classes, extra_config
         )
     extra_config[constants.POST_TRANSFORM] = post_transform
-    return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)
+    return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, missing_val=None, extra_config=extra_config)
 
 
 def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={}):
@@ -234,7 +234,7 @@ def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={})
     n_features, tree_infos, _, _ = _get_tree_infos_from_tree_ensemble(operator.raw_operator, device, extra_config)
 
     # Generate the model.
-    return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)
+    return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, missing_val=None, extra_config=extra_config)
 
 
 register_converter("ONNXMLTreeEnsembleClassifier", convert_onnx_tree_ensemble_classifier)

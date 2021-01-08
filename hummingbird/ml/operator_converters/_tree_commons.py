@@ -344,9 +344,9 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
             hidden_biases.append(thresh)
 
             if missing == right:
-                hidden_missing_biases.append(0)
-            else:
                 hidden_missing_biases.append(1)
+            else:
+                hidden_missing_biases.append(0)
     weights.append(np.array(hidden_weights).astype("float32"))
     biases.append(np.array(hidden_biases).astype("float32"))
 
@@ -379,10 +379,10 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
             for j, p in enumerate(path[:-1]):
                 num_leaves_before_p = list(lefts[:p]).count(-1)
                 if path[j + 1] in lefts:
-                    vec[p - num_leaves_before_p] = 1
-                    num_positive += 1
-                elif path[j + 1] in rights:
                     vec[p - num_leaves_before_p] = -1
+                elif path[j + 1] in rights:
+                    num_positive += 1
+                    vec[p - num_leaves_before_p] = 1
                 else:
                     raise RuntimeError("Inconsistent state encountered while tree translation.")
 
