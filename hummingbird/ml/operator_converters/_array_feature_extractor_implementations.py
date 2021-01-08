@@ -10,18 +10,18 @@ Base class for array feature extractor
 
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class ArrayFeatureExtractor(BaseOperator, torch.nn.Module):
+class ArrayFeatureExtractor(PhysicalOperator, torch.nn.Module):
     """
     Class implementing ArrayFeatureExtractor in PyTorch
 
     This is used by SelectKBest, VarianceThreshold operators in scikit-learn
     """
 
-    def __init__(self, column_indices, device):
-        super(ArrayFeatureExtractor, self).__init__(transformer=True)
+    def __init__(self, logical_operator, column_indices, device):
+        super(ArrayFeatureExtractor, self).__init__(logical_operator, transformer=True)
 
         is_contiguous = False
         if max(column_indices) - min(column_indices) + 1 == len(column_indices):

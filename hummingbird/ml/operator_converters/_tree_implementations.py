@@ -13,7 +13,7 @@ import numpy as np
 import torch
 
 from . import constants
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
 class TreeImpl(Enum):
@@ -26,13 +26,13 @@ class TreeImpl(Enum):
     perf_tree_trav = 3
 
 
-class AbstracTreeImpl(BaseOperator):
+class AbstracTreeImpl(PhysicalOperator):
     """
     Abstract class definig the basic structure for tree-base models.
     """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, logical_operator, **kwargs):
+        super().__init__(logical_operator, **kwargs)
 
     @abstractmethod
     def aggregation(self, x):
@@ -53,7 +53,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
     Abstract class definig the basic structure for tree-base models implemented in PyTorch.
     """
 
-    def __init__(self, tree_parameters, n_features, classes, n_classes, **kwargs):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes, n_classes, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -61,7 +61,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
         """
-        super(AbstractPyTorchTreeImpl, self).__init__(**kwargs)
+        super(AbstractPyTorchTreeImpl, self).__init__(logical_operator, **kwargs)
 
         # Set up the variables for the subclasses.
         # Each subclass will trigger different behaviours by properly setting these.
@@ -89,7 +89,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the GEMM strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, n_features, classes, n_classes=None, extra_config={}, **kwargs):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes, n_classes=None, extra_config={}, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -97,7 +97,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
         """
-        super(GEMMTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
+        super(GEMMTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, **kwargs)
 
         # Initialize the actual model.
         hidden_one_size = 0
@@ -185,7 +185,9 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         indexes = indexes.expand(batch_size, self.num_trees)
         return indexes.reshape(-1)
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, extra_config={}, **kwargs):
+    def __init__(
+        self, logical_operator, tree_parameters, max_depth, n_features, classes, n_classes=None, extra_config={}, **kwargs
+    ):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -195,7 +197,9 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             n_classes: The total number of used classes
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(TreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
+        super(TreeTraversalTreeImpl, self).__init__(
+            logical_operator, tree_parameters, n_features, classes, n_classes, **kwargs
+        )
 
         # Initialize the actual model.
         self.n_features = n_features
@@ -273,7 +277,9 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, extra_config={}, **kwargs):
+    def __init__(
+        self, logical_operator, tree_parameters, max_depth, n_features, classes, n_classes=None, extra_config={}, **kwargs
+    ):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -282,7 +288,9 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
         """
-        super(PerfectTreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
+        super(PerfectTreeTraversalTreeImpl, self).__init__(
+            logical_operator, tree_parameters, n_features, classes, n_classes, **kwargs
+        )
 
         # Initialize the actual model.
         self.max_tree_depth = max_depth
@@ -431,7 +439,7 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -441,7 +449,7 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
             extra_config: Extra configuration used to properly implement the source tree
         """
         super(TreeTraversalDecisionTreeImpl, self).__init__(
-            tree_parameters, max_depth, n_features, classes, extra_config=extra_config
+            logical_operator, tree_parameters, max_depth, n_features, classes, extra_config=extra_config
         )
 
     def aggregation(self, x):
@@ -455,7 +463,7 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -463,7 +471,9 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
         """
-        super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(tree_parameters, max_depth, n_features, classes)
+        super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(
+            logical_operator, tree_parameters, max_depth, n_features, classes
+        )
 
     def aggregation(self, x):
         output = x.sum(1)
@@ -477,7 +487,7 @@ class GEMMGBDTImpl(GEMMTreeImpl):
     Class implementing the GEMM strategy (in PyTorch) for GBDT models.
     """
 
-    def __init__(self, tree_parameters, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -485,7 +495,7 @@ class GEMMGBDTImpl(GEMMTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(GEMMGBDTImpl, self).__init__(tree_parameters, n_features, classes, 1, extra_config)
+        super(GEMMGBDTImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, 1, extra_config)
 
         self.n_gbdt_classes = 1
         self.post_transform = lambda x: x
@@ -509,7 +519,7 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch.
     """
 
-    def __init__(self, tree_parameters, max_detph, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, max_detph, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -518,7 +528,9 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(TreeTraversalGBDTImpl, self).__init__(tree_parameters, max_detph, n_features, classes, 1, extra_config)
+        super(TreeTraversalGBDTImpl, self).__init__(
+            logical_operator, tree_parameters, max_detph, n_features, classes, 1, extra_config
+        )
 
         self.n_gbdt_classes = 1
         self.post_transform = lambda x: x
@@ -542,7 +554,7 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -551,7 +563,9 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(PerfectTreeTraversalGBDTImpl, self).__init__(tree_parameters, max_depth, n_features, classes, 1, extra_config)
+        super(PerfectTreeTraversalGBDTImpl, self).__init__(
+            logical_operator, tree_parameters, max_depth, n_features, classes, 1, extra_config
+        )
 
         self.n_gbdt_classes = 1
         self.post_transform = lambda x: x

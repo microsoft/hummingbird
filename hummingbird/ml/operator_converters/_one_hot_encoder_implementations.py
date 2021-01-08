@@ -11,19 +11,19 @@ Base classes for one hot encoder implementations.
 import numpy as np
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 from . import constants
 
 
-class OneHotEncoderString(BaseOperator, torch.nn.Module):
+class OneHotEncoderString(PhysicalOperator, torch.nn.Module):
     """
     Class implementing OneHotEncoder operators for strings in PyTorch.
 
     Because we are dealing with tensors, strings require additional length information for processing.
     """
 
-    def __init__(self, categories, device, extra_config={}):
-        super(OneHotEncoderString, self).__init__(transformer=True)
+    def __init__(self, logical_operator, categories, device, extra_config={}):
+        super(OneHotEncoderString, self).__init__(logical_operator, transformer=True)
 
         self.num_columns = len(categories)
         self.max_word_length = max([max([len(c) for c in cat]) for cat in categories])
@@ -69,13 +69,13 @@ class OneHotEncoderString(BaseOperator, torch.nn.Module):
         return torch.cat(encoded_tensors, dim=1).float()
 
 
-class OneHotEncoder(BaseOperator, torch.nn.Module):
+class OneHotEncoder(PhysicalOperator, torch.nn.Module):
     """
     Class implementing OneHotEncoder operators for ints in PyTorch.
     """
 
-    def __init__(self, categories, device):
-        super(OneHotEncoder, self).__init__(transformer=True)
+    def __init__(self, logical_operator, categories, device):
+        super(OneHotEncoder, self).__init__(logical_operator, transformer=True)
 
         self.num_columns = len(categories)
 

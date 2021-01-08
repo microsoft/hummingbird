@@ -10,17 +10,17 @@ Base classes for sklearn discretizers: Binarizer, KBinsDiscretizer
 """
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 from ._one_hot_encoder_implementations import OneHotEncoder
 
 
-class Binarizer(BaseOperator, torch.nn.Module):
+class Binarizer(PhysicalOperator, torch.nn.Module):
     """
     Class implementing Binarizer operators in PyTorch.
     """
 
-    def __init__(self, threshold, device):
-        super(Binarizer, self).__init__()
+    def __init__(self, logical_operator, threshold, device):
+        super(Binarizer, self).__init__(logical_operator)
         self.transformer = True
         self.threshold = torch.nn.Parameter(torch.FloatTensor([threshold]), requires_grad=False)
 
@@ -28,16 +28,16 @@ class Binarizer(BaseOperator, torch.nn.Module):
         return torch.gt(x, self.threshold).float()
 
 
-class KBinsDiscretizer(BaseOperator, torch.nn.Module):
-    def __init__(self, encode, bin_edges, labels, device):
-        super(KBinsDiscretizer, self).__init__()
+class KBinsDiscretizer(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator, encode, bin_edges, labels, device):
+        super(KBinsDiscretizer, self).__init__(logical_operator)
         self.transformer = True
         self.encode = encode
         # We use DoubleTensors for better precision.
         # We use a small delta value of 1e-9.
         self.ge_tensor = torch.nn.Parameter(torch.FloatTensor(bin_edges[:, :-1]), requires_grad=False)
         self.lt_tensor = torch.nn.Parameter(torch.FloatTensor(bin_edges[:, 1:]), requires_grad=False)
-        self.ohe = OneHotEncoder(labels, device)
+        self.ohe = OneHotEncoder(logical_operator, labels, device)
 
     def forward(self, x):
         x = x.float()

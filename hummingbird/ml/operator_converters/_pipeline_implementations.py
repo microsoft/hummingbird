@@ -13,12 +13,12 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class Concat(BaseOperator, torch.nn.Module):
-    def __init__(self):
-        super(Concat, self).__init__(transformer=True)
+class Concat(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator):
+        super(Concat, self).__init__(logical_operator, transformer=True)
 
     def forward(self, *x):
         if len(x[0].shape) > 1:

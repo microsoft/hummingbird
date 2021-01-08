@@ -10,12 +10,22 @@ Base class for linear algorithm implementations.
 
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class LinearModel(BaseOperator, torch.nn.Module):
-    def __init__(self, coefficients, intercepts, device, classes=[0], multi_class=None, loss=None, is_linear_regression=False):
-        super(LinearModel, self).__init__()
+class LinearModel(PhysicalOperator, torch.nn.Module):
+    def __init__(
+        self,
+        logical_operator,
+        coefficients,
+        intercepts,
+        device,
+        classes=[0],
+        multi_class=None,
+        loss=None,
+        is_linear_regression=False,
+    ):
+        super(LinearModel, self).__init__(logical_operator)
         self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients), requires_grad=False)
         self.intercepts = torch.nn.Parameter(torch.from_numpy(intercepts).view(-1), requires_grad=False)
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)

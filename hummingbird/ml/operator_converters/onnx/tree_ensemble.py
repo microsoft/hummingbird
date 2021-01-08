@@ -47,7 +47,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
         elif attr.name == "nodes_treeids":
             tree_ids = attr.ints
         elif attr.name == "classlabels_int64s":
-            classes = attr.ints
+            classes = list(attr.ints)
         elif attr.name == "classlabels_strings ":
             if len(attr.strings) > 0:
                 raise AssertionError("String class labels not supported yet.")
@@ -210,10 +210,12 @@ def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}
     # Generate the model.
     if post_transform == "NONE":
         return convert_decision_ensemble_tree_common(
-            tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, classes, extra_config
+            operator, tree_infos, _dummy_get_parameter, get_parameters_for_tree_trav_common, n_features, classes, extra_config
         )
     extra_config[constants.POST_TRANSFORM] = post_transform
-    return convert_gbdt_classifier_common(tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config)
+    return convert_gbdt_classifier_common(
+        operator, tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config
+    )
 
 
 def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={}):
@@ -234,7 +236,7 @@ def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={})
     n_features, tree_infos, _, _ = _get_tree_infos_from_tree_ensemble(operator.raw_operator, device, extra_config)
 
     # Generate the model.
-    return convert_gbdt_common(tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)
+    return convert_gbdt_common(operator, tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)
 
 
 register_converter("ONNXMLTreeEnsembleClassifier", convert_onnx_tree_ensemble_classifier)

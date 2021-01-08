@@ -13,13 +13,13 @@ from onnxconverter_common.registration import register_converter
 import torch
 
 from .. import constants
-from .._base_operator import BaseOperator
+from .._physical_operator import PhysicalOperator
 from .._pipeline_implementations import Concat
 
 
-class Cast(BaseOperator, torch.nn.Module):
-    def __init__(self, to_type):
-        super(Cast, self).__init__()
+class Cast(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator, to_type):
+        super(Cast, self).__init__(logical_operator)
 
         assert to_type is not None
 
@@ -40,9 +40,9 @@ class Cast(BaseOperator, torch.nn.Module):
             )
 
 
-class Reshape(BaseOperator, torch.nn.Module):
-    def __init__(self, shape):
-        super(Reshape, self).__init__()
+class Reshape(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator, shape):
+        super(Reshape, self).__init__(logical_operator)
 
         self.shape = shape
 
@@ -71,7 +71,7 @@ def convert_onnx_cast(operator, device=None, extra_config={}):
             to_type = attr.i
 
     # Generate the model.
-    return Cast(to_type)
+    return Cast(operator, to_type)
 
 
 def convert_onnx_concat(operator, device=None, extra_config={}):
@@ -89,7 +89,7 @@ def convert_onnx_concat(operator, device=None, extra_config={}):
     assert operator is not None
 
     # Generate the model.
-    return Concat()
+    return Concat(operator)
 
 
 def convert_onnx_reshape(operator, device=None, extra_config={}):
@@ -111,7 +111,7 @@ def convert_onnx_reshape(operator, device=None, extra_config={}):
     shape = list(initializers[operator.raw_operator.origin.input[1]].int64_data)
 
     # Generate the model.
-    return Reshape(shape)
+    return Reshape(operator, shape)
 
 
 register_converter("ONNXMLCast", convert_onnx_cast)

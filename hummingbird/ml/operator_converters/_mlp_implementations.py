@@ -11,12 +11,12 @@ Base class for multi-layer perceptrons (MLP) implementation.
 
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class MLPModel(BaseOperator, torch.nn.Module):
-    def __init__(self, weights, biases, activation, device):
-        super(MLPModel, self).__init__()
+class MLPModel(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator, weights, biases, activation, device):
+        super(MLPModel, self).__init__(logical_operator)
         self.regression = True
         self.weights = torch.nn.ParameterList(
             [torch.nn.Parameter(torch.from_numpy(weight.astype("float32")), requires_grad=False) for weight in weights]
@@ -43,8 +43,8 @@ class MLPModel(BaseOperator, torch.nn.Module):
 
 
 class MLPClassificationModel(MLPModel):
-    def __init__(self, weights, biases, activation, classes, device):
-        super(MLPClassificationModel, self).__init__(weights, biases, activation, device)
+    def __init__(self, logical_operator, weights, biases, activation, classes, device):
+        super(MLPClassificationModel, self).__init__(logical_operator, weights, biases, activation, device)
         self.regression = False
         self.classification = True
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)

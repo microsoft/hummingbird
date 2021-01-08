@@ -43,7 +43,13 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
         raise RuntimeError("Random Forest Classifier translation only supports integer class labels")
 
     return convert_decision_ensemble_tree_common(
-        tree_infos, get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn, n_features, classes, extra_config
+        operator,
+        tree_infos,
+        get_parameters_for_sklearn_common,
+        get_parameters_for_tree_trav_sklearn,
+        n_features,
+        classes,
+        extra_config,
     )
 
 
@@ -69,6 +75,7 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     extra_config[constants.NUM_TREES] = len(tree_infos)
 
     return convert_decision_ensemble_tree_common(
+        operator,
         tree_infos,
         get_parameters_for_sklearn_common,
         get_parameters_for_tree_trav_sklearn,
