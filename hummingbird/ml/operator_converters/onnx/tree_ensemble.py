@@ -47,7 +47,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
         elif attr.name == "nodes_treeids":
             tree_ids = attr.ints
         elif attr.name == "classlabels_int64s":
-            classes = attr.ints
+            classes = list(attr.ints)
         elif attr.name == "classlabels_strings ":
             if len(attr.strings) > 0:
                 raise AssertionError("String class labels not supported yet.")
