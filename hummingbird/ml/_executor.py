@@ -116,14 +116,3 @@ class Executor(torch.nn.Module, object):
                 return variable_map[self._output_names[0]]
             else:
                 return tuple(variable_map[output_name] for output_name in self._output_names)
-
-
-class _ExecutableOperator(torch.nn.Module):
-    def __init__(self, operator, input_names, output_names):
-        super(_ExecutableOperator, self).__init__()
-        self.operator = operator
-        self.input_names = input_names
-        self.output_names = output_names
-
-    def forward(self, x):
-        return self.operator(x)
