@@ -12,7 +12,7 @@ Base classes for KNeighbors model implementations: (KNeighborsClassifier, KNeigh
 from enum import Enum
 import torch
 import numpy as np
-from ._physical_operator import PhysicalOperator
+from ._base_operator import BaseOperator
 
 
 class MetricType(Enum):
@@ -22,7 +22,7 @@ class MetricType(Enum):
     mahalanobis = 4
 
 
-class KNeighborsModel(PhysicalOperator, torch.nn.Module):
+class KNeighborsModel(BaseOperator, torch.nn.Module):
     def __init__(
         self,
         logical_operator,

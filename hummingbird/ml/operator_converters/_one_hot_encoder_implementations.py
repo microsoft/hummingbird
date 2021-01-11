@@ -11,11 +11,11 @@ Base classes for one hot encoder implementations.
 import numpy as np
 import torch
 
-from ._physical_operator import PhysicalOperator
+from ._base_operator import BaseOperator
 from . import constants
 
 
-class OneHotEncoderString(PhysicalOperator, torch.nn.Module):
+class OneHotEncoderString(BaseOperator, torch.nn.Module):
     """
     Class implementing OneHotEncoder operators for strings in PyTorch.
 
@@ -69,7 +69,7 @@ class OneHotEncoderString(PhysicalOperator, torch.nn.Module):
         return torch.cat(encoded_tensors, dim=1).float()
 
 
-class OneHotEncoder(PhysicalOperator, torch.nn.Module):
+class OneHotEncoder(BaseOperator, torch.nn.Module):
     """
     Class implementing OneHotEncoder operators for ints in PyTorch.
     """

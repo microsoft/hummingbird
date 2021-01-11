@@ -11,10 +11,10 @@ Base classes for matrix decomposition algorithm implementations.
 
 import torch
 
-from ._physical_operator import PhysicalOperator
+from ._base_operator import BaseOperator
 
 
-class Decomposition(PhysicalOperator, torch.nn.Module):
+class Decomposition(BaseOperator, torch.nn.Module):
     def __init__(self, logical_operator, mean, transform_matrix, device):
         super(Decomposition, self).__init__(logical_operator)
         self.transformer = True
@@ -30,7 +30,7 @@ class Decomposition(PhysicalOperator, torch.nn.Module):
         return torch.mm(x, self.transform_matrix).float()
 
 
-class KernelPCA(PhysicalOperator, torch.nn.Module):
+class KernelPCA(BaseOperator, torch.nn.Module):
     def __init__(self, logical_operator, kernel, degree, sv, scaled_alphas, gamma, coef0, k_fit_rows, k_fit_all, device):
         super(KernelPCA, self).__init__(logical_operator)
         self.transformer = True

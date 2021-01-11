@@ -1,7 +1,7 @@
 from abc import ABC
 
 
-class PhysicalOperator(ABC):
+class BaseOperator(ABC):
     """
     Abstract class defining the basic structure for operator implementations in Hummingbird.
     """

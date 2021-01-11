@@ -10,10 +10,10 @@ Base classes for scaler implementations.
 
 import torch
 
-from ._physical_operator import PhysicalOperator
+from ._base_operator import BaseOperator
 
 
-class Scaler(PhysicalOperator, torch.nn.Module):
+class Scaler(BaseOperator, torch.nn.Module):
     """
     Class implementing Scaler operators in PyTorch. Supported normalizers are L1, L2 and Max.
     """

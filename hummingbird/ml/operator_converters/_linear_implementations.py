@@ -10,10 +10,10 @@ Base class for linear algorithm implementations.
 
 import torch
 
-from ._physical_operator import PhysicalOperator
+from ._base_operator import BaseOperator
 
 
-class LinearModel(PhysicalOperator, torch.nn.Module):
+class LinearModel(BaseOperator, torch.nn.Module):
     def __init__(
         self,
         logical_operator,

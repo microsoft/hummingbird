@@ -12,7 +12,7 @@ import torch
 import numpy as np
 from onnxconverter_common.topology import Variable
 from onnxconverter_common.registration import register_converter
-from .._physical_operator import PhysicalOperator
+from .._base_operator import BaseOperator
 from .._pipeline_implementations import Concat
 
 

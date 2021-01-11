@@ -13,11 +13,11 @@ from onnxconverter_common.registration import register_converter
 import torch
 
 from .. import constants
-from .._physical_operator import PhysicalOperator
+from .._base_operator import BaseOperator
 from .._pipeline_implementations import Concat
 
 
-class Cast(PhysicalOperator, torch.nn.Module):
+class Cast(BaseOperator, torch.nn.Module):
     def __init__(self, logical_operator, to_type):
         super(Cast, self).__init__(logical_operator)
 
@@ -40,7 +40,7 @@ class Cast(PhysicalOperator, torch.nn.Module):
             )
 
 
-class Reshape(PhysicalOperator, torch.nn.Module):
+class Reshape(BaseOperator, torch.nn.Module):
     def __init__(self, logical_operator, shape):
         super(Reshape, self).__init__(logical_operator)
 

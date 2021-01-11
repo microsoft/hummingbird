@@ -124,10 +124,10 @@ def _compile_to_tvm(topology, executor, trace_input, target, ctx, config, extra_
 
 def convert(topology, backend, test_input, device, extra_config={}):
     """
-    This function is used to convert a `Topology` object into a *backend* model.
+    This function is used to convert a `onnxconverter_common.topology.Topology` object into a *backend* model.
 
     Args:
-        topology: The `Topology` object that will be converted into a backend model
+        topology: The `onnxconverter_common.topology.Topology` object that will be converted into a backend model
         backend: Which backend the model should be run on
         test_input: Inputs for PyTorch model tracing
         device: Which device the translated model will be run on

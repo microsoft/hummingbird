@@ -10,10 +10,10 @@ Base class for array feature extractor
 
 import torch
 
-from ._physical_operator import PhysicalOperator
+from ._base_operator import BaseOperator
 
 
-class ArrayFeatureExtractor(PhysicalOperator, torch.nn.Module):
+class ArrayFeatureExtractor(BaseOperator, torch.nn.Module):
     """
     Class implementing ArrayFeatureExtractor in PyTorch
 
