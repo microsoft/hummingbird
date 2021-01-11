@@ -10,7 +10,7 @@ import hummingbird.ml
 from hummingbird.ml._utils import xgboost_installed, tvm_installed
 from hummingbird.ml import constants
 from tree_utils import gbdt_implementation_map
-from sklearn.datasets import make_classification
+from sklearn.datasets import make_classification, make_regression
 
 if xgboost_installed():
     import xgboost as xgb
@@ -233,22 +233,35 @@ class TestXGBoostConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for extra_config_param in ["gemm", "tree_trav", "perf_tree_trav"]:
             for missing in [None, -99999, np.nan]:
-                model = xgb.XGBClassifier(n_estimators=10, max_depth=3, missing=missing)
-                # Missing values during training + inference.
-                X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
-                X[:25][y[:25] == 0, 0] = np.nan if missing is None else missing
-                model.fit(X, y)
-                torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={"tree_implementation": extra_config_param})
-                self.assertIsNotNone(torch_model)
-                np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+                for model_class in [xgb.XGBClassifier, xgb.XGBRegressor]:
+                    model = model_class(n_estimators=10, max_depth=3, missing=missing)
+                    # Missing values during training + inference.
+                    if model_class == xgb.XGBClassifier:
+                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
+                    else:
+                        X, y = make_regression(n_samples=100, n_features=3, n_informative=3, random_state=2021)
+                    X[:25][y[:25] == 0, 0] = np.nan if missing is None else missing
+                    model.fit(X, y)
+                    torch_model = hummingbird.ml.convert(model, "torch", X, extra_config={"tree_implementation": extra_config_param})
+                    self.assertIsNotNone(torch_model)
+                    if model_class == xgb.XGBClassifier:
+                        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+                    else:
+                        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
-                # Missing values during training + inference.
-                X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
-                model.fit(X, y)
-                X[:25][y[:25] == 0, 0] = np.nan if missing is None else missing
-                torch_model = hummingbird.ml.convert(model, "torch", [], extra_config={"tree_implementation": extra_config_param})
-                self.assertIsNotNone(torch_model)
-                np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+                    # Missing values during training + inference.
+                    if model_class == xgb.XGBClassifier:
+                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
+                    else:
+                        X, y = make_regression(n_samples=100, n_features=3, n_informative=3, random_state=2021)
+                    model.fit(X, y)
+                    X[:25][y[:25] == 0, 0] = np.nan if missing is None else missing
+                    torch_model = hummingbird.ml.convert(model, "torch", X, extra_config={"tree_implementation": extra_config_param})
+                    self.assertIsNotNone(torch_model)
+                    if model_class == xgb.XGBClassifier:
+                        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+                    else:
+                        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Torchscript backends.
     # Test TorchScript backend regression.
