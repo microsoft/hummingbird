@@ -14,14 +14,14 @@ import pprint
 from uuid import uuid4
 
 import numpy as np
+from onnxconverter_common.container import CommonSklearnModelContainer
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
-
+from onnxconverter_common.topology import Topology
 from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 
-from .containers import CommonSklearnModelContainer, CommonONNXModelContainer, CommonSparkMLModelContainer
-from ._topology import Topology
+from .containers import CommonONNXModelContainer, CommonSparkMLModelContainer
 from ._utils import sklearn_installed, sparkml_installed
 from .operator_converters import constants
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name, get_sparkml_api_operator_name
@@ -48,12 +48,16 @@ def parse_sklearn_api_model(model, extra_config={}):
     # the input scikit-learn model after parsing.
     topology = Topology(raw_model_container)
 
-    # Declare input variables.
-    inputs = _declare_input_variables(topology, raw_model_container, extra_config)
+    # Declare an object to provide variables' and operators' naming mechanism.
+    # One global scope is enough for parsing scikit-learn models.
+    scope = topology.declare_scope("__root__")
 
-    # Parse the input scikit-learn model into a topology object.
+    # Declare input variables.
+    inputs = _declare_input_variables(scope, raw_model_container, extra_config)
+
+    # Parse the input scikit-learn model into its scope with the topology.
     # Get the outputs of the model.
-    outputs = _parse_sklearn_api(topology, model, inputs)
+    outputs = _parse_sklearn_api(scope, model, inputs)
 
     # Declare output variables.
     _declare_output_variables(raw_model_container, extra_config, outputs)
@@ -80,12 +84,16 @@ def parse_sparkml_api_model(model, extra_config={}):
     # the input Spark-ML model after parsing.
     topology = Topology(raw_model_container)
 
-    # Declare input variables.
-    inputs = _declare_input_variables(topology, raw_model_container, extra_config)
+    # Declare an object to provide variables' and operators' naming mechanism.
+    # One global scope is enough for parsing Spark-ML models.
+    scope = topology.declare_scope("__root__")
 
-    # Parse the input Spark-ML model into its topology with the topology.
+    # Declare input variables.
+    inputs = _declare_input_variables(scope, raw_model_container, extra_config)
+
+    # Parse the input Spark-ML model into its scope with the topology.
     # Get the outputs of the model.
-    current_op_outputs, _ = _parse_sparkml_api(topology, model, inputs)
+    current_op_outputs, _ = _parse_sparkml_api(scope, model, inputs)
 
     # Declare output variables.
     _declare_output_variables(raw_model_container, extra_config, current_op_outputs)
@@ -115,28 +123,32 @@ def parse_onnx_api_model(model):
     # the input ONNX model after parsing.
     topology = Topology(raw_model_container)
 
+    # Declare an object to provide variables' and operators' naming mechanism.
+    # One global scope is enough for parsing ONNX models.
+    scope = topology.declare_scope("__root__")
+
     # Declare input variables.
     inputs = []
     for i in model.graph.input:
-        inputs.append(topology.declare_logical_variable(i.name))
+        inputs.append(scope.declare_local_variable(i.name))
 
     # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the inputs of the ONNX graph.
     for variable in inputs:
         raw_model_container.add_input(variable)
 
-    # Parse the input ONNX model into its topology with the topology.
-    _parse_onnx_api(topology, model, inputs)
+    # Parse the input ONNX model into its scope with the topology.
+    _parse_onnx_api(scope, model, inputs)
 
     # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the output_names of the ONNX graph.
     for o in model.graph.output:
-        raw_model_container.add_output(topology.declare_logical_variable(o.name))
+        raw_model_container.add_output(scope.declare_local_variable(o.name))
 
     return topology
 
 
-def _declare_input_variables(topology, raw_model_container, extra_config):
+def _declare_input_variables(scope, raw_model_container, extra_config):
     # Declare input variables.
     inputs = []
     n_inputs = extra_config[constants.N_INPUTS] if constants.N_INPUTS in extra_config else 1
@@ -173,13 +185,12 @@ def _declare_input_variables(topology, raw_model_container, extra_config):
                         input.dtype
                     )
                 )
-            inputs.append(topology.declare_logical_variable(input_name, type=input_type))
+            inputs.append(scope.declare_local_variable(input_name, type=input_type))
     else:
         # We have no information on the input. Sklearn/Spark-ML always gets as input a single dataframe,
         # therefore by default we start with a single `input` variable
         input_name = extra_config[constants.INPUT_NAMES][0] if constants.TEST_INPUT in extra_config else "input"
-        var = topology.declare_logical_variable(input_name)
-        inputs.append(var)
+        inputs.append(scope.declare_local_variable(input_name))
 
     # The object raw_model_container is a part of the topology we're going to return.
     # We use it to store the inputs of the Sklearn/Spark-ML's computational graph.
@@ -203,13 +214,13 @@ def _declare_output_variables(raw_model_container, extra_config, outputs):
         raw_model_container.add_output(variable)
 
 
-def _parse_sklearn_api(topology, model, inputs):
+def _parse_sklearn_api(scope, model, inputs):
     """
-    This is a delegate function adding the model to the input topology.
+    This is a delegate function adding the model to the input scope.
     It does nothing but invokes the correct parsing function according to the input model's type.
 
     Args:
-        topology: The ``hummingbitd.ml._topology.Topology`` object where the model will be added
+        scope: The `onnxconverter_common.topology.Scope` object where the model will be added
         model: A scikit-learn model object
         inputs: A list of `onnxconverter_common.topology.Variable`s
 
@@ -218,19 +229,19 @@ def _parse_sklearn_api(topology, model, inputs):
     """
     tmodel = type(model)
     if tmodel in sklearn_api_parsers_map:
-        outputs = sklearn_api_parsers_map[tmodel](topology, model, inputs)
+        outputs = sklearn_api_parsers_map[tmodel](scope, model, inputs)
     else:
-        outputs = _parse_sklearn_single_model(topology, model, inputs)
+        outputs = _parse_sklearn_single_model(scope, model, inputs)
 
     return outputs
 
 
-def _parse_sklearn_single_model(topology, model, inputs):
+def _parse_sklearn_single_model(scope, model, inputs):
     """
     This function handles all sklearn objects composed by a single model.
 
     Args:
-        topology: The ``hummingbitd.ml._topology.Topology`` object where the model will be added
+        scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
         model: A scikit-learn model object
         inputs: A list of `onnxconverter_common.topology.Variable`s
 
@@ -241,34 +252,34 @@ def _parse_sklearn_single_model(topology, model, inputs):
         raise RuntimeError("Parameter model must be an object not a " "string '{0}'.".format(model))
 
     alias = get_sklearn_api_operator_name(type(model))
-    this_operator = topology.declare_logical_operator(alias, model)
+    this_operator = scope.declare_local_operator(alias, model)
     this_operator.inputs = inputs
 
     # We assume that all scikit-learn operators produce a single output.
-    variable = topology.declare_logical_variable("variable")
+    variable = scope.declare_local_variable("variable")
     this_operator.outputs.append(variable)
 
     return this_operator.outputs
 
 
-def _parse_sklearn_pipeline(topology, model, inputs):
+def _parse_sklearn_pipeline(scope, model, inputs):
     """
     The basic ideas of scikit-learn parsing:
         1. Sequentially go though all stages defined in the considered
            scikit-learn pipeline
         2. The output variables of one stage will be fed into its next
            stage as the inputs.
-    :param topology: Topology object defined in _topology.py
+    :param scope: Scope object defined in _topology.py
     :param model: scikit-learn pipeline object
     :param inputs: A list of Variable objects
     :return: A list of output variables produced by the input pipeline
     """
     for step in model.steps:
-        inputs = _parse_sklearn_api(topology, step[1], inputs)
+        inputs = _parse_sklearn_api(scope, step[1], inputs)
     return inputs
 
 
-def _parse_sparkml_pipeline(topology, model, all_outputs):
+def _parse_sparkml_pipeline(scope, model, all_outputs):
     """
     The basic ideas of Spark-ML parsing:
         1. Sequentially go though all stages defined in the considered
@@ -276,20 +287,20 @@ def _parse_sparkml_pipeline(topology, model, all_outputs):
            as the input. Operator will pick which inputs to operates on.
         2. The output variables of one stage will be fed into its next
            stage as the inputs.
-    :param topology: Topology object defined in _topology.py
+    :param scope: Scope object defined in _topology.py
     :param model: Spark-ML pipeline object
     :param all_outputs: A list of Variable objects
     :return: A list of output variables produced by the input pipeline
     """
     for step in model.stages:
-        current_op_outputs, all_outputs = _parse_sparkml_api(topology, step, all_outputs)
+        current_op_outputs, all_outputs = _parse_sparkml_api(scope, step, all_outputs)
     return current_op_outputs, all_outputs
 
 
-def _parse_sklearn_feature_union(topology, model, inputs):
+def _parse_sklearn_feature_union(scope, model, inputs):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L199.
-    :param topology: Topology object
+    :param scope: Scope object
     :param model: A scikit-learn FeatureUnion object
     :param inputs: A list of Variable objects
     :return: A list of output variables produced by feature union
@@ -298,32 +309,32 @@ def _parse_sklearn_feature_union(topology, model, inputs):
     transformed_result_names = []
     # Encode each transform as our IR object
     for name, transform in model.transformer_list:
-        transformed_result_names.append(_parse_sklearn_single_model(topology, transform, inputs)[0])
+        transformed_result_names.append(_parse_sklearn_single_model(scope, transform, inputs)[0])
         if model.transformer_weights is not None and name in model.transformer_weights:
             transform_result = [transformed_result_names.pop()]
             # Create a Multiply node
-            multiply_operator = topology.declare_logical_operator("SklearnMultiply")
+            multiply_operator = scope.declare_local_operator("SklearnMultiply")
             multiply_operator.inputs = transform_result
             multiply_operator.operand = model.transformer_weights[name]
-            multiply_output = topology.declare_logical_variable("multiply_output")
+            multiply_output = scope.declare_local_variable("multiply_output")
             multiply_operator.outputs.append(multiply_output)
             transformed_result_names.append(multiply_operator.outputs[0])
 
     # Create a Concat operator
-    concat_operator = topology.declare_logical_operator("SklearnConcat")
+    concat_operator = scope.declare_local_operator("SklearnConcat")
     concat_operator.inputs = transformed_result_names
 
     # Declare output name of scikit-learn FeatureUnion
-    union_name = topology.declare_logical_variable("union")
+    union_name = scope.declare_local_variable("union")
     concat_operator.outputs.append(union_name)
 
     return concat_operator.outputs
 
 
-def _parse_sklearn_column_transformer(topology, model, inputs):
+def _parse_sklearn_column_transformer(scope, model, inputs):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
-    :param topology: Topology object
+    :param scope: Scope object
     :param model: A *scikit-learn* *ColumnTransformer* object
     :param inputs: A list of Variable objects
     :return: A list of output variables produced by column transformer
@@ -349,7 +360,7 @@ def _parse_sklearn_column_transformer(topology, model, inputs):
         names = _get_column_indices(column_indices, inputs, len(inputs) > 1)
         transform_inputs = []
         for onnx_var, onnx_is in names.items():
-            tr_inputs = _fetch_input_slice(topology, [inputs[onnx_var]], onnx_is)
+            tr_inputs = _fetch_input_slice(scope, [inputs[onnx_var]], onnx_is)
             transform_inputs.extend(tr_inputs)
 
         merged_cols = False
@@ -364,9 +375,9 @@ def _parse_sklearn_column_transformer(topology, model, inputs):
             # Many ONNX operators expect one input vector, the default behaviour is to merge columns.
             ty = transform_inputs[0].type.__class__([None, None])
 
-            conc_op = topology.declare_logical_operator("SklearnConcat")
+            conc_op = scope.declare_local_operator("SklearnConcat")
             conc_op.inputs = transform_inputs
-            conc_names = topology.declare_logical_variable("merged_columns", ty)
+            conc_names = scope.declare_local_variable("merged_columns", ty)
             conc_op.outputs.append(conc_names)
             transform_inputs = [conc_names]
 
@@ -381,24 +392,24 @@ def _parse_sklearn_column_transformer(topology, model, inputs):
                     "Unknown operator alias " "'{0}'. These are specified in " "supported.py." "".format(model_obj)
                 )
         else:
-            var_out = _parse_sklearn_api(topology, model_obj, transform_inputs)[0]
+            var_out = _parse_sklearn_api(scope, model_obj, transform_inputs)[0]
             if model.transformer_weights is not None and name in model.transformer_weights:
                 # Create a Multiply node
-                multiply_operator = topology.declare_logical_operator("SklearnMultiply")
+                multiply_operator = scope.declare_local_operator("SklearnMultiply")
                 multiply_operator.inputs.append(var_out)
                 multiply_operator.operand = model.transformer_weights[name]
-                var_out = topology.declare_logical_variable("multiply_output")
+                var_out = scope.declare_local_variable("multiply_output")
                 multiply_operator.outputs.append(var_out)
         if var_out:
             transformed_result_names.append(var_out)
 
     # Create a Concat node
     if len(transformed_result_names) > 1:
-        concat_operator = topology.declare_logical_operator("SklearnConcat")
+        concat_operator = scope.declare_local_operator("SklearnConcat")
         concat_operator.inputs = transformed_result_names
 
         # Declare output name of scikit-learn ColumnTransformer
-        transformed_column_name = topology.declare_logical_variable("transformed_column")
+        transformed_column_name = scope.declare_local_variable("transformed_column")
         concat_operator.outputs.append(transformed_column_name)
         return concat_operator.outputs
     return transformed_result_names
@@ -428,12 +439,12 @@ def _build_sparkml_api_parsers_map():
     return map_parser
 
 
-def _parse_onnx_api(topology, model, inputs):
+def _parse_onnx_api(scope, model, inputs):
     """
     This function handles all input ONNX models.
 
     Args:
-        topology: The ``onnxconverter_common.topology.Topology`` where the model will be added
+        scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
         model: A ONNX model object
         inputs: A list of `onnxconverter_common.topology.Variable`s
 
@@ -455,15 +466,15 @@ def _parse_onnx_api(topology, model, inputs):
 
     # Add each operator in the LinkedNode data structure to the topology.
     for node in new_node_list:
-        _parse_onnx_single_operator(topology, node)
+        _parse_onnx_single_operator(scope, node)
 
 
-def _parse_onnx_single_operator(topology, operator):
+def _parse_onnx_single_operator(scope, operator):
     """
     This function handles the parsing of all ONNX operators.
 
     Args:
-        topology: The ``onnxconverter_common.topology.Topology`` where the model will be added
+        scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
         model: An ONNX operator
     """
 
@@ -471,28 +482,28 @@ def _parse_onnx_single_operator(topology, operator):
     if operator.op_type == "Identity":
         return
 
-    # Add the operator in the topology.
+    # Add the operator in the scope.
     alias = get_onnxml_api_operator_name(operator.op_type)
-    this_operator = topology.declare_logical_operator(alias, operator)
+    this_operator = scope.declare_local_operator(alias, operator)
 
     # Register the operator's inputs.
     input_names = list(operator.origin.input)
-    this_operator.inputs = [topology.variables[in_] for in_ in input_names if in_ in topology.variables]
+    this_operator.inputs = [scope.variables[in_] for in_ in input_names if in_ in scope.variables]
 
     # Register the operator's outpurs.
     output_names = list(operator.output.keys())
     output_names.sort()
     for output in output_names:
-        variable = topology.declare_logical_variable(output)
+        variable = scope.declare_local_variable(output)
         this_operator.outputs.append(variable)
 
 
-def _parse_sparkml_api(topology, model, inputs):
+def _parse_sparkml_api(scope, model, inputs):
     """
     This function handles all input Spark-ML models.
 
     Args:
-        topology: The ``onnxconverter_common.topology.Topology`` where the model will be added
+        scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
         model: A Spark-ML model object
         inputs: A list of `onnxconverter_common.topology.Variable`s
 
@@ -501,18 +512,18 @@ def _parse_sparkml_api(topology, model, inputs):
     """
     tmodel = type(model)
     if tmodel in sparkml_api_parsers_map:
-        outputs = sparkml_api_parsers_map[tmodel](topology, model, inputs)
+        outputs = sparkml_api_parsers_map[tmodel](scope, model, inputs)
     else:
-        outputs = _parse_sparkml_single_operator(topology, model, inputs)
+        outputs = _parse_sparkml_single_operator(scope, model, inputs)
     return outputs
 
 
-def _parse_sparkml_single_operator(topology, operator, all_inputs):
+def _parse_sparkml_single_operator(scope, operator, all_inputs):
     """
     This function handles the parsing of all Spark-ML operators.
 
     Args:
-        topology: The ``onnxconverter_common.topology.Topology`` where the model will be added
+        scope: The ``onnxconverter_common.topology.Scope`` where the model will be added
         model: A Spark-ML operator
         all_inputs: A list of `onnxconverter_common.topology.Variable`s
     """
@@ -522,7 +533,7 @@ def _parse_sparkml_single_operator(topology, operator, all_inputs):
         raise RuntimeError("Parameter operator must be an object not a " "string '{0}'.".format(operator))
 
     alias = get_sparkml_api_operator_name(type(operator))
-    this_operator = topology.declare_logical_operator(alias, operator)
+    this_operator = scope.declare_local_operator(alias, operator)
 
     if hasattr(operator, "getInputCol") and callable(operator.getInputCol):
         this_operator.inputs = [i for i in all_inputs if i.raw_name == operator.getInputCol()]
@@ -537,14 +548,14 @@ def _parse_sparkml_single_operator(topology, operator, all_inputs):
         raise RuntimeError("Unable to determine inputs for the Spark-ML operator: {}".format(type(operator)))
 
     if hasattr(operator, "getOutputCol") and callable(operator.getOutputCol):
-        variable = topology.declare_logical_variable(operator.getOutputCol())
+        variable = scope.declare_local_variable(operator.getOutputCol())
         this_operator.outputs.append(variable)
     elif hasattr(operator, "getOutputCols") and callable(operator.getOutputCols):
         for output_col in operator.getOutputCols():
-            variable = topology.declare_logical_variable(output_col)
+            variable = scope.declare_local_variable(output_col)
             this_operator.outputs.append(variable)
     else:
-        variable = topology.declare_logical_variable("variable")
+        variable = scope.declare_local_variable("variable")
         this_operator.outputs.append(variable)
 
     return this_operator.outputs, all_inputs + this_operator.outputs
@@ -584,7 +595,7 @@ def _remove_zipmap(node_list):
     return output_node_list
 
 
-def _fetch_input_slice(topology, inputs, column_indices):
+def _fetch_input_slice(scope, inputs, column_indices):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L53.
     """
@@ -601,10 +612,10 @@ def _fetch_input_slice(topology, inputs, column_indices):
         and (len(inputs[0].type.shape) == 1 or inputs[0].type.shape[1] == 1)
     ):
         return inputs
-    array_feature_extractor_operator = topology.declare_logical_operator("SklearnArrayFeatureExtractor")
+    array_feature_extractor_operator = scope.declare_local_operator("SklearnArrayFeatureExtractor")
     array_feature_extractor_operator.inputs = inputs
     array_feature_extractor_operator.column_indices = column_indices
-    output_variable_name = topology.declare_logical_variable("extracted_feature_columns", inputs[0].type)
+    output_variable_name = scope.declare_local_variable("extracted_feature_columns", inputs[0].type)
     array_feature_extractor_operator.outputs.append(output_variable_name)
     return array_feature_extractor_operator.outputs
 
