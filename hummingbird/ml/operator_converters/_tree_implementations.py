@@ -13,7 +13,7 @@ import numpy as np
 import torch
 
 from . import constants
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
 class TreeImpl(Enum):
@@ -26,7 +26,7 @@ class TreeImpl(Enum):
     perf_tree_trav = 3
 
 
-class AbstracTreeImpl(BaseOperator):
+class AbstracTreeImpl(PhysicalOperator):
     """
     Abstract class definig the basic structure for tree-base models.
     """

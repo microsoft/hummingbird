@@ -14,6 +14,7 @@ import torch
 from uuid import uuid4
 
 from onnxconverter_common.registration import get_converter
+from onnxconverter_common.topology import Topology as ONNXTopology
 import onnx
 
 from hummingbird.ml.containers import (
@@ -44,6 +45,51 @@ if pandas_installed():
     from pandas import DataFrame
 else:
     DataFrame = None
+
+
+# We wrap the onnxconverter topology and do some renamining for consistency with Hummingbird design.
+class Topology:
+    def __init__(self, input_container):
+        self.onnxconverter_topology = ONNXTopology(input_container)
+
+        # Declare an object to provide variables' and operators' naming mechanism.
+        # One global scope is enough for parsing Hummingbird's supported input models.
+        self.scope = self.onnxconverter_topology.declare_scope("__root__")
+
+    @property
+    def input_container(self):
+        """
+        Returns the input container wrapping the original input model.
+        """
+        return self.onnxconverter_topology.raw_model
+
+    @property
+    def variables(self):
+        """
+        Returns all the logical variables of the topology.
+        """
+        return self.scope.variables
+
+    def declare_logical_variable(self, original_input_name, type=None):
+        """
+        This function creates a new logical variable within the topology.
+        If original_input_name has been used to create other variables,
+        the new variable will hide all other variables created using original_input_name.
+        """
+        return self.scope.declare_local_variable(original_input_name, type=type)
+
+    def declare_logical_operator(self, alias, model=None):
+        """
+        This function is used to declare new logical operator.
+        """
+        return self.scope.declare_local_operator(alias, model)
+
+    def topological_operator_iterator(self):
+        """
+        This is an iterator of all operators in the Topology object.
+        Operators are returned in a topological order.
+        """
+        return self.onnxconverter_topology.topological_operator_iterator()
 
 
 def _jit_trace(executor, trace_input, device, extra_config):
@@ -103,8 +149,8 @@ def _compile_to_tvm(topology, executor, trace_input, target, ctx, config, extra_
 
     ts_model = _jit_trace(executor, trace_input, "cpu", extra_config)
     test_input = [
-        (topology.raw_model.input_names[i], trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,)
-        for i in range(len(topology.raw_model.input_names))
+        (topology.input_container.input_names[i], trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,)
+        for i in range(len(topology.input_container.input_names))
     ]
 
     model, params = relay.frontend.from_pytorch(ts_model, test_input)
@@ -124,10 +170,10 @@ def _compile_to_tvm(topology, executor, trace_input, target, ctx, config, extra_
 
 def convert(topology, backend, test_input, device, extra_config={}):
     """
-    This function is used to convert a `onnxconverter_common.topology.Topology` object into a *backend* model.
+    This function is used to convert a `Topology` object into a *backend* model.
 
     Args:
-        topology: The `onnxconverter_common.topology.Topology` object that will be converted into a backend model
+        topology: The `Topology` object that will be converted into a backend model
         backend: Which backend the model should be run on
         test_input: Inputs for PyTorch model tracing
         device: Which device the translated model will be run on
@@ -179,7 +225,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
     operators = list(topology.topological_operator_iterator())
     executor = Executor(
-        topology.raw_model.input_names, topology.raw_model.output_names, operator_map, operators, extra_config
+        topology.input_container.input_names, topology.input_container.output_names, operator_map, operators, extra_config
     ).eval()
 
     # if constants.REMAINDER_SIZE is present in extra_config, we are in the convert_batch mode.
@@ -207,8 +253,8 @@ def convert(topology, backend, test_input, device, extra_config={}):
             executor,
             batch_trace_input,
             output_model_name,
-            input_names=topology.raw_model.input_names,
-            output_names=topology.raw_model.output_names,
+            input_names=topology.input_container.input_names,
+            output_names=topology.input_container.output_names,
             keep_initializers_as_inputs=False,
             opset_version=target_opset,
             do_constant_folding=True,
@@ -289,7 +335,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
         # In the container we will be using the context to properly configure the input tensors.
         extra_config[constants.TVM_CONTEXT] = ctx
-        extra_config[constants.TVM_INPUT_NAMES] = topology.raw_model.input_names
+        extra_config[constants.TVM_INPUT_NAMES] = topology.input_container.input_names
 
         hb_model = tvm_model
     else:

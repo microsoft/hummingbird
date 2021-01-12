@@ -7,13 +7,13 @@
 """
 Converter for scikit-learn Imputers: SimpleImputer and MissingIndicator
 """
-from .._base_operator import BaseOperator
+from .._physical_operator import PhysicalOperator
 import numpy as np
 from onnxconverter_common.registration import register_converter
 import torch
 
 
-class SimpleImputer(BaseOperator, torch.nn.Module):
+class SimpleImputer(PhysicalOperator, torch.nn.Module):
     """
     Class implementing SimpleImputer operators in PyTorch.
     """
@@ -64,7 +64,7 @@ def convert_sklearn_simple_imputer(operator, device, extra_config):
     return SimpleImputer(operator, device)
 
 
-class MissingIndicator(BaseOperator, torch.nn.Module):
+class MissingIndicator(PhysicalOperator, torch.nn.Module):
     """
     Class implementing Imputer operators in MissingIndicator.
     """

@@ -7,12 +7,12 @@
 """
 Converter for scikit-learn PolynomialFeatures.
 """
-from .._base_operator import BaseOperator
+from .._physical_operator import PhysicalOperator
 from onnxconverter_common.registration import register_converter
 import torch
 
 
-class PolynomialFeatures(BaseOperator, torch.nn.Module):
+class PolynomialFeatures(PhysicalOperator, torch.nn.Module):
     """
     Class implementing PolynomialFeatures operators in PyTorch.
 

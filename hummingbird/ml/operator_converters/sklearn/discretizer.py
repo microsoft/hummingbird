@@ -10,7 +10,7 @@ Converter for scikit-learn discretizers: Binarizer and KBinsDiscretizer.
 import torch
 import numpy as np
 from onnxconverter_common.registration import register_converter
-from .._base_operator import BaseOperator
+from .._physical_operator import PhysicalOperator
 from .._discretizer_implementations import Binarizer, KBinsDiscretizer
 
 

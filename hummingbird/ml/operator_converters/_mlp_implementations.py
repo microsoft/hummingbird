@@ -11,10 +11,10 @@ Base class for multi-layer perceptrons (MLP) implementation.
 
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class MLPModel(BaseOperator, torch.nn.Module):
+class MLPModel(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, weights, biases, activation, device):
         super(MLPModel, self).__init__(logical_operator)
         self.regression = True
