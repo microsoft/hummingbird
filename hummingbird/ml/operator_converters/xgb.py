@@ -87,7 +87,7 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
     if "n_features" in extra_config:
         n_features = extra_config["n_features"]
     else:
@@ -115,7 +115,7 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
     if "n_features" in extra_config:
         n_features = extra_config["n_features"]
     else:

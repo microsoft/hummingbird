@@ -15,7 +15,7 @@ from .._scaler_implementations import Scaler
 
 
 def convert_sklearn_robust_scaler(operator, device, extra_config):
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     scale = operator.raw_operator.scale_
     if scale is not None:
@@ -24,7 +24,7 @@ def convert_sklearn_robust_scaler(operator, device, extra_config):
 
 
 def convert_sklearn_max_abs_scaler(operator, device, extra_config):
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     scale = operator.raw_operator.scale_
     if scale is not None:
@@ -33,7 +33,7 @@ def convert_sklearn_max_abs_scaler(operator, device, extra_config):
 
 
 def convert_sklearn_min_max_scaler(operator, device, extra_config):
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     scale = np.array([x for x in operator.raw_operator.scale_])
     offset = np.array([-1.0 / x * y for x, y in zip(operator.raw_operator.scale_, operator.raw_operator.min_)])
@@ -41,7 +41,7 @@ def convert_sklearn_min_max_scaler(operator, device, extra_config):
 
 
 def convert_sklearn_standard_scaler(operator, device, extra_config):
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     scale = operator.raw_operator.scale_
     if scale is not None:

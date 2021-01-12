@@ -27,7 +27,7 @@ def convert_sklearn_bernouli_naive_bayes(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     model = operator.raw_operator
 
@@ -56,7 +56,7 @@ def convert_sklearn_multinomial_naive_bayes(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     model = operator.raw_operator
 
@@ -82,7 +82,7 @@ def convert_sklearn_gaussian_naive_bayes(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     model = operator.raw_operator
     classes = model.classes_

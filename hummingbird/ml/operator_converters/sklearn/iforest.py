@@ -218,7 +218,7 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     tree_infos = operator.raw_operator.estimators_
     n_features = operator.raw_operator.n_features_

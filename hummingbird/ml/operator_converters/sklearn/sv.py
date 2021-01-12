@@ -92,7 +92,7 @@ def convert_sklearn_svc_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     if operator.raw_operator.kernel in ["linear", "poly", "rbf", "sigmoid"]:
         # https://stackoverflow.com/questions/20113206/scikit-learn-svc-decision-function-and-predict

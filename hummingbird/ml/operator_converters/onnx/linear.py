@@ -27,7 +27,7 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
         A PyTorch model
     """
 
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     coefficients = intercepts = classes = multi_class = None
 
@@ -81,7 +81,7 @@ def convert_onnx_linear_regression_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     coefficients = intercepts = None
     for attr in operator.raw_operator.origin.attribute:

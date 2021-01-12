@@ -200,7 +200,7 @@ def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree informations from the operator.
     n_features, tree_infos, classes, post_transform = _get_tree_infos_from_tree_ensemble(
@@ -230,7 +230,7 @@ def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={})
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree informations from the operator.
     n_features, tree_infos, _, _ = _get_tree_infos_from_tree_ensemble(operator.raw_operator, device, extra_config)

@@ -45,7 +45,7 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator.estimators_
@@ -107,7 +107,7 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator.estimators_.ravel().tolist()
@@ -141,7 +141,7 @@ def convert_sklearn_hist_gbdt_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator._predictors
@@ -184,7 +184,7 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator._predictors

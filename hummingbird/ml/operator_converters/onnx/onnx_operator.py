@@ -62,7 +62,7 @@ def convert_onnx_cast(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     to_type = None
 
@@ -86,7 +86,7 @@ def convert_onnx_concat(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Generate the model.
     return Concat(operator)
@@ -104,7 +104,7 @@ def convert_onnx_reshape(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     shape = []
     initializers = extra_config[constants.ONNX_INITIALIZERS]

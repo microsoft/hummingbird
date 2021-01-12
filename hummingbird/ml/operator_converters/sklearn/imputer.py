@@ -59,7 +59,7 @@ def convert_sklearn_simple_imputer(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     return SimpleImputer(operator, device)
 
@@ -103,7 +103,7 @@ def convert_sklearn_missing_indicator(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     return MissingIndicator(operator, device)
 

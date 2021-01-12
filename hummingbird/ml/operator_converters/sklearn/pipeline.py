@@ -44,7 +44,7 @@ def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     indices = operator.column_indices
     if any([type(i) is bool for i in indices]):
@@ -64,7 +64,7 @@ def convert_sklearn_concat(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     return Concat(operator)
 
@@ -81,7 +81,7 @@ def convert_sklearn_multiply(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
     assert hasattr(operator, "operand")
 
     score = operator.operand

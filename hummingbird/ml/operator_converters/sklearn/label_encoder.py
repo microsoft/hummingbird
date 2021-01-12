@@ -26,7 +26,7 @@ def convert_sklearn_label_encoder(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     if all([type(x) in [int, np.int32, np.int64] for x in operator.raw_operator.classes_]):
         return NumericLabelEncoder(operator, operator.raw_operator.classes_, device)

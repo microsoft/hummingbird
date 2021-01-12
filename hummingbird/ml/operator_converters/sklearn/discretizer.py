@@ -26,7 +26,7 @@ def convert_sklearn_binarizer(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     return Binarizer(operator, operator.raw_operator.threshold, device)
 
@@ -43,7 +43,7 @@ def convert_sklearn_k_bins_discretizer(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     bin_edges = []
     max_bin_edges = 0

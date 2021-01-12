@@ -27,7 +27,7 @@ def convert_sklearn_mlp_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     classes = operator.raw_operator.classes_
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
@@ -52,7 +52,7 @@ def convert_sklearn_mlp_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     activation = operator.raw_operator.activation
     weights = operator.raw_operator.coefs_
