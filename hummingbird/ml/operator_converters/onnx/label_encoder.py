@@ -27,14 +27,15 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
 
     for attr in operator.original_operator.origin.attribute:
         if attr.name == "keys_int64s":
-            return NumericLabelEncoder(np.array(attr.ints), device)
+            return NumericLabelEncoder(operator, np.array(attr.ints), device)
         elif attr.name == "keys_strings":
             # Note that these lines will fail later on for pytorch < 1.8
             keys = np.array([x.decode("UTF-8") for x in attr.strings])
-            return StringLabelEncoder(keys, device, extra_config)
+            return StringLabelEncoder(operator, keys, device, extra_config)
 
     # If we reach here, we have a parsing error.
     raise RuntimeError("Error parsing LabelEncoder, found unexpected None for keys")

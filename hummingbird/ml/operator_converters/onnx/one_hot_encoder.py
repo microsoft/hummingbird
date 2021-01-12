@@ -27,17 +27,16 @@ def convert_onnx_one_hot_encoder(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
 
     categories = []
-    operator = operator.raw_operator
-
-    for attr in operator.origin.attribute:
+    for attr in operator.raw_operator.origin.attribute:
         if attr.name == "cats_int64s":
             categories.append(np.array(attr.ints))
-            return OneHotEncoder(categories, device)
+            return OneHotEncoder(operator, categories, device)
         elif attr.name == "cats_strings":
             categories.append([x.decode("UTF-8") for x in attr.strings])
-            return OneHotEncoderString(categories, device, extra_config)
+            return OneHotEncoderString(operator, categories, device, extra_config)
 
     raise RuntimeError("Error parsing OneHotEncoder, no categories")
 

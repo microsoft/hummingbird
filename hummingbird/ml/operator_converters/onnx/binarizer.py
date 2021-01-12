@@ -25,6 +25,7 @@ def convert_onnx_binarizer(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
 
     threshold = None
     for attr in operator.raw_operator.origin.attribute:
@@ -35,7 +36,7 @@ def convert_onnx_binarizer(operator, device=None, extra_config={}):
     if threshold is None:
         raise RuntimeError("Error parsing Binarizer, found unexpected None")
 
-    return Binarizer(threshold, device)
+    return Binarizer(operator, threshold, device)
 
 
 register_converter("ONNXMLBinarizer", convert_onnx_binarizer)

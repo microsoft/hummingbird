@@ -98,7 +98,7 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
     Class implementing the GEMM strategy (in PyTorch) for isolation forest model.
     """
 
-    def __init__(self, tree_parameters, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -106,7 +106,9 @@ class GEMMIsolationForestImpl(GEMMTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(GEMMIsolationForestImpl, self).__init__(tree_parameters, n_features, classes, None, anomaly_detection=True)
+        super(GEMMIsolationForestImpl, self).__init__(
+            logical_operator, tree_parameters, n_features, classes, None, anomaly_detection=True
+        )
 
         # Assign the required constants.
         if constants.OFFSET in extra_config:
@@ -133,7 +135,7 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch for isolation forest model.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -143,7 +145,7 @@ class TreeTraversalIsolationForestImpl(TreeTraversalTreeImpl):
             extra_config: Extra configuration used to properly implement the source tree
         """
         super(TreeTraversalIsolationForestImpl, self).__init__(
-            tree_parameters, max_depth, n_features, classes, n_classes=None, anomaly_detection=True
+            logical_operator, tree_parameters, max_depth, n_features, classes, n_classes=None, anomaly_detection=True
         )
 
         # Assign the required constants.
@@ -171,7 +173,7 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for isolation forest model.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -181,7 +183,7 @@ class PerfectTreeTraversalIsolationForestImpl(PerfectTreeTraversalTreeImpl):
             extra_config: Extra configuration used to properly implement the source tree
         """
         super(PerfectTreeTraversalIsolationForestImpl, self).__init__(
-            tree_parameters, max_depth, n_features, classes, None, anomaly_detection=True
+            logical_operator, tree_parameters, max_depth, n_features, classes, None, anomaly_detection=True
         )
 
         # Assign the required constants.
@@ -216,9 +218,8 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
-    # Get tree information out of the model.
     tree_infos = operator.raw_operator.estimators_
     n_features = operator.raw_operator.n_features_
     # Following constants will be passed in the tree implementation to normalize the anomaly score.
@@ -242,7 +243,7 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
             )
             for tree_param in tree_parameters
         ]
-        return GEMMIsolationForestImpl(net_parameters, n_features, classes, extra_config=extra_config)
+        return GEMMIsolationForestImpl(operator, net_parameters, n_features, classes, extra_config=extra_config)
 
     net_parameters = [
         get_parameters_for_tree_trav_sklearn(
@@ -251,10 +252,12 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalIsolationForestImpl(net_parameters, max_depth, n_features, classes, extra_config=extra_config)
+        return TreeTraversalIsolationForestImpl(
+            operator, net_parameters, max_depth, n_features, classes, extra_config=extra_config
+        )
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
         return PerfectTreeTraversalIsolationForestImpl(
-            net_parameters, max_depth, n_features, classes, extra_config=extra_config
+            operator, net_parameters, max_depth, n_features, classes, extra_config=extra_config
         )
 
 

@@ -149,26 +149,22 @@ def convert(topology, backend, test_input, device, extra_config={}):
         tvm_backend = tvm.__name__
 
     for operator in topology.topological_operator_iterator():
-        try:
-            converter = get_converter(operator.type)
-
-            if backend == onnx.__name__:
-                # vers = LooseVersion(torch.__version__)
-                # allowed_min = LooseVersion("1.6.0")
-                # Pytorch <= 1.6.0 has a bug with exporting GEMM into ONNX.
-                # For the moment only tree_trav is enabled for pytorch <= 1.6.0
-                # if vers < allowed_min:
-                extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
-
-            operator_map[operator.full_name] = converter(operator, device, extra_config)
-        except ValueError:
+        converter = get_converter(operator.type)
+        if convert is None:
             raise MissingConverter(
                 "Unable to find converter for {} type {} with extra config: {}.".format(
                     operator.type, type(getattr(operator, "raw_model", None)), extra_config
                 )
             )
-        except Exception as e:
-            raise e
+
+        if backend == onnx.__name__:
+            # vers = LooseVersion(torch.__version__)
+            # allowed_min = LooseVersion("1.6.0")
+            # Pytorch <= 1.6.0 has a bug with exporting GEMM into ONNX.
+            # For the moment only tree_trav is enabled for pytorch <= 1.6.0
+            # if vers < allowed_min:
+            extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
+        operator_map[operator.full_name] = converter(operator, device, extra_config)
 
     # Set the parameters for the model / container
     n_threads = None if constants.N_THREADS not in extra_config else extra_config[constants.N_THREADS]
