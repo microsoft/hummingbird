@@ -20,8 +20,8 @@ class ArrayFeatureExtractor(BaseOperator, torch.nn.Module):
     This is used by SelectKBest, VarianceThreshold operators in scikit-learn
     """
 
-    def __init__(self, column_indices, device):
-        super(ArrayFeatureExtractor, self).__init__(transformer=True)
+    def __init__(self, logical_operator, column_indices, device):
+        super(ArrayFeatureExtractor, self).__init__(logical_operator, transformer=True)
 
         is_contiguous = False
         if max(column_indices) - min(column_indices) + 1 == len(column_indices):

@@ -28,7 +28,7 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.estimators_
@@ -43,7 +43,13 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
         raise RuntimeError("Random Forest Classifier translation only supports integer class labels")
 
     return convert_decision_ensemble_tree_common(
-        tree_infos, get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn, n_features, classes, extra_config
+        operator,
+        tree_infos,
+        get_parameters_for_sklearn_common,
+        get_parameters_for_tree_trav_sklearn,
+        n_features,
+        classes,
+        extra_config,
     )
 
 
@@ -59,7 +65,7 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator.estimators_
@@ -69,6 +75,7 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     extra_config[constants.NUM_TREES] = len(tree_infos)
 
     return convert_decision_ensemble_tree_common(
+        operator,
         tree_infos,
         get_parameters_for_sklearn_common,
         get_parameters_for_tree_trav_sklearn,
@@ -89,7 +96,7 @@ def convert_sklearn_decision_tree_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     operator.raw_operator.estimators_ = [operator.raw_operator]
     return convert_sklearn_random_forest_classifier(operator, device, extra_config)
@@ -107,7 +114,7 @@ def convert_sklearn_decision_tree_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     operator.raw_operator.estimators_ = [operator.raw_operator]
     return convert_sklearn_random_forest_regressor(operator, device, extra_config)

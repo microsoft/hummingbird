@@ -29,7 +29,7 @@ def convert_sparkml_vector_assembler(operator, device, extra_config):
         A PyTorch model
     """
 
-    return Concat()
+    return Concat(operator)
 
 
 register_converter("SparkMLVectorAssembler", convert_sparkml_vector_assembler)

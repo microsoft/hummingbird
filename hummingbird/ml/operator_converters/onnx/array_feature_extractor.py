@@ -26,12 +26,12 @@ def convert_onnx_array_feature_extractor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
 
-    # TODO, this will be tested as part of the ai.onnx.ml.OneHotEncoder tests
     column_indices = []
     initializers = extra_config[constants.ONNX_INITIALIZERS]
-    column_indices = initializers[operator.raw_operator.origin.input[1]].int64_data
-    return ArrayFeatureExtractor(column_indices, device)
+    column_indices = list(initializers[operator.raw_operator.origin.input[1]].int64_data)
+    return ArrayFeatureExtractor(operator, column_indices, device)
 
 
 register_converter("ONNXMLArrayFeatureExtractor", convert_onnx_array_feature_extractor)

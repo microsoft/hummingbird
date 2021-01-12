@@ -37,12 +37,9 @@ def convert_sparkml_bucketizer(operator, device, extra_config):
         bin_edges[i][-1] = bin_edges[i][-1] + 1e-3
         labels.append(np.array([i for i in range(len(bin_edges[i]) - 1)]))
         if len(bin_edges[i]) < max_bin_edges:
-            bin_edges[i] = (
-                bin_edges[i]
-                + [np.inf for _ in range((max_bin_edges - len(bin_edges[i])))]
-            )
+            bin_edges[i] = bin_edges[i] + [np.inf for _ in range((max_bin_edges - len(bin_edges[i])))]
 
-    return KBinsDiscretizer(None, np.array(bin_edges), labels, device)
+    return KBinsDiscretizer(operator, None, np.array(bin_edges), labels, device)
 
 
 register_converter("SparkMLBucketizer", convert_sparkml_bucketizer)

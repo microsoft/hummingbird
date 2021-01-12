@@ -18,8 +18,8 @@ class Scaler(BaseOperator, torch.nn.Module):
     Class implementing Scaler operators in PyTorch. Supported normalizers are L1, L2 and Max.
     """
 
-    def __init__(self, offset, scale, device):
-        super(Scaler, self).__init__(transformer=True)
+    def __init__(self, logical_operator, offset, scale, device):
+        super(Scaler, self).__init__(logical_operator, transformer=True)
 
         self.offset = offset
         self.scale = scale

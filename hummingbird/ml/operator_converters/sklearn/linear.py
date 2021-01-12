@@ -28,6 +28,9 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
+    supported_loss = {"log", "modified_huber", "squared_hinge"}
     classes = [0] if not hasattr(operator.raw_operator, "classes_") else operator.raw_operator.classes_
 
     if not all(["int" in str(type(x)) for x in classes]):
@@ -39,6 +42,7 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
 
     multi_class = None
+    loss = None
     if hasattr(operator.raw_operator, "multi_class"):
         if operator.raw_operator.multi_class == "ovr" or operator.raw_operator.solver in ["warn", "liblinear"]:
             multi_class = "ovr"
@@ -46,8 +50,15 @@ def convert_sklearn_linear_model(operator, device, extra_config):
             multi_class = "ovr"
         else:
             multi_class = "multinomial"
+    if hasattr(operator.raw_operator, "loss"):
+        loss = operator.raw_operator.loss
+        assert (
+            loss in supported_loss
+        ), "predict_proba for linear models currently only support {}. (Given {}). Please fill an issue at https://github.com/microsoft/hummingbird".format(
+            supported_loss, loss
+        )
 
-    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)
+    return LinearModel(operator, coefficients, intercepts, device, classes=classes, multi_class=multi_class, loss=loss)
 
 
 def convert_sklearn_linear_regression_model(operator, device, extra_config):
@@ -62,11 +73,12 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
 
     coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype("float32")
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
 
-    return LinearModel(coefficients, intercepts, device, is_linear_regression=True)
+    return LinearModel(operator, coefficients, intercepts, device, is_linear_regression=True)
 
 
 register_converter("SklearnLinearRegression", convert_sklearn_linear_regression_model)

@@ -22,8 +22,8 @@ class OneHotEncoderString(BaseOperator, torch.nn.Module):
     Because we are dealing with tensors, strings require additional length information for processing.
     """
 
-    def __init__(self, categories, device, extra_config={}):
-        super(OneHotEncoderString, self).__init__(transformer=True)
+    def __init__(self, logical_operator, categories, device, extra_config={}):
+        super(OneHotEncoderString, self).__init__(logical_operator, transformer=True)
 
         self.num_columns = len(categories)
         self.max_word_length = max([max([len(c) for c in cat]) for cat in categories])
@@ -74,8 +74,8 @@ class OneHotEncoder(BaseOperator, torch.nn.Module):
     Class implementing OneHotEncoder operators for ints in PyTorch.
     """
 
-    def __init__(self, categories, device):
-        super(OneHotEncoder, self).__init__(transformer=True)
+    def __init__(self, logical_operator, categories, device):
+        super(OneHotEncoder, self).__init__(logical_operator, transformer=True)
 
         self.num_columns = len(categories)
 

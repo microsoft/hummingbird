@@ -30,7 +30,11 @@ def _tree_traversal(node, lefts, rights, features, thresholds, values, missings,
         pos = len(rights) - 1
         count = _tree_traversal(node["left_child"], lefts, rights, features, thresholds, values, missings, count + 1)
         rights[pos] = count + 1
-        missings[pos] = lefts[pos] if node["default_left"] else rights[pos]
+        if node['missing_type'] == 'None':
+            # Missing values not present in training data are treated as zeros during inference.
+            missings[pos] = lefts[pos] if 0 < node["threshold"] else rights[pos]
+        else:
+            missings[pos] = lefts[pos] if node["default_left"] else rights[pos]
         return _tree_traversal(node["right_child"], lefts, rights, features, thresholds, values, missings, count + 1)
     else:
         features.append(0)
@@ -69,16 +73,15 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
     assert not hasattr(operator.raw_operator, "use_missing") or operator.raw_operator.use_missing
     assert not hasattr(operator.raw_operator, "zero_as_missing") or not operator.raw_operator.zero_as_missing
 
-    # Get tree information out of the model.
     n_features = operator.raw_operator._n_features
     tree_infos = operator.raw_operator.booster_.dump_model()["tree_info"]
     n_classes = operator.raw_operator._n_classes
 
-    return convert_gbdt_classifier_common(tree_infos, _get_tree_parameters, n_features, n_classes, missing_val=None, extra_config=extra_config)
+    return convert_gbdt_classifier_common(operator, tree_infos, _get_tree_parameters, n_features, n_classes, missing_val=None, extra_config=extra_config)
 
 
 def convert_sklearn_lgbm_regressor(operator, device, extra_config):
@@ -93,7 +96,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
     assert not hasattr(operator.raw_operator, "use_missing") or operator.raw_operator.use_missing
     assert not hasattr(operator.raw_operator, "zero_as_missing") or not operator.raw_operator.zero_as_missing
 
@@ -103,7 +106,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     if operator.raw_operator._objective == "tweedie":
         extra_config[constants.POST_TRANSFORM] = constants.TWEEDIE
 
-    return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, missing_val=None, extra_config=extra_config)
+    return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, missing_val=None, extra_config=extra_config)
 
 
 # Register the converters.

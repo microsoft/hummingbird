@@ -22,8 +22,8 @@ class StringLabelEncoder(BaseOperator, torch.nn.Module):
     When the ONNX backend is selected, this operator only works for PyTorch => 1.8.0.
     """
 
-    def __init__(self, classes, device, extra_config={}):
-        super(StringLabelEncoder, self).__init__(transformer=True)
+    def __init__(self, logical_operator, classes, device, extra_config={}):
+        super(StringLabelEncoder, self).__init__(logical_operator, transformer=True)
         self.regression = False
         self.num_columns = len(classes)
         self.max_word_length = max([len(cat) for cat in classes])
@@ -53,8 +53,8 @@ class StringLabelEncoder(BaseOperator, torch.nn.Module):
 
 
 class NumericLabelEncoder(BaseOperator, torch.nn.Module):
-    def __init__(self, classes, device):
-        super(NumericLabelEncoder, self).__init__(transformer=True)
+    def __init__(self, logical_operator, classes, device):
+        super(NumericLabelEncoder, self).__init__(logical_operator, transformer=True)
         self.regression = False
         self.check_tensor = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
 

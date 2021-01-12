@@ -27,12 +27,14 @@ def convert_sklearn_pca(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     transform_matrix = operator.raw_operator.components_.transpose()
     mean = operator.raw_operator.mean_.reshape(1, -1)
     if operator.raw_operator.whiten:
         transform_matrix = transform_matrix / np.sqrt(operator.raw_operator.explained_variance_)
 
-    return Decomposition(mean, transform_matrix, device)
+    return Decomposition(operator, mean, transform_matrix, device)
 
 
 def convert_sklearn_kernel_pca(operator, device, extra_config):
@@ -47,6 +49,8 @@ def convert_sklearn_kernel_pca(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     if operator.raw_operator.kernel in ["linear", "poly", "rbf", "sigmoid", "cosine", "precomputed"]:
         kernel = operator.raw_operator.kernel
         degree = operator.raw_operator.degree
@@ -57,6 +61,7 @@ def convert_sklearn_kernel_pca(operator, device, extra_config):
             operator.raw_operator.lambdas_[non_zeros]
         )
         return KernelPCA(
+            operator,
             kernel,
             degree,
             sv,
@@ -87,13 +92,15 @@ def convert_sklearn_fast_ica(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     transform_matrix = operator.raw_operator.components_.transpose()
     if hasattr(operator.raw_operator, "mean_"):
         mean = operator.raw_operator.mean_.reshape(1, -1).astype("float32")
     else:
         mean = None
 
-    return Decomposition(mean, transform_matrix.astype("float32"), device)
+    return Decomposition(operator, mean, transform_matrix.astype("float32"), device)
 
 
 def convert_sklearn_truncated_svd(operator, device, extra_config):
@@ -108,8 +115,10 @@ def convert_sklearn_truncated_svd(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     transform_matrix = operator.raw_operator.components_.transpose()
-    return Decomposition(None, transform_matrix.astype("float32"), device)
+    return Decomposition(operator, None, transform_matrix.astype("float32"), device)
 
 
 register_converter("SklearnPCA", convert_sklearn_pca)

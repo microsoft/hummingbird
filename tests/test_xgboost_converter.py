@@ -34,9 +34,7 @@ class TestXGBoostConverter(unittest.TestCase):
                     model, "torch", X[0:1], extra_config={"tree_implementation": extra_config_param}
                 )
                 self.assertIsNotNone(torch_model)
-                self.assertEqual(
-                    str(type(list(torch_model.model._operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
-                )
+                self.assertEqual(str(type(list(torch_model.model._operators)[0])), gbdt_implementation_map[extra_config_param])
 
     def _run_xgb_classifier_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
@@ -233,11 +231,11 @@ class TestXGBoostConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for extra_config_param in ["gemm", "tree_trav", "perf_tree_trav"]:
             for missing in [None, -99999, np.nan]:
-                for model_class in [xgb.XGBClassifier, xgb.XGBRegressor]:
-                    model = model_class(n_estimators=10, max_depth=3, missing=missing)
-                    # Missing values during training + inference.
+                for model_class, n_classes in zip([xgb.XGBClassifier, xgb.XGBClassifier, xgb.XGBRegressor], [2, 3, None]):
+                    model = model_class(missing=missing)
+                    # Missing values during both training and inference.
                     if model_class == xgb.XGBClassifier:
-                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
+                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=n_classes, random_state=2021)
                     else:
                         X, y = make_regression(n_samples=100, n_features=3, n_informative=3, random_state=2021)
                     X[:25][y[:25] == 0, 0] = np.nan if missing is None else missing
@@ -249,9 +247,10 @@ class TestXGBoostConverter(unittest.TestCase):
                     else:
                         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
-                    # Missing values during training + inference.
+                    # Missing values during only inference.
+                    model = model_class(missing=missing)
                     if model_class == xgb.XGBClassifier:
-                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
+                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=n_classes, random_state=2021)
                     else:
                         X, y = make_regression(n_samples=100, n_features=3, n_informative=3, random_state=2021)
                     model.fit(X, y)

@@ -32,9 +32,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
                     model, "torch", extra_config={constants.TREE_IMPLEMENTATION: extra_config_param}
                 )
                 self.assertIsNotNone(torch_model)
-                self.assertTrue(
-                    str(type(list(torch_model.model._operator_map.values())[0])) == dt_implementation_map[extra_config_param]
-                )
+                self.assertTrue(str(type(list(torch_model.model._operators)[0])) == dt_implementation_map[extra_config_param])
 
     # Used for classification tests
     def _run_tree_classification_converter(
@@ -237,6 +235,19 @@ class TestSklearnTreeConverter(unittest.TestCase):
         self._run_random_forest_classifier_single_node_tree_converter(
             extra_config={constants.TREE_IMPLEMENTATION: "perf_tree_trav"}
         )
+
+    # Another small tree tests
+    def test_random_forest_classifier_small_tree_converter(self):
+        seed = 0
+        np.random.seed(seed=0)
+        N = 9
+        X = np.random.randn(N, 8)
+        y = np.random.randint(low=0, high=2, size=N)
+        model = RandomForestClassifier(random_state=seed)
+        model.fit(X, y)
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(torch_model)
+        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Float 64 classification test helper
     def _run_float64_tree_classification_converter(self, model_type, num_classes, extra_config={}, labels_shift=0, **kwargs):

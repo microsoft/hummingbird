@@ -31,9 +31,7 @@ class TestLGBMConverter(unittest.TestCase):
 
                 torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
                 self.assertIsNotNone(torch_model)
-                self.assertEqual(
-                    str(type(list(torch_model.model._operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
-                )
+                self.assertEqual(str(type(list(torch_model.model._operators)[0])), gbdt_implementation_map[extra_config_param])
 
     def _run_lgbm_classifier_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
@@ -267,11 +265,11 @@ class TestLGBMConverter(unittest.TestCase):
         warnings.filterwarnings("ignore")
         for extra_config_param in ["gemm", "tree_trav", "perf_tree_trav"]:
             for missing in [None, np.nan]:
-                for model_class in [lgb.LGBMClassifier, lgb.LGBMRegressor]:
-                    model = model_class(n_estimators=1, max_depth=3, use_missing=True, zero_as_missing=False)
+                for model_class, n_classes in zip([lgb.LGBMClassifier, lgb.LGBMClassifier, lgb.LGBMRegressor], [2, 3, None]):
+                    model = model_class(use_missing=True, zero_as_missing=False)
                     # Missing values during training + inference.
                     if model_class == lgb.LGBMClassifier:
-                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
+                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=n_classes, random_state=2021)
                     else:
                         X, y = make_regression(n_samples=100, n_features=3, n_informative=3, random_state=2021)
                     X[:25][y[:25] == 0, 0] = np.nan if missing is None else missing
@@ -284,8 +282,9 @@ class TestLGBMConverter(unittest.TestCase):
                         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
                     # Missing values during only inference.
+                    model = model_class(use_missing=True, zero_as_missing=False)
                     if model_class == lgb.LGBMClassifier:
-                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=2, random_state=2021)
+                        X, y = make_classification(n_samples=100, n_features=3, n_informative=3, n_redundant=0, n_repeated=0, n_classes=n_classes, random_state=2021)
                     else:
                         X, y = make_regression(n_samples=100, n_features=3, n_informative=3, random_state=2021)
                     model.fit(X, y)
