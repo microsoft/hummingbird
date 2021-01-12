@@ -159,7 +159,12 @@ class PyTorchSklearnContainerRegression(SklearnContainerRegression, PyTorchSklea
 
     def _predict(self, *inputs):
         if self._is_regression:
-            return self.model.forward(*inputs).cpu().numpy().ravel()
+            output = self.model.forward(*inputs).cpu().numpy()
+            if len(output.shape) == 2 and output.shape[1] > 1:
+                # Multioutput regression
+                return output
+            else:
+                return output.ravel()
         elif self._is_anomaly_detection:
             return self.model.forward(*inputs)[0].cpu().numpy().ravel()
         else:

@@ -73,7 +73,9 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
         A PyTorch model
     """
 
-    coefficients = operator.raw_operator.coef_.transpose().reshape(-1, 1).astype("float32")
+    coefficients = operator.raw_operator.coef_.transpose().astype("float32")
+    if len(coefficients.shape) == 1:
+        coefficients = coefficients.reshape(-1, 1)
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
 
     return LinearModel(coefficients, intercepts, device, is_linear_regression=True)

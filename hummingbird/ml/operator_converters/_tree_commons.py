@@ -251,7 +251,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     return [nodes_map, ids, lefts, rights, features, thresholds, values]
 
 
-def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, extra_config={}):
+def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, classes, extra_config={}):
     """
     This function is used to generate tree parameters for sklearn trees.
     Includes SklearnRandomForestClassifier/Regressor, and SklearnGradientBoostingClassifier.
@@ -262,7 +262,7 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
         features: The features used in the decision nodes
         thresholds: The thresholds used in the decision nodes
         values: The values stored in the leaf nodes
-
+        classes: The list of class labels. None if regression model
     Returns:
         An array containing the extracted parameters
     """
@@ -270,7 +270,8 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
     values = np.array(values)
     if len(values.shape) == 3:
         values = values.reshape(values.shape[0], -1)
-    if values.shape[1] > 1:
+    if values.shape[1] > 1 and classes is not None and len(classes) > 0:
+        # Triggers only for classification.
         values /= np.sum(values, axis=1, keepdims=True)
     if constants.NUM_TREES in extra_config:
         values /= extra_config[constants.NUM_TREES]
@@ -403,7 +404,7 @@ def convert_decision_ensemble_tree_common(
 
     net_parameters = [
         get_parameters_for_tree_trav(
-            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, extra_config,
+            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, classes, extra_config,
         )
         for tree_param in tree_parameters
     ]

@@ -246,7 +246,7 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
 
     net_parameters = [
         get_parameters_for_tree_trav_sklearn(
-            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values
+            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, classes
         )
         for tree_param in tree_parameters
     ]
