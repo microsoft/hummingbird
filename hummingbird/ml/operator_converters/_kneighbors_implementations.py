@@ -24,9 +24,19 @@ class MetricType(Enum):
 
 class KNeighborsModel(BaseOperator, torch.nn.Module):
     def __init__(
-        self, train_data, train_labels, n_neighbors, weights, classes, batch_size, is_classifier, metric_type, metric_params
+        self,
+        logical_operator,
+        train_data,
+        train_labels,
+        n_neighbors,
+        weights,
+        classes,
+        batch_size,
+        is_classifier,
+        metric_type,
+        metric_params,
     ):
-        super(KNeighborsModel, self).__init__()
+        super(KNeighborsModel, self).__init__(logical_operator)
         self.classification = is_classifier
         self.regression = not is_classifier
         self.train_data = torch.nn.Parameter(torch.from_numpy(train_data.astype("float32")), requires_grad=False)

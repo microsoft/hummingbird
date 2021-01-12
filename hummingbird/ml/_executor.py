@@ -56,8 +56,7 @@ class Executor(torch.nn.Module, object):
 
         self._input_names = _fix_var_naming(operators, input_names)
         self._output_names = _fix_var_naming(reversed(operators), output_names, "output")
-        self._operator_map = torch.nn.ModuleDict(operator_map)
-        self._operators = operators
+        self._operators = torch.nn.ModuleList([operator_map[operator.full_name] for operator in operators])
         self.max_string_length = None
 
         if constants.MAX_STRING_LENGTH in extra_config:
@@ -105,14 +104,13 @@ class Executor(torch.nn.Module, object):
 
             # Evaluate all the operators in the topology by properly wiring inputs \ outputs
             for operator in self._operators:
-                pytorch_op = self._operator_map[operator.full_name]
-                pytorch_outputs = pytorch_op(*(variable_map[input] for input in operator.input_full_names))
+                outputs = operator(*(variable_map[input_name] for input_name in operator.inputs))
 
-                if len(operator.output_full_names) == 1:
-                    variable_map[operator.output_full_names[0]] = pytorch_outputs
+                if len(operator.outputs) == 1:
+                    variable_map[operator.outputs[0]] = outputs
                 else:
-                    for i, output in enumerate(operator.output_full_names):
-                        variable_map[output] = pytorch_outputs[i]
+                    for i, output_name in enumerate(operator.outputs):
+                        variable_map[output_name] = outputs[i]
 
             # Prepare and return the output.
             if len(self._output_names) == 1:

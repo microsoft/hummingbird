@@ -27,6 +27,8 @@ def convert_sklearn_mlp_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     classes = operator.raw_operator.classes_
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
         raise RuntimeError("Hummingbird supports only integer labels for class labels.")
@@ -35,7 +37,7 @@ def convert_sklearn_mlp_classifier(operator, device, extra_config):
     weights = operator.raw_operator.coefs_
     biases = operator.raw_operator.intercepts_
 
-    return MLPClassificationModel(weights, biases, activation, classes, device)
+    return MLPClassificationModel(operator, weights, biases, activation, classes, device)
 
 
 def convert_sklearn_mlp_regressor(operator, device, extra_config):
@@ -50,11 +52,13 @@ def convert_sklearn_mlp_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     activation = operator.raw_operator.activation
     weights = operator.raw_operator.coefs_
     biases = operator.raw_operator.intercepts_
 
-    return MLPModel(weights, biases, activation, device)
+    return MLPModel(operator, weights, biases, activation, device)
 
 
 register_converter("SklearnMLPClassifier", convert_sklearn_mlp_classifier)

@@ -381,7 +381,7 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
 
 
 def convert_decision_ensemble_tree_common(
-    tree_infos, get_parameters, get_parameters_for_tree_trav, n_features, classes=None, extra_config={}
+    operator, tree_infos, get_parameters, get_parameters_for_tree_trav, n_features, classes=None, extra_config={}
 ):
     tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, get_parameters, extra_config)
 
@@ -399,7 +399,7 @@ def convert_decision_ensemble_tree_common(
             )
             for tree_param in tree_parameters
         ]
-        return GEMMDecisionTreeImpl(net_parameters, n_features, classes)
+        return GEMMDecisionTreeImpl(operator, net_parameters, n_features, classes)
 
     net_parameters = [
         get_parameters_for_tree_trav(
@@ -408,6 +408,6 @@ def convert_decision_ensemble_tree_common(
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes, extra_config)
+        return TreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
-        return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)
+        return PerfectTreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes)

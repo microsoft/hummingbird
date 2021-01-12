@@ -28,6 +28,7 @@ def convert_sklearn_kneighbors_regression_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
 
     return _convert_kneighbors_model(operator, device, extra_config, False)
 
@@ -44,7 +45,6 @@ def convert_sklearn_kneighbors_classification_model(operator, device, extra_conf
     Returns:
         A PyTorch model
     """
-
     return _convert_kneighbors_model(operator, device, extra_config, True)
 
 
@@ -118,6 +118,7 @@ def _convert_kneighbors_model(operator, device, extra_config, is_classifier):
     n_neighbors = operator.raw_operator.n_neighbors
 
     return KNeighborsModel(
+        operator,
         train_data,
         train_labels,
         n_neighbors,

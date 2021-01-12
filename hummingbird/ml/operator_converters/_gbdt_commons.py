@@ -15,7 +15,9 @@ from ._tree_commons import get_tree_params_and_type, get_parameters_for_tree_tra
 from ._tree_implementations import GEMMGBDTImpl, TreeTraversalGBDTImpl, PerfectTreeTraversalGBDTImpl, TreeImpl
 
 
-def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, n_classes, classes=None, extra_config={}):
+def convert_gbdt_classifier_common(
+    operator, tree_infos, get_tree_parameters, n_features, n_classes, classes=None, extra_config={}
+):
     """
     Common converter for GBDT classifiers.
 
@@ -46,10 +48,10 @@ def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, 
     if reorder_trees and n_classes > 1:
         tree_infos = [tree_infos[i * n_classes + j] for j in range(n_classes) for i in range(len(tree_infos) // n_classes)]
 
-    return convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes, extra_config)
+    return convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes, extra_config)
 
 
-def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=None, extra_config={}):
+def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes=None, extra_config={}):
     """
     Common converter for GBDT models.
 
@@ -159,8 +161,8 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
-        return GEMMGBDTImpl(net_parameters, n_features, classes, extra_config)
+        return GEMMGBDTImpl(operator, net_parameters, n_features, classes, extra_config)
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, extra_config)
+        return TreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav.
-        return PerfectTreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, extra_config)
+        return PerfectTreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)

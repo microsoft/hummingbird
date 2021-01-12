@@ -23,8 +23,8 @@ class Multiply(BaseOperator, torch.nn.Module):
     Module used to multiply features in a pipeline by a score.
     """
 
-    def __init__(self, score):
-        super(Multiply, self).__init__()
+    def __init__(self, operator, score):
+        super(Multiply, self).__init__(operator)
 
         self.score = score
 
@@ -44,12 +44,12 @@ def convert_sklearn_array_feature_extractor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     indices = operator.column_indices
     if any([type(i) is bool for i in indices]):
         indices = [i for i in range(len(indices)) if indices[i]]
-    return ArrayFeatureExtractor(np.ascontiguousarray(indices), device)
+    return ArrayFeatureExtractor(operator, np.ascontiguousarray(indices), device)
 
 
 def convert_sklearn_concat(operator, device=None, extra_config={}):
@@ -64,7 +64,9 @@ def convert_sklearn_concat(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    return Concat()
+    assert operator is not None, "Cannot convert None operator"
+
+    return Concat(operator)
 
 
 def convert_sklearn_multiply(operator, device=None, extra_config={}):
@@ -79,13 +81,13 @@ def convert_sklearn_multiply(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
     assert hasattr(operator, "operand")
 
     score = operator.operand
 
     # Generate the model.
-    return Multiply(score)
+    return Multiply(operator, score)
 
 
 register_converter("SklearnArrayFeatureExtractor", convert_sklearn_array_feature_extractor)
