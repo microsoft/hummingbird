@@ -26,7 +26,7 @@ def convert_onnx_array_feature_extractor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     column_indices = []
     initializers = extra_config[constants.ONNX_INITIALIZERS]

@@ -28,7 +28,7 @@ def convert_sklearn_kneighbors_regression_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     return _convert_kneighbors_model(operator, device, extra_config, False)
 

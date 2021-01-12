@@ -27,7 +27,7 @@ def convert_onnx_label_encoder(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     for attr in operator.original_operator.origin.attribute:
         if attr.name == "keys_int64s":

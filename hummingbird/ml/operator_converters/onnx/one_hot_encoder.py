@@ -27,7 +27,7 @@ def convert_onnx_one_hot_encoder(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     categories = []
     for attr in operator.raw_operator.origin.attribute:

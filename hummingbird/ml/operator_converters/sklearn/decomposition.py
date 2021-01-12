@@ -27,7 +27,7 @@ def convert_sklearn_pca(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     transform_matrix = operator.raw_operator.components_.transpose()
     mean = operator.raw_operator.mean_.reshape(1, -1)
@@ -49,7 +49,7 @@ def convert_sklearn_kernel_pca(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     if operator.raw_operator.kernel in ["linear", "poly", "rbf", "sigmoid", "cosine", "precomputed"]:
         kernel = operator.raw_operator.kernel
@@ -92,7 +92,7 @@ def convert_sklearn_fast_ica(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     transform_matrix = operator.raw_operator.components_.transpose()
     if hasattr(operator.raw_operator, "mean_"):
@@ -115,7 +115,7 @@ def convert_sklearn_truncated_svd(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     transform_matrix = operator.raw_operator.components_.transpose()
     return Decomposition(operator, None, transform_matrix.astype("float32"), device)

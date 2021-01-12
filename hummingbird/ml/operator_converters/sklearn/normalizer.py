@@ -25,7 +25,7 @@ def convert_sklearn_normalizer(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     return Normalizer(operator, operator.raw_operator.norm, device)
 

@@ -26,7 +26,7 @@ def convert_sklearn_select_k_best(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     indices = np.array([i for i, val in enumerate(operator.raw_operator.get_support()) if val])
     return ArrayFeatureExtractor(operator, np.ascontiguousarray(indices), device)
@@ -44,7 +44,7 @@ def convert_sklearn_variance_threshold(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     var = operator.raw_operator.variances_
     threshold = operator.raw_operator.threshold
@@ -64,7 +64,7 @@ def convert_sklearn_select_percentile(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     indices = np.array([i for i, val in enumerate(operator.raw_operator.get_support()) if val])
     return ArrayFeatureExtractor(operator, np.ascontiguousarray(indices), device)
