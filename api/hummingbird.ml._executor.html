@@ -110,7 +110,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._array_feature_extractor_implementations.html">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._base_operator.html">hummingbird.ml.operator_converters._base_operator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
@@ -121,6 +120,7 @@
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._normalizer_implementations.html">hummingbird.ml.operator_converters._normalizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._one_hot_encoder_implementations.html">hummingbird.ml.operator_converters._one_hot_encoder_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._physical_operator.html">hummingbird.ml.operator_converters._physical_operator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._pipeline_implementations.html">hummingbird.ml.operator_converters._pipeline_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._scaler_implementations.html">hummingbird.ml.operator_converters._scaler_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_commons.html">hummingbird.ml.operator_converters._tree_commons</a></li>
@@ -212,12 +212,12 @@
 <span id="hummingbird-ml-executor"></span><h1>hummingbird.ml._executor<a class="headerlink" href="#module-hummingbird.ml._executor" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="hummingbird.ml._executor.Executor">
-<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml._executor.</code><code class="sig-name descname">Executor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_names</span></em>, <em class="sig-param"><span class="n">output_names</span></em>, <em class="sig-param"><span class="n">operator_map</span></em>, <em class="sig-param"><span class="n">operators</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_executor.py#L19"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">hummingbird.ml._executor.</code><code class="sig-name descname">Executor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_names</span></em>, <em class="sig-param"><span class="n">output_names</span></em>, <em class="sig-param"><span class="n">operator_map</span></em>, <em class="sig-param"><span class="n">operators</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_executor.py#L19"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Executor class able to run Hummingbird’s internal representation of a converted pipeline.</p>
 <dl class="py method">
 <dt id="hummingbird.ml._executor.Executor.forward">
-<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_executor.py#L65"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_executor.py#L65"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">

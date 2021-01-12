@@ -110,7 +110,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._array_feature_extractor_implementations.html">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._base_operator.html">hummingbird.ml.operator_converters._base_operator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
@@ -121,6 +120,7 @@
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._normalizer_implementations.html">hummingbird.ml.operator_converters._normalizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._one_hot_encoder_implementations.html">hummingbird.ml.operator_converters._one_hot_encoder_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._physical_operator.html">hummingbird.ml.operator_converters._physical_operator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._pipeline_implementations.html">hummingbird.ml.operator_converters._pipeline_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._scaler_implementations.html">hummingbird.ml.operator_converters._scaler_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_commons.html">hummingbird.ml.operator_converters._tree_commons</a></li>
@@ -214,33 +214,33 @@
 Some code here have been copied from <a class="reference external" href="https://github.com/onnx/sklearn-onnx/">https://github.com/onnx/sklearn-onnx/</a>.</p>
 <dl class="py function">
 <dt id="hummingbird.ml._parse._build_sklearn_api_parsers_map">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_build_sklearn_api_parsers_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L418"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._build_sklearn_api_parsers_map" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_build_sklearn_api_parsers_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L407"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._build_sklearn_api_parsers_map" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._build_sparkml_api_parsers_map">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_build_sparkml_api_parsers_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L430"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._build_sparkml_api_parsers_map" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_build_sparkml_api_parsers_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L419"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._build_sparkml_api_parsers_map" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._declare_input_variables">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_declare_input_variables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">raw_model_container</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L151"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._declare_input_variables" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_declare_input_variables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">raw_model_container</span></em>, <em class="sig-param"><span class="n">extra_config</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L139"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._declare_input_variables" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._declare_output_variables">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_declare_output_variables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_model_container</span></em>, <em class="sig-param"><span class="n">extra_config</span></em>, <em class="sig-param"><span class="n">outputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L203"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._declare_output_variables" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_declare_output_variables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_model_container</span></em>, <em class="sig-param"><span class="n">extra_config</span></em>, <em class="sig-param"><span class="n">outputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L192"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._declare_output_variables" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._fetch_input_slice">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_fetch_input_slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">inputs</span></em>, <em class="sig-param"><span class="n">column_indices</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L598"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._fetch_input_slice" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_fetch_input_slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">inputs</span></em>, <em class="sig-param"><span class="n">column_indices</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L587"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._fetch_input_slice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Taken from <a class="reference external" href="https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L53">https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L53</a>.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._get_column_index">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_get_column_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L623"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._get_column_index" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_get_column_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L612"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._get_column_index" title="Permalink to this definition">¶</a></dt>
 <dd><p>Taken from <a class="reference external" href="https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/common/utils.py#L50">https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/common/utils.py#L50</a>.
 Returns a tuples (variable index, column index in that variable).
 The function has two different behaviours, one when <em>i</em> (column index)
@@ -260,7 +260,7 @@ in this case, here are the results:</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._get_column_indices">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_get_column_indices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">indices</span></em>, <em class="sig-param"><span class="n">inputs</span></em>, <em class="sig-param"><span class="n">multiple</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L681"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._get_column_indices" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_get_column_indices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">indices</span></em>, <em class="sig-param"><span class="n">inputs</span></em>, <em class="sig-param"><span class="n">multiple</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L670"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._get_column_indices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Taken from <a class="reference external" href="https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/common/utils.py#L105">https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/common/utils.py#L105</a>.
 Returns the requested graph inpudes based on their indices or names. See <cite>_parse._get_column_index</cite>.
 Args:</p>
@@ -277,10 +277,10 @@ requested indices ] }</em> if <em>multiple</em> is True</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_onnx_api">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_onnx_api</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L442"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_onnx_api" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_onnx_api</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L431"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_onnx_api" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function handles all input ONNX models.</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>scope: The <code class="docutils literal notranslate"><span class="pre">onnxconverter_common.topology.Scope</span></code> where the model will be added
+<dt>Args:</dt><dd><p>topology: The <code class="docutils literal notranslate"><span class="pre">onnxconverter_common.topology.Topology</span></code> where the model will be added
 model: A ONNX model object
 inputs: A list of <a href="#id1"><span class="problematic" id="id2">`</span></a>onnxconverter_common.topology.Variable`s</p>
 </dd>
@@ -291,10 +291,10 @@ inputs: A list of <a href="#id1"><span class="problematic" id="id2">`</span></a>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_onnx_single_operator">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_onnx_single_operator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">operator</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L472"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_onnx_single_operator" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_onnx_single_operator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">operator</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L461"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_onnx_single_operator" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function handles the parsing of all ONNX operators.</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>scope: The <code class="docutils literal notranslate"><span class="pre">onnxconverter_common.topology.Scope</span></code> where the model will be added
+<dt>Args:</dt><dd><p>topology: The <code class="docutils literal notranslate"><span class="pre">onnxconverter_common.topology.Topology</span></code> where the model will be added
 model: An ONNX operator</p>
 </dd>
 </dl>
@@ -302,11 +302,11 @@ model: An ONNX operator</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_sklearn_api">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_api</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L217"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_api" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is a delegate function adding the model to the input scope.
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_api</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L206"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_api" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a delegate function adding the model to the input topology.
 It does nothing but invokes the correct parsing function according to the input model’s type.</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>scope: The <cite>onnxconverter_common.topology.Scope</cite> object where the model will be added
+<dt>Args:</dt><dd><p>topology: The <code class="docutils literal notranslate"><span class="pre">hummingbitd.ml._topology.Topology</span></code> object where the model will be added
 model: A scikit-learn model object
 inputs: A list of <a href="#id3"><span class="problematic" id="id4">`</span></a>onnxconverter_common.topology.Variable`s</p>
 </dd>
@@ -317,9 +317,9 @@ inputs: A list of <a href="#id3"><span class="problematic" id="id4">`</span></a>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_sklearn_column_transformer">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_column_transformer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L334"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_column_transformer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_column_transformer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L323"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_column_transformer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Taken from <a class="reference external" href="https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238">https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238</a>.
-:param scope: Scope object
+:param topology: Topology object
 :param model: A <em>scikit-learn</em> <em>ColumnTransformer</em> object
 :param inputs: A list of Variable objects
 :return: A list of output variables produced by column transformer</p>
@@ -327,9 +327,9 @@ inputs: A list of <a href="#id3"><span class="problematic" id="id4">`</span></a>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_sklearn_feature_union">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_feature_union</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L300"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_feature_union" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_feature_union</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L289"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_feature_union" title="Permalink to this definition">¶</a></dt>
 <dd><p>Taken from <a class="reference external" href="https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L199">https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L199</a>.
-:param scope: Scope object
+:param topology: Topology object
 :param model: A scikit-learn FeatureUnion object
 :param inputs: A list of Variable objects
 :return: A list of output variables produced by feature union</p>
@@ -337,7 +337,7 @@ inputs: A list of <a href="#id3"><span class="problematic" id="id4">`</span></a>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_sklearn_pipeline">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_pipeline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L265"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_pipeline" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_pipeline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L254"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_pipeline" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>The basic ideas of scikit-learn parsing:</dt><dd><ol class="arabic simple">
 <li><p>Sequentially go though all stages defined in the considered
@@ -350,7 +350,7 @@ stage as the inputs.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scope</strong> – Scope object defined in _topology.py</p></li>
+<li><p><strong>topology</strong> – Topology object defined in _topology.py</p></li>
 <li><p><strong>model</strong> – scikit-learn pipeline object</p></li>
 <li><p><strong>inputs</strong> – A list of Variable objects</p></li>
 </ul>
@@ -363,10 +363,10 @@ stage as the inputs.</p></li>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_sklearn_single_model">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_single_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L239"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_single_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sklearn_single_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L228"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sklearn_single_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function handles all sklearn objects composed by a single model.</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>scope: The <code class="docutils literal notranslate"><span class="pre">onnxconverter_common.topology.Scope</span></code> where the model will be added
+<dt>Args:</dt><dd><p>topology: The <code class="docutils literal notranslate"><span class="pre">hummingbitd.ml._topology.Topology</span></code> object where the model will be added
 model: A scikit-learn model object
 inputs: A list of <a href="#id7"><span class="problematic" id="id8">`</span></a>onnxconverter_common.topology.Variable`s</p>
 </dd>
@@ -377,10 +377,10 @@ inputs: A list of <a href="#id7"><span class="problematic" id="id8">`</span></a>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_sparkml_api">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sparkml_api</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L501"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sparkml_api" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sparkml_api</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L490"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sparkml_api" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function handles all input Spark-ML models.</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>scope: The <code class="docutils literal notranslate"><span class="pre">onnxconverter_common.topology.Scope</span></code> where the model will be added
+<dt>Args:</dt><dd><p>topology: The <code class="docutils literal notranslate"><span class="pre">onnxconverter_common.topology.Topology</span></code> where the model will be added
 model: A Spark-ML model object
 inputs: A list of <a href="#id9"><span class="problematic" id="id10">`</span></a>onnxconverter_common.topology.Variable`s</p>
 </dd>
@@ -391,7 +391,7 @@ inputs: A list of <a href="#id9"><span class="problematic" id="id10">`</span></a
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_sparkml_pipeline">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sparkml_pipeline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">all_outputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L282"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sparkml_pipeline" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sparkml_pipeline</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">all_outputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L271"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sparkml_pipeline" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>The basic ideas of Spark-ML parsing:</dt><dd><ol class="arabic simple">
 <li><p>Sequentially go though all stages defined in the considered
@@ -405,7 +405,7 @@ stage as the inputs.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scope</strong> – Scope object defined in _topology.py</p></li>
+<li><p><strong>topology</strong> – Topology object defined in _topology.py</p></li>
 <li><p><strong>model</strong> – Spark-ML pipeline object</p></li>
 <li><p><strong>all_outputs</strong> – A list of Variable objects</p></li>
 </ul>
@@ -418,10 +418,10 @@ stage as the inputs.</p></li>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._parse_sparkml_single_operator">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sparkml_single_operator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scope</span></em>, <em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">all_inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L521"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sparkml_single_operator" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_parse_sparkml_single_operator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topology</span></em>, <em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">all_inputs</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L510"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._parse_sparkml_single_operator" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function handles the parsing of all Spark-ML operators.</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>scope: The <code class="docutils literal notranslate"><span class="pre">onnxconverter_common.topology.Scope</span></code> where the model will be added
+<dt>Args:</dt><dd><p>topology: The <code class="docutils literal notranslate"><span class="pre">onnxconverter_common.topology.Topology</span></code> where the model will be added
 model: A Spark-ML operator
 all_inputs: A list of <a href="#id11"><span class="problematic" id="id12">`</span></a>onnxconverter_common.topology.Variable`s</p>
 </dd>
@@ -430,13 +430,13 @@ all_inputs: A list of <a href="#id11"><span class="problematic" id="id12">`</spa
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse._remove_zipmap">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_remove_zipmap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_list</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L564"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._remove_zipmap" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">_remove_zipmap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_list</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L553"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse._remove_zipmap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method used to remove ZipMap operators in the graph.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse.parse_onnx_api_model">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">parse_onnx_api_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L104"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse.parse_onnx_api_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">parse_onnx_api_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L96"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse.parse_onnx_api_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Puts <em>ONNX</em> object into an abstract representation so that our framework can work seamlessly on models created
 with different machine learning tools.</p>
 <dl class="simple">
@@ -449,7 +449,7 @@ with different machine learning tools.</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse.parse_sklearn_api_model">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">parse_sklearn_api_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L32"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse.parse_sklearn_api_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">parse_sklearn_api_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L32"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse.parse_sklearn_api_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Puts <em>scikit-learn</em> object into an abstract representation so that our framework can work seamlessly on models created
 with different machine learning tools.</p>
 <dl class="simple">
@@ -462,7 +462,7 @@ with different machine learning tools.</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml._parse.parse_sparkml_api_model">
-<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">parse_sparkml_api_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/34bccdb/hummingbirdhummingbird/ml/_parse.py#L68"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse.parse_sparkml_api_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml._parse.</code><code class="sig-name descname">parse_sparkml_api_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/_parse.py#L64"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml._parse.parse_sparkml_api_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Puts <em>Spark-ML</em> object into an abstract representation so that our framework can work seamlessly on models created
 with different machine learning tools.</p>
 <dl class="simple">

@@ -108,7 +108,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="api/hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._array_feature_extractor_implementations.html">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._base_operator.html">hummingbird.ml.operator_converters._base_operator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
@@ -119,6 +118,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._normalizer_implementations.html">hummingbird.ml.operator_converters._normalizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._one_hot_encoder_implementations.html">hummingbird.ml.operator_converters._one_hot_encoder_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._physical_operator.html">hummingbird.ml.operator_converters._physical_operator</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._pipeline_implementations.html">hummingbird.ml.operator_converters._pipeline_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._scaler_implementations.html">hummingbird.ml.operator_converters._scaler_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._tree_commons.html">hummingbird.ml.operator_converters._tree_commons</a></li>
@@ -223,6 +223,7 @@
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  | <a href="#X"><strong>X</strong></a>
  
@@ -281,8 +282,6 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._array_feature_extractor_implementations.html#hummingbird.ml.operator_converters._array_feature_extractor_implementations.ArrayFeatureExtractor._abc_impl">(hummingbird.ml.operator_converters._array_feature_extractor_implementations.ArrayFeatureExtractor attribute)</a>
 </li>
-        <li><a href="api/hummingbird.ml.operator_converters._base_operator.html#hummingbird.ml.operator_converters._base_operator.BaseOperator._abc_impl">(hummingbird.ml.operator_converters._base_operator.BaseOperator attribute)</a>
-</li>
         <li><a href="api/hummingbird.ml.operator_converters._decomposition_implementations.html#hummingbird.ml.operator_converters._decomposition_implementations.Decomposition._abc_impl">(hummingbird.ml.operator_converters._decomposition_implementations.Decomposition attribute)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._decomposition_implementations.html#hummingbird.ml.operator_converters._decomposition_implementations.KernelPCA._abc_impl">(hummingbird.ml.operator_converters._decomposition_implementations.KernelPCA attribute)</a>
@@ -312,6 +311,8 @@
         <li><a href="api/hummingbird.ml.operator_converters._one_hot_encoder_implementations.html#hummingbird.ml.operator_converters._one_hot_encoder_implementations.OneHotEncoder._abc_impl">(hummingbird.ml.operator_converters._one_hot_encoder_implementations.OneHotEncoder attribute)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._one_hot_encoder_implementations.html#hummingbird.ml.operator_converters._one_hot_encoder_implementations.OneHotEncoderString._abc_impl">(hummingbird.ml.operator_converters._one_hot_encoder_implementations.OneHotEncoderString attribute)</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters._physical_operator.html#hummingbird.ml.operator_converters._physical_operator.PhysicalOperator._abc_impl">(hummingbird.ml.operator_converters._physical_operator.PhysicalOperator attribute)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._pipeline_implementations.html#hummingbird.ml.operator_converters._pipeline_implementations.Concat._abc_impl">(hummingbird.ml.operator_converters._pipeline_implementations.Concat attribute)</a>
 </li>
@@ -586,8 +587,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hummingbird.ml.operator_converters.constants.html#hummingbird.ml.operator_converters.constants.BASE_PREDICTION">BASE_PREDICTION (in module hummingbird.ml.operator_converters.constants)</a>
 </li>
-      <li><a href="api/hummingbird.ml.operator_converters._base_operator.html#hummingbird.ml.operator_converters._base_operator.BaseOperator">BaseOperator (class in hummingbird.ml.operator_converters._base_operator)</a>
-</li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported.BATCH_SIZE">BATCH_SIZE (in module hummingbird.ml.supported)</a>
 </li>
   </ul></td>
@@ -772,6 +771,10 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology.Topology.declare_logical_operator">declare_logical_operator() (hummingbird.ml._topology.Topology method)</a>
+</li>
+      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology.Topology.declare_logical_variable">declare_logical_variable() (hummingbird.ml._topology.Topology method)</a>
+</li>
       <li><a href="api/hummingbird.ml.operator_converters._decomposition_implementations.html#hummingbird.ml.operator_converters._decomposition_implementations.Decomposition">Decomposition (class in hummingbird.ml.operator_converters._decomposition_implementations)</a>
 </li>
   </ul></td>
@@ -1027,13 +1030,6 @@
 </li>
       </ul></li>
       <li>
-    hummingbird.ml.operator_converters._base_operator
-
-      <ul>
-        <li><a href="api/hummingbird.ml.operator_converters._base_operator.html#module-hummingbird.ml.operator_converters._base_operator">module</a>
-</li>
-      </ul></li>
-      <li>
     hummingbird.ml.operator_converters._decomposition_implementations
 
       <ul>
@@ -1101,6 +1097,13 @@
 
       <ul>
         <li><a href="api/hummingbird.ml.operator_converters._one_hot_encoder_implementations.html#module-hummingbird.ml.operator_converters._one_hot_encoder_implementations">module</a>
+</li>
+      </ul></li>
+      <li>
+    hummingbird.ml.operator_converters._physical_operator
+
+      <ul>
+        <li><a href="api/hummingbird.ml.operator_converters._physical_operator.html#module-hummingbird.ml.operator_converters._physical_operator">module</a>
 </li>
       </ul></li>
       <li>
@@ -1407,10 +1410,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hummingbird.ml.operator_converters.constants.html#hummingbird.ml.operator_converters.constants.IFOREST_THRESHOLD">IFOREST_THRESHOLD (in module hummingbird.ml.operator_converters.constants)</a>
 </li>
-      <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported.INPUT_NAMES">INPUT_NAMES (in module hummingbird.ml.supported)</a>
+      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology.Topology.input_container">input_container() (hummingbird.ml._topology.Topology property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported.INPUT_NAMES">INPUT_NAMES (in module hummingbird.ml.supported)</a>
+</li>
       <li><a href="api/hummingbird.ml._utils.html#hummingbird.ml._utils.is_pandas_dataframe">is_pandas_dataframe() (in module hummingbird.ml._utils)</a>
 </li>
       <li><a href="api/hummingbird.ml._utils.html#hummingbird.ml._utils.is_spark_dataframe">is_spark_dataframe() (in module hummingbird.ml._utils)</a>
@@ -1521,8 +1526,6 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._array_feature_extractor_implementations.html#module-hummingbird.ml.operator_converters._array_feature_extractor_implementations">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a>
 </li>
-        <li><a href="api/hummingbird.ml.operator_converters._base_operator.html#module-hummingbird.ml.operator_converters._base_operator">hummingbird.ml.operator_converters._base_operator</a>
-</li>
         <li><a href="api/hummingbird.ml.operator_converters._decomposition_implementations.html#module-hummingbird.ml.operator_converters._decomposition_implementations">hummingbird.ml.operator_converters._decomposition_implementations</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._discretizer_implementations.html#module-hummingbird.ml.operator_converters._discretizer_implementations">hummingbird.ml.operator_converters._discretizer_implementations</a>
@@ -1542,6 +1545,8 @@
         <li><a href="api/hummingbird.ml.operator_converters._normalizer_implementations.html#module-hummingbird.ml.operator_converters._normalizer_implementations">hummingbird.ml.operator_converters._normalizer_implementations</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._one_hot_encoder_implementations.html#module-hummingbird.ml.operator_converters._one_hot_encoder_implementations">hummingbird.ml.operator_converters._one_hot_encoder_implementations</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters._physical_operator.html#module-hummingbird.ml.operator_converters._physical_operator">hummingbird.ml.operator_converters._physical_operator</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._pipeline_implementations.html#module-hummingbird.ml.operator_converters._pipeline_implementations">hummingbird.ml.operator_converters._pipeline_implementations</a>
 </li>
@@ -1714,10 +1719,14 @@
 </li>
       <li><a href="api/hummingbird.ml.operator_converters._tree_implementations.html#hummingbird.ml.operator_converters._tree_implementations.PerfectTreeTraversalTreeImpl">PerfectTreeTraversalTreeImpl (class in hummingbird.ml.operator_converters._tree_implementations)</a>
 </li>
+      <li><a href="api/hummingbird.ml.operator_converters._physical_operator.html#hummingbird.ml.operator_converters._physical_operator.PhysicalOperator">PhysicalOperator (class in hummingbird.ml.operator_converters._physical_operator)</a>
+</li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.poly_features.html#hummingbird.ml.operator_converters.sklearn.poly_features.PolynomialFeatures">PolynomialFeatures (class in hummingbird.ml.operator_converters.sklearn.poly_features)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.constants.html#hummingbird.ml.operator_converters.constants.POST_TRANSFORM">POST_TRANSFORM (in module hummingbird.ml.operator_converters.constants)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hummingbird.ml.containers._sklearn_api_containers.html#hummingbird.ml.containers._sklearn_api_containers.SklearnContainerRegression.predict">predict() (hummingbird.ml.containers._sklearn_api_containers.SklearnContainerRegression method)</a>
 
       <ul>
@@ -1730,8 +1739,6 @@
         <li><a href="api/hummingbird.ml.containers.sklearn.pytorch_containers.html#hummingbird.ml.containers.sklearn.pytorch_containers.TorchScriptSklearnContainerRegression.predict">(hummingbird.ml.containers.sklearn.pytorch_containers.TorchScriptSklearnContainerRegression method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hummingbird.ml.containers._sklearn_api_containers.html#hummingbird.ml.containers._sklearn_api_containers.SklearnContainerClassification.predict_proba">predict_proba() (hummingbird.ml.containers._sklearn_api_containers.SklearnContainerClassification method)</a>
 
       <ul>
@@ -1844,6 +1851,10 @@
 </li>
       <li><a href="api/hummingbird.ml.containers.sklearn.pytorch_containers.html#hummingbird.ml.containers.sklearn.pytorch_containers.PyTorchSklearnContainer.to">to() (hummingbird.ml.containers.sklearn.pytorch_containers.PyTorchSklearnContainer method)</a>
 </li>
+      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology.Topology.topological_operator_iterator">topological_operator_iterator() (hummingbird.ml._topology.Topology method)</a>
+</li>
+      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology.Topology">Topology (class in hummingbird.ml._topology)</a>
+</li>
       <li><a href="api/hummingbird.ml._utils.html#hummingbird.ml._utils.torch_installed">torch_installed() (in module hummingbird.ml._utils)</a>
 </li>
       <li><a href="api/hummingbird.ml.containers.sklearn.pytorch_containers.html#hummingbird.ml.containers.sklearn.pytorch_containers.TorchScriptSklearnContainerAnomalyDetection">TorchScriptSklearnContainerAnomalyDetection (class in hummingbird.ml.containers.sklearn.pytorch_containers)</a>
@@ -1872,10 +1883,10 @@
 </li>
       <li><a href="api/hummingbird.ml.operator_converters._tree_implementations.html#hummingbird.ml.operator_converters._tree_implementations.TreeTraversalDecisionTreeImpl">TreeTraversalDecisionTreeImpl (class in hummingbird.ml.operator_converters._tree_implementations)</a>
 </li>
-      <li><a href="api/hummingbird.ml.operator_converters._tree_implementations.html#hummingbird.ml.operator_converters._tree_implementations.TreeTraversalGBDTImpl">TreeTraversalGBDTImpl (class in hummingbird.ml.operator_converters._tree_implementations)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hummingbird.ml.operator_converters._tree_implementations.html#hummingbird.ml.operator_converters._tree_implementations.TreeTraversalGBDTImpl">TreeTraversalGBDTImpl (class in hummingbird.ml.operator_converters._tree_implementations)</a>
+</li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.iforest.html#hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl">TreeTraversalIsolationForestImpl (class in hummingbird.ml.operator_converters.sklearn.iforest)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters._tree_implementations.html#hummingbird.ml.operator_converters._tree_implementations.TreeTraversalTreeImpl">TreeTraversalTreeImpl (class in hummingbird.ml.operator_converters._tree_implementations)</a>
@@ -1907,6 +1918,14 @@
       <li><a href="api/hummingbird.ml.containers.sklearn.tvm_containers.html#hummingbird.ml.containers.sklearn.tvm_containers.TVMSklearnContainerTransformer">TVMSklearnContainerTransformer (class in hummingbird.ml.containers.sklearn.tvm_containers)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.constants.html#hummingbird.ml.operator_converters.constants.TWEEDIE">TWEEDIE (in module hummingbird.ml.operator_converters.constants)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology.Topology.variables">variables() (hummingbird.ml._topology.Topology property)</a>
 </li>
   </ul></td>
 </tr></table>

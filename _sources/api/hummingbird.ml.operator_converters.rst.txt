@@ -13,7 +13,6 @@ hummingbird.ml.operator\_converters
    :maxdepth: 1
 
    hummingbird.ml.operator_converters._array_feature_extractor_implementations
-   hummingbird.ml.operator_converters._base_operator
    hummingbird.ml.operator_converters._decomposition_implementations
    hummingbird.ml.operator_converters._discretizer_implementations
    hummingbird.ml.operator_converters._gbdt_commons
@@ -24,6 +23,7 @@ hummingbird.ml.operator\_converters
    hummingbird.ml.operator_converters._nb_implementations
    hummingbird.ml.operator_converters._normalizer_implementations
    hummingbird.ml.operator_converters._one_hot_encoder_implementations
+   hummingbird.ml.operator_converters._physical_operator
    hummingbird.ml.operator_converters._pipeline_implementations
    hummingbird.ml.operator_converters._scaler_implementations
    hummingbird.ml.operator_converters._tree_commons
