@@ -29,6 +29,8 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
             for model_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor, LinearRegression]:
                 model = MultiOutputRegressor(model_class())
                 X, y = datasets.make_regression(n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021)
+                X = X.astype('float32')
+                y = y.astype('float32')
                 model.fit(X, y)
 
                 torch_model = hummingbird.ml.convert(model, "torch")
@@ -43,6 +45,8 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
                 random.shuffle(order)
                 model = RegressorChain(model_class(), order=order)
                 X, y = datasets.make_regression(n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021)
+                X = X.astype('float32')
+                y = y.astype('float32')
                 model.fit(X, y)
 
                 torch_model = hummingbird.ml.convert(model, "torch")
