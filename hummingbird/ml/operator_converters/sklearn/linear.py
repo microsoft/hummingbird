@@ -28,8 +28,9 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    supported_loss = {"log", "modified_huber", "squared_hinge"}
+    assert operator is not None, "Cannot convert None operator"
 
+    supported_loss = {"log", "modified_huber", "squared_hinge"}
     classes = [0] if not hasattr(operator.raw_operator, "classes_") else operator.raw_operator.classes_
 
     if not all(["int" in str(type(x)) for x in classes]):
@@ -57,7 +58,7 @@ def convert_sklearn_linear_model(operator, device, extra_config):
             supported_loss, loss
         )
 
-    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class, loss=loss)
+    return LinearModel(operator, coefficients, intercepts, device, classes=classes, multi_class=multi_class, loss=loss)
 
 
 def convert_sklearn_linear_regression_model(operator, device, extra_config):
@@ -72,13 +73,14 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
 
     coefficients = operator.raw_operator.coef_.transpose().astype("float32")
     if len(coefficients.shape) == 1:
         coefficients = coefficients.reshape(-1, 1)
     intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
 
-    return LinearModel(coefficients, intercepts, device, is_linear_regression=True)
+    return LinearModel(operator, coefficients, intercepts, device, is_linear_regression=True)
 
 
 register_converter("SklearnLinearRegression", convert_sklearn_linear_regression_model)

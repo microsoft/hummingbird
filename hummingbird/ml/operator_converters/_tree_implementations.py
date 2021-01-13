@@ -13,7 +13,7 @@ import numpy as np
 import torch
 
 from . import constants
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
 class TreeImpl(Enum):
@@ -26,13 +26,13 @@ class TreeImpl(Enum):
     perf_tree_trav = 3
 
 
-class AbstracTreeImpl(BaseOperator):
+class AbstracTreeImpl(PhysicalOperator):
     """
     Abstract class definig the basic structure for tree-base models.
     """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, logical_operator, **kwargs):
+        super().__init__(logical_operator, **kwargs)
 
     @abstractmethod
     def aggregation(self, x):
@@ -53,15 +53,16 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
     Abstract class definig the basic structure for tree-base models implemented in PyTorch.
     """
 
-    def __init__(self, tree_parameters, n_features, classes, n_classes, **kwargs):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes, n_classes, missing_val, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
+            missing_val: The value to be treated as the missing value
         """
-        super(AbstractPyTorchTreeImpl, self).__init__(**kwargs)
+        super(AbstractPyTorchTreeImpl, self).__init__(logical_operator, **kwargs)
 
         # Set up the variables for the subclasses.
         # Each subclass will trigger different behaviours by properly setting these.
@@ -83,23 +84,32 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
                 self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
                 self.perform_class_select = True
 
+        self.missing_val = missing_val
+        if self.missing_val in [None, np.nan]:
+            self.missing_val_op = torch.isnan
+        else:
+            def missing_val_op(x):
+                return x == self.missing_val
+            self.missing_val_op = missing_val_op
+
 
 class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     """
     Class implementing the GEMM strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, n_features, classes, n_classes=None, extra_config={}, **kwargs):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes, n_classes=None, missing_val=None, extra_config={}, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
+            missing_val: The value to be treated as the missing value
         """
         # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
-        n_classes = n_classes if n_classes is not None else tree_parameters[0][0][2].shape[0]
-        super(GEMMTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
+        n_classes = n_classes if n_classes is not None else tree_parameters[0][0][3].shape[0]
+        super(GEMMTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, missing_val, **kwargs)
 
         # Initialize the actual model.
         hidden_one_size = 0
@@ -108,22 +118,24 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         for weight, bias in tree_parameters:
             hidden_one_size = max(hidden_one_size, weight[0].shape[0])
-            hidden_two_size = max(hidden_two_size, weight[1].shape[0])
+            hidden_two_size = max(hidden_two_size, weight[2].shape[0])
 
         n_trees = len(tree_parameters)
-        weight_1 = np.zeros((n_trees, hidden_one_size, n_features))
+        weight_1 = np.zeros((n_trees, hidden_one_size))
         bias_1 = np.zeros((n_trees, hidden_one_size))
+        missing_bias_1 = np.zeros((n_trees, hidden_one_size))
         weight_2 = np.zeros((n_trees, hidden_two_size, hidden_one_size))
         bias_2 = np.zeros((n_trees, hidden_two_size))
         weight_3 = np.zeros((n_trees, hidden_three_size, hidden_two_size))
 
         for i, (weight, bias) in enumerate(tree_parameters):
             if len(weight[0]) > 0:
-                weight_1[i, 0 : weight[0].shape[0], 0 : weight[0].shape[1]] = weight[0]
+                weight_1[i, 0 : weight[0].shape[0]] = np.argmax(weight[0], axis=1)
                 bias_1[i, 0 : bias[0].shape[0]] = bias[0]
-                weight_2[i, 0 : weight[1].shape[0], 0 : weight[1].shape[1]] = weight[1]
-                bias_2[i, 0 : bias[1].shape[0]] = bias[1]
-                weight_3[i, 0 : weight[2].shape[0], 0 : weight[2].shape[1]] = weight[2]
+                missing_bias_1[i, 0 : bias[1].shape[0]] = bias[1]
+                weight_2[i, 0 : weight[2].shape[0], 0 : weight[2].shape[1]] = weight[2]
+                bias_2[i, 0 : bias[2].shape[0]] = bias[2]
+                weight_3[i, 0 : weight[3].shape[0], 0 : weight[3].shape[1]] = weight[3]
 
         self.n_trees = n_trees
         self.n_features = n_features
@@ -131,13 +143,19 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         self.hidden_two_size = hidden_two_size
         self.hidden_three_size = hidden_three_size
 
-        self.weight_1 = torch.nn.Parameter(torch.from_numpy(weight_1.reshape(-1, self.n_features).astype("float32")))
-        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype("float32")))
+        self.weight_1 = torch.nn.Parameter(torch.from_numpy(weight_1.reshape(-1).astype("int64")), requires_grad=False)
+        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(1, -1).astype("float32")), requires_grad=False)
 
-        self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")))
-        self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")))
+        # By default when we compare nan to any value the output will be false. Thus we need to explicitly
+        # account for missing values only when missings are different to lefts (i.e., False condition)
+        if np.sum(missing_bias_1) != 0:
+            self.missing_bias_1 = torch.nn.Parameter(torch.from_numpy(missing_bias_1.reshape(1, -1).astype("float32")), requires_grad=False)
+        else:
+            self.missing_bias_1 = None
 
-        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype("float32")))
+        self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")), requires_grad=False)
+        self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")), requires_grad=False)
+        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype("float32")), requires_grad=False)
 
         # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
         # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
@@ -148,10 +166,12 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         return x
 
     def forward(self, x):
-        x = x.t()
-        x = torch.mm(self.weight_1, x) < self.bias_1
-        x = x.view(self.n_trees, self.hidden_one_size, -1)
-        x = x.float()
+        features = torch.index_select(x, 1, self.weight_1)
+        if self.missing_bias_1 is not None:
+            x = torch.where(self.missing_val_op(features), self.missing_bias_1 + torch.zeros_like(features), (features >= self.bias_1).float())
+        else:
+            x = (features >= self.bias_1).float()
+        x = x.view(-1, self.n_trees * self.hidden_one_size).t().view(self.n_trees, self.hidden_one_size, -1)
 
         x = torch.matmul(self.weight_2, x)
 
@@ -187,7 +207,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         indexes = indexes.expand(batch_size, self.num_trees)
         return indexes.reshape(-1)
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, extra_config={}, **kwargs):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes, n_classes=None, missing_val=None, extra_config={}, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -195,11 +215,12 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
             n_classes: The total number of used classes
+            missing_val: The value to be treated as the missing value
             extra_config: Extra configuration used to properly implement the source tree
         """
         # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
         n_classes = n_classes if n_classes is not None else tree_parameters[0][6].shape[1]
-        super(TreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
+        super(TreeTraversalTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, missing_val, **kwargs)
 
         # Initialize the actual model.
         self.n_features = n_features
@@ -214,15 +235,27 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         thresholds = np.zeros((self.num_trees, self.num_nodes), dtype=np.float32)
         values = np.zeros((self.num_trees, self.num_nodes, self.n_classes), dtype=np.float32)
 
+        missings = None
+        if len(tree_parameters[0]) == 8 and tree_parameters[0][7] is not None:
+            missings = np.zeros((self.num_trees, self.num_nodes), dtype=np.int64)
+
         for i in range(self.num_trees):
             lefts[i][: len(tree_parameters[i][0])] = tree_parameters[i][2]
             rights[i][: len(tree_parameters[i][0])] = tree_parameters[i][3]
             features[i][: len(tree_parameters[i][0])] = tree_parameters[i][4]
             thresholds[i][: len(tree_parameters[i][0])] = tree_parameters[i][5]
             values[i][: len(tree_parameters[i][0])][:] = tree_parameters[i][6]
+            if missings is not None:
+                missings[i][: len(tree_parameters[i][0])] = tree_parameters[i][7]
 
         self.lefts = torch.nn.Parameter(torch.from_numpy(lefts).view(-1), requires_grad=False)
         self.rights = torch.nn.Parameter(torch.from_numpy(rights).view(-1), requires_grad=False)
+
+        # By default when we compare nan to any value the output will be false. Thus we need to explicitly
+        # account for missing values when missings are different to lefts (i.e., false condition)
+        self.missings = None
+        if missings is not None and not np.allclose(lefts, missings):
+            self.missings = torch.nn.Parameter(torch.from_numpy(missings).view(-1), requires_grad=False)
 
         self.features = torch.nn.Parameter(torch.from_numpy(features).view(-1), requires_grad=False)
         self.thresholds = torch.nn.Parameter(torch.from_numpy(thresholds).view(-1))
@@ -251,7 +284,12 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             lefts = torch.index_select(self.lefts, 0, indexes).view(-1, self.num_trees)
             rights = torch.index_select(self.rights, 0, indexes).view(-1, self.num_trees)
 
+            if self.missings is not None:
+                missings = torch.index_select(self.missings, 0, indexes).view(-1, self.num_trees)
+
             indexes = torch.where(torch.ge(feature_values, thresholds), rights, lefts).long()
+            if self.missings is not None:
+                indexes = torch.where(self.missing_val_op(feature_values), missings, indexes)
             indexes = indexes + self.nodes_offset
             indexes = indexes.view(-1)
 
@@ -277,18 +315,19 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for tree-base models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes, n_classes=None, extra_config={}, **kwargs):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes, n_classes=None, missing_val=None, extra_config={}, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            missing_val: The value to be treated as the missing value
             n_classes: The total number of used classes
         """
         # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
         n_classes = n_classes if n_classes is not None else tree_parameters[0][6].shape[1]
-        super(PerfectTreeTraversalTreeImpl, self).__init__(tree_parameters, n_features, classes, n_classes, **kwargs)
+        super(PerfectTreeTraversalTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, missing_val, **kwargs)
 
         # Initialize the actual model.
         self.max_tree_depth = max_depth
@@ -297,40 +336,53 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         node_maps = [tp[0] for tp in tree_parameters]
 
-        weight_0 = np.zeros((self.num_trees, 2 ** max_depth - 1))
-        bias_0 = np.zeros((self.num_trees, 2 ** max_depth - 1))
-        weight_1 = np.zeros((self.num_trees, 2 ** max_depth, self.n_classes))
+        feature_ids = np.zeros((self.num_trees, 2 ** max_depth - 1))
+        threshold_vals = np.zeros((self.num_trees, 2 ** max_depth - 1))
+        leaf_vals = np.zeros((self.num_trees, 2 ** max_depth, self.n_classes))
+        missings = np.zeros((self.num_trees, 2 ** max_depth - 1), dtype=np.int64)
 
+        # By default when we compare nan to any value the output will be false. Thus, in `_populate_structure_tensors` we check whether there are
+        # non-trivial missings that are different to lefts (i.e., false condition) and set the `self.has_non_trivial_missing_vals` to True.
+        self.has_non_trivial_missing_vals = False
         for i, node_map in enumerate(node_maps):
-            self._get_weights_and_biases(node_map, max_depth, weight_0[i], weight_1[i], bias_0[i])
+            self._populate_structure_tensors(node_map, max_depth, feature_ids[i], leaf_vals[i], threshold_vals[i], missings[i])
 
         node_by_levels = [set() for _ in range(max_depth)]
         self._traverse_by_level(node_by_levels, 0, -1, max_depth)
 
-        self.root_nodes = torch.nn.Parameter(torch.from_numpy(weight_0[:, 0].flatten().astype("int64")), requires_grad=False)
-        self.root_biases = torch.nn.Parameter(-1 * torch.from_numpy(bias_0[:, 0].astype("float32")), requires_grad=False)
+        self.root_nodes = torch.nn.Parameter(torch.from_numpy(feature_ids[:, 0].flatten().astype("int64")), requires_grad=False)
+        self.root_biases = torch.nn.Parameter(-1 * torch.from_numpy(threshold_vals[:, 0].astype("float32")), requires_grad=False)
+        self.root_missing_node_ids = torch.nn.Parameter(torch.from_numpy(missings[:, 0].astype("int64")), requires_grad=False)
 
         tree_indices = np.array([i for i in range(0, 2 * self.num_trees, 2)]).astype("int64")
         self.tree_indices = torch.nn.Parameter(torch.from_numpy(tree_indices), requires_grad=False)
 
-        self.nodes = []
-        self.biases = []
+        self.feature_ids = []
+        self.threshold_vals = []
+        self.missing_node_ids = []
         for i in range(1, max_depth):
-            nodes = torch.nn.Parameter(
-                torch.from_numpy(weight_0[:, list(sorted(node_by_levels[i]))].flatten().astype("int64")), requires_grad=False
+            features = torch.nn.Parameter(
+                torch.from_numpy(feature_ids[:, list(sorted(node_by_levels[i]))].flatten().astype("int64")), requires_grad=False
             )
-            biases = torch.nn.Parameter(
-                torch.from_numpy(-1 * bias_0[:, list(sorted(node_by_levels[i]))].flatten().astype("float32")),
+            thresholds = torch.nn.Parameter(
+                torch.from_numpy(-1 * threshold_vals[:, list(sorted(node_by_levels[i]))].flatten().astype("float32")),
                 requires_grad=False,
             )
-            self.nodes.append(nodes)
-            self.biases.append(biases)
+            missing_nodes = torch.nn.Parameter(
+                torch.from_numpy(missings[:, list(sorted(node_by_levels[i]))].flatten().astype("int64")),
+                requires_grad=False,
+            )
 
-        self.nodes = torch.nn.ParameterList(self.nodes)
-        self.biases = torch.nn.ParameterList(self.biases)
+            self.feature_ids.append(features)
+            self.threshold_vals.append(thresholds)
+            self.missing_node_ids.append(missing_nodes)
+
+        self.feature_ids = torch.nn.ParameterList(self.feature_ids)
+        self.threshold_vals = torch.nn.ParameterList(self.threshold_vals)
+        self.missing_node_ids = torch.nn.ParameterList(self.missing_node_ids)
 
         self.leaf_nodes = torch.nn.Parameter(
-            torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype("float32")), requires_grad=False
+            torch.from_numpy(leaf_vals.reshape((-1, self.n_classes)).astype("float32")), requires_grad=False
         )
 
         # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
@@ -342,15 +394,23 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         return x
 
     def forward(self, x):
-        prev_indices = (torch.ge(torch.index_select(x, 1, self.root_nodes), self.root_biases)).long()
+        root_features = torch.index_select(x, 1, self.root_nodes)
+        prev_indices = torch.ge(root_features, self.root_biases).long()
+        if self.has_non_trivial_missing_vals:
+            prev_indices = torch.where(self.missing_val_op(root_features), self.root_missing_node_ids, prev_indices)
         prev_indices = prev_indices + self.tree_indices
         prev_indices = prev_indices.view(-1)
 
         factor = 2
-        for nodes, biases in zip(self.nodes, self.biases):
-            gather_indices = torch.index_select(nodes, 0, prev_indices).view(-1, self.num_trees)
+        for features, thresholds, missings in zip(self.feature_ids, self.threshold_vals, self.missing_node_ids):
+            gather_indices = torch.index_select(features, 0, prev_indices).view(-1, self.num_trees)
             features = torch.gather(x, 1, gather_indices).view(-1)
-            prev_indices = factor * prev_indices + torch.ge(features, torch.index_select(biases, 0, prev_indices)).long()
+            thresholds = torch.index_select(thresholds, 0, prev_indices)
+            node_eval_status = torch.ge(features, thresholds).long()
+            if self.has_non_trivial_missing_vals:
+                missings = torch.index_select(missings, 0, prev_indices)
+                node_eval_status = torch.where(self.missing_val_op(features), missings, node_eval_status)
+            prev_indices = factor * prev_indices + node_eval_status
 
         output = torch.index_select(self.leaf_nodes, 0, prev_indices).view(-1, self.num_trees, self.n_classes)
 
@@ -378,17 +438,24 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         node_id = self._traverse_by_level(node_by_levels, node_id, current_level, max_level)
         return node_id
 
-    def _get_weights_and_biases(self, nodes_map, tree_depth, weight_0, weight_1, bias_0):
+    def _populate_structure_tensors(self, nodes_map, tree_depth, node_ids, threshold_vals, leaf_vals, missings):
         def depth_f_traversal(node, current_depth, node_id, leaf_start_id):
-            weight_0[node_id] = node.feature
-            bias_0[node_id] = -node.threshold
+            node_ids[node_id] = node.feature
+            leaf_vals[node_id] = -node.threshold
+
+            if node.missing is None or node.left == node.missing:
+                missings[node_id] = 0
+            else:
+                missings[node_id] = 1
+                self.has_non_trivial_missing_vals = True
+
             current_depth += 1
             node_id += 1
 
             if node.left.feature == -1:
                 node_id += 2 ** (tree_depth - current_depth - 1) - 1
                 v = node.left.value
-                weight_1[leaf_start_id : leaf_start_id + 2 ** (tree_depth - current_depth - 1)] = (
+                threshold_vals[leaf_start_id : leaf_start_id + 2 ** (tree_depth - current_depth - 1)] = (
                     np.ones((2 ** (tree_depth - current_depth - 1), self.n_classes)) * v
                 )
                 leaf_start_id += 2 ** (tree_depth - current_depth - 1)
@@ -398,7 +465,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             if node.right.feature == -1:
                 node_id += 2 ** (tree_depth - current_depth - 1) - 1
                 v = node.right.value
-                weight_1[leaf_start_id : leaf_start_id + 2 ** (tree_depth - current_depth - 1)] = (
+                threshold_vals[leaf_start_id : leaf_start_id + 2 ** (tree_depth - current_depth - 1)] = (
                     np.ones((2 ** (tree_depth - current_depth - 1), self.n_classes)) * v
                 )
                 leaf_start_id += 2 ** (tree_depth - current_depth - 1)
@@ -417,14 +484,15 @@ class GEMMDecisionTreeImpl(GEMMTreeImpl):
 
     """
 
-    def __init__(self, tree_parameters, n_features, classes=None):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes=None, missing_val=None):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            missing_val: The value to be treated as the missing value
         """
-        super(GEMMDecisionTreeImpl, self).__init__(tree_parameters, n_features, classes)
+        super(GEMMDecisionTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, missing_val)
 
     def aggregation(self, x):
         output = x.sum(0).t()
@@ -437,17 +505,18 @@ class TreeTraversalDecisionTreeImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None, missing_val=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            missing_val: The value to be treated as the missing value
             extra_config: Extra configuration used to properly implement the source tree
         """
         super(TreeTraversalDecisionTreeImpl, self).__init__(
-            tree_parameters, max_depth, n_features, classes, extra_config=extra_config
+            logical_operator, tree_parameters, max_depth, n_features, classes, extra_config=extra_config
         )
 
     def aggregation(self, x):
@@ -461,15 +530,16 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None, missing_val=None):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            missing_val: The value to be treated as the missing value
         """
-        super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(tree_parameters, max_depth, n_features, classes)
+        super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(logical_operator, tree_parameters, max_depth, n_features, classes, missing_val)
 
     def aggregation(self, x):
         output = x.sum(1)
@@ -483,15 +553,16 @@ class GEMMGBDTImpl(GEMMTreeImpl):
     Class implementing the GEMM strategy (in PyTorch) for GBDT models.
     """
 
-    def __init__(self, tree_parameters, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes=None, missing_val=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            missing_val: The value to be treated as the missing value
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(GEMMGBDTImpl, self).__init__(tree_parameters, n_features, classes, 1, extra_config)
+        super(GEMMGBDTImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, 1, missing_val, extra_config)
 
         self.n_gbdt_classes = 1
         self.post_transform = lambda x: x
@@ -515,16 +586,17 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
     Class implementing the Tree Traversal strategy in PyTorch.
     """
 
-    def __init__(self, tree_parameters, max_detph, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, max_detph, n_features, classes=None, missing_val=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            missing_val: The value to be treated as the missing_val value
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(TreeTraversalGBDTImpl, self).__init__(tree_parameters, max_detph, n_features, classes, 1, extra_config)
+        super(TreeTraversalGBDTImpl, self).__init__(logical_operator, tree_parameters, max_detph, n_features, classes, 1, missing_val, extra_config)
 
         self.n_gbdt_classes = 1
         self.post_transform = lambda x: x
@@ -548,16 +620,17 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch.
     """
 
-    def __init__(self, tree_parameters, max_depth, n_features, classes=None, extra_config={}):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None, missing_val=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            missing_val: The value to be treated as the missing_val value
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(PerfectTreeTraversalGBDTImpl, self).__init__(tree_parameters, max_depth, n_features, classes, 1, extra_config)
+        super(PerfectTreeTraversalGBDTImpl, self).__init__(logical_operator, tree_parameters, max_depth, n_features, classes, 1, missing_val, extra_config)
 
         self.n_gbdt_classes = 1
         self.post_transform = lambda x: x

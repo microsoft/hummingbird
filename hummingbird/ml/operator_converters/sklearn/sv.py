@@ -13,12 +13,12 @@ import scipy
 import torch
 from onnxconverter_common.registration import register_converter
 
-from .._base_operator import BaseOperator
+from .._physical_operator import PhysicalOperator
 
 
-class SVC(BaseOperator, torch.nn.Module):
-    def __init__(self, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device):
-        super(SVC, self).__init__(classification=True)
+class SVC(PhysicalOperator, torch.nn.Module):
+    def __init__(self, operator, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device):
+        super(SVC, self).__init__(operator, classification=True)
         self.kernel = kernel
         self.degree = degree
         self.gamma = gamma
@@ -92,6 +92,8 @@ def convert_sklearn_svc_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     if operator.raw_operator.kernel in ["linear", "poly", "rbf", "sigmoid"]:
         # https://stackoverflow.com/questions/20113206/scikit-learn-svc-decision-function-and-predict
         kernel = operator.raw_operator.kernel
@@ -109,7 +111,7 @@ def convert_sklearn_svc_model(operator, device, extra_config):
             # TODO: which versions is this case for, and how to test?
             gamma = operator.raw_operator.gamma
 
-        return SVC(kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
+        return SVC(operator, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
     else:
         raise RuntimeError("Unsupported kernel for SVC: {}".format(operator.raw_operator.kernel))
 

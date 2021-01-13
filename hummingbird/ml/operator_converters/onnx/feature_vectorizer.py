@@ -26,8 +26,9 @@ def convert_onnx_feature_vectorizer(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
 
-    return Concat()
+    return Concat(operator)
 
 
 register_converter("ONNXMLFeatureVectorizer", convert_onnx_feature_vectorizer)

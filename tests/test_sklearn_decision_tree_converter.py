@@ -33,9 +33,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
                     model, "torch", extra_config={constants.TREE_IMPLEMENTATION: extra_config_param}
                 )
                 self.assertIsNotNone(torch_model)
-                self.assertTrue(
-                    str(type(list(torch_model.model._operator_map.values())[0])) == dt_implementation_map[extra_config_param]
-                )
+                self.assertTrue(str(type(list(torch_model.model._operators)[0])) == dt_implementation_map[extra_config_param])
 
     # Used for classification tests
     def _run_tree_classification_converter(

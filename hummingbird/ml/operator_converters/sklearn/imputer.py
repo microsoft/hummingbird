@@ -7,19 +7,20 @@
 """
 Converter for scikit-learn Imputers: SimpleImputer and MissingIndicator
 """
-from .._base_operator import BaseOperator
+from .._physical_operator import PhysicalOperator
 import numpy as np
 from onnxconverter_common.registration import register_converter
 import torch
 
 
-class SimpleImputer(BaseOperator, torch.nn.Module):
+class SimpleImputer(PhysicalOperator, torch.nn.Module):
     """
     Class implementing SimpleImputer operators in PyTorch.
     """
 
-    def __init__(self, sklearn_imputer, device):
-        super(SimpleImputer, self).__init__()
+    def __init__(self, logical_operator, device):
+        super(SimpleImputer, self).__init__(logical_operator)
+        sklearn_imputer = logical_operator.raw_operator
         stats = [float(stat) for stat in sklearn_imputer.statistics_ if isinstance(stat, float)]
         b_mask = np.logical_not(np.isnan(stats))
         i_mask = [i for i in range(len(b_mask)) if b_mask[i]]
@@ -58,16 +59,19 @@ def convert_sklearn_simple_imputer(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    return SimpleImputer(operator.raw_operator, device)
+    assert operator is not None, "Cannot convert None operator"
+
+    return SimpleImputer(operator, device)
 
 
-class MissingIndicator(BaseOperator, torch.nn.Module):
+class MissingIndicator(PhysicalOperator, torch.nn.Module):
     """
     Class implementing Imputer operators in MissingIndicator.
     """
 
-    def __init__(self, sklearn_missing_indicator, device):
-        super(MissingIndicator, self).__init__()
+    def __init__(self, logical_operator, device):
+        super(MissingIndicator, self).__init__(logical_operator)
+        sklearn_missing_indicator = logical_operator.raw_operator
         self.transformer = True
         self.missing_values = torch.nn.Parameter(
             torch.tensor([sklearn_missing_indicator.missing_values], dtype=torch.float32), requires_grad=False
@@ -99,7 +103,9 @@ def convert_sklearn_missing_indicator(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    return MissingIndicator(operator.raw_operator, device)
+    assert operator is not None, "Cannot convert None operator"
+
+    return MissingIndicator(operator, device)
 
 
 register_converter("SklearnImputer", convert_sklearn_simple_imputer)

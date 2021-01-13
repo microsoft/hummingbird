@@ -16,7 +16,7 @@ from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
 from ._tree_commons import TreeParameters
 
 
-def _tree_traversal(node, lefts, rights, features, thresholds, values, count):
+def _tree_traversal(node, lefts, rights, features, thresholds, values, missings, count):
     """
     Recursive function for parsing a tree and filling the input data structures.
     """
@@ -26,16 +26,23 @@ def _tree_traversal(node, lefts, rights, features, thresholds, values, count):
         values.append([-1])
         lefts.append(count + 1)
         rights.append(-1)
+        missings.append(-1)
         pos = len(rights) - 1
-        count = _tree_traversal(node["left_child"], lefts, rights, features, thresholds, values, count + 1)
+        count = _tree_traversal(node["left_child"], lefts, rights, features, thresholds, values, missings, count + 1)
         rights[pos] = count + 1
-        return _tree_traversal(node["right_child"], lefts, rights, features, thresholds, values, count + 1)
+        if node['missing_type'] == 'None':
+            # Missing values not present in training data are treated as zeros during inference.
+            missings[pos] = lefts[pos] if 0 < node["threshold"] else rights[pos]
+        else:
+            missings[pos] = lefts[pos] if node["default_left"] else rights[pos]
+        return _tree_traversal(node["right_child"], lefts, rights, features, thresholds, values, missings, count + 1)
     else:
         features.append(0)
         thresholds.append(0)
         values.append([node["leaf_value"]])
         lefts.append(-1)
         rights.append(-1)
+        missings.append(-1)
         return count
 
 
@@ -48,9 +55,10 @@ def _get_tree_parameters(tree_info):
     features = []
     thresholds = []
     values = []
-    _tree_traversal(tree_info["tree_structure"], lefts, rights, features, thresholds, values, 0)
+    missings = []
+    _tree_traversal(tree_info["tree_structure"], lefts, rights, features, thresholds, values, missings, 0)
 
-    return TreeParameters(lefts, rights, features, thresholds, values)
+    return TreeParameters(lefts, rights, features, thresholds, values, missings)
 
 
 def convert_sklearn_lgbm_classifier(operator, device, extra_config):
@@ -65,14 +73,15 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
+    assert not hasattr(operator.raw_operator, "use_missing") or operator.raw_operator.use_missing
+    assert not hasattr(operator.raw_operator, "zero_as_missing") or not operator.raw_operator.zero_as_missing
 
-    # Get tree information out of the model.
     n_features = operator.raw_operator._n_features
     tree_infos = operator.raw_operator.booster_.dump_model()["tree_info"]
     n_classes = operator.raw_operator._n_classes
 
-    return convert_gbdt_classifier_common(tree_infos, _get_tree_parameters, n_features, n_classes, extra_config=extra_config)
+    return convert_gbdt_classifier_common(operator, tree_infos, _get_tree_parameters, n_features, n_classes, missing_val=None, extra_config=extra_config)
 
 
 def convert_sklearn_lgbm_regressor(operator, device, extra_config):
@@ -87,7 +96,9 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
+    assert not hasattr(operator.raw_operator, "use_missing") or operator.raw_operator.use_missing
+    assert not hasattr(operator.raw_operator, "zero_as_missing") or not operator.raw_operator.zero_as_missing
 
     # Get tree information out of the model.
     n_features = operator.raw_operator._n_features
@@ -95,7 +106,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     if operator.raw_operator._objective == "tweedie":
         extra_config[constants.POST_TRANSFORM] = constants.TWEEDIE
 
-    return convert_gbdt_common(tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
+    return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, missing_val=None, extra_config=extra_config)
 
 
 # Register the converters.
