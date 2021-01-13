@@ -28,7 +28,7 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
         for n_targets in [2, 3, 4]:
             for model_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor, LinearRegression]:
                 model = MultiOutputRegressor(model_class())
-                X, y = datasets.make_regression(n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021)
+                X, y = datasets.make_regression(n_samples=50, n_features=10, n_informative=5, n_targets=n_targets, random_state=2020)
                 X = X.astype('float32')
                 y = y.astype('float32')
                 model.fit(X, y)
@@ -44,7 +44,7 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
                 order = [i for i in range(n_targets)]
                 random.shuffle(order)
                 model = RegressorChain(model_class(), order=order)
-                X, y = datasets.make_regression(n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021)
+                X, y = datasets.make_regression(n_samples=50, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021)
                 X = X.astype('float32')
                 y = y.astype('float32')
                 model.fit(X, y)
