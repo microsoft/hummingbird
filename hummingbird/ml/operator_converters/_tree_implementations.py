@@ -76,7 +76,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
             self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
         elif classes is None:
             self.regression = True
-            self.n_classes = 1
+            self.n_classes = 1 if n_classes is None else n_classes
         else:
             self.classification = True
             self.n_classes = len(classes) if n_classes is None else n_classes
@@ -107,6 +107,8 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
             n_classes: The total number of used classes
             missing_val: The value to be treated as the missing value
         """
+        # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
+        n_classes = n_classes if n_classes is not None else tree_parameters[0][0][3].shape[0]
         super(GEMMTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, missing_val, **kwargs)
 
         # Initialize the actual model.
@@ -216,6 +218,8 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             missing_val: The value to be treated as the missing value
             extra_config: Extra configuration used to properly implement the source tree
         """
+        # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
+        n_classes = n_classes if n_classes is not None else tree_parameters[0][6].shape[1]
         super(TreeTraversalTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, missing_val, **kwargs)
 
         # Initialize the actual model.
@@ -321,6 +325,8 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             missing_val: The value to be treated as the missing value
             n_classes: The total number of used classes
         """
+        # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
+        n_classes = n_classes if n_classes is not None else tree_parameters[0][6].shape[1]
         super(PerfectTreeTraversalTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, missing_val, **kwargs)
 
         # Initialize the actual model.

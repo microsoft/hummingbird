@@ -260,6 +260,17 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
+    # Multioutput regression tests
+    def test_multioutput_linear_regression(self):
+        for n_targets in [1, 2, 7]:
+            model = LinearRegression()
+            X, y = datasets.make_regression(n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021)
+            model.fit(X, y)
+
+            torch_model = hummingbird.ml.convert(model, "torch")
+            self.assertTrue(torch_model is not None)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5)
+
     # Test Torschscript backend.
     def test_logistic_regression_ts(self):
 

@@ -272,7 +272,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     return [nodes_map, ids, lefts, rights, features, thresholds, values, missings]
 
 
-def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, missings=None, extra_config={}):
+def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, missings=None, classes=None, extra_config={}):
     """
     This function is used to generate tree parameters for sklearn trees.
     Includes SklearnRandomForestClassifier/Regressor, and SklearnGradientBoostingClassifier.
@@ -284,6 +284,7 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
         thresholds: The thresholds used in the decision nodes
         values: The values stored in the leaf nodes
         missings: In the case of a missing value which child node to select
+        classes: The list of class labels. None if regression model
     Returns:
         An array containing the extracted parameters
     """
@@ -291,7 +292,8 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
     values = np.array(values)
     if len(values.shape) == 3:
         values = values.reshape(values.shape[0], -1)
-    if values.shape[1] > 1:
+    if values.shape[1] > 1 and classes is not None and len(classes) > 0:
+        # Triggers only for classification.
         values /= np.sum(values, axis=1, keepdims=True)
     if constants.NUM_TREES in extra_config:
         values /= extra_config[constants.NUM_TREES]
