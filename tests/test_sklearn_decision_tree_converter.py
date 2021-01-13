@@ -714,7 +714,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
             ExtraTreesClassifier, 3, "tvm", n_estimators=10, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30}
         )
 
-    # *TreeRegressor multioutput regression
+    # TreeRegressor multioutput regression
     def test_tree_regressors_multioutput_regression(self):
         for tree_method in ['gemm', 'tree_trav', 'perf_tree_trav']:
             for n_targets in [1, 2, 7]:

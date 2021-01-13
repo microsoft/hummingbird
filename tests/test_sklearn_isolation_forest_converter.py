@@ -7,7 +7,6 @@ import warnings
 import numpy as np
 import torch
 from sklearn.ensemble import IsolationForest
-from sklearn import datasets
 
 import hummingbird.ml
 from hummingbird.ml import constants
