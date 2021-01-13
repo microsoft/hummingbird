@@ -215,7 +215,7 @@
 <p>Collections of functions shared among GBDT converters.</p>
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_classifier_common">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters._gbdt_commons.</code><code class="sig-name descname">convert_gbdt_classifier_common</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">tree_infos</span></em>, <em class="sig-param"><span class="n">get_tree_parameters</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">n_classes</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L18"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_classifier_common" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters._gbdt_commons.</code><code class="sig-name descname">convert_gbdt_classifier_common</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">tree_infos</span></em>, <em class="sig-param"><span class="n">get_tree_parameters</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">n_classes</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">missing_val</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/108c2a6/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L18"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_classifier_common" title="Permalink to this definition">¶</a></dt>
 <dd><p>Common converter for GBDT classifiers.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>tree_infos: The information representaing a tree (ensemble)
@@ -223,6 +223,7 @@ get_tree_parameters: A function specifying how to parse the tree_infos into para
 n_features: The number of features input to the model
 n_classes: How many classes are expected. 1 for regression tasks
 classes: The classes used for classification. None if implementing a regression model
+missing_val: The value to be treated as the missing value
 extra_config: Extra configuration used to properly implement the source tree</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tree implementation in PyTorch</p>
@@ -232,13 +233,14 @@ extra_config: Extra configuration used to properly implement the source tree</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_common">
-<code class="sig-prename descclassname">hummingbird.ml.operator_converters._gbdt_commons.</code><code class="sig-name descname">convert_gbdt_common</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">tree_infos</span></em>, <em class="sig-param"><span class="n">get_tree_parameters</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/94b584b/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L54"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_common" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">hummingbird.ml.operator_converters._gbdt_commons.</code><code class="sig-name descname">convert_gbdt_common</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">operator</span></em>, <em class="sig-param"><span class="n">tree_infos</span></em>, <em class="sig-param"><span class="n">get_tree_parameters</span></em>, <em class="sig-param"><span class="n">n_features</span></em>, <em class="sig-param"><span class="n">classes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">missing_val</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_config</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/108c2a6/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L53"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_common" title="Permalink to this definition">¶</a></dt>
 <dd><p>Common converter for GBDT models.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>tree_infos: The information representaing a tree (ensemble)
 get_tree_parameters: A function specifying how to parse the tree_infos into parameters
 n_features: The number of features input to the model
 classes: The classes used for classification. None if implementing a regression model
+missing_val: The value to be treated as the missing value
 extra_config: Extra configuration used to properly implement the source tree</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tree implementation in PyTorch</p>
