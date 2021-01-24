@@ -18,6 +18,7 @@ from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 
 from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.multioutput import MultiOutputRegressor, RegressorChain
 from sklearn.preprocessing import OneHotEncoder
 
 from .containers import CommonSklearnModelContainer, CommonONNXModelContainer, CommonSparkMLModelContainer
@@ -320,6 +321,54 @@ def _parse_sklearn_feature_union(topology, model, inputs):
     return concat_operator.outputs
 
 
+def _parse_sklearn_multi_output_regressor(topology, model, inputs):
+    """
+    :param topology: Topology object
+    :param model: A *scikit-learn* *MultiOutputRegressor* object
+    :param inputs: A list of Variable objects
+    :return: Output produced by MultiOutputRegressor
+    """
+    outputs = []
+    for estimator in model.estimators_:
+        outputs.append(_parse_sklearn_api(topology, estimator, inputs)[0])
+
+    conc_op = topology.declare_logical_operator("SklearnConcat")
+    conc_op.inputs = outputs
+    conc_names = topology.declare_logical_variable("concat_outputs")
+    conc_op.outputs.append(conc_names)
+    return conc_op.outputs
+
+
+def _parse_sklearn_regressor_chain(topology, model, inputs):
+    """
+    :param topology: Topology object
+    :param model: A *scikit-learn* *RegressorChain* object
+    :param inputs: A list of Variable objects
+    :return: Output produced by RegressorChain
+    """
+    outputs = []
+    for estimator in model.estimators_:
+        outputs.append(_parse_sklearn_api(topology, estimator, inputs)[0])
+        conc_op = topology.declare_logical_operator("SklearnConcat")
+        conc_op.inputs.extend(inputs)
+        conc_op.inputs.append(outputs[-1])
+        conc_names = topology.declare_logical_variable("concat_inputs")
+        conc_op.outputs.append(conc_names)
+        inputs = conc_op.outputs
+
+    conc_op = topology.declare_logical_operator("SklearnConcat")
+    if model.order is not None:
+        reorderd_outputs = [None for _ in outputs]
+        for i, pos in enumerate(model.order):
+            reorderd_outputs[pos] = outputs[i]
+        outputs = reorderd_outputs
+
+    conc_op.inputs = outputs
+    conc_names = topology.declare_logical_variable("concat_outputs")
+    conc_op.outputs.append(conc_names)
+    return conc_op.outputs
+
+
 def _parse_sklearn_column_transformer(topology, model, inputs):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
@@ -408,8 +457,10 @@ def _build_sklearn_api_parsers_map():
     # Parsers for edge cases are going here.
     map_parser = {
         ColumnTransformer: _parse_sklearn_column_transformer,
+        MultiOutputRegressor: _parse_sklearn_multi_output_regressor,
         pipeline.Pipeline: _parse_sklearn_pipeline,
         pipeline.FeatureUnion: _parse_sklearn_feature_union,
+        RegressorChain: _parse_sklearn_regressor_chain,
         # More parsers will go here
     }
 

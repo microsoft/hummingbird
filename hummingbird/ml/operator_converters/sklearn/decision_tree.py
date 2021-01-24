@@ -42,11 +42,14 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
     if not all(isinstance(c, int) for c in classes):
         raise RuntimeError("Random Forest Classifier translation only supports integer class labels")
 
+    def get_parameters_for_tree_trav(lefts, rights, features, thresholds, values, missings=None, extra_config={}):
+        return get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, missings, classes, extra_config)
+
     return convert_decision_ensemble_tree_common(
         operator,
         tree_infos,
         get_parameters_for_sklearn_common,
-        get_parameters_for_tree_trav_sklearn,
+        get_parameters_for_tree_trav,
         n_features,
         classes,
         extra_config,
@@ -74,11 +77,14 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     # For Sklearn Trees we need to know how many trees are there for normalization.
     extra_config[constants.NUM_TREES] = len(tree_infos)
 
+    def get_parameters_for_tree_trav(lefts, rights, features, thresholds, values, missings=None, extra_config={}):
+        return get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, missings, None, extra_config)
+
     return convert_decision_ensemble_tree_common(
         operator,
         tree_infos,
         get_parameters_for_sklearn_common,
-        get_parameters_for_tree_trav_sklearn,
+        get_parameters_for_tree_trav,
         n_features,
         extra_config=extra_config,
     )

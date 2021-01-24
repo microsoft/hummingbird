@@ -16,7 +16,7 @@ from ._gbdt_commons import convert_gbdt_classifier_common, convert_gbdt_common
 from ._tree_commons import TreeParameters
 
 
-def _tree_traversal(tree_info, lefts, rights, features, thresholds, values):
+def _tree_traversal(tree_info, lefts, rights, missing, features, thresholds, values):
     """
     Recursive function for parsing a tree and filling the input data structures.
     """
@@ -28,6 +28,7 @@ def _tree_traversal(tree_info, lefts, rights, features, thresholds, values):
             values.append([float(tree_info[count].split("=")[1])])
             lefts.append(-1)
             rights.append(-1)
+            missing.append(-1)
             count += 1
         else:
             features.append(int(tree_info[count].split(":")[1].split("<")[0].replace("[f", "")))
@@ -56,6 +57,8 @@ def _tree_traversal(tree_info, lefts, rights, features, thresholds, values):
                 r_correct_id += 1
             rights.append(r_correct_id)
 
+            missing_wrong_id = tree_info[count].split(",")[2].replace("missing=", "")
+            missing.append(l_correct_id if l_wrong_id == missing_wrong_id else r_correct_id)
             count += 1
 
 
@@ -65,14 +68,15 @@ def _get_tree_parameters(tree_info):
     """
     lefts = []
     rights = []
+    missing = []
     features = []
     thresholds = []
     values = []
     _tree_traversal(
-        tree_info.replace("[f", "").replace("[", "").replace("]", "").split(), lefts, rights, features, thresholds, values
+        tree_info.replace("[f", "").replace("[", "").replace("]", "").split(), lefts, rights, missing, features, thresholds, values
     )
 
-    return TreeParameters(lefts, rights, features, thresholds, values)
+    return TreeParameters(lefts, rights, features, thresholds, values, missing)
 
 
 def convert_sklearn_xgb_classifier(operator, device, extra_config):
@@ -97,10 +101,9 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
         )
     tree_infos = operator.raw_operator.get_booster().get_dump()
     n_classes = operator.raw_operator.n_classes_
+    missing_val = operator.raw_operator.missing
 
-    return convert_gbdt_classifier_common(
-        operator, tree_infos, _get_tree_parameters, n_features, n_classes, extra_config=extra_config
-    )
+    return convert_gbdt_classifier_common(operator, tree_infos, _get_tree_parameters, n_features, n_classes, missing_val=missing_val, extra_config=extra_config)
 
 
 def convert_sklearn_xgb_regressor(operator, device, extra_config):
@@ -132,8 +135,9 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
         base_prediction = [base_prediction]
 
     extra_config[constants.BASE_PREDICTION] = base_prediction
+    missing_val = operator.raw_operator.missing
 
-    return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
+    return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, missing_val=missing_val, extra_config=extra_config)
 
 
 # Register the converters.

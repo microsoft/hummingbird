@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 from sklearn.ensemble import ExtraTreesClassifier, ExtraTreesRegressor, RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn import datasets
 
 import hummingbird.ml
 from hummingbird.ml.exceptions import MissingConverter
@@ -712,6 +713,19 @@ class TestSklearnTreeConverter(unittest.TestCase):
         self._run_tree_classification_converter(
             ExtraTreesClassifier, 3, "tvm", n_estimators=10, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30}
         )
+
+    # TreeRegressor multioutput regression
+    def test_tree_regressors_multioutput_regression(self):
+        for tree_method in ['gemm', 'tree_trav', 'perf_tree_trav']:
+            for n_targets in [1, 2, 7]:
+                for tree_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor]:
+                    model = tree_class()
+                    X, y = datasets.make_regression(n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021)
+                    model.fit(X, y)
+
+                    torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_IMPLEMENTATION: tree_method})
+                    self.assertTrue(torch_model is not None)
+                    np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5)
 
 
 if __name__ == "__main__":
