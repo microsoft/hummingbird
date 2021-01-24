@@ -12,11 +12,11 @@ Base classes for LabelEncoders
 import torch
 import numpy as np
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 from . import constants
 
 
-class StringLabelEncoder(BaseOperator, torch.nn.Module):
+class StringLabelEncoder(PhysicalOperator, torch.nn.Module):
     """
     LabelEncoder over string data types.
     When the ONNX backend is selected, this operator only works for PyTorch => 1.8.0.
@@ -52,7 +52,7 @@ class StringLabelEncoder(BaseOperator, torch.nn.Module):
         return result
 
 
-class NumericLabelEncoder(BaseOperator, torch.nn.Module):
+class NumericLabelEncoder(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, classes, device):
         super(NumericLabelEncoder, self).__init__(logical_operator, transformer=True)
         self.regression = False

@@ -10,10 +10,10 @@ Base classes for normalizer implementations.
 
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class Normalizer(BaseOperator, torch.nn.Module):
+class Normalizer(PhysicalOperator, torch.nn.Module):
     """
     Class implementing Normalizer operators in PyTorch. Supported normalizers are L1, L2 and Max.
     """

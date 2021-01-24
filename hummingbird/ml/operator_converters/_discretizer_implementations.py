@@ -10,11 +10,11 @@ Base classes for sklearn discretizers: Binarizer, KBinsDiscretizer
 """
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 from ._one_hot_encoder_implementations import OneHotEncoder
 
 
-class Binarizer(BaseOperator, torch.nn.Module):
+class Binarizer(PhysicalOperator, torch.nn.Module):
     """
     Class implementing Binarizer operators in PyTorch.
     """
@@ -28,7 +28,7 @@ class Binarizer(BaseOperator, torch.nn.Module):
         return torch.gt(x, self.threshold).float()
 
 
-class KBinsDiscretizer(BaseOperator, torch.nn.Module):
+class KBinsDiscretizer(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, encode, bin_edges, labels, device):
         super(KBinsDiscretizer, self).__init__(logical_operator)
         self.transformer = True

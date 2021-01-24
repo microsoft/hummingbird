@@ -13,10 +13,10 @@ import numpy as np
 from onnxconverter_common.registration import register_converter
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class Concat(BaseOperator, torch.nn.Module):
+class Concat(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator):
         super(Concat, self).__init__(logical_operator, transformer=True)
 

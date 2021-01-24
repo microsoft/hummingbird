@@ -14,11 +14,11 @@ import torch
 
 from .. import constants
 from .._array_feature_extractor_implementations import ArrayFeatureExtractor
-from .._base_operator import BaseOperator
+from .._physical_operator import PhysicalOperator
 from .._pipeline_implementations import Concat
 
 
-class Multiply(BaseOperator, torch.nn.Module):
+class Multiply(PhysicalOperator, torch.nn.Module):
     """
     Module used to multiply features in a pipeline by a score.
     """
