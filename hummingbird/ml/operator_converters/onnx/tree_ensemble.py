@@ -116,7 +116,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
                         l_count += 1
             if t_values.shape[0] == 1:
                 # Model creating trees with just a single leaf node. We fix the values here.
-                n_classes = t_values.shape[1]
+                n_classes = t_values.shape[1] if len(t_values.shape) > 1 else 1
                 t_values = np.array([np.array([0.0]), t_values[0], t_values[0]])
                 t_values.reshape(3, n_classes)
             if is_decision_tree and n_classes == 2:  # We need to fix the probabilities in this case.
@@ -153,7 +153,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
                 l_count += 1
     if t_values.shape[0] == 1:
         # Model creating trees with just a single leaf node. We fix the values here.
-        n_classes = t_values.shape[1]
+        n_classes = t_values.shape[1] if len(t_values.shape) > 1 else 1
         t_values = np.array([np.array([0.0]), t_values[0], t_values[0]])
         t_values.reshape(3, n_classes)
     if is_decision_tree and n_classes == 2:  # We need to fix the probabilities in this case.
