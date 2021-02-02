@@ -210,7 +210,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
         if missings is not None:
-            missings = [1, -1, -1]
+            missings = [2, -1, -1]
         n_classes = values.shape[1] if type(values) is np.ndarray else 1
         values = np.array([np.zeros(n_classes), values[0], values[0]])
         values.reshape(3, n_classes)
@@ -328,13 +328,13 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
         if missings is not None:
-            missings = [1, -1, -1]
+            missings = [2, -1, -1]
         n_classes = values.shape[1]
         values = np.array([np.zeros(n_classes), values[0], values[0]])
         values.reshape(3, n_classes)
 
     if missings is None:
-        missings = lefts
+        missings = rights
 
     # First hidden layer has all inequalities.
     hidden_weights = []
