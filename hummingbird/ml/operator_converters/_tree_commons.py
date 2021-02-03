@@ -31,7 +31,6 @@ class Node:
             feature: The feature used to make a decision (if not leaf node, ignored otherwise)
             threshold: The threshold used in the decision (if not leaf node, ignored otherwise)
             value: The value stored in the leaf (ignored if not leaf node).
-            missing: In the case of a missingle value chosen child node id
         """
         self.id = id
         self.left = None
@@ -39,7 +38,6 @@ class Node:
         self.feature = None
         self.threshold = None
         self.value = None
-        self.missing = None
 
 
 class TreeParameters:
@@ -47,7 +45,7 @@ class TreeParameters:
     Class containing a convenient in-memory representation of a decision tree.
     """
 
-    def __init__(self, lefts, rights, features, thresholds, values, missings=None):
+    def __init__(self, lefts, rights, features, thresholds, values):
         """
         Args:
             lefts: The id of the left nodes
@@ -55,14 +53,12 @@ class TreeParameters:
             feature: The features used to make decisions
             thresholds: The thresholds used in the decisions
             values: The value stored in the leaves
-            missings: In the case of a missing value which child node to select
         """
         self.lefts = lefts
         self.rights = rights
         self.features = features
         self.thresholds = thresholds
         self.values = values
-        self.missings = missings
 
 
 def _find_max_depth(tree_parameters):
@@ -188,7 +184,7 @@ def get_parameters_for_sklearn_common(tree_infos):
     return TreeParameters(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, missings=None, extra_config={}):
+def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, extra_config={}):
     """
     Common functions used by all tree algorithms to generate the parameters according to the tree_trav strategies.
 
@@ -198,7 +194,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         features: The features used in the decision nodes
         thresholds: The thresholds used in the decision nodes
         values: The values stored in the leaf nodes
-        missings: In the case of a missing value which child node to select
+
     Returns:
         An array containing the extracted parameters
     """
@@ -209,26 +205,18 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         rights = [2, -1, -1]
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
-        if missings is not None:
-            missings = [2, -1, -1]
         n_classes = values.shape[1] if type(values) is np.ndarray else 1
         values = np.array([np.zeros(n_classes), values[0], values[0]])
         values.reshape(3, n_classes)
 
     ids = [i for i in range(len(lefts))]
-    if missings is not None:
-        nodes = list(zip(ids, lefts, rights, features, thresholds, values, missings))
-    else:
-        nodes = list(zip(ids, lefts, rights, features, thresholds, values))
+    nodes = list(zip(ids, lefts, rights, features, thresholds, values))
 
     # Refactor the tree parameters in the proper format.
     nodes_map = {0: Node(0)}
     current_node = 0
     for i, node in enumerate(nodes):
-        if missings is not None:
-            id, left, right, feature, threshold, value, missing = node
-        else:
-            id, left, right, feature, threshold, value = node
+        id, left, right, feature, threshold, value = node
 
         if left != -1:
             l_node = Node(left)
@@ -252,13 +240,6 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         nodes_map[current_node].threshold = threshold
         nodes_map[current_node].value = value
 
-        if missings is not None:
-            m_node = l_node if missing == left else r_node
-            nodes_map[current_node].missing = m_node
-
-            if missings[i] == -1:
-                missings[i] = id
-
         current_node += 1
 
     lefts = np.array(lefts)
@@ -266,13 +247,11 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     features = np.array(features)
     thresholds = np.array(thresholds)
     values = np.array(values)
-    if missings is not None:
-        missings = np.array(missings)
 
-    return [nodes_map, ids, lefts, rights, features, thresholds, values, missings]
+    return [nodes_map, ids, lefts, rights, features, thresholds, values]
 
 
-def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, missings=None, classes=None, extra_config={}):
+def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, classes=None, extra_config={}):
     """
     This function is used to generate tree parameters for sklearn trees.
     Includes SklearnRandomForestClassifier/Regressor, and SklearnGradientBoostingClassifier.
@@ -283,7 +262,6 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
         features: The features used in the decision nodes
         thresholds: The thresholds used in the decision nodes
         values: The values stored in the leaf nodes
-        missings: In the case of a missing value which child node to select
         classes: The list of class labels. None if regression model
     Returns:
         An array containing the extracted parameters
@@ -298,10 +276,10 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
     if constants.NUM_TREES in extra_config:
         values /= extra_config[constants.NUM_TREES]
 
-    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values, missings)
+    return get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, values)
 
 
-def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, missings=None, extra_config={}):
+def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, n_features, extra_config={}):
     """
     Common functions used by all tree algorithms to generate the parameters according to the GEMM strategy.
 
@@ -312,7 +290,7 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
         thresholds: The thresholds used in the decision nodes
         values: The values stored in the leaf nodes
         n_features: The number of expected input features
-        missings: In the case of a missing value which child node to select
+
     Returns:
         The weights and bias for the GEMM implementation
     """
@@ -327,34 +305,19 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
         rights = [2, -1, -1]
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
-        if missings is not None:
-            missings = [2, -1, -1]
         n_classes = values.shape[1]
         values = np.array([np.zeros(n_classes), values[0], values[0]])
         values.reshape(3, n_classes)
 
-    if missings is None:
-        missings = rights
-
     # First hidden layer has all inequalities.
     hidden_weights = []
     hidden_biases = []
-    hidden_missing_biases = []
-    for left, right, missing, feature, thresh in zip(lefts, rights, missings, features, thresholds):
-        if left != -1 or right != -1:
+    for left, feature, thresh in zip(lefts, features, thresholds):
+        if left != -1:
             hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
             hidden_biases.append(thresh)
-
-            if missing == right:
-                hidden_missing_biases.append(1)
-            else:
-                hidden_missing_biases.append(0)
     weights.append(np.array(hidden_weights).astype("float32"))
     biases.append(np.array(hidden_biases).astype("float32"))
-
-    # Missing value handling biases.
-    weights.append(None)
-    biases.append(np.array(hidden_missing_biases).astype("float32"))
 
     n_splits = len(hidden_weights)
 
@@ -381,10 +344,10 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
             for j, p in enumerate(path[:-1]):
                 num_leaves_before_p = list(lefts[:p]).count(-1)
                 if path[j + 1] in lefts:
-                    vec[p - num_leaves_before_p] = -1
-                elif path[j + 1] in rights:
-                    num_positive += 1
                     vec[p - num_leaves_before_p] = 1
+                    num_positive += 1
+                elif path[j + 1] in rights:
+                    vec[p - num_leaves_before_p] = -1
                 else:
                     raise RuntimeError("Inconsistent state encountered while tree translation.")
 
@@ -433,7 +396,6 @@ def convert_decision_ensemble_tree_common(
                 tree_param.thresholds,
                 tree_param.values,
                 n_features,
-                tree_param.missings,
                 extra_config,
             )
             for tree_param in tree_parameters
@@ -442,7 +404,7 @@ def convert_decision_ensemble_tree_common(
 
     net_parameters = [
         get_parameters_for_tree_trav(
-            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, tree_param.missings, extra_config,
+            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, extra_config,
         )
         for tree_param in tree_parameters
     ]
