@@ -312,7 +312,7 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
     # First hidden layer has all inequalities.
     hidden_weights = []
     hidden_biases = []
-    for left, right, feature, thresh in zip(lefts, rights, features, thresholds):
+    for left, feature, thresh in zip(lefts, features, thresholds):
         if left != -1:
             hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
             hidden_biases.append(thresh)
