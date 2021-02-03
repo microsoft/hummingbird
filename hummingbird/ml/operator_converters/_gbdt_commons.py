@@ -15,7 +15,9 @@ from ._tree_commons import get_tree_params_and_type, get_parameters_for_tree_tra
 from ._tree_implementations import GEMMGBDTImpl, TreeTraversalGBDTImpl, PerfectTreeTraversalGBDTImpl, TreeImpl
 
 
-def convert_gbdt_classifier_common(operator, tree_infos, get_tree_parameters, n_features, n_classes, classes=None, missing_val=None, extra_config={}):
+def convert_gbdt_classifier_common(
+    operator, tree_infos, get_tree_parameters, n_features, n_classes, classes=None, extra_config={}
+):
     """
     Common converter for GBDT classifiers.
 
@@ -25,7 +27,6 @@ def convert_gbdt_classifier_common(operator, tree_infos, get_tree_parameters, n_
         n_features: The number of features input to the model
         n_classes: How many classes are expected. 1 for regression tasks
         classes: The classes used for classification. None if implementing a regression model
-        missing_val: The value to be treated as the missing value
         extra_config: Extra configuration used to properly implement the source tree
 
     Returns:
@@ -47,10 +48,10 @@ def convert_gbdt_classifier_common(operator, tree_infos, get_tree_parameters, n_
     if reorder_trees and n_classes > 1:
         tree_infos = [tree_infos[i * n_classes + j] for j in range(n_classes) for i in range(len(tree_infos) // n_classes)]
 
-    return convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes, missing_val, extra_config)
+    return convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes, extra_config)
 
 
-def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes=None, missing_val=None, extra_config={}):
+def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes=None, extra_config={}):
     """
     Common converter for GBDT models.
 
@@ -59,7 +60,6 @@ def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, c
         get_tree_parameters: A function specifying how to parse the tree_infos into parameters
         n_features: The number of features input to the model
         classes: The classes used for classification. None if implementing a regression model
-        missing_val: The value to be treated as the missing value
         extra_config: Extra configuration used to properly implement the source tree
 
     Returns:
@@ -86,7 +86,6 @@ def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, c
                 tree_param.thresholds,
                 tree_param.values,
                 n_features,
-                tree_param.missings,
                 extra_config,
             )
             for tree_param in tree_parameters
@@ -104,7 +103,6 @@ def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, c
                 tree_param.features,
                 tree_param.thresholds,
                 tree_param.values,
-                tree_param.missings,
                 extra_config,
             )
             for tree_param in tree_parameters
@@ -163,8 +161,8 @@ def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, c
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
-        return GEMMGBDTImpl(operator, net_parameters, n_features, classes, missing_val, extra_config)
+        return GEMMGBDTImpl(operator, net_parameters, n_features, classes, extra_config)
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, missing_val, extra_config)
+        return TreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav.
-        return PerfectTreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, missing_val, extra_config)
+        return PerfectTreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
