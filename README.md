@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/hummingbird-ml.svg)](https://badge.fury.io/py/hummingbird-ml)
 [![](https://github.com/microsoft/hummingbird/workflows/Build/badge.svg?branch=main)](https://github.com/microsoft/hummingbird/actions)
-![](https://img.shields.io/badge/3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-blue)
+![](https://img.shields.io/badge/3.6%20%7C%203.7%20%7C%203.8-blue)
 [![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/main/graph/badge.svg)](https://codecov.io/github/microsoft/hummingbird?branch=main)
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Downloads](https://pepy.tech/badge/hummingbird-ml)](https://pepy.tech/project/hummingbird-ml)
