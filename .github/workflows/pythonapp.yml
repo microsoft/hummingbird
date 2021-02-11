@@ -73,7 +73,7 @@ jobs:
         pip install pandas
     - uses: actions/cache@v1
       # TVM takes forever, we try to cache it.
-      if: ${{ matrix.python-version != '3.6' && matrix.os != 'windows-2019' }}
+      if: ${{ matrix.os != 'windows-2019' }}
       id: cache
       env:
         CACHE_NUMBER: 1
@@ -84,7 +84,7 @@ jobs:
     # 1 to 4 will be retrieved from the cache.
     # The pipeline only works for Unix systems. For windows we will have to compile LLVM from source which is a no go.
     - name: Fetch and prepare TVM for compilation
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.6' && matrix.os != 'windows-2019' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os != 'windows-2019' }}
       run: |
         cd ~/
         git clone https://github.com/apache/incubator-tvm.git
