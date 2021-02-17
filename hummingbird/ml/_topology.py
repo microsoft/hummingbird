@@ -97,7 +97,11 @@ def _jit_trace(executor, trace_input, device, extra_config):
     Function used to convert an input pytorch model into torchscript.
     """
     if device != "cpu":
-        trace_input.to(device)
+        if type(trace_input) is tuple:
+            for input_ in trace_input:
+                input_.to(device)
+        else:
+            trace_input.to(device)
     return torch.jit.trace(executor, trace_input).eval()
 
 
