@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-18.04, macos-10.15, windows-2019]
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -36,19 +36,19 @@ jobs:
         # The GitHub editor is 127 chars wide
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     # PyTorch for Mac has different pip syntax wrt Win and Linux.
-    # PyTorch stop supporting python 3.5 from version 1.6.
+    # We want to test torch 1.5.x (in this case on python3.6) and torch 1.7.x.
     # The following cases address the situations above.
-    - name: Install pytorch 1.5.1 if python 3.5 (mac)
-      if: ${{ matrix.python-version == '3.5' && matrix.os == 'macos-10.15' }}
+    - name: Install pytorch 1.5.1 if python 3.6 (mac)
+      if: ${{ matrix.python-version == '3.6' && matrix.os == 'macos-10.15' }}
       run: pip install torch==1.5.1
-    - name: Install pytorch 1.7.1 if python 3.5 (mac)
-      if: ${{ matrix.python-version != '3.5' && matrix.os == 'macos-10.15' }}
+    - name: Install pytorch 1.7.1 if python > 3.6 (mac)
+      if: ${{ matrix.python-version != '3.6' && matrix.os == 'macos-10.15' }}
       run: pip install torch==1.7.1
-    - name: Install pytorch 1.5.1+cpu if python 3.5 (not mac)
-      if: ${{ matrix.python-version == '3.5' && matrix.os != 'macos-10.15' }}
+    - name: Install pytorch 1.5.1+cpu if python 3.6 (not mac)
+      if: ${{ matrix.python-version == '3.6' && matrix.os != 'macos-10.15' }}
       run: pip install torch==1.5.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
-    - name: Install pytorch 1.7.1+cpu if python > 3.5 (not mac)
-      if:  ${{ matrix.python-version != '3.5' && matrix.os != 'macos-10.15' }}
+    - name: Install pytorch 1.7.1+cpu if python > 3.6 (not mac)
+      if:  ${{ matrix.python-version != '3.6' && matrix.os != 'macos-10.15' }}
       run: pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
@@ -73,7 +73,7 @@ jobs:
         pip install pandas
     - uses: actions/cache@v1
       # TVM takes forever, we try to cache it.
-      if: ${{ matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
+      if: ${{ matrix.os != 'windows-2019' }}
       id: cache
       env:
         CACHE_NUMBER: 1
@@ -84,7 +84,7 @@ jobs:
     # 1 to 4 will be retrieved from the cache.
     # The pipeline only works for Unix systems. For windows we will have to compile LLVM from source which is a no go.
     - name: Fetch and prepare TVM for compilation
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os != 'windows-2019' }}
       run: |
         cd ~/
         git clone https://github.com/apache/incubator-tvm.git
@@ -93,19 +93,19 @@ jobs:
         git submodule update --recursive --init
         cmake -E make_directory build
     - name: Get LLVM on Linux
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'ubuntu-18.04' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.6' && matrix.os == 'ubuntu-18.04' }}
       working-directory: ../../../incubator-tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz && mv clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04 llvm
     - name: Get LLVM on Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os == 'macos-10.15' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.6' && matrix.os == 'macos-10.15' }}
       working-directory: ../../../incubator-tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz && mv clang+llvm-10.0.0-x86_64-apple-darwin llvm
     - name: CMake TVM
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.6' && matrix.os != 'windows-2019' }}
       working-directory: ../../../incubator-tvm/build
       run: >-
         cmake
@@ -114,12 +114,12 @@ jobs:
         "-DUSE_LLVM=../llvm/bin/llvm-config"
         ..
     - name: Build TVM
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.6' && matrix.os != 'windows-2019' }}
       working-directory: ../../../incubator-tvm/build
       run: |
         make -j3
     - name: Install python TVM
-      if: ${{ matrix.python-version != '3.5' && matrix.os != 'windows-2019' }}
+      if: ${{ matrix.python-version != '3.6' && matrix.os != 'windows-2019' }}
       working-directory: ../../../incubator-tvm/python
       run: |
         python setup.py install
@@ -127,14 +127,14 @@ jobs:
     - name: Test with pytest
       if: ${{ matrix.python-version != '3.7' || matrix.os != 'ubuntu-18.04' }}
       run: pytest
-    # Run and push coverage only for two runs (Linux py3.7 and py3.5).
+    # Run and push coverage only for two runs (Linux py3.7 and py3.6).
     - name: Coverage 3.7 Linux
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
-    - name: Coverage 3.5 Linux
-      if: ${{ matrix.python-version == '3.5' && matrix.os == 'ubuntu-18.04' }}
+    - name: Coverage 3.6 Linux
+      if: ${{ matrix.python-version == '3.6' && matrix.os == 'ubuntu-18.04' }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
@@ -144,8 +144,8 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
-    - name: Upload coverage to Codecov 3.5
-      if: ${{ matrix.python-version == '3.5' && matrix.os == 'ubuntu-18.04' }}
+    - name: Upload coverage to Codecov 3.6
+      if: ${{ matrix.python-version == '3.6' && matrix.os == 'ubuntu-18.04' }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
