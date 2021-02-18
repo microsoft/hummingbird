@@ -410,9 +410,7 @@ class TestBackends(unittest.TestCase):
         self.assertRaises(RuntimeError, hummingbird.ml.convert, onnx_ml_model, "onnx")
 
     # Test ONNX save and load
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNX test requires ORT")
     def test_onnx_save_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -436,9 +434,7 @@ class TestBackends(unittest.TestCase):
         shutil.rmtree("onnx-tmp")
 
     # Test ONNX save and generic load
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNX test requires ORT")
     def test_onnx_save_generic_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -470,6 +466,23 @@ class TestBackends(unittest.TestCase):
         model.fit(data)
 
         self.assertRaises(ValueError, hummingbird.ml.convert, model, [("input", Int32TensorType([6, 1]))])
+
+    # Test ONNX
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNX test requires ORT")
+    def test_onnx(self):
+        import numpy as np
+        import lightgbm as lgb
+        from hummingbird.ml import convert
+
+        # Create some random data for binary classification.
+        num_classes = 2
+        X = np.array(np.random.rand(10000, 28), dtype=np.float32)
+        y = np.random.randint(num_classes, size=10000)
+
+        model = lgb.LGBMClassifier()
+        model.fit(X, y)
+
+        self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "onnx")
 
 
 if __name__ == "__main__":
