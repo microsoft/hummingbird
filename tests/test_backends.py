@@ -410,9 +410,7 @@ class TestBackends(unittest.TestCase):
         self.assertRaises(RuntimeError, hummingbird.ml.convert, onnx_ml_model, "onnx")
 
     # Test ONNX save and load
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNX test requires ORT")
     def test_onnx_save_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -436,9 +434,7 @@ class TestBackends(unittest.TestCase):
         shutil.rmtree("onnx-tmp")
 
     # Test ONNX save and generic load
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNX test requires ORT")
     def test_onnx_save_generic_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
