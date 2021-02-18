@@ -30,7 +30,16 @@ def convert_onnx_array_feature_extractor(operator, device, extra_config):
 
     column_indices = []
     initializers = extra_config[constants.ONNX_INITIALIZERS]
-    column_indices = list(initializers[operator.raw_operator.origin.input[1]].int64_data)
+    operator_inputs = operator.raw_operator.origin.input
+    column_indices = None
+    for input_ in operator_inputs:
+        if input_ in initializers:
+            assert column_indices is None, "More than one ArrayFeatureExtractor input match with stored initializers."
+            column_indices = list(initializers[input_].int64_data)
+            if len(column_indices) == 0:
+                column_indices = list(initializers[input_].int32_data)
+            assert len(column_indices) > 0, "Cannot convert ArrayFeatureExtractor with empty column indeces."
+
     return ArrayFeatureExtractor(operator, column_indices, device)
 
 
