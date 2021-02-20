@@ -203,7 +203,7 @@ def convert_onnx_argmax(operator, device=None, extra_config={}):
     Converter for `ai.onnx.ArgMax`.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Add` model
+        operator: An operator wrapping a `ai.onnx.ArgMax` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
@@ -324,7 +324,7 @@ def convert_onnx_mat_mul(operator, device=None, extra_config={}):
     Converter for `ai.onnx.MatMul`.
 
     Args:
-        operator: An operator wrapping a `ai.onnx.Mul` model
+        operator: An operator wrapping a `ai.onnx.MatMul` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
