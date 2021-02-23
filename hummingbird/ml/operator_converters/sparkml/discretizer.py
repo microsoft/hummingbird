@@ -29,17 +29,15 @@ def convert_sparkml_bucketizer(operator, device, extra_config):
         A PyTorch model
     """
     bin_edges = [operator.raw_operator.getSplits()]
-    max_bin_edges = len(bin_edges[0])
+    max_bin_edges = max([len(bins) for bins in bin_edges])
     labels = []
 
     for i in range(len(bin_edges)):
-        bin_edges[i][0] = bin_edges[i][0] - 1e-3
-        bin_edges[i][-1] = bin_edges[i][-1] + 1e-3
         labels.append(np.array([i for i in range(len(bin_edges[i]) - 1)]))
         if len(bin_edges[i]) < max_bin_edges:
             bin_edges[i] = bin_edges[i] + [np.inf for _ in range((max_bin_edges - len(bin_edges[i])))]
 
-    return KBinsDiscretizer(operator, None, np.array(bin_edges), labels, device)
+    return KBinsDiscretizer(operator, None, None, np.array(bin_edges), labels, device)
 
 
 register_converter("SparkMLBucketizer", convert_sparkml_bucketizer)
