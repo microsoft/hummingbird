@@ -35,7 +35,7 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
 
                 torch_model = hummingbird.ml.convert(model, "torch")
                 self.assertTrue(torch_model is not None)
-                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5)
+                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-4, atol=1e-5)
 
     # Test RegressorChain with different child learners
     def test_sklearn_regressor_chain(self):
