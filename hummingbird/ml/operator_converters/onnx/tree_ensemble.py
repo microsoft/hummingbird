@@ -120,8 +120,9 @@ def _get_tree_infos_from_onnx_ml_operator(model):
                 t_values = np.array([np.array([0.0]), t_values[0], t_values[0]])
                 t_values.reshape(3, n_classes)
             if is_decision_tree and n_classes == 2:  # We need to fix the probabilities in this case.
+                max_tree_ids = max(tree_ids) + 1
                 for k in range(len(t_left)):
-                    prob = (1 / (max(tree_ids) + 1)) - t_values[k][1]
+                    prob = (1 / max_tree_ids) - t_values[k][1]
                     t_values[k][0] = prob
 
             tree_infos.append(
