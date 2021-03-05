@@ -90,7 +90,7 @@ def convert_onnx_svm_classifier_model(operator, device, extra_config):
             )
         )
 
-    return SVC(kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
+    return SVC(operator, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
 
 
 register_converter("ONNXMLSVMClassifier", convert_onnx_svm_classifier_model)
