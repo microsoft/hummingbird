@@ -31,8 +31,9 @@ install_requires = [
     "dill",
 ]
 onnx_requires = [
-    "onnxruntime>=1.0.0",
+    "onnxruntime>=1.0.0,<1.7.0",
     "onnxmltools>=1.6.0",
+    "skl2onnx<=1.7.0",
 ]
 extra_requires = [
     # The need each for these depends on which libraries you plan to convert from
