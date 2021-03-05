@@ -91,6 +91,9 @@ class TestONNXSVC(unittest.TestCase):
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred[1], pred, rtol=rtol, atol=atol)
 
+    # TODO: There is a bug with ORT:
+    # onnxruntime.capi.onnxruntime_pybind11_state.NotImplemented:
+    # [ONNXRuntimeError] : 9 : NOT_IMPLEMENTED : Could not find an implementation for the node Gemm_8:Gemm(11)
     # @unittest.skipIf(
     #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     # )
