@@ -82,6 +82,7 @@ XGBRegressor,
 "Normalizer",
 "Reshape",
 "Scaler",
+"SVMClassifier",
 "TreeEnsembleClassifier",
 "TreeEnsembleRegressor",
 """
@@ -309,6 +310,7 @@ def _build_onnxml_operator_list():
             "OneHotEncoder",
             "Normalizer",
             "Scaler",
+            "SVMClassifier",
             # Tree-based models
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",
