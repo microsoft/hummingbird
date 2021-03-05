@@ -64,8 +64,10 @@ class Sum(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator):
         super(Sum, self).__init__(logical_operator)
 
-    def forward(self, x):
-        return torch.sum(x).view(1)
+    def forward(self, *x):
+        if len(x) > 1:
+            x = torch.cat(x, dim=1)
+        return torch.sum(*x)
 
 
 class Add(PhysicalOperator, torch.nn.Module):
@@ -95,8 +97,8 @@ class Neg(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator):
         super(Neg, self).__init__(logical_operator)
 
-    def forward(self, x):
-        return torch.neg(x).view(-1)
+    def forward(self, *x):
+        return torch.neg(*x)
 
 
 class Abs(PhysicalOperator, torch.nn.Module):

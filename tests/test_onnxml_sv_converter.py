@@ -81,15 +81,15 @@ class TestONNXSVC(unittest.TestCase):
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred[1], pred, rtol=rtol, atol=atol)
 
-    # @unittest.skipIf(
-    #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
-    # )
-    # # test ai.onnx.ml.SVMClassifier with 3 classes for onnxml-> pytorch
-    # def test_logistic_regression_onnxml_multi_torch(self, rtol=1e-06, atol=1e-06):
-    #     onnx_ml_pred, pred = self._test_sv(3)
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    # test ai.onnx.ml.SVMClassifier with 3 classes for onnxml-> pytorch
+    def test_logistic_regression_onnxml_multi_torch(self, rtol=1e-06, atol=1e-06):
+        onnx_ml_pred, pred = self._test_sv(3)
 
-    #     # Check that predicted values match
-    #     np.testing.assert_allclose(onnx_ml_pred[1], pred, rtol=rtol, atol=atol)
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred[1], pred, rtol=rtol, atol=atol)
 
     # @unittest.skipIf(
     #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
@@ -103,19 +103,6 @@ class TestONNXSVC(unittest.TestCase):
     #     np.testing.assert_allclose(
     #         list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
     #     )
-
-    # @unittest.skipIf(
-    #     not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
-    # )
-    # # test ai.onnx.ml.LinearClassifier with 3 classes
-    # def test_logistic_regression_onnxml_multi(self, rtol=1e-06, atol=1e-06):
-    #     onnx_ml_pred, onnx_pred = self._test_sv(3)
-
-    #     # Check that predicted values match
-    #     np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
-    #     np.testing.assert_allclose(
-    #         list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
-    #     )  # probs
 
 
 if __name__ == "__main__":

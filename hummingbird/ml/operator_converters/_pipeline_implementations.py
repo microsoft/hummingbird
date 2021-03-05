@@ -35,4 +35,4 @@ class Concat(PhysicalOperator, torch.nn.Module):
                     )
             return torch.cat(x, dim=1)
         else:
-            return torch.stack(x, dim=1)
+            return torch.stack([i.view(-1) for i in x], dim=1)
