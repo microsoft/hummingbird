@@ -13,12 +13,12 @@ import numpy as np
 import scipy
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class SVC(BaseOperator, torch.nn.Module):
-    def __init__(self, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device):
-        super(SVC, self).__init__(classification=True)
+class SVC(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device):
+        super(SVC, self).__init__(logical_operator, classification=True)
         self.kernel = kernel
         self.degree = degree
         self.gamma = gamma

@@ -41,7 +41,7 @@ def convert_sklearn_svc_model(operator, device, extra_config):
             # TODO: which versions is this case for, and how to test?
             gamma = operator.raw_operator.gamma
 
-        return SVC(kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
+        return SVC(operator, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
     else:
         raise RuntimeError("Unsupported kernel for SVC: {}".format(operator.raw_operator.kernel))
 
