@@ -26,7 +26,7 @@ def convert_onnx_svm_classifier_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-
+    operator_orig = operator
     operator = operator.raw_operator
 
     # These are passed as params to SVC()
@@ -90,7 +90,7 @@ def convert_onnx_svm_classifier_model(operator, device, extra_config):
             )
         )
 
-    return SVC(operator, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
+    return SVC(operator_orig, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
 
 
 register_converter("ONNXMLSVMClassifier", convert_onnx_svm_classifier_model)
