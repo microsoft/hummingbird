@@ -26,6 +26,7 @@ hummingbird.ml.operator\_converters
    hummingbird.ml.operator_converters._physical_operator
    hummingbird.ml.operator_converters._pipeline_implementations
    hummingbird.ml.operator_converters._scaler_implementations
+   hummingbird.ml.operator_converters._sv_implementations
    hummingbird.ml.operator_converters._tree_commons
    hummingbird.ml.operator_converters._tree_implementations
    hummingbird.ml.operator_converters.constants

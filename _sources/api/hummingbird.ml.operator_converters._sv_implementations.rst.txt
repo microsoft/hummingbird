@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.\_sv\_implementations
+=========================================================
+
+.. automodule:: hummingbird.ml.operator_converters._sv_implementations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

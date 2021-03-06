@@ -21,4 +21,5 @@ hummingbird.ml.operator\_converters.onnx
    hummingbird.ml.operator_converters.onnx.one_hot_encoder
    hummingbird.ml.operator_converters.onnx.onnx_operator
    hummingbird.ml.operator_converters.onnx.scaler
+   hummingbird.ml.operator_converters.onnx.sv
    hummingbird.ml.operator_converters.onnx.tree_ensemble
