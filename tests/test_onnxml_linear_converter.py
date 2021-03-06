@@ -7,7 +7,6 @@ import warnings
 import numpy as np
 import torch
 from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV
-from sklearn.svm import LinearSVC, SVC, NuSVC
 
 from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, lightgbm_installed
 from hummingbird.ml import convert

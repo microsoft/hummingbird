@@ -64,15 +64,19 @@ class Sum(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator):
         super(Sum, self).__init__(logical_operator)
 
-    def forward(self, x):
-        return torch.sum(x).view(1)
+    def forward(self, *x):
+        if len(x) > 1:
+            x = torch.cat(x, dim=1)
+        return torch.sum(*x)
 
 
 class Add(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, val):
         super(Add, self).__init__(logical_operator)
 
-        self.val = torch.nn.Parameter(torch.FloatTensor(val), requires_grad=False)
+        if val is not None:
+            assert len(self.inputs) == 1, "Unexpected input length for Add val"
+            self.val = torch.nn.Parameter(torch.FloatTensor(val), requires_grad=False)
 
     def forward(self, *x):
         if len(x) == 1:
@@ -84,7 +88,7 @@ class Less(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, val):
         super(Less, self).__init__(logical_operator)
 
-        self.val = val
+        self.val = torch.nn.Parameter(torch.FloatTensor(val), requires_grad=False)
 
     def forward(self, x):
         return torch.lt(x, self.val)
@@ -94,8 +98,8 @@ class Neg(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator):
         super(Neg, self).__init__(logical_operator)
 
-    def forward(self, x):
-        return torch.neg(x).view(-1)
+    def forward(self, *x):
+        return torch.neg(*x)
 
 
 class Abs(PhysicalOperator, torch.nn.Module):
@@ -110,10 +114,14 @@ class Mul(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, val):
         super(Mul, self).__init__(logical_operator)
 
-        self.val = val
+        if val is not None:
+            assert len(self.inputs) == 1, "Unexpected input length for Mul val"
+            self.val = torch.nn.Parameter(torch.FloatTensor(val), requires_grad=False)
 
-    def forward(self, x):
-        return torch.mul(x, self.val)
+    def forward(self, *x):
+        if len(x) == 1:
+            return torch.mul(*x, self.val)
+        return torch.mul(*x)
 
 
 class MatMul(PhysicalOperator, torch.nn.Module):
@@ -256,7 +264,9 @@ def convert_onnx_add(operator, device=None, extra_config={}):
     assert operator is not None
 
     initializers = extra_config[constants.ONNX_INITIALIZERS]
-    val = list(initializers[operator.raw_operator.origin.input[1]].float_data)
+    val = None
+    if operator.raw_operator.origin.input[1] in initializers:
+        val = list(initializers[operator.raw_operator.origin.input[1]].float_data)
 
     # Generate the model.
     return Add(operator, val)
@@ -313,7 +323,9 @@ def convert_onnx_mul(operator, device=None, extra_config={}):
     assert operator is not None
 
     initializers = extra_config[constants.ONNX_INITIALIZERS]
-    val = list(initializers[operator.raw_operator.origin.input[1]].float_data)
+    val = None
+    if operator.raw_operator.origin.input[1] in initializers:
+        val = list(initializers[operator.raw_operator.origin.input[1]].float_data)
 
     # Generate the model.
     return Mul(operator, val)

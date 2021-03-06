@@ -70,20 +70,27 @@ XGBRanker,
 XGBRegressor,
 
 **Supported Operators (ONNX-ML)**
-"ArrayFeatureExtractor",
-"Binarizer"
-"Cast",
-"Concat",
-"FeatureVectorizer"
-"LabelEncoder",
-"LinearClassifier",
-"LinearRegressor",
-"OneHotEncoder",
-"Normalizer",
-"Reshape",
-"Scaler",
-"TreeEnsembleClassifier",
-"TreeEnsembleRegressor",
+Abs,
+Add,
+ArrayFeatureExtractor,
+Binarizer,
+Cast,
+Concat,
+Div,
+LabelEncoder,
+Less,
+LinearClassifier,
+LinearRegressor,
+Mul,
+Neg,
+Normalizer,
+OneHotEncoder,
+Reshape,
+Sum,
+Scaler,
+SVMClassifier,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor,
 """
 from collections import defaultdict
 
@@ -301,6 +308,7 @@ def _build_onnxml_operator_list():
             "Mul",
             "Neg",
             "Reshape",
+            "Sum",
             # Preprocessing
             "ArrayFeatureExtractor",
             "Binarizer",
@@ -309,6 +317,7 @@ def _build_onnxml_operator_list():
             "OneHotEncoder",
             "Normalizer",
             "Scaler",
+            "SVMClassifier",
             # Tree-based models
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",
