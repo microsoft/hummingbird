@@ -26,8 +26,6 @@ def convert_onnx_svm_classifier_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    operator_orig = operator
-    operator = operator.raw_operator
 
     # These are passed as params to SVC()
     kernel = degree = sv = nv = a = b = gamma = coef0 = classes = None
@@ -35,7 +33,7 @@ def convert_onnx_svm_classifier_model(operator, device, extra_config):
     # These are stored for reshaping after parsing is done
     sv_vals = coeffis = None
 
-    for attr in operator.origin.attribute:
+    for attr in operator.raw_operator.origin.attribute:
 
         if attr.name == "kernel_type":
             # ex: Convert b'RBF' to 'rbf' for consistency
@@ -71,10 +69,11 @@ def convert_onnx_svm_classifier_model(operator, device, extra_config):
         raise RuntimeError("Error parsing SVC arrays, found unexpected None")
 
     # Now that we have parsed the degree and lengths, reshape 'a' and 'sv'
-    #   For 'a', these are in 'dual' shape, so resize into 2:
-    #   https://github.com/onnx/sklearn-onnx/blob/master/skl2onnx/operator_converters/support_vector_machines.py#L41
+    # For 'a', these are in 'dual' shape, so resize into 2:
+    # https://github.com/onnx/sklearn-onnx/blob/master/skl2onnx/operator_converters/support_vector_machines.py#L41
+    #
     # Except for when they're not...
-    #   https://stackoverflow.com/questions/22816646/the-dimension-of-dual-coef-in-sklearn-svc
+    # https://stackoverflow.com/questions/22816646/the-dimension-of-dual-coef-in-sklearn-svc
     if len(classes) > 2:
         a = coeffis.reshape(2, len(coeffis) // 2)
     else:  # if not in "dual" form with classes > 3 (binary), 'a' and 'b' are the inverse. Don't ask why.
@@ -90,7 +89,7 @@ def convert_onnx_svm_classifier_model(operator, device, extra_config):
             )
         )
 
-    return SVC(operator_orig, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
+    return SVC(operator, kernel, degree, sv, nv, a, b, gamma, coef0, classes, device)
 
 
 register_converter("ONNXMLSVMClassifier", convert_onnx_svm_classifier_model)

@@ -53,21 +53,19 @@ class TestONNXSVC(unittest.TestCase):
             else:
                 onnx_ml_pred[0] = pred[i]
 
+        model = convert(onnx_ml_model, mode, X)
+
         if mode == "torch":
-            torch_model = convert(onnx_ml_model, "torch", X)
-            pred = torch_model.predict(X)
+            pred = model.predict(X)
 
         else:
-            # Create ONNX model by calling converter
-            onnx_model = convert(onnx_ml_model, "onnx", X)
-
             # Get the predictions for the ONNX model
             pred = [[] for i in range(len(output_names))]
             if len(output_names) == 1:  # regression
-                pred = onnx_model.predict(X)
+                pred = model.predict(X)
             else:  # classification
-                pred[0] = onnx_model.predict_proba(X)
-                pred[1] = onnx_model.predict(X)
+                pred[0] = model.predict_proba(X)
+                pred[1] = model.predict(X)
 
         return onnx_ml_pred, pred
 

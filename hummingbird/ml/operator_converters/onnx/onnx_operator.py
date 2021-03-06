@@ -75,6 +75,7 @@ class Add(PhysicalOperator, torch.nn.Module):
         super(Add, self).__init__(logical_operator)
 
         if val is not None:
+            assert len(self.inputs) == 1, "Unexpected input length for Add val"
             self.val = torch.nn.Parameter(torch.FloatTensor(val), requires_grad=False)
 
     def forward(self, *x):
@@ -114,6 +115,7 @@ class Mul(PhysicalOperator, torch.nn.Module):
         super(Mul, self).__init__(logical_operator)
 
         if val is not None:
+            assert len(self.inputs) == 1, "Unexpected input length for Mul val"
             self.val = torch.nn.Parameter(torch.FloatTensor(val), requires_grad=False)
 
     def forward(self, *x):
@@ -262,9 +264,8 @@ def convert_onnx_add(operator, device=None, extra_config={}):
     assert operator is not None
 
     initializers = extra_config[constants.ONNX_INITIALIZERS]
-    if operator.raw_operator.origin.input[1] not in initializers:
-        val = None
-    else:
+    val = None
+    if operator.raw_operator.origin.input[1] in initializers:
         val = list(initializers[operator.raw_operator.origin.input[1]].float_data)
 
     # Generate the model.
@@ -322,9 +323,8 @@ def convert_onnx_mul(operator, device=None, extra_config={}):
     assert operator is not None
 
     initializers = extra_config[constants.ONNX_INITIALIZERS]
-    if operator.raw_operator.origin.input[1] not in initializers:
-        val = None
-    else:
+    val = None
+    if operator.raw_operator.origin.input[1] in initializers:
         val = list(initializers[operator.raw_operator.origin.input[1]].float_data)
 
     # Generate the model.
