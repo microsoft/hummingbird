@@ -20,24 +20,27 @@ class SimpleImputer(PhysicalOperator, torch.nn.Module):
     Class implementing SimpleImputer operators in PyTorch.
     """
 
-    def __init__(self, logical_operator, device):
+    def __init__(self, logical_operator, device, statistics=None, missing=None, strategy=None):
         super(SimpleImputer, self).__init__(logical_operator)
         sklearn_imputer = logical_operator.raw_operator
-        stats = [float(stat) for stat in sklearn_imputer.statistics_ if isinstance(stat, float)]
+        # Pull out the stats field from either the SKL imputer or args
+        stats_ = statistics if statistics is not None else sklearn_imputer.statistics_
+        # Process the stats into an array
+        stats = [float(stat) for stat in stats_ if isinstance(stat, float)]
+
+        missing_values = missing if missing is not None else sklearn_imputer.missing_values
+        strategy = strategy if strategy is not None else sklearn_imputer.strategy
+
         b_mask = np.logical_not(np.isnan(stats))
         i_mask = [i for i in range(len(b_mask)) if b_mask[i]]
         self.transformer = True
-        self.do_mask = sklearn_imputer.strategy == "constant" or all(b_mask)
+        self.do_mask = strategy == "constant" or all(b_mask)
         self.mask = torch.nn.Parameter(torch.LongTensor([] if self.do_mask else i_mask), requires_grad=False)
-        self.replace_values = torch.nn.Parameter(
-            torch.tensor([sklearn_imputer.statistics_], dtype=torch.float32), requires_grad=False
-        )
+        self.replace_values = torch.nn.Parameter(torch.tensor([stats_], dtype=torch.float32), requires_grad=False)
 
-        self.is_nan = True if (sklearn_imputer.missing_values == "NaN" or np.isnan(sklearn_imputer.missing_values)) else False
+        self.is_nan = True if (missing_values == "NaN" or np.isnan(missing_values)) else False
         if not self.is_nan:
-            self.missing_values = torch.nn.Parameter(
-                torch.tensor([sklearn_imputer.missing_values], dtype=torch.float32), requires_grad=False
-            )
+            self.missing_values = torch.nn.Parameter(torch.tensor([missing_values], dtype=torch.float32), requires_grad=False)
 
     def forward(self, x):
         if self.is_nan:

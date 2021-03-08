@@ -38,12 +38,8 @@ def convert_onnx_imputer(operator, device=None, extra_config={}):
         print("stats: {}, missing: {}".format(stats, missing))
         raise RuntimeError("Error parsing Imputer, found unexpected None")
 
-    from sklearn.impute import SimpleImputer as SimpleImputerSKL
-
-    simple_imp = SimpleImputerSKL(missing_values=missing)
-    simple_imp.statistics_ = stats
-    operator.raw_operator = simple_imp
-    return SimpleImputer(operator, device)
+    # ONNXML has no "strategy" field, so pass the default SKL field, which is "mean"
+    return SimpleImputer(operator, device, statistics=stats, missing=missing, strategy="mean")
 
 
 register_converter("ONNXMLImputer", convert_onnx_imputer)
