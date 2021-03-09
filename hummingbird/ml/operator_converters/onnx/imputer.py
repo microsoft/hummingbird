@@ -35,11 +35,10 @@ def convert_onnx_imputer(operator, device=None, extra_config={}):
             missing = attr.f
 
     if any(v is None for v in [stats, missing]):
-        print("stats: {}, missing: {}".format(stats, missing))
-        raise RuntimeError("Error parsing Imputer, found unexpected None")
+        raise RuntimeError("Error parsing Imputer, found unexpected None. stats: {}, missing: {}", stats, missing)
 
-    # ONNXML has no "strategy" field, so pass the default SKL field, which is "mean"
-    return SimpleImputer(operator, device, statistics=stats, missing=missing, strategy="mean")
+    # ONNXML has no "strategy" field, but always behaves similar to SKL's constant: "replace missing values with fill_value"
+    return SimpleImputer(operator, device, statistics=stats, missing=missing, strategy="constant")
 
 
 register_converter("ONNXMLImputer", convert_onnx_imputer)

@@ -21,7 +21,7 @@ if onnx_ml_tools_installed():
 class TestONNXImputer(unittest.TestCase):
     def _test_imputer_converter(self, norm):
         warnings.filterwarnings("ignore")
-        model = SimpleImputer(strategy="mean", fill_value="nan")
+        model = SimpleImputer(strategy="constant")
         X = np.array([[1, 2], [np.nan, 3], [7, 6]], dtype=np.float32)
         model.fit(X)
 

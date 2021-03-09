@@ -26,7 +26,7 @@ class SimpleImputer(PhysicalOperator, torch.nn.Module):
         # Pull out the stats field from either the SKL imputer or args
         stats_ = statistics if statistics is not None else sklearn_imputer.statistics_
         # Process the stats into an array
-        stats = [float(stat) for stat in stats_ if isinstance(stat, float)]
+        stats = [float(stat) for stat in stats_]
 
         missing_values = missing if missing is not None else sklearn_imputer.missing_values
         strategy = strategy if strategy is not None else sklearn_imputer.strategy
