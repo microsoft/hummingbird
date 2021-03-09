@@ -27,7 +27,6 @@ install_requires = [
     "scipy<=1.5.4",
     "scikit-learn>=0.21.3,<=0.23.2",
     "torch>=1.4.*,<=1.8.0",
-    "psutil",
     "dill",
 ]
 onnx_requires = [
@@ -58,7 +57,7 @@ setup(
         "sparkml": ["pyspark>=2.4.4"],
         "onnx": onnx_requires,
         "extra": extra_requires,
-        "benchmark": onnx_requires + extra_requires + ["memory-profiler", "psutil"],
+        "benchmark": onnx_requires + extra_requires + ["memory-profiler"],
     },
     classifiers=[
         "Environment :: Console",

@@ -2,7 +2,6 @@
 Tests extra configurations.
 """
 from distutils.version import LooseVersion
-import psutil
 import unittest
 import warnings
 import sys
@@ -34,29 +33,6 @@ if onnx_ml_tools_installed():
 
 
 class TestExtraConf(unittest.TestCase):
-    # Test default number of threads. It will only work on mac after 1.6 https://github.com/pytorch/pytorch/issues/43036
-    @unittest.skipIf(
-        sys.platform == "darwin" and LooseVersion(torch.__version__) <= LooseVersion("1.6.0"),
-        reason="PyTorch has a bug on mac related to multi-threading",
-    )
-    def test_torch_deafault_n_threads(self):
-        warnings.filterwarnings("ignore")
-        max_depth = 10
-        num_classes = 2
-        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
-        np.random.seed(0)
-        X = np.random.rand(100, 200)
-        X = np.array(X, dtype=np.float32)
-        y = np.random.randint(num_classes, size=100)
-
-        model.fit(X, y)
-
-        hb_model = hummingbird.ml.convert(model, "torch")
-
-        self.assertIsNotNone(hb_model)
-        self.assertTrue(torch.get_num_threads() == psutil.cpu_count(logical=False))
-        self.assertTrue(torch.get_num_interop_threads() == 1)
-
     # Test one thread in pytorch.
     @unittest.skipIf(
         sys.platform == "darwin" and LooseVersion(torch.__version__) > LooseVersion("1.6.0"),
@@ -79,33 +55,6 @@ class TestExtraConf(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         self.assertTrue(torch.get_num_threads() == 1)
         self.assertTrue(torch.get_num_interop_threads() == 1)
-
-    # Test default number of threads onnx.
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
-    def test_onnx_deafault_n_threads(self):
-        warnings.filterwarnings("ignore")
-        max_depth = 10
-        num_classes = 2
-        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
-        np.random.seed(0)
-        X = np.random.rand(100, 200)
-        X = np.array(X, dtype=np.float32)
-        y = np.random.randint(num_classes, size=100)
-
-        model.fit(X, y)
-
-        # Create ONNX-ML model
-        onnx_ml_model = convert_sklearn(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
-        )
-
-        hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx", X)
-
-        self.assertIsNotNone(hb_model)
-        self.assertTrue(hb_model._session.get_session_options().intra_op_num_threads == psutil.cpu_count(logical=False))
-        self.assertTrue(hb_model._session.get_session_options().inter_op_num_threads == 1)
 
     # Test one thread onnx.
     @unittest.skipIf(

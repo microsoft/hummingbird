@@ -8,7 +8,6 @@
 Hummingbird main (converters) API.
 """
 from copy import deepcopy
-import psutil
 import numpy as np
 
 from .operator_converters import constants
@@ -303,7 +302,7 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
         extra_config[constants.CONTAINER] = True
     # By default we set num of intra-op parallelism to be the number of physical cores available
     if constants.N_THREADS not in extra_config:
-        extra_config[constants.N_THREADS] = psutil.cpu_count(logical=False)
+        extra_config[constants.N_THREADS] = 1
 
     # Fix the test_input type
     if constants.TEST_INPUT in extra_config:
