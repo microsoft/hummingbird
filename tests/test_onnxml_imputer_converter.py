@@ -19,9 +19,10 @@ if onnx_ml_tools_installed():
 
 
 class TestONNXImputer(unittest.TestCase):
-    def _test_imputer_converter(self, norm):
+    def _test_imputer_converter(self, norm, model=None):
         warnings.filterwarnings("ignore")
-        model = SimpleImputer(strategy="constant")
+        if model is None:
+            model = SimpleImputer(strategy="constant")
         X = np.array([[1, 2], [np.nan, 3], [7, 6]], dtype=np.float32)
         model.fit(X)
 
@@ -56,6 +57,26 @@ class TestONNXImputer(unittest.TestCase):
     )
     def test_onnx_imputer_l2(self, rtol=1e-06, atol=1e-06):
         onnx_ml_pred, onnx_pred = self._test_imputer_converter("l2")
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_onnx_imputer_nan0(self, rtol=1e-06, atol=1e-06):
+        model = SimpleImputer(strategy="constant", fill_value=0)
+        onnx_ml_pred, onnx_pred = self._test_imputer_converter("l1", model=model)
+
+        # Check that predicted values match
+        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_onnx_imputer_mean(self, rtol=1e-06, atol=1e-06):
+        model = SimpleImputer(strategy="mean", fill_value="nan")
+        onnx_ml_pred, onnx_pred = self._test_imputer_converter("l1", model=model)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
