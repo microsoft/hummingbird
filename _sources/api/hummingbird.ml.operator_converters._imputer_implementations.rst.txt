@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.\_imputer\_implementations
+==============================================================
+
+.. automodule:: hummingbird.ml.operator_converters._imputer_implementations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

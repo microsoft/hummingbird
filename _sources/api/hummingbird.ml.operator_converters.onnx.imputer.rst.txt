@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.onnx.imputer
+================================================
+
+.. automodule:: hummingbird.ml.operator_converters.onnx.imputer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

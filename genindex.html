@@ -111,6 +111,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._imputer_implementations.html">hummingbird.ml.operator_converters._imputer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._kneighbors_implementations.html">hummingbird.ml.operator_converters._kneighbors_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html">hummingbird.ml.operator_converters._label_encoder_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._linear_implementations.html">hummingbird.ml.operator_converters._linear_implementations</a></li>
@@ -291,6 +292,10 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._discretizer_implementations.html#hummingbird.ml.operator_converters._discretizer_implementations.KBinsDiscretizer._abc_impl">(hummingbird.ml.operator_converters._discretizer_implementations.KBinsDiscretizer attribute)</a>
 </li>
+        <li><a href="api/hummingbird.ml.operator_converters._imputer_implementations.html#hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator._abc_impl">(hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator attribute)</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters._imputer_implementations.html#hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer._abc_impl">(hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer attribute)</a>
+</li>
         <li><a href="api/hummingbird.ml.operator_converters._kneighbors_implementations.html#hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel._abc_impl">(hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel attribute)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder._abc_impl">(hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder attribute)</a>
@@ -370,10 +375,6 @@
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.iforest.html#hummingbird.ml.operator_converters.sklearn.iforest.PerfectTreeTraversalIsolationForestImpl._abc_impl">(hummingbird.ml.operator_converters.sklearn.iforest.PerfectTreeTraversalIsolationForestImpl attribute)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.iforest.html#hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl._abc_impl">(hummingbird.ml.operator_converters.sklearn.iforest.TreeTraversalIsolationForestImpl attribute)</a>
-</li>
-        <li><a href="api/hummingbird.ml.operator_converters.sklearn.imputer.html#hummingbird.ml.operator_converters.sklearn.imputer.MissingIndicator._abc_impl">(hummingbird.ml.operator_converters.sklearn.imputer.MissingIndicator attribute)</a>
-</li>
-        <li><a href="api/hummingbird.ml.operator_converters.sklearn.imputer.html#hummingbird.ml.operator_converters.sklearn.imputer.SimpleImputer._abc_impl">(hummingbird.ml.operator_converters.sklearn.imputer.SimpleImputer attribute)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.pipeline.html#hummingbird.ml.operator_converters.sklearn.pipeline.Multiply._abc_impl">(hummingbird.ml.operator_converters.sklearn.pipeline.Multiply attribute)</a>
 </li>
@@ -676,6 +677,8 @@
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.onnx.feature_vectorizer.html#hummingbird.ml.operator_converters.onnx.feature_vectorizer.convert_onnx_feature_vectorizer">convert_onnx_feature_vectorizer() (in module hummingbird.ml.operator_converters.onnx.feature_vectorizer)</a>
 </li>
+      <li><a href="api/hummingbird.ml.operator_converters.onnx.imputer.html#hummingbird.ml.operator_converters.onnx.imputer.convert_onnx_imputer">convert_onnx_imputer() (in module hummingbird.ml.operator_converters.onnx.imputer)</a>
+</li>
       <li><a href="api/hummingbird.ml.operator_converters.onnx.label_encoder.html#hummingbird.ml.operator_converters.onnx.label_encoder.convert_onnx_label_encoder">convert_onnx_label_encoder() (in module hummingbird.ml.operator_converters.onnx.label_encoder)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.onnx.onnx_operator.html#hummingbird.ml.operator_converters.onnx.onnx_operator.convert_onnx_less">convert_onnx_less() (in module hummingbird.ml.operator_converters.onnx.onnx_operator)</a>
@@ -716,10 +719,10 @@
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.decision_tree.html#hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_decision_tree_classifier">convert_sklearn_decision_tree_classifier() (in module hummingbird.ml.operator_converters.sklearn.decision_tree)</a>
 </li>
-      <li><a href="api/hummingbird.ml.operator_converters.sklearn.decision_tree.html#hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_decision_tree_regressor">convert_sklearn_decision_tree_regressor() (in module hummingbird.ml.operator_converters.sklearn.decision_tree)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hummingbird.ml.operator_converters.sklearn.decision_tree.html#hummingbird.ml.operator_converters.sklearn.decision_tree.convert_sklearn_decision_tree_regressor">convert_sklearn_decision_tree_regressor() (in module hummingbird.ml.operator_converters.sklearn.decision_tree)</a>
+</li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.decomposition.html#hummingbird.ml.operator_converters.sklearn.decomposition.convert_sklearn_fast_ica">convert_sklearn_fast_ica() (in module hummingbird.ml.operator_converters.sklearn.decomposition)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.nb.html#hummingbird.ml.operator_converters.sklearn.nb.convert_sklearn_gaussian_naive_bayes">convert_sklearn_gaussian_naive_bayes() (in module hummingbird.ml.operator_converters.sklearn.nb)</a>
@@ -855,6 +858,10 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._discretizer_implementations.html#hummingbird.ml.operator_converters._discretizer_implementations.KBinsDiscretizer.forward">(hummingbird.ml.operator_converters._discretizer_implementations.KBinsDiscretizer method)</a>
 </li>
+        <li><a href="api/hummingbird.ml.operator_converters._imputer_implementations.html#hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator.forward">(hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator method)</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters._imputer_implementations.html#hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer.forward">(hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer method)</a>
+</li>
         <li><a href="api/hummingbird.ml.operator_converters._kneighbors_implementations.html#hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel.forward">(hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel method)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder.forward">(hummingbird.ml.operator_converters._label_encoder_implementations.NumericLabelEncoder method)</a>
@@ -910,10 +917,6 @@
         <li><a href="api/hummingbird.ml.operator_converters.onnx.onnx_operator.html#hummingbird.ml.operator_converters.onnx.onnx_operator.Reshape.forward">(hummingbird.ml.operator_converters.onnx.onnx_operator.Reshape method)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.onnx_operator.html#hummingbird.ml.operator_converters.onnx.onnx_operator.Sum.forward">(hummingbird.ml.operator_converters.onnx.onnx_operator.Sum method)</a>
-</li>
-        <li><a href="api/hummingbird.ml.operator_converters.sklearn.imputer.html#hummingbird.ml.operator_converters.sklearn.imputer.MissingIndicator.forward">(hummingbird.ml.operator_converters.sklearn.imputer.MissingIndicator method)</a>
-</li>
-        <li><a href="api/hummingbird.ml.operator_converters.sklearn.imputer.html#hummingbird.ml.operator_converters.sklearn.imputer.SimpleImputer.forward">(hummingbird.ml.operator_converters.sklearn.imputer.SimpleImputer method)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.pipeline.html#hummingbird.ml.operator_converters.sklearn.pipeline.Multiply.forward">(hummingbird.ml.operator_converters.sklearn.pipeline.Multiply method)</a>
 </li>
@@ -1120,6 +1123,13 @@
 </li>
       </ul></li>
       <li>
+    hummingbird.ml.operator_converters._imputer_implementations
+
+      <ul>
+        <li><a href="api/hummingbird.ml.operator_converters._imputer_implementations.html#module-hummingbird.ml.operator_converters._imputer_implementations">module</a>
+</li>
+      </ul></li>
+      <li>
     hummingbird.ml.operator_converters._kneighbors_implementations
 
       <ul>
@@ -1252,6 +1262,13 @@
 
       <ul>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.feature_vectorizer.html#module-hummingbird.ml.operator_converters.onnx.feature_vectorizer">module</a>
+</li>
+      </ul></li>
+      <li>
+    hummingbird.ml.operator_converters.onnx.imputer
+
+      <ul>
+        <li><a href="api/hummingbird.ml.operator_converters.onnx.imputer.html#module-hummingbird.ml.operator_converters.onnx.imputer">module</a>
 </li>
       </ul></li>
       <li>
@@ -1565,7 +1582,7 @@
 </li>
       <li><a href="api/hummingbird.ml.exceptions.html#hummingbird.ml.exceptions.MissingConverter">MissingConverter</a>
 </li>
-      <li><a href="api/hummingbird.ml.operator_converters.sklearn.imputer.html#hummingbird.ml.operator_converters.sklearn.imputer.MissingIndicator">MissingIndicator (class in hummingbird.ml.operator_converters.sklearn.imputer)</a>
+      <li><a href="api/hummingbird.ml.operator_converters._imputer_implementations.html#hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator">MissingIndicator (class in hummingbird.ml.operator_converters._imputer_implementations)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters._mlp_implementations.html#hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel">MLPClassificationModel (class in hummingbird.ml.operator_converters._mlp_implementations)</a>
 </li>
@@ -1619,6 +1636,8 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._gbdt_commons.html#module-hummingbird.ml.operator_converters._gbdt_commons">hummingbird.ml.operator_converters._gbdt_commons</a>
 </li>
+        <li><a href="api/hummingbird.ml.operator_converters._imputer_implementations.html#module-hummingbird.ml.operator_converters._imputer_implementations">hummingbird.ml.operator_converters._imputer_implementations</a>
+</li>
         <li><a href="api/hummingbird.ml.operator_converters._kneighbors_implementations.html#module-hummingbird.ml.operator_converters._kneighbors_implementations">hummingbird.ml.operator_converters._kneighbors_implementations</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#module-hummingbird.ml.operator_converters._label_encoder_implementations">hummingbird.ml.operator_converters._label_encoder_implementations</a>
@@ -1656,6 +1675,8 @@
         <li><a href="api/hummingbird.ml.operator_converters.onnx.binarizer.html#module-hummingbird.ml.operator_converters.onnx.binarizer">hummingbird.ml.operator_converters.onnx.binarizer</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.feature_vectorizer.html#module-hummingbird.ml.operator_converters.onnx.feature_vectorizer">hummingbird.ml.operator_converters.onnx.feature_vectorizer</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters.onnx.imputer.html#module-hummingbird.ml.operator_converters.onnx.imputer">hummingbird.ml.operator_converters.onnx.imputer</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.label_encoder.html#module-hummingbird.ml.operator_converters.onnx.label_encoder">hummingbird.ml.operator_converters.onnx.label_encoder</a>
 </li>
@@ -1912,7 +1933,7 @@
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.constants.html#hummingbird.ml.operator_converters.constants.SIGMOID">SIGMOID (in module hummingbird.ml.operator_converters.constants)</a>
 </li>
-      <li><a href="api/hummingbird.ml.operator_converters.sklearn.imputer.html#hummingbird.ml.operator_converters.sklearn.imputer.SimpleImputer">SimpleImputer (class in hummingbird.ml.operator_converters.sklearn.imputer)</a>
+      <li><a href="api/hummingbird.ml.operator_converters._imputer_implementations.html#hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer">SimpleImputer (class in hummingbird.ml.operator_converters._imputer_implementations)</a>
 </li>
       <li><a href="api/hummingbird.ml._utils.html#hummingbird.ml._utils.sklearn_installed">sklearn_installed() (in module hummingbird.ml._utils)</a>
 </li>

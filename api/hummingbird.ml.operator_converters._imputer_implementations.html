@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>hummingbird.ml.operator_converters._mlp_implementations &mdash; hummingbird  documentation</title>
+  <title>hummingbird.ml.operator_converters._imputer_implementations &mdash; hummingbird  documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hummingbird.ml.operator_converters._nb_implementations" href="hummingbird.ml.operator_converters._nb_implementations.html" />
-    <link rel="prev" title="hummingbird.ml.operator_converters._linear_implementations" href="hummingbird.ml.operator_converters._linear_implementations.html" /> 
+    <link rel="next" title="hummingbird.ml.operator_converters._kneighbors_implementations" href="hummingbird.ml.operator_converters._kneighbors_implementations.html" />
+    <link rel="prev" title="hummingbird.ml.operator_converters._gbdt_commons" href="hummingbird.ml.operator_converters._gbdt_commons.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -113,11 +113,11 @@
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._imputer_implementations.html">hummingbird.ml.operator_converters._imputer_implementations</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">hummingbird.ml.operator_converters._imputer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._kneighbors_implementations.html">hummingbird.ml.operator_converters._kneighbors_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._label_encoder_implementations.html">hummingbird.ml.operator_converters._label_encoder_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._linear_implementations.html">hummingbird.ml.operator_converters._linear_implementations</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">hummingbird.ml.operator_converters._mlp_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._mlp_implementations.html">hummingbird.ml.operator_converters._mlp_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._normalizer_implementations.html">hummingbird.ml.operator_converters._normalizer_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._one_hot_encoder_implementations.html">hummingbird.ml.operator_converters._one_hot_encoder_implementations</a></li>
@@ -193,13 +193,13 @@
         
           <li><a href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a> &raquo;</li>
         
-      <li>hummingbird.ml.operator_converters._mlp_implementations</li>
+      <li>hummingbird.ml.operator_converters._imputer_implementations</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/api/hummingbird.ml.operator_converters._mlp_implementations.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/hummingbird.ml.operator_converters._imputer_implementations.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -212,21 +212,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-hummingbird.ml.operator_converters._mlp_implementations">
-<span id="hummingbird-ml-operator-converters-mlp-implementations"></span><h1>hummingbird.ml.operator_converters._mlp_implementations<a class="headerlink" href="#module-hummingbird.ml.operator_converters._mlp_implementations" title="Permalink to this headline">¶</a></h1>
-<p>Base class for multi-layer perceptrons (MLP) implementation.</p>
+  <div class="section" id="module-hummingbird.ml.operator_converters._imputer_implementations">
+<span id="hummingbird-ml-operator-converters-imputer-implementations"></span><h1>hummingbird.ml.operator_converters._imputer_implementations<a class="headerlink" href="#module-hummingbird.ml.operator_converters._imputer_implementations" title="Permalink to this headline">¶</a></h1>
+<p>Base classes for Imputers</p>
 <dl class="py class">
-<dt id="hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._mlp_implementations.</span></code><code class="sig-name descname"><span class="pre">MLPClassificationModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">biases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/575bc2d/hummingbirdhummingbird/ml/operator_converters/_mlp_implementations.py#L45"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#hummingbird.ml.operator_converters._mlp_implementations.MLPModel" title="hummingbird.ml.operator_converters._mlp_implementations.MLPModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._mlp_implementations.MLPModel</span></code></a></p>
+<dt id="hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._imputer_implementations.</span></code><code class="sig-name descname"><span class="pre">MissingIndicator</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/575bc2d/hummingbirdhummingbird/ml/operator_converters/_imputer_implementations.py#L55"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._physical_operator.html#hummingbird.ml.operator_converters._physical_operator.PhysicalOperator" title="hummingbird.ml.operator_converters._physical_operator.PhysicalOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._physical_operator.PhysicalOperator</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<p>Class implementing Imputer operators in MissingIndicator.</p>
 <dl class="py attribute">
-<dt id="hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel._abc_impl">
-<code class="sig-name descname"><span class="pre">_abc_impl</span></code><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dt id="hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator._abc_impl">
+<code class="sig-name descname"><span class="pre">_abc_impl</span></code><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator._abc_impl" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel.forward">
-<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/575bc2d/hummingbirdhummingbird/ml/operator_converters/_mlp_implementations.py#L60"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel.forward" title="Permalink to this definition">¶</a></dt>
+<dt id="hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator.forward">
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/575bc2d/hummingbirdhummingbird/ml/operator_converters/_imputer_implementations.py#L71"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._imputer_implementations.MissingIndicator.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -241,17 +242,18 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="hummingbird.ml.operator_converters._mlp_implementations.MLPModel">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._mlp_implementations.</span></code><code class="sig-name descname"><span class="pre">MLPModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">biases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/575bc2d/hummingbirdhummingbird/ml/operator_converters/_mlp_implementations.py#L17"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._mlp_implementations.MLPModel" title="Permalink to this definition">¶</a></dt>
+<dt id="hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._imputer_implementations.</span></code><code class="sig-name descname"><span class="pre">SimpleImputer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/575bc2d/hummingbirdhummingbird/ml/operator_converters/_imputer_implementations.py#L18"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._physical_operator.html#hummingbird.ml.operator_converters._physical_operator.PhysicalOperator" title="hummingbird.ml.operator_converters._physical_operator.PhysicalOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._physical_operator.PhysicalOperator</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<p>Class implementing SimpleImputer operators in PyTorch.</p>
 <dl class="py attribute">
-<dt id="hummingbird.ml.operator_converters._mlp_implementations.MLPModel._abc_impl">
-<code class="sig-name descname"><span class="pre">_abc_impl</span></code><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters._mlp_implementations.MLPModel._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dt id="hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer._abc_impl">
+<code class="sig-name descname"><span class="pre">_abc_impl</span></code><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer._abc_impl" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="hummingbird.ml.operator_converters._mlp_implementations.MLPModel.forward">
-<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/575bc2d/hummingbirdhummingbird/ml/operator_converters/_mlp_implementations.py#L29"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._mlp_implementations.MLPModel.forward" title="Permalink to this definition">¶</a></dt>
+<dt id="hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer.forward">
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/575bc2d/hummingbirdhummingbird/ml/operator_converters/_imputer_implementations.py#L45"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._imputer_implementations.SimpleImputer.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -273,8 +275,8 @@ registered hooks while the latter silently ignores them.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="hummingbird.ml.operator_converters._nb_implementations.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters._nb_implementations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="hummingbird.ml.operator_converters._linear_implementations.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters._linear_implementations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hummingbird.ml.operator_converters._kneighbors_implementations.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters._kneighbors_implementations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hummingbird.ml.operator_converters._gbdt_commons.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters._gbdt_commons" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
