@@ -91,7 +91,7 @@ In general, Hummingbird syntax is very intuitive and minimal. To run your tradit
 ```python
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from hummingbird.ml import convert
+from hummingbird.ml import convert, load
 
 # Create some random data for binary classification
 num_classes = 2
@@ -116,7 +116,7 @@ model.predict(X)
 model.save('hb_model')
 
 # Load the model back
-model = hummingbird.ml.load('hb_model')
+model = load('hb_model')
 ```
 
 # Documentation
