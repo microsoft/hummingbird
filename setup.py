@@ -22,7 +22,7 @@ with open(README) as f:
         long_description = long_description[start_pos:]
 
 install_requires = [
-    "numpy>=1.15,<=1.19.4",
+    "numpy>=1.15,<=1.20.*",
     "onnxconverter-common>=1.6.0,<=1.7.0",
     "scipy<=1.5.4",
     "scikit-learn>=0.21.3,<=0.23.2",
