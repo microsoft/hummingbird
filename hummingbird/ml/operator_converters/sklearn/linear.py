@@ -86,5 +86,7 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
 register_converter("SklearnLinearRegression", convert_sklearn_linear_regression_model)
 register_converter("SklearnLogisticRegression", convert_sklearn_linear_model)
 register_converter("SklearnLinearSVC", convert_sklearn_linear_model)
+register_converter("SklearnLinearSVR", convert_sklearn_linear_regression_model)
 register_converter("SklearnSGDClassifier", convert_sklearn_linear_model)
 register_converter("SklearnLogisticRegressionCV", convert_sklearn_linear_model)
+register_converter("SklearnRidgeCV", convert_sklearn_linear_regression_model)

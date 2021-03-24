@@ -131,15 +131,10 @@ def _build_sklearn_operator_list():
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
         # Linear-based models
-        from sklearn.linear_model import (
-            LinearRegression,
-            LogisticRegression,
-            LogisticRegressionCV,
-            SGDClassifier,
-        )
+        from sklearn.linear_model import LinearRegression, LogisticRegression, LogisticRegressionCV, SGDClassifier, RidgeCV
 
         # SVM-based models
-        from sklearn.svm import LinearSVC, SVC, NuSVC
+        from sklearn.svm import LinearSVC, SVC, NuSVC, LinearSVR
 
         # Imputers
         from sklearn.impute import MissingIndicator, SimpleImputer
@@ -197,9 +192,11 @@ def _build_sklearn_operator_list():
             # Linear-methods
             LinearRegression,
             LinearSVC,
+            LinearSVR,
             LogisticRegression,
             LogisticRegressionCV,
             SGDClassifier,
+            RidgeCV,
             # Other models
             BernoulliNB,
             GaussianNB,
