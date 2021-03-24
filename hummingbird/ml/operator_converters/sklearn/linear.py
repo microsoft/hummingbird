@@ -63,10 +63,11 @@ def convert_sklearn_linear_model(operator, device, extra_config):
 
 def convert_sklearn_linear_regression_model(operator, device, extra_config):
     """
-    Converter for `sklearn.linear_model.LinearRegression`
+    Converter for `sklearn.linear_model.LinearRegression`, `sklearn.svm.LinearSVR` and `sklearn.linear_model.RidgeCV`
 
     Args:
-        operator: An operator wrapping a `sklearn.linear_model.LinearRegression` model
+        operator: An operator wrapping a `sklearn.linear_model.LinearRegression`, `sklearn.svm.LinearSVR`
+            or `sklearn.linear_model.RidgeCV` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
