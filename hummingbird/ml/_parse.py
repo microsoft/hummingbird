@@ -27,6 +27,7 @@ from ._utils import sklearn_installed, sparkml_installed
 from .operator_converters import constants
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name, get_sparkml_api_operator_name
 
+# Stacking is only supported starting from scikit-learn 0.22.
 try:
     from sklearn.ensemble import StackingClassifier, StackingRegressor
 except ImportError:
