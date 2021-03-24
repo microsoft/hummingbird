@@ -7,7 +7,7 @@ from distutils.version import LooseVersion
 
 import numpy as np
 import torch
-from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV
+from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV, RidgeCV
 from sklearn import datasets
 
 import hummingbird.ml
@@ -107,6 +107,32 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     def test_linear_regression_float(self):
         np.random.seed(0)
         self._test_linear_regression(np.random.rand(100))
+
+    # RidgeCV test function to be parameterized
+    def _test_ridge_cv(self, y_input):
+        model = RidgeCV()
+
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = y_input
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    # RidgeCV with ints
+    def test_ridge_cv_int(self):
+        np.random.seed(0)
+        self._test_ridge_cv(np.random.randint(2, size=100))
+
+    # RidgeCV with floats
+    def test_ridge_cv_float(self):
+        np.random.seed(0)
+        self._test_ridge_cv(np.random.rand(100))
 
     # LogisticRegressionCV test function to be parameterized
     def _test_logistic_regression_cv(self, num_classes, solver="liblinear", multi_class="auto", labels_shift=0):
@@ -264,7 +290,9 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     def test_multioutput_linear_regression(self):
         for n_targets in [1, 2, 7]:
             model = LinearRegression()
-            X, y = datasets.make_regression(n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021)
+            X, y = datasets.make_regression(
+                n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021
+            )
             model.fit(X, y)
 
             torch_model = hummingbird.ml.convert(model, "torch")
