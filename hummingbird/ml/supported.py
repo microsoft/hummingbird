@@ -29,6 +29,7 @@ HistGradientBoostingRegressor,
 IsolationForest,
 KernelPCA,
 KBinsDiscretizer,
+KMeans,
 KNeighborsClassifier,
 KNeighborsRegressor,
 LabelEncoder,
@@ -154,6 +155,9 @@ def _build_sklearn_operator_list():
         from sklearn.neighbors import KNeighborsClassifier
         from sklearn.neighbors import KNeighborsRegressor
 
+        # Clustering models
+        from sklearn.cluster import KMeans
+
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
@@ -199,6 +203,8 @@ def _build_sklearn_operator_list():
             LogisticRegressionCV,
             SGDClassifier,
             RidgeCV,
+            # Clustering
+            KMeans,
             # Other models
             BernoulliNB,
             GaussianNB,
