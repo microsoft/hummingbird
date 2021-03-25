@@ -1,8 +1,0 @@
-hummingbird.ml.operator\_converters.sklearn.kmeans
-==================================================
-
-.. automodule:: hummingbird.ml.operator_converters.sklearn.kmeans
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:

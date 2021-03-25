@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>hummingbird.ml.operator_converters.sklearn.kmeans &mdash; hummingbird  documentation</title>
+  <title>hummingbird.ml.operator_converters.sklearn.cluster &mdash; hummingbird  documentation</title>
   
 
   
@@ -40,8 +40,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hummingbird.ml.operator_converters.sklearn.kneighbors" href="hummingbird.ml.operator_converters.sklearn.kneighbors.html" />
-    <link rel="prev" title="hummingbird.ml.operator_converters.sklearn.imputer" href="hummingbird.ml.operator_converters.sklearn.imputer.html" /> 
+    <link rel="next" title="hummingbird.ml.operator_converters.sklearn.decision_tree" href="hummingbird.ml.operator_converters.sklearn.decision_tree.html" />
+    <link rel="prev" title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor" href="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -195,13 +195,13 @@
         
           <li><a href="hummingbird.ml.operator_converters.sklearn.html">hummingbird.ml.operator_converters.sklearn</a> &raquo;</li>
         
-      <li>hummingbird.ml.operator_converters.sklearn.kmeans</li>
+      <li>hummingbird.ml.operator_converters.sklearn.cluster</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/api/hummingbird.ml.operator_converters.sklearn.kmeans.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/hummingbird.ml.operator_converters.sklearn.cluster.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -214,22 +214,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-hummingbird.ml.operator_converters.sklearn.kmeans">
-<span id="hummingbird-ml-operator-converters-sklearn-kmeans"></span><h1>hummingbird.ml.operator_converters.sklearn.kmeans<a class="headerlink" href="#module-hummingbird.ml.operator_converters.sklearn.kmeans" title="Permalink to this headline">¶</a></h1>
-<p>Converters for scikit-learn KMeans.</p>
+  <div class="section" id="module-hummingbird.ml.operator_converters.sklearn.cluster">
+<span id="hummingbird-ml-operator-converters-sklearn-cluster"></span><h1>hummingbird.ml.operator_converters.sklearn.cluster<a class="headerlink" href="#module-hummingbird.ml.operator_converters.sklearn.cluster" title="Permalink to this headline">¶</a></h1>
+<p>Converters for scikit-learn KMeans and MeanShift models.</p>
 <dl class="py class">
-<dt id="hummingbird.ml.operator_converters.sklearn.kmeans.KMeans">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.sklearn.kmeans.</span></code><code class="sig-name descname"><span class="pre">KMeans</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centroids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/55f63fe/hummingbirdhummingbird/ml/operator_converters/sklearn/kmeans.py#L18"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kmeans.KMeans" title="Permalink to this definition">¶</a></dt>
+<dt id="hummingbird.ml.operator_converters.sklearn.cluster.KMeans">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.sklearn.cluster.</span></code><code class="sig-name descname"><span class="pre">KMeans</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centroids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/7b717b9/hummingbirdhummingbird/ml/operator_converters/sklearn/cluster.py#L18"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.cluster.KMeans" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._physical_operator.html#hummingbird.ml.operator_converters._physical_operator.PhysicalOperator" title="hummingbird.ml.operator_converters._physical_operator.PhysicalOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._physical_operator.PhysicalOperator</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <p>Class implementing Kmeans in PyTorch</p>
 <dl class="py attribute">
-<dt id="hummingbird.ml.operator_converters.sklearn.kmeans.KMeans._abc_impl">
-<code class="sig-name descname"><span class="pre">_abc_impl</span></code><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kmeans.KMeans._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dt id="hummingbird.ml.operator_converters.sklearn.cluster.KMeans._abc_impl">
+<code class="sig-name descname"><span class="pre">_abc_impl</span></code><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.cluster.KMeans._abc_impl" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="hummingbird.ml.operator_converters.sklearn.kmeans.KMeans.forward">
-<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/55f63fe/hummingbirdhummingbird/ml/operator_converters/sklearn/kmeans.py#L28"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kmeans.KMeans.forward" title="Permalink to this definition">¶</a></dt>
+<dt id="hummingbird.ml.operator_converters.sklearn.cluster.KMeans.forward">
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/7b717b9/hummingbirdhummingbird/ml/operator_converters/sklearn/cluster.py#L28"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.cluster.KMeans.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -244,8 +244,8 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.operator_converters.sklearn.kmeans.convert_sklearn_kmeans_model">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.sklearn.kmeans.</span></code><code class="sig-name descname"><span class="pre">convert_sklearn_kmeans_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/55f63fe/hummingbirdhummingbird/ml/operator_converters/sklearn/kmeans.py#L35"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.kmeans.convert_sklearn_kmeans_model" title="Permalink to this definition">¶</a></dt>
+<dt id="hummingbird.ml.operator_converters.sklearn.cluster.convert_sklearn_kmeans_model">
+<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.sklearn.cluster.</span></code><code class="sig-name descname"><span class="pre">convert_sklearn_kmeans_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/7b717b9/hummingbirdhummingbird/ml/operator_converters/sklearn/cluster.py#L35"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.cluster.convert_sklearn_kmeans_model" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -256,8 +256,8 @@ registered hooks while the latter silently ignores them.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="hummingbird.ml.operator_converters.sklearn.kneighbors.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters.sklearn.kneighbors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="hummingbird.ml.operator_converters.sklearn.imputer.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters.sklearn.imputer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hummingbird.ml.operator_converters.sklearn.decision_tree.html" class="btn btn-neutral float-right" title="hummingbird.ml.operator_converters.sklearn.decision_tree" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hummingbird.ml.operator_converters.sklearn.array_feature_extractor.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters.sklearn.array_feature_extractor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.sklearn.cluster
+===================================================
+
+.. automodule:: hummingbird.ml.operator_converters.sklearn.cluster
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
