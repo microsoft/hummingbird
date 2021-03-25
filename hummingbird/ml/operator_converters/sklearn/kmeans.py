@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------
 
 """
-Converters for scikit-learn k neighbor models: KNeighborsClassifier, KNeighborsRegressor.
+Converters for scikit-learn KMeans.
 """
 
 import torch
