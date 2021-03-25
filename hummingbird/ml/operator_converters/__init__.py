@@ -30,13 +30,13 @@ from .onnx import scaler as onnx_scaler  # noqa: E402, F811
 from .onnx import sv as onnx_sv  # noqa: E402, F811
 from .onnx import tree_ensemble  # noqa: E402
 from .sklearn import array_feature_extractor as sklearn_afe  # noqa: E402
+from .sklearn import cluster  # noqa: E402
 from .sklearn import decision_tree  # noqa: E402
 from .sklearn import decomposition  # noqa: E402
 from .sklearn import discretizer as sklearn_discretizer  # noqa: E402
 from .sklearn import gbdt  # noqa: E402
 from .sklearn import iforest  # noqa: E402
 from .sklearn import imputer  # noqa: E402
-from .sklearn import kmeans  # noqa: E402
 from .sklearn import kneighbors  # noqa: E402
 from .sklearn import label_encoder  # noqa: E402
 from .sklearn import linear as sklearn_linear  # noqa: E402

@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------
 
 """
-Converters for scikit-learn KMeans.
+Converters for scikit-learn KMeans and MeanShift models.
 """
 
 import torch
@@ -40,3 +40,4 @@ def convert_sklearn_kmeans_model(operator, device, extra_config):
 
 
 register_converter("SklearnKMeans", convert_sklearn_kmeans_model)
+register_converter("SklearnMeanShift", convert_sklearn_kmeans_model)

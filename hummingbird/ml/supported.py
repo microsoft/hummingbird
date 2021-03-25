@@ -40,6 +40,7 @@ LogisticRegression,
 LogisticRegressionCV,
 RidgeCV,
 MaxAbsScaler,
+MeanShift,
 MinMaxScaler,
 MissingIndicator,
 MLPClassifier,
@@ -156,7 +157,7 @@ def _build_sklearn_operator_list():
         from sklearn.neighbors import KNeighborsRegressor
 
         # Clustering models
-        from sklearn.cluster import KMeans
+        from sklearn.cluster import KMeans, MeanShift
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -205,6 +206,7 @@ def _build_sklearn_operator_list():
             RidgeCV,
             # Clustering
             KMeans,
+            MeanShift,
             # Other models
             BernoulliNB,
             GaussianNB,
