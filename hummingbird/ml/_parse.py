@@ -18,6 +18,7 @@ from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 
 from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.multioutput import MultiOutputRegressor, RegressorChain
 from sklearn.preprocessing import OneHotEncoder
 
@@ -375,6 +376,18 @@ def _parse_sklearn_regressor_chain(topology, model, inputs):
     return conc_op.outputs
 
 
+def _parse_sklearn_model_selection(topology, model, inputs):
+    """
+    :param topology: Topology object
+    :param model: A *sklearn.model_selection* object
+    :param inputs: A list of Variable objects
+    :return: Output produced by sklearn.model_selection.* object
+    """
+    op = model.best_estimator_
+    var_output = _parse_sklearn_api(topology, op, inputs)
+    return var_output
+
+
 def _parse_sklearn_column_transformer(topology, model, inputs):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
@@ -509,9 +522,11 @@ def _build_sklearn_api_parsers_map():
     # Parsers for edge cases are going here.
     map_parser = {
         ColumnTransformer: _parse_sklearn_column_transformer,
+        GridSearchCV: _parse_sklearn_model_selection,
         MultiOutputRegressor: _parse_sklearn_multi_output_regressor,
         pipeline.Pipeline: _parse_sklearn_pipeline,
         pipeline.FeatureUnion: _parse_sklearn_feature_union,
+        RandomizedSearchCV: _parse_sklearn_model_selection,
         RegressorChain: _parse_sklearn_regressor_chain,
         # More parsers will go here
     }
