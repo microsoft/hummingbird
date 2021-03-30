@@ -381,7 +381,7 @@ def _parse_sklearn_model_selection(topology, model, inputs):
     :param topology: Topology object
     :param model: A *sklearn.model_selection* object
     :param inputs: A list of Variable objects
-    :return: Output produced by RegressorChain
+    :return: Output produced by sklearn.model_selection.* object
     """
     op = model.best_estimator_
     var_output = _parse_sklearn_api(topology, op, inputs)
