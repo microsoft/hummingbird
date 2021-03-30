@@ -35,8 +35,7 @@ class TestSklearnModelSelection(unittest.TestCase):
             if not score_w_train_data:
                 X = X[n_train_rows:, :]
 
-            extra_config = {hummingbird.ml.operator_converters.constants.BATCH_SIZE: X.shape[0]}
-            torch_model = hummingbird.ml.convert(model, "torch", extra_config=extra_config)
+            torch_model = hummingbird.ml.convert(model, "torch")
             self.assertTrue(torch_model is not None)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-6, atol=1e-5)
 
