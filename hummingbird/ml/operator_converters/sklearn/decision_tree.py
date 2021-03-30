@@ -43,7 +43,7 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
         if LooseVersion(torch.__version__) < LooseVersion("1.7.0"):
             import warnings
 
-            warnings.warn("torch < 1.7.0 may give a mismatch on multiclass RF. See issue #10.")
+            warnings.warn("torch < 1.7.0 may give a mismatch on multiclass. See issue #10.")
 
     # For Sklearn Trees we need to know how many trees are there for normalization.
     extra_config[constants.NUM_TREES] = len(tree_infos)
