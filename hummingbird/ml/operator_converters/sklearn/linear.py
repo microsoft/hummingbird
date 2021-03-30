@@ -33,7 +33,7 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     supported_loss = {"log", "modified_huber", "squared_hinge"}
     classes = [0] if not hasattr(operator.raw_operator, "classes_") else operator.raw_operator.classes_
     # There is a bug in torch < 1.7.0 that causes a mismatch. See Issue #10
-    if classes > 2:
+    if len(classes) > 2:
         from distutils.version import LooseVersion
         import torch
 
