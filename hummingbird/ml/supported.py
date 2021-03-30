@@ -24,6 +24,7 @@ FastICA,
 GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
+GridSearchCV,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
@@ -158,6 +159,12 @@ def _build_sklearn_operator_list():
 
         # Clustering models
         from sklearn.cluster import KMeans, MeanShift
+
+        # Model selection
+        from sklearn.model_selection import (
+            GridSearchCV,
+            RandomizedSearchCV
+        )
 
         # Preprocessing
         from sklearn.preprocessing import (
