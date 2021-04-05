@@ -162,10 +162,7 @@ def _build_sklearn_operator_list():
         from sklearn.cluster import KMeans, MeanShift
 
         # Model selection
-        from sklearn.model_selection import (
-            GridSearchCV,
-            RandomizedSearchCV
-        )
+        from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -469,7 +466,7 @@ backends = _build_backend_map()
 # Supported configurations settings accepted by Hummingbird are defined below.
 # Please check `test.test_extra_conf.py` for examples on how to use these.
 TREE_IMPLEMENTATION = "tree_implementation"
-"""Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav."""
+"""Which tree implementation to use. Values can be: gemm, tree_trav, perf_tree_trav."""
 
 ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
 """For ONNX models we can set the name of the output model."""
