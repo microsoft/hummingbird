@@ -65,13 +65,16 @@ class Executor(torch.nn.Module, object):
     def forward(self, *inputs):
         with torch.no_grad():
             assert len(self._input_names) == len(inputs) or (
-                type(inputs[0]) == DataFrame and DataFrame is not None and len(self._input_names) == len(inputs[0].columns)
+                type(inputs[0]) == DataFrame
+                and DataFrame is not None
+                and not self.check_dataframe_to_array
+                and len(self._input_names) == len(inputs[0].columns)
             ), "number of inputs or number of columns in the dataframe do not match with the expected number of inputs {}".format(
                 self._input_names
             )
 
             if type(inputs[0]) == DataFrame and DataFrame is not None:
-                # Split the dataframe into column ndarrays
+                # Split the dataframe into column ndarrays.
                 inputs = inputs[0]
                 input_names = list(inputs.columns)
                 splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
