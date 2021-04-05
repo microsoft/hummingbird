@@ -55,7 +55,18 @@ class TestSklearnClustering(unittest.TestCase):
     def test_kmeans_5_elkan(self):
         self._test_kmeans(5, "elkan")
 
-    @unittest.skipIf(MeanShift is None, reason="MeanShift is supported in scikit-learn >= 0.22")
+    # KMeans test double
+    def test_kmeans_double(self):
+        model = KMeans(random_state=0)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float64)
+
+        model.fit(X)
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
     def _test_mean_shift(self, bandwidth=None, backend="torch", extra_config={}):
         for cluster_all in [True, False]:
             model = MeanShift(bandwidth=bandwidth, cluster_all=cluster_all)
@@ -69,14 +80,17 @@ class TestSklearnClustering(unittest.TestCase):
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
     # MeanShift default
+    @unittest.skipIf(MeanShift is None, reason="MeanShift is supported in scikit-learn >= 0.22")
     def test_mean_shift(self):
         self._test_mean_shift()
 
     # MeanShift bandwdith 2.0
+    @unittest.skipIf(MeanShift is None, reason="MeanShift is supported in scikit-learn >= 0.22")
     def test_mean_shift_bandwdith(self):
         self._test_mean_shift(2.0)
 
     # MeanShift bandwdith 5.0
+    @unittest.skipIf(MeanShift is None, reason="MeanShift is supported in scikit-learn >= 0.22")
     def test_mean_shift_bandwdith_5(self):
         self._test_mean_shift(5.0)
 
