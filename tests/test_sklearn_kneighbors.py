@@ -194,7 +194,9 @@ class TestSklearnKNeighbors(unittest.TestCase):
     # KNeighborsRegressor with multioutput
     def test_kneighbors_multioutput_regressor(self):
         for n_targets in [1, 2, 7]:
-            X, y = datasets.make_regression(n_samples=1000, n_features=10, n_informative=5, n_targets=n_targets, random_state=1, noise=0.5)
+            X, y = datasets.make_regression(
+                n_samples=1000, n_features=10, n_informative=5, n_targets=n_targets, random_state=1, noise=0.5
+            )
             model = KNeighborsRegressor()
             model.fit(X, y)
 

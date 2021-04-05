@@ -15,14 +15,7 @@ import hummingbird.ml
 
 
 class TestSklearnModelSelection(unittest.TestCase):
-    def _test_model_selection(
-        self,
-        model_selection_class,
-        base_classifier,
-        parameters,
-        score_w_train_data=False,
-        **kwargs
-    ):
+    def _test_model_selection(self, model_selection_class, base_classifier, parameters, score_w_train_data=False, **kwargs):
         for data in [datasets.load_breast_cancer(), datasets.load_iris()]:
             X, y = data.data, data.target
             X = X.astype(np.float32)
@@ -41,19 +34,37 @@ class TestSklearnModelSelection(unittest.TestCase):
 
     # GridSearchCV/DecisionTreeClassifier
     def test_gridsearchcv_decision_tree_1(self):
-        self._test_model_selection(GridSearchCV, DecisionTreeClassifier(random_state=42), {'min_samples_split': range(2, 403, 10)})
+        self._test_model_selection(
+            GridSearchCV, DecisionTreeClassifier(random_state=42), {"min_samples_split": range(2, 403, 10)}
+        )
 
     # GridSearchCV/DecisionTreeClassifier w/ extra configs
     def test_gridsearchcv_decision_tree_2(self):
-        self._test_model_selection(GridSearchCV, DecisionTreeClassifier(random_state=42), {'min_samples_split': range(2, 403, 10)}, scoring={'AUC': 'roc_auc', 'Accuracy': make_scorer(accuracy_score)}, refit='AUC', return_train_score=True)
+        self._test_model_selection(
+            GridSearchCV,
+            DecisionTreeClassifier(random_state=42),
+            {"min_samples_split": range(2, 403, 10)},
+            scoring={"AUC": "roc_auc", "Accuracy": make_scorer(accuracy_score)},
+            refit="AUC",
+            return_train_score=True,
+        )
 
     # RandomizedSearchCV/DecisionTreeClassifier
     def test_randpmizedsearchcv_decision_tree_1(self):
-        self._test_model_selection(RandomizedSearchCV, DecisionTreeClassifier(random_state=42), {'min_samples_split': range(2, 403, 10)})
+        self._test_model_selection(
+            RandomizedSearchCV, DecisionTreeClassifier(random_state=42), {"min_samples_split": range(2, 403, 10)}
+        )
 
     # RandomizedSearchCV/DecisionTreeClassifier w/ extra configs
     def test_randpmizedsearchcv_decision_tree_2(self):
-        self._test_model_selection(RandomizedSearchCV, DecisionTreeClassifier(random_state=42), {'min_samples_split': range(2, 403, 10)}, scoring={'AUC': 'roc_auc', 'Accuracy': make_scorer(accuracy_score)}, refit='AUC', return_train_score=True)
+        self._test_model_selection(
+            RandomizedSearchCV,
+            DecisionTreeClassifier(random_state=42),
+            {"min_samples_split": range(2, 403, 10)},
+            scoring={"AUC": "roc_auc", "Accuracy": make_scorer(accuracy_score)},
+            refit="AUC",
+            return_train_score=True,
+        )
 
 
 if __name__ == "__main__":
