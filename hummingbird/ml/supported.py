@@ -24,6 +24,7 @@ FastICA,
 GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
+GridSearchCV,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
@@ -40,6 +41,7 @@ LogisticRegression,
 LogisticRegressionCV,
 RidgeCV,
 MaxAbsScaler,
+MeanShift,
 MinMaxScaler,
 MissingIndicator,
 MLPClassifier,
@@ -51,6 +53,7 @@ PCA,
 PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
+RandomizedGridSearchCV,
 RobustScaler,
 SelectKBest,
 SelectPercentile,
@@ -156,7 +159,13 @@ def _build_sklearn_operator_list():
         from sklearn.neighbors import KNeighborsRegressor
 
         # Clustering models
-        from sklearn.cluster import KMeans
+        from sklearn.cluster import KMeans, MeanShift
+
+        # Model selection
+        from sklearn.model_selection import (
+            GridSearchCV,
+            RandomizedSearchCV
+        )
 
         # Preprocessing
         from sklearn.preprocessing import (
@@ -205,6 +214,7 @@ def _build_sklearn_operator_list():
             RidgeCV,
             # Clustering
             KMeans,
+            MeanShift,
             # Other models
             BernoulliNB,
             GaussianNB,
