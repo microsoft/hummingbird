@@ -23,7 +23,7 @@ class KMeans(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, centroids, device):
         super(KMeans, self).__init__(logical_operator, regression=True)
 
-        self.centroids = torch.nn.Parameter(torch.from_numpy(centroids), requires_grad=False)
+        self.centroids = torch.nn.Parameter(torch.FloatTensor(centroids), requires_grad=False)
 
     def forward(self, x):
         # Compute the Euclidean distance
