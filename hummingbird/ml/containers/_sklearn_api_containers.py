@@ -33,6 +33,7 @@ class SklearnContainer(ABC):
         self._n_threads = n_threads
         self._extra_config = extra_config
         self._batch_size = batch_size
+        self._check_dataframe_to_array = constants.TEST_INPUT not in extra_config
 
     @property
     def model(self):
@@ -53,11 +54,15 @@ class SklearnContainer(ABC):
         This function scores the full dataset at once. See BatchContainer below for batched scoring.
         """
         if DataFrame is not None and type(inputs[0]) == DataFrame:
-            # Split the dataframe into column ndarrays.
-            inputs = inputs[0]
-            input_names = list(inputs.columns)
-            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
-            inputs = [df.to_numpy().reshape(-1, 1) for df in splits]
+            if self._check_dataframe_to_array:
+                # We were expecting a numpy array as input but we got a dataframe: call values() on it to get the array.
+                inputs = [inputs[0].values]
+            else:
+                # Split the dataframe into column ndarrays.
+                inputs = inputs[0]
+                input_names = list(inputs.columns)
+                splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+                inputs = [df.to_numpy().reshape(-1, 1) for df in splits]
 
         return function(*inputs)
 
