@@ -169,6 +169,5 @@ def setup(app):
 
 # The following is used by sphinx.ext.linkcode to provide links to github
 linkcode_resolve = make_linkcode_resolve(
-    "hummingbird",
-    "https://github.com/microsoft/" "hummingbird/blob/{revision}/hummingbird" "{package}/{path}#L{lineno}",
+    "hummingbird", "https://github.com/microsoft/" "hummingbird/blob/{revision}/hummingbird" "{package}/{path}#L{lineno}",
 )
