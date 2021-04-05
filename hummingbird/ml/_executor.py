@@ -58,37 +58,28 @@ class Executor(torch.nn.Module, object):
         self._output_names = _fix_var_naming(reversed(operators), output_names, "output")
         self._operators = torch.nn.ModuleList([operator_map[operator.full_name] for operator in operators])
         self.max_string_length = None
-        self.check_dataframe_to_array = constants.TEST_INPUT not in extra_config
 
         if constants.MAX_STRING_LENGTH in extra_config:
             self.max_string_length = extra_config[constants.MAX_STRING_LENGTH]
 
     def forward(self, *inputs):
         with torch.no_grad():
-            assert (
-                len(self._input_names) == len(inputs)
-                or (type(inputs[0]) == DataFrame and DataFrame is not None and self.check_dataframe_to_array)
-                or (
-                    type(inputs[0]) == DataFrame
-                    and DataFrame is not None
-                    and not self.check_dataframe_to_array
-                    and len(self._input_names) == len(inputs[0].columns)
-                )
+            assert len(self._input_names) == len(inputs) or (
+                type(inputs[0]) == DataFrame
+                and DataFrame is not None
+                and not self.check_dataframe_to_array
+                and len(self._input_names) == len(inputs[0].columns)
             ), "number of inputs or number of columns in the dataframe do not match with the expected number of inputs {}".format(
                 self._input_names
             )
 
             if type(inputs[0]) == DataFrame and DataFrame is not None:
-                if self.check_dataframe_to_array:
-                    # We were expecting a numpy array as input but we got a dataframe: call values() on it to get the array.
-                    inputs = inputs[0].values()
-                else:
-                    # Split the dataframe into column ndarrays.
-                    inputs = inputs[0]
-                    input_names = list(inputs.columns)
-                    splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
-                    splits = [df.to_numpy().reshape(-1, 1) for df in splits]
-                    inputs = tuple(splits)
+                # Split the dataframe into column ndarrays.
+                inputs = inputs[0]
+                input_names = list(inputs.columns)
+                splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+                splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+                inputs = tuple(splits)
             inputs = [*inputs]
             variable_map = {}
             device = get_device(self)
