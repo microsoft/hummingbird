@@ -8,7 +8,7 @@
 Entrypoint for Hummingbird modules.
 """
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 __author__ = "Microsoft"
 __producer__ = "hummingbird"
 __producer_version__ = __version__

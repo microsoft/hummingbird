@@ -1,11 +1,11 @@
 """
-Tests sklearn SVC classifiers (LinearSVC, SVC, NuSVC) converters.
+Tests sklearn SV classifiers / regressors (LinearSVC, LinearSVR, SVC, NuSVC) converters.
 """
 import unittest
 
 import numpy as np
 import torch
-from sklearn.svm import LinearSVC, SVC, NuSVC
+from sklearn.svm import LinearSVC, LinearSVR, SVC, NuSVC, SVR
 
 import hummingbird.ml
 from hummingbird.ml import constants
@@ -36,6 +36,32 @@ class TestSklearnSVC(unittest.TestCase):
     # LinearSVC with class labels shifted
     def test_linear_svc_shifted(self):
         self._test_linear_svc(3, labels_shift=2)
+
+    # RidgeCV test function to be parameterized
+    def _test_svr(self, y_input):
+        model = LinearSVR()
+
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = y_input
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    # RidgeCV with ints
+    def test_svr_int(self):
+        np.random.seed(0)
+        self._test_svr(np.random.randint(2, size=100))
+
+    # RidgeCV with floats
+    def test_svr_float(self):
+        np.random.seed(0)
+        self._test_svr(np.random.rand(100))
 
     # SVC test function to be parameterized
     def _test_svc(self, num_classes, kernel="rbf", gamma=None, backend="torch", labels_shift=0, extra_config={}):

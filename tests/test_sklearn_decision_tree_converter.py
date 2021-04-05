@@ -52,6 +52,12 @@ class TestSklearnTreeConverter(unittest.TestCase):
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
+            from distutils.version import LooseVersion
+            import torch
+
+            if LooseVersion(torch.__version__) >= LooseVersion("1.7.0"):
+                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
     # Random forest binary classifier
     def test_random_forest_classifier_binary_converter(self):
         self._run_tree_classification_converter(RandomForestClassifier, 2, n_estimators=10)

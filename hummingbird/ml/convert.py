@@ -55,12 +55,12 @@ def _is_sparkml_model(model):
         return False
 
 
-def _supported_backend_check(backend):
+def _supported_backend_check(backend_formatted, backend_original):
     """
     Function used to check whether the specified backend is supported or not.
     """
-    if backend is None:
-        raise MissingBackend("Backend: {}".format(backend))
+    if backend_formatted is None:
+        raise MissingBackend("Backend: formatted {}, original {}".format(backend_formatted, backend_original))
 
 
 def _supported_backend_check_config(model, backend, extra_config):
@@ -78,7 +78,9 @@ def _supported_backend_check_config(model, backend, extra_config):
         tvm_backend = tvm.__name__
 
     if (
-        (backend == torch.jit.__name__ and not _is_onnx_model(model)) or backend == tvm_backend
+        (backend == torch.jit.__name__ and not _is_onnx_model(model))
+        or backend == tvm_backend
+        or (backend == onnx.__name__ and not _is_onnx_model(model))
     ) and constants.TEST_INPUT not in extra_config:
         raise RuntimeError("Backend {} requires test inputs. Please pass some test input to the convert.".format(backend))
 
@@ -370,26 +372,26 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
     # We do some normalization on backends.
     if type(backend) != str:
         raise ValueError("Backend must be a string: {}".format(backend))
-    backend = backend.lower()
-    backend = backends[backend]
+    backend_formatted = backend.lower()
+    backend_formatted = backends[backend_formatted]
 
     # Check whether we actually support the backend.
-    _supported_backend_check(backend)
-    _supported_backend_check_config(model, backend, extra_config)
+    _supported_backend_check(backend_formatted, backend)
+    _supported_backend_check_config(model, backend_formatted, extra_config)
 
     if type(model) in xgb_operator_list:
-        return _convert_xgboost(model, backend, test_input, device, extra_config)
+        return _convert_xgboost(model, backend_formatted, test_input, device, extra_config)
 
     if type(model) in lgbm_operator_list:
-        return _convert_lightgbm(model, backend, test_input, device, extra_config)
+        return _convert_lightgbm(model, backend_formatted, test_input, device, extra_config)
 
     if _is_onnx_model(model):
-        return _convert_onnxml(model, backend, test_input, device, extra_config)
+        return _convert_onnxml(model, backend_formatted, test_input, device, extra_config)
 
     if _is_sparkml_model(model):
-        return _convert_sparkml(model, backend, test_input, device, extra_config)
+        return _convert_sparkml(model, backend_formatted, test_input, device, extra_config)
 
-    return _convert_sklearn(model, backend, test_input, device, extra_config)
+    return _convert_sklearn(model, backend_formatted, test_input, device, extra_config)
 
 
 def convert(model, backend, test_input=None, device="cpu", extra_config={}):

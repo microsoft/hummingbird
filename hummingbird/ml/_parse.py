@@ -18,6 +18,7 @@ from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 
 from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.multioutput import MultiOutputRegressor, RegressorChain
 from sklearn.preprocessing import OneHotEncoder
 
@@ -26,6 +27,12 @@ from ._topology import Topology
 from ._utils import sklearn_installed, sparkml_installed
 from .operator_converters import constants
 from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name, get_sparkml_api_operator_name
+
+# Stacking is only supported starting from scikit-learn 0.22.
+try:
+    from sklearn.ensemble import StackingClassifier, StackingRegressor
+except ImportError:
+    StackingClassifier = None
 
 do_not_merge_columns = tuple(filter(lambda op: op is not None, [OneHotEncoder, ColumnTransformer]))
 
@@ -369,6 +376,18 @@ def _parse_sklearn_regressor_chain(topology, model, inputs):
     return conc_op.outputs
 
 
+def _parse_sklearn_model_selection(topology, model, inputs):
+    """
+    :param topology: Topology object
+    :param model: A *sklearn.model_selection* object
+    :param inputs: A list of Variable objects
+    :return: Output produced by sklearn.model_selection.* object
+    """
+    op = model.best_estimator_
+    var_output = _parse_sklearn_api(topology, op, inputs)
+    return var_output
+
+
 def _parse_sklearn_column_transformer(topology, model, inputs):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
@@ -453,16 +472,68 @@ def _parse_sklearn_column_transformer(topology, model, inputs):
     return transformed_result_names
 
 
+def _parse_sklearn_stacking(topology, model, inputs):
+    """
+    Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
+    :param topology: Topology object
+    :param model: A *scikit-learn* *ColumnTransformer* object
+    :param inputs: A list of Variable objects
+    :return: A list of output variables produced by column transformer
+    """
+    # Output variable name of each estimator. It's a list of variables.
+    transformed_result_names = []
+    # Encode each estimator as our IR object.
+    for op, method in zip(model.estimators_, model.stack_method_):
+        var_out = _parse_sklearn_api(topology, op, inputs)
+        if method not in ["predict_proba", "predict"]:
+            raise ValueError(
+                "Ensemble method {} not supported. Please fill an issue at https://github.com/microsoft/hummingbird.".format(
+                    method
+                )
+            )
+        index = 0
+        if method == "predict_proba":
+            index = 1
+        array_feature_extractor_operator = topology.declare_logical_operator("SklearnArrayFeatureExtractor")
+        array_feature_extractor_operator.inputs = var_out
+        array_feature_extractor_operator.column_indices = [index]
+        output_variable_name = topology.declare_logical_variable("extracted_feature_columns", var_out[0].type)
+        array_feature_extractor_operator.outputs.append(output_variable_name)
+        transformed_result_names.append(output_variable_name)
+
+    if model.passthrough:
+        transformed_result_names.extend(inputs)
+    if len(transformed_result_names) > 1:
+        concat_operator = topology.declare_logical_operator("SklearnConcat")
+        concat_operator.inputs = transformed_result_names
+
+        # Declare output name of scikit-learn ColumnTransformer
+        transformed_column_name = topology.declare_logical_variable("transformed_column")
+        concat_operator.outputs.append(transformed_column_name)
+        transformed_result_names = [transformed_column_name]
+
+    op = model.final_estimator_
+    var_out = _parse_sklearn_api(topology, op, transformed_result_names)
+
+    return var_out
+
+
 def _build_sklearn_api_parsers_map():
     # Parsers for edge cases are going here.
     map_parser = {
         ColumnTransformer: _parse_sklearn_column_transformer,
+        GridSearchCV: _parse_sklearn_model_selection,
         MultiOutputRegressor: _parse_sklearn_multi_output_regressor,
         pipeline.Pipeline: _parse_sklearn_pipeline,
         pipeline.FeatureUnion: _parse_sklearn_feature_union,
+        RandomizedSearchCV: _parse_sklearn_model_selection,
         RegressorChain: _parse_sklearn_regressor_chain,
         # More parsers will go here
     }
+
+    if StackingClassifier is not None:
+        map_parser[StackingClassifier] = _parse_sklearn_stacking
+        map_parser[StackingRegressor] = _parse_sklearn_stacking
 
     return map_parser
 
