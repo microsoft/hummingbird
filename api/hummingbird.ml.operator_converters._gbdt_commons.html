@@ -4,8 +4,7 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>hummingbird.ml.operator_converters._gbdt_commons &mdash; hummingbird  documentation</title>
@@ -213,12 +212,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-hummingbird.ml.operator_converters._gbdt_commons">
+  <div class="section" id="module-hummingbird.ml.operator_converters._gbdt_commons">
 <span id="hummingbird-ml-operator-converters-gbdt-commons"></span><h1>hummingbird.ml.operator_converters._gbdt_commons<a class="headerlink" href="#module-hummingbird.ml.operator_converters._gbdt_commons" title="Permalink to this headline">¶</a></h1>
 <p>Collections of functions shared among GBDT converters.</p>
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_classifier_common">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._gbdt_commons.</span></code><code class="sig-name descname"><span class="pre">convert_gbdt_classifier_common</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_infos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_tree_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/3f115b4/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L18"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_classifier_common" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._gbdt_commons.</span></code><code class="sig-name descname"><span class="pre">convert_gbdt_classifier_common</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_infos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_tree_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8040a6a/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L18"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_classifier_common" title="Permalink to this definition">¶</a></dt>
 <dd><p>Common converter for GBDT classifiers.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>tree_infos: The information representaing a tree (ensemble)
@@ -235,7 +234,7 @@ extra_config: Extra configuration used to properly implement the source tree</p>
 
 <dl class="py function">
 <dt id="hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_common">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._gbdt_commons.</span></code><code class="sig-name descname"><span class="pre">convert_gbdt_common</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_infos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_tree_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/3f115b4/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L63"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_common" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._gbdt_commons.</span></code><code class="sig-name descname"><span class="pre">convert_gbdt_common</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree_infos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_tree_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8040a6a/hummingbirdhummingbird/ml/operator_converters/_gbdt_commons.py#L63"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._gbdt_commons.convert_gbdt_common" title="Permalink to this definition">¶</a></dt>
 <dd><p>Common converter for GBDT models.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>tree_infos: The information representaing a tree (ensemble)
@@ -249,7 +248,7 @@ extra_config: Extra configuration used to properly implement the source tree</p>
 </dl>
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>

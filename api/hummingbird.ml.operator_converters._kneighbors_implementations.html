@@ -4,8 +4,7 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>hummingbird.ml.operator_converters._kneighbors_implementations &mdash; hummingbird  documentation</title>
@@ -213,12 +212,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-hummingbird.ml.operator_converters._kneighbors_implementations">
+  <div class="section" id="module-hummingbird.ml.operator_converters._kneighbors_implementations">
 <span id="hummingbird-ml-operator-converters-kneighbors-implementations"></span><h1>hummingbird.ml.operator_converters._kneighbors_implementations<a class="headerlink" href="#module-hummingbird.ml.operator_converters._kneighbors_implementations" title="Permalink to this headline">¶</a></h1>
 <p>Base classes for KNeighbors model implementations: (KNeighborsClassifier, KNeighborsRegressor).</p>
 <dl class="py class">
 <dt id="hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._kneighbors_implementations.</span></code><code class="sig-name descname"><span class="pre">KNeighborsModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_classifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_params</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/3f115b4/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L25"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._kneighbors_implementations.</span></code><code class="sig-name descname"><span class="pre">KNeighborsModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_classifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_params</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8040a6a/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L25"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._physical_operator.html#hummingbird.ml.operator_converters._physical_operator.PhysicalOperator" title="hummingbird.ml.operator_converters._physical_operator.PhysicalOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._physical_operator.PhysicalOperator</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <dl class="py attribute">
 <dt id="hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel._abc_impl">
@@ -227,7 +226,7 @@
 
 <dl class="py method">
 <dt id="hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel.forward">
-<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/3f115b4/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L95"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel.forward" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8040a6a/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L95"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.KNeighborsModel.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -243,32 +242,32 @@ registered hooks while the latter silently ignores them.</p>
 
 <dl class="py class">
 <dt id="hummingbird.ml.operator_converters._kneighbors_implementations.MetricType">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._kneighbors_implementations.</span></code><code class="sig-name descname"><span class="pre">MetricType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/3f115b4/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L18"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._kneighbors_implementations.</span></code><code class="sig-name descname"><span class="pre">MetricType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8040a6a/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L18"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
 <p>An enumeration.</p>
 <dl class="py attribute">
 <dt id="hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.mahalanobis">
-<code class="sig-name descname"><span class="pre">mahalanobis</span></code><em class="property"> <span class="pre">=</span> <span class="pre">4</span></em><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/3f115b4/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.mahalanobis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">mahalanobis</span></code><em class="property"> <span class="pre">=</span> <span class="pre">4</span></em><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8040a6a/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.mahalanobis" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.minkowski">
-<code class="sig-name descname"><span class="pre">minkowski</span></code><em class="property"> <span class="pre">=</span> <span class="pre">1</span></em><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/3f115b4/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.minkowski" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">minkowski</span></code><em class="property"> <span class="pre">=</span> <span class="pre">1</span></em><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8040a6a/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.minkowski" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.seuclidean">
-<code class="sig-name descname"><span class="pre">seuclidean</span></code><em class="property"> <span class="pre">=</span> <span class="pre">3</span></em><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/3f115b4/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.seuclidean" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">seuclidean</span></code><em class="property"> <span class="pre">=</span> <span class="pre">3</span></em><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8040a6a/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.seuclidean" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt id="hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.wminkowski">
-<code class="sig-name descname"><span class="pre">wminkowski</span></code><em class="property"> <span class="pre">=</span> <span class="pre">2</span></em><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/3f115b4/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.wminkowski" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">wminkowski</span></code><em class="property"> <span class="pre">=</span> <span class="pre">2</span></em><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/8040a6a/hummingbirdhummingbird/ml/operator_converters/_kneighbors_implementations.py#L"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._kneighbors_implementations.MetricType.wminkowski" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>
