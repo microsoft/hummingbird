@@ -71,7 +71,7 @@ class TestSklearnBagging(unittest.TestCase):
         hb_model = hummingbird.ml.convert(reg, "torch")
 
         np.testing.assert_allclose(
-            reg.predict(X), hb_model.predict(X), rtol=1e-05, atol=1e-05,
+            reg.predict(X), hb_model.predict(X), rtol=1e-04, atol=1e-04,
         )
 
     def test_bagging_linear_regression(self):
@@ -83,7 +83,7 @@ class TestSklearnBagging(unittest.TestCase):
         hb_model = hummingbird.ml.convert(reg, "torch")
 
         np.testing.assert_allclose(
-            reg.predict(X), hb_model.predict(X), rtol=1e-05, atol=1e-05,
+            reg.predict(X), hb_model.predict(X), rtol=1e-04, atol=1e-04,
         )
 
 
