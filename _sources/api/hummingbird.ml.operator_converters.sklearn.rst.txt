@@ -13,6 +13,7 @@ hummingbird.ml.operator\_converters.sklearn
    :maxdepth: 1
 
    hummingbird.ml.operator_converters.sklearn.array_feature_extractor
+   hummingbird.ml.operator_converters.sklearn.bagging
    hummingbird.ml.operator_converters.sklearn.cluster
    hummingbird.ml.operator_converters.sklearn.decision_tree
    hummingbird.ml.operator_converters.sklearn.decomposition

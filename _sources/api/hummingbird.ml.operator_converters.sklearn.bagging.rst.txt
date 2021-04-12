@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.sklearn.bagging
+===================================================
+
+.. automodule:: hummingbird.ml.operator_converters.sklearn.bagging
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
