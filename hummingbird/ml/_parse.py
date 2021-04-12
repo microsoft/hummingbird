@@ -523,7 +523,7 @@ def _parse_sklearn_bagging(topology, model, inputs):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
     :param topology: Topology object
-    :param model: A *scikit-learn* *BaggingClassifier* object
+    :param model: A *scikit-learn* *BaggingClassifier* or *BaggingRegressor* object
     :param inputs: A list of Variable objects
     :return: A list of output variables produced by column transformer
     """
@@ -556,7 +556,7 @@ def _build_sklearn_api_parsers_map():
         RandomizedSearchCV: _parse_sklearn_model_selection,
         RegressorChain: _parse_sklearn_regressor_chain,
         BaggingClassifier: _parse_sklearn_bagging,
-        BaggingRegressor: _parse_sklearn_bagging,
+        BaggingRegressor: _parse_sklearn_bagging,  # This may introduce some rounding error. TODO better implementation.
         # More parsers will go here
     }
 
