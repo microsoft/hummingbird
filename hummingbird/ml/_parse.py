@@ -18,6 +18,7 @@ from onnxconverter_common.optimizer import LinkedNode, _topological_sort
 
 from sklearn import pipeline
 from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import BaggingClassifier, BaggingRegressor
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.multioutput import MultiOutputRegressor, RegressorChain
 from sklearn.preprocessing import OneHotEncoder
@@ -476,7 +477,7 @@ def _parse_sklearn_stacking(topology, model, inputs):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
     :param topology: Topology object
-    :param model: A *scikit-learn* *ColumnTransformer* object
+    :param model: A *scikit-learn* *Stacking* object
     :param inputs: A list of Variable objects
     :return: A list of output variables produced by column transformer
     """
@@ -518,6 +519,32 @@ def _parse_sklearn_stacking(topology, model, inputs):
     return var_out
 
 
+def _parse_sklearn_bagging(topology, model, inputs):
+    """
+    Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
+    :param topology: Topology object
+    :param model: A *scikit-learn* *BaggingClassifier* object
+    :param inputs: A list of Variable objects
+    :return: A list of output variables produced by column transformer
+    """
+    # Output variable name of each estimator. It's a list of variables.
+    transformed_result_names = []
+    # Encode each estimator as our IR object.
+    for op in model.estimators_:
+        var_out = _parse_sklearn_api(topology, op, inputs)
+        transformed_result_names.extend(var_out)
+
+    bagging_operator = topology.declare_logical_operator("SklearnBagging", model)
+    bagging_operator.inputs = transformed_result_names
+
+    # Declare output name of scikit-learn ColumnTransformer
+    transformed_column_name = topology.declare_logical_variable("transformed_column")
+    bagging_operator.outputs.append(transformed_column_name)
+    transformed_result_names = [transformed_column_name]
+
+    return transformed_result_names
+
+
 def _build_sklearn_api_parsers_map():
     # Parsers for edge cases are going here.
     map_parser = {
@@ -528,6 +555,8 @@ def _build_sklearn_api_parsers_map():
         pipeline.FeatureUnion: _parse_sklearn_feature_union,
         RandomizedSearchCV: _parse_sklearn_model_selection,
         RegressorChain: _parse_sklearn_regressor_chain,
+        BaggingClassifier: _parse_sklearn_bagging,
+        BaggingRegressor: _parse_sklearn_bagging,
         # More parsers will go here
     }
 
