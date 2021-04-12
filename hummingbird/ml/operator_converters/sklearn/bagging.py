@@ -21,7 +21,7 @@ class Bagging(PhysicalOperator, torch.nn.Module):
         super(Bagging, self).__init__(logical_operator, transformer=True)
 
         self.is_classifier = is_classifier
-        self.n_estimators = n_estimators
+        self.n_estimators = float(n_estimators)
         self.perform_class_select = False
         if min(classes) != 0 or max(classes) != len(classes) - 1:
             self.perform_class_select = True
