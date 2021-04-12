@@ -37,7 +37,7 @@ onnx_requires = [
 ]
 extra_requires = [
     # The need each for these depends on which libraries you plan to convert from
-    "xgboost>=0.90",
+    "xgboost>=0.90,<1.4.0",
     "lightgbm>=2.2,<3",
 ]
 setup(
