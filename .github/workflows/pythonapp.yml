@@ -69,7 +69,7 @@ jobs:
         export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
     - name: Install extra dependencies
       run: |
-        pip install .[extra,onnx,sparkml]
+        pip install .[extra,onnx]
         pip install pandas
     - uses: actions/cache@v1
       # TVM takes forever, we try to cache it.
