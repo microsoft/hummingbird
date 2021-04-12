@@ -20,9 +20,6 @@ class TestSklearnBagging(unittest.TestCase):
         hb_model = hummingbird.ml.convert(clf, "torch")
 
         np.testing.assert_allclose(
-            clf.predict([[0, 0, 0, 0]]), hb_model.predict(np.array([[0, 0, 0, 0]])), rtol=1e-06, atol=1e-06,
-        )
-        np.testing.assert_allclose(
             clf.predict_proba([[0, 0, 0, 0]]), hb_model.predict_proba(np.array([[0, 0, 0, 0]])), rtol=1e-06, atol=1e-06,
         )
 
@@ -34,9 +31,6 @@ class TestSklearnBagging(unittest.TestCase):
 
         hb_model = hummingbird.ml.convert(clf, "torch")
 
-        np.testing.assert_allclose(
-            clf.predict(X), hb_model.predict(X), rtol=1e-06, atol=1e-06,
-        )
         np.testing.assert_allclose(
             clf.predict_proba([[0, 0, 0, 0]]), hb_model.predict_proba(np.array([[0, 0, 0, 0]])), rtol=1e-06, atol=1e-06,
         )
