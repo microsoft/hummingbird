@@ -377,6 +377,7 @@ def _build_sklearn_api_operator_name_map():
         "ArrayFeatureExtractor",
         "Concat",
         "Multiply",
+        "Bagging",
     ]
 
     return {

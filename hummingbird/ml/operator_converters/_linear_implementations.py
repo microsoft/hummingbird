@@ -43,6 +43,7 @@ class LinearModel(PhysicalOperator, torch.nn.Module):
             self.binary_classification = True
 
     def forward(self, x):
+        x = x.float()
         output = torch.addmm(self.intercepts, x, self.coefficients)
         if self.multi_class == "multinomial":
             output = torch.softmax(output, dim=1)
