@@ -12,13 +12,12 @@ from hummingbird.ml import convert
 from distutils.version import LooseVersion
 
 if sparkml_installed():
-    from pyspark import SparkContext
-    from pyspark.sql import SQLContext
+    from pyspark.sql import SparkSession, SQLContext
     from pyspark.ml.linalg import Vectors
     from pyspark.ml.classification import LogisticRegression
 
-    sc = SparkContext.getOrCreate()
-    sql = SQLContext(sc)
+    spark = SparkSession.builder.master("local[*]").config("spark.driver.bindAddress", "127.0.0.1").getOrCreate()
+    sql = SQLContext(spark)
 
 
 class TestSparkMLLinear(unittest.TestCase):
