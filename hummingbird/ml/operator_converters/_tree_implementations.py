@@ -14,6 +14,7 @@ import torch
 
 from . import constants
 from ._physical_operator import PhysicalOperator
+from . import _tree_commons
 
 
 class TreeImpl(Enum):
@@ -504,7 +505,7 @@ class GEMMGBDTImpl(GEMMTreeImpl):
         super(GEMMGBDTImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, 1, extra_config)
 
         self.n_gbdt_classes = 1
-        self.post_transform = lambda x: x
+        self.post_transform = _tree_commons.PostTransform()
 
         if constants.POST_TRANSFORM in extra_config:
             self.post_transform = extra_config[constants.POST_TRANSFORM]
@@ -539,7 +540,7 @@ class TreeTraversalGBDTImpl(TreeTraversalTreeImpl):
         )
 
         self.n_gbdt_classes = 1
-        self.post_transform = lambda x: x
+        self.post_transform = _tree_commons.PostTransform()
 
         if constants.POST_TRANSFORM in extra_config:
             self.post_transform = extra_config[constants.POST_TRANSFORM]
