@@ -575,7 +575,7 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
         )
 
         self.n_gbdt_classes = 1
-        self.post_transform = lambda x: x
+        self.post_transform = _tree_commons.PostTransform()
 
         if constants.POST_TRANSFORM in extra_config:
             self.post_transform = extra_config[constants.POST_TRANSFORM]
