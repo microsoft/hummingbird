@@ -507,8 +507,9 @@ class TestBackends(unittest.TestCase):
         self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "onnx")
 
     # Test Spark UDF
-    @unittest.skipIf(not sparkml_installed(), reason="UDF test requires Spark installed")
-    @unittest.skipIf(LooseVersion(pyspark.__version__) < LooseVersion("3"), reason="UDF Test requires spark >= 3")
+    @unittest.skipIf(
+        not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"), reason="UDF Test requires spark >= 3"
+    )
     def test_udf_torch(self):
         X, y = load_iris(return_X_y=True)
         X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
@@ -538,8 +539,9 @@ class TestBackends(unittest.TestCase):
         # Run the query.
         sql_context.sql("SELECT SUM(prediction) FROM (SELECT PREDICT(*) as prediction FROM IRIS)").show()
 
-    @unittest.skipIf(not sparkml_installed(), reason="UDF test requires Spark installed")
-    @unittest.skipIf(LooseVersion(pyspark.__version__) < LooseVersion("3"), reason="UDF Test requires spark >= 3")
+    @unittest.skipIf(
+        not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"), reason="UDF Test requires spark >= 3"
+    )
     def test_udf_torch_jit_broadcast(self):
         import pickle
 
@@ -556,8 +558,9 @@ class TestBackends(unittest.TestCase):
         # Broadcast the model returns an error.
         self.assertRaises(pickle.PickleError, spark.sparkContext.broadcast, hb_model)
 
-    @unittest.skipIf(not sparkml_installed(), reason="UDF test requires Spark installed")
-    @unittest.skipIf(LooseVersion(pyspark.__version__) < LooseVersion("3"), reason="UDF Test requires spark >= 3")
+    @unittest.skipIf(
+        not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"), reason="UDF Test requires spark >= 3"
+    )
     def test_udf_torch_jit_spark_file(self):
         import dill
         import torch.jit
