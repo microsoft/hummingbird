@@ -159,10 +159,17 @@ class TestBackends(unittest.TestCase):
         shutil.rmtree("ts-tmp")
 
     def test_load_fails_bad_path(self):
+        # Asserts for bad path with extension
         self.assertRaises(AssertionError, hummingbird.ml.load, "nonsense.zip")
         self.assertRaises(AssertionError, hummingbird.ml.ONNXContainer.load, "nonsense.zip")
         self.assertRaises(AssertionError, hummingbird.ml.TorchContainer.load, "nonsense.zip")
         self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense.zip")
+
+        # Asserts for bad path with no extension
+        self.assertRaises(AssertionError, hummingbird.ml.load, "nonsense")
+        self.assertRaises(AssertionError, hummingbird.ml.ONNXContainer.load, "nonsense")
+        self.assertRaises(AssertionError, hummingbird.ml.TorchContainer.load, "nonsense")
+        self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense")
 
     # Test not supported backends
     def test_unsupported_backend(self):
