@@ -161,14 +161,22 @@ class TestBackends(unittest.TestCase):
     def test_load_fails_bad_path(self):
         # Asserts for bad path with extension
         self.assertRaises(AssertionError, hummingbird.ml.load, "nonsense.zip")
-        self.assertRaises(AssertionError, hummingbird.ml.ONNXContainer.load, "nonsense.zip")
         self.assertRaises(AssertionError, hummingbird.ml.TorchContainer.load, "nonsense.zip")
-        self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense.zip")
 
         # Asserts for bad path with no extension
         self.assertRaises(AssertionError, hummingbird.ml.load, "nonsense")
-        self.assertRaises(AssertionError, hummingbird.ml.ONNXContainer.load, "nonsense")
         self.assertRaises(AssertionError, hummingbird.ml.TorchContainer.load, "nonsense")
+
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_load_fails_bad_path_onnx(self):
+        self.assertRaises(AssertionError, hummingbird.ml.ONNXContainer.load, "nonsense.zip")
+        self.assertRaises(AssertionError, hummingbird.ml.ONNXContainer.load, "nonsense")
+
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_load_fails_bad_path_tvm(self):
+        self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense.zip")
         self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense")
 
     # Test not supported backends
