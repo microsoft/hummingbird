@@ -8,7 +8,7 @@
 TVM output containers for the sklearn API are listed here.
 """
 
-import dill
+import pickle
 import os
 import numpy as np
 import shutil
@@ -96,7 +96,7 @@ class TVMSklearnContainer(SklearnContainer):
 
         # Save the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "wb") as file:
-            dill.dump(self, file)
+            pickle.dump(self, file)
 
         # Zip the dir.
         shutil.make_archive(location, "zip", location)
@@ -164,7 +164,7 @@ class TVMSklearnContainer(SklearnContainer):
 
         # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
-            container = dill.load(file)
+            container = pickle.load(file)
         assert container is not None, "Failed to load the model container."
 
         # Setup the container.
