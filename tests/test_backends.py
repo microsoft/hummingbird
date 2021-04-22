@@ -158,6 +158,12 @@ class TestBackends(unittest.TestCase):
         os.remove("ts-tmp.zip")
         shutil.rmtree("ts-tmp")
 
+    def test_load_fails_bad_path(self):
+        self.assertRaises(AssertionError, hummingbird.ml.load, "nonsense.zip")
+        self.assertRaises(AssertionError, hummingbird.ml.ONNXContainer.load, "nonsense.zip")
+        self.assertRaises(AssertionError, hummingbird.ml.TorchContainer.load, "nonsense.zip")
+        self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense.zip")
+
     # Test not supported backends
     def test_unsupported_backend(self):
         warnings.filterwarnings("ignore")
