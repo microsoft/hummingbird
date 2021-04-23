@@ -6,10 +6,14 @@ import warnings
 import os
 import shutil
 import numpy as np
+from typing import Iterator
+from distutils.version import LooseVersion
 
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
 from onnxconverter_common.data_types import (
     FloatTensorType,
     DoubleTensorType,
@@ -19,11 +23,29 @@ from onnxconverter_common.data_types import (
 )
 
 import hummingbird.ml
-from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, tvm_installed
+from hummingbird.ml._utils import (
+    onnx_ml_tools_installed,
+    onnx_runtime_installed,
+    tvm_installed,
+    sparkml_installed,
+    pandas_installed,
+)
 from hummingbird.ml.exceptions import MissingBackend
 
 if onnx_ml_tools_installed():
     from onnxmltools.convert import convert_sklearn
+
+if sparkml_installed():
+    import pyspark
+    from pyspark import SparkFiles
+    from pyspark.sql import SparkSession, SQLContext
+    from pyspark.sql.functions import pandas_udf, col, expr
+
+    spark = SparkSession.builder.master("local[*]").config("spark.driver.bindAddress", "127.0.0.1").getOrCreate()
+    sql_context = SQLContext(spark)
+
+if pandas_installed():
+    import pandas as pd
 
 
 class TestBackends(unittest.TestCase):
@@ -504,6 +526,109 @@ class TestBackends(unittest.TestCase):
         model.fit(X, y)
 
         self.assertRaises(RuntimeError, hummingbird.ml.convert, model, "onnx")
+
+    # Test Spark UDF
+    @unittest.skipIf(
+        os.name == "nt" or not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
+        reason="UDF Test requires spark >= 3",
+    )
+    def test_udf_torch(self):
+        X, y = load_iris(return_X_y=True)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
+        spark_df = sql_context.createDataFrame(pd.DataFrame(data=X_train))
+        sql_context.registerDataFrameAsTable(spark_df, "IRIS")
+
+        model = GradientBoostingClassifier(n_estimators=10)
+        model.fit(X_train, y_train)
+
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        # Broadcast the model.
+        broadcasted_model = spark.sparkContext.broadcast(hb_model)
+
+        # UDF definition.
+        @pandas_udf("long")
+        def udf_hb_predict(iterator: Iterator[pd.Series]) -> Iterator[pd.Series]:
+            model = broadcasted_model.value
+            for args in iterator:
+                data_unmangled = pd.concat([feature for feature in args], axis=1)
+                predictions = model.predict(data_unmangled)
+                yield pd.Series(np.array(predictions))
+
+        # Register the UDF.
+        sql_context.udf.register("PREDICT", udf_hb_predict)
+
+        # Run the query.
+        sql_context.sql("SELECT SUM(prediction) FROM (SELECT PREDICT(*) as prediction FROM IRIS)").show()
+
+    @unittest.skipIf(
+        os.name == "nt" or not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
+        reason="UDF Test requires spark >= 3",
+    )
+    def test_udf_torch_jit_broadcast(self):
+        import pickle
+
+        X, y = load_iris(return_X_y=True)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
+        spark_df = sql_context.createDataFrame(pd.DataFrame(data=X_train))
+        sql_context.registerDataFrameAsTable(spark_df, "IRIS")
+
+        model = GradientBoostingClassifier(n_estimators=10)
+        model.fit(X_train, y_train)
+
+        hb_model = hummingbird.ml.convert(model, "torch.jit", X_test)
+
+        # Broadcast the model returns an error.
+        self.assertRaises(pickle.PickleError, spark.sparkContext.broadcast, hb_model)
+
+    @unittest.skipIf(
+        os.name == "nt" or not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
+        reason="UDF Test requires spark >= 3",
+    )
+    def test_udf_torch_jit_spark_file(self):
+        import dill
+        import torch.jit
+
+        X, y = load_iris(return_X_y=True)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
+        spark_df = sql_context.createDataFrame(pd.DataFrame(data=X_train))
+        sql_context.registerDataFrameAsTable(spark_df, "IRIS")
+
+        model = GradientBoostingClassifier(n_estimators=10)
+        model.fit(X_train, y_train)
+
+        hb_model = hummingbird.ml.convert(model, "torch.jit", X_test)
+
+        # Save the file locally.
+        if os.path.exists("deployed_model.zip"):
+            os.remove("deployed_model.zip")
+        torch.jit.save(hb_model.model, "deployed_model.zip")
+        hb_model._model = None
+
+        # Share the model using spark file and broadcast the container.
+        spark.sparkContext.addFile("deployed_model.zip")
+        broadcasted_container = spark.sparkContext.broadcast(hb_model)
+
+        # UDF definition.
+        @pandas_udf("long")
+        def udf_hb_predict(iterator: Iterator[pd.Series]) -> Iterator[pd.Series]:
+            location = SparkFiles.get("deployed_model.zip")
+            torch_model = torch.jit.load(location)
+            container = broadcasted_container.value
+            container._model = torch_model
+            model = container
+            for args in iterator:
+                data_unmangled = pd.concat([feature for feature in args], axis=1)
+                predictions = model.predict(data_unmangled.values)
+                yield pd.Series(np.array(predictions))
+
+        # Register the UDF.
+        sql_context.udf.register("PREDICT", udf_hb_predict)
+
+        # Run the query.
+        sql_context.sql("SELECT SUM(prediction) FROM (SELECT PREDICT(*) as prediction FROM IRIS)").show()
+
+        os.remove("deployed_model.zip")
 
 
 if __name__ == "__main__":
