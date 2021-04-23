@@ -60,7 +60,7 @@ jobs:
     - name: If mac, install libomp to facilitate lgbm install
       if: matrix.os == 'macos-10.15'
       run: |
-        brew install libomp==11.1.0
+        brew install libomp@11.1.0
         export CC=/usr/bin/clang
         export CXX=/usr/bin/clang++
         export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
