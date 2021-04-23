@@ -80,6 +80,7 @@ class PyTorchSklearnContainer(SklearnContainer):
             with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "wb") as file:
                 dill.dump(self, file)
         else:
+            shutil.rmtree(location)
             raise RuntimeError("Model type {} not recognized.".format(type(self.model)))
 
         # Zip the dir.
@@ -128,6 +129,7 @@ class PyTorchSklearnContainer(SklearnContainer):
             with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "rb") as file:
                 container = dill.load(file)
         else:
+            shutil.rmtree(location)
             raise RuntimeError("Model type {} not recognized".format(model_type))
 
         # Need to set the number of threads to use as set in the original container.
@@ -136,6 +138,7 @@ class PyTorchSklearnContainer(SklearnContainer):
                 torch.set_num_interop_threads(1)
             torch.set_num_threads(container._n_threads)
 
+        shutil.rmtree(location)
         return container
 
     def to(self, device):

@@ -124,7 +124,9 @@ class ONNXSklearnContainer(SklearnContainer):
             # Load the model type.
             with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
                 model_type = file.readline()
-                assert model_type == "onnx", "Expected ONNX model type, got {}".format(model_type)
+            if model_type != "onnx":
+                shutil.rmtree(location)
+                raise RuntimeError("Expected ONNX model type, got {}".format(model_type))
 
         # Load the actual model.
         model = onnx.load(os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
@@ -132,7 +134,9 @@ class ONNXSklearnContainer(SklearnContainer):
         # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
             container = dill.load(file)
-        assert container is not None, "Failed to load the model container."
+        if container is None:
+            shutil.rmtree(location)
+            raise RuntimeError("Failed to load the model container.")
 
         # Setup the container.
         container._model = model
@@ -144,6 +148,7 @@ class ONNXSklearnContainer(SklearnContainer):
             sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
         container._session = ort.InferenceSession(container._model.SerializeToString(), sess_options=sess_options)
 
+        shutil.rmtree(location)
         return container
 
     def _get_named_inputs(self, inputs):

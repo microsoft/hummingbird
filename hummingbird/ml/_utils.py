@@ -215,6 +215,7 @@ def load(location):
     elif "tvm" in model_type:
         model = TVMSklearnContainer.load(location, do_unzip_and_model_type_check=False)
     else:
+        shutil.rmtree(location)
         raise RuntimeError("Model type {} not recognized.".format(model_type))
 
     assert model.model is not None
