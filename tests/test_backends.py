@@ -508,7 +508,7 @@ class TestBackends(unittest.TestCase):
 
     # Test Spark UDF
     @unittest.skipIf(
-        os.name != "nt" and not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
+        os.name == "nt" or not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
         reason="UDF Test requires spark >= 3",
     )
     def test_udf_torch(self):
@@ -541,7 +541,7 @@ class TestBackends(unittest.TestCase):
         sql_context.sql("SELECT SUM(prediction) FROM (SELECT PREDICT(*) as prediction FROM IRIS)").show()
 
     @unittest.skipIf(
-        os.name != "nt" and not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
+        os.name == "nt" or not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
         reason="UDF Test requires spark >= 3",
     )
     def test_udf_torch_jit_broadcast(self):
@@ -561,7 +561,7 @@ class TestBackends(unittest.TestCase):
         self.assertRaises(pickle.PickleError, spark.sparkContext.broadcast, hb_model)
 
     @unittest.skipIf(
-        os.name != "nt" and not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
+        os.name == "nt" or not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
         reason="UDF Test requires spark >= 3",
     )
     def test_udf_torch_jit_spark_file(self):
