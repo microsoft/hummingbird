@@ -508,7 +508,8 @@ class TestBackends(unittest.TestCase):
 
     # Test Spark UDF
     @unittest.skipIf(
-        not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"), reason="UDF Test requires spark >= 3"
+        os.name != "nt" and not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
+        reason="UDF Test requires spark >= 3",
     )
     def test_udf_torch(self):
         X, y = load_iris(return_X_y=True)
@@ -540,7 +541,8 @@ class TestBackends(unittest.TestCase):
         sql_context.sql("SELECT SUM(prediction) FROM (SELECT PREDICT(*) as prediction FROM IRIS)").show()
 
     @unittest.skipIf(
-        not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"), reason="UDF Test requires spark >= 3"
+        os.name != "nt" and not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
+        reason="UDF Test requires spark >= 3",
     )
     def test_udf_torch_jit_broadcast(self):
         import pickle
@@ -557,6 +559,55 @@ class TestBackends(unittest.TestCase):
 
         # Broadcast the model returns an error.
         self.assertRaises(pickle.PickleError, spark.sparkContext.broadcast, hb_model)
+
+    @unittest.skipIf(
+        os.name != "nt" and not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
+        reason="UDF Test requires spark >= 3",
+    )
+    def test_udf_torch_jit_spark_file(self):
+        import dill
+        import torch.jit
+
+        X, y = load_iris(return_X_y=True)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
+        spark_df = sql_context.createDataFrame(pd.DataFrame(data=X_train))
+        sql_context.registerDataFrameAsTable(spark_df, "IRIS")
+
+        model = GradientBoostingClassifier(n_estimators=10)
+        model.fit(X_train, y_train)
+
+        hb_model = hummingbird.ml.convert(model, "torch.jit", X_test)
+
+        # Save the file locally.
+        if os.path.exists("deployed_model.zip"):
+            os.remove("deployed_model.zip")
+        torch.jit.save(hb_model.model, "deployed_model.zip")
+        hb_model._model = None
+
+        # Share the model using spark file and broadcast the container.
+        spark.sparkContext.addFile("deployed_model.zip")
+        broadcasted_container = spark.sparkContext.broadcast(hb_model)
+
+        # UDF definition.
+        @pandas_udf("long")
+        def udf_hb_predict(iterator: Iterator[pd.Series]) -> Iterator[pd.Series]:
+            location = SparkFiles.get("deployed_model.zip")
+            torch_model = torch.jit.load(location)
+            container = broadcasted_container.value
+            container._model = torch_model
+            model = container
+            for args in iterator:
+                data_unmangled = pd.concat([feature for feature in args], axis=1)
+                predictions = model.predict(data_unmangled.values)
+                yield pd.Series(np.array(predictions))
+
+        # Register the UDF.
+        sql_context.udf.register("PREDICT", udf_hb_predict)
+
+        # Run the query.
+        sql_context.sql("SELECT SUM(prediction) FROM (SELECT PREDICT(*) as prediction FROM IRIS)").show()
+
+        os.remove("deployed_model.zip")
 
 
 if __name__ == "__main__":
