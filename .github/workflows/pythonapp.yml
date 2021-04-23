@@ -72,7 +72,7 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
-    - uses: actions/cache@v1
+    - uses: actions/cache@v2
       # TVM takes forever, we try to cache it.
       if: ${{ matrix.os != 'windows-2019' }}
       id: cache
