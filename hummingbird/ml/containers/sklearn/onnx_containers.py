@@ -134,9 +134,9 @@ class ONNXSklearnContainer(SklearnContainer):
 
         # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
-        if container is None:
-            shutil.rmtree(location)
-            raise RuntimeError("Failed to load the model container.")
+            if container is None:
+                shutil.rmtree(location)
+                raise RuntimeError("Failed to load the model container.")
 
         # Setup the container.
         container._model = model
