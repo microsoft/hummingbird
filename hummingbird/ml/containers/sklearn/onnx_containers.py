@@ -117,6 +117,7 @@ class ONNXSklearnContainer(SklearnContainer):
                 zip_location = location + ".zip"
             else:
                 location = zip_location[:-4]
+            assert os.path.exists(zip_location), "Zip file {} does not exist.".format(zip_location)
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)
