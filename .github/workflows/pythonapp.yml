@@ -60,7 +60,8 @@ jobs:
     - name: If mac, install libomp to facilitate lgbm install
       if: matrix.os == 'macos-10.15'
       run: |
-        brew install libomp
+        wget https://raw.githubusercontent.com/Homebrew/homebrew-core/fb8323f2b170bd4ae97e1bac9bf3e2983af3fdb0/Formula/libomp.rb
+        brew install ./libomp.rb
         export CC=/usr/bin/clang
         export CXX=/usr/bin/clang++
         export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
@@ -71,7 +72,7 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
-    - uses: actions/cache@v1
+    - uses: actions/cache@v2
       # TVM takes forever, we try to cache it.
       if: ${{ matrix.os != 'windows-2019' }}
       id: cache
