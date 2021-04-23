@@ -12,8 +12,10 @@ import dill
 import os
 import numpy as np
 import shutil
+import torch
 
-from hummingbird.ml._utils import tvm_installed
+import hummingbird
+from hummingbird.ml._utils import tvm_installed, dump_versions
 from hummingbird.ml.operator_converters import constants
 from hummingbird.ml.containers._sklearn_api_containers import (
     SklearnContainer,
@@ -66,8 +68,10 @@ class TVMSklearnContainer(SklearnContainer):
         os.makedirs(location)
 
         # Save the model type.
+        versions = dump_versions(hummingbird, torch, tvm)
         with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
             file.write("tvm")
+            file.writelines(versions)
 
         # Save the actual model.
         path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)

@@ -9,11 +9,14 @@ ONNX output containers for the sklearn API are listed here.
 """
 
 import dill
+from distutils.version import LooseVersion
 import os
 import numpy as np
 import shutil
+import torch
 
-from hummingbird.ml._utils import onnx_runtime_installed, from_strings_to_ints
+import hummingbird
+from hummingbird.ml._utils import onnx_runtime_installed, from_strings_to_ints, dump_versions
 from hummingbird.ml.operator_converters import constants
 from hummingbird.ml.containers._sklearn_api_containers import (
     SklearnContainer,
@@ -67,8 +70,10 @@ class ONNXSklearnContainer(SklearnContainer):
         os.makedirs(location)
 
         # Save the model type.
+        versions = dump_versions(hummingbird, torch, onnx)
         with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
             file.write("onnx")
+            file.writelines(versions)
 
         # Save the actual model.
         onnx.save(self.model, os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
@@ -123,7 +128,8 @@ class ONNXSklearnContainer(SklearnContainer):
 
             # Load the model type.
             with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
-                model_type = file.readline()
+                configuration = file.readline()
+            model_type = configuration[0]
             if model_type != "onnx":
                 shutil.rmtree(location)
                 raise RuntimeError("Expected ONNX model type, got {}".format(model_type))

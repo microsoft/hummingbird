@@ -9,6 +9,7 @@ Collection of utility functions used throughout Hummingbird.
 """
 
 from distutils.version import LooseVersion
+from types import ModuleType
 import numpy as np
 import torch
 import os
@@ -220,6 +221,34 @@ def load(location):
 
     assert model.model is not None
     return model
+
+
+_version_map = {"hummingbird": 1, "torch": 2, "onnx": 3, "tvm": 3}
+
+
+def dump_versions(configuration, *args):
+    configurations = np.array(args.len())
+    for module in args:
+        assert isinstance(module, ModuleType)
+        configurations[_version_map[module]] = module.__version__
+    return "\n".join(configurations)
+
+
+# def _check_dumped_versions(configuration, *args):
+#     hummingbird_version = configuration[1]
+#     torch_version = configuration[2]
+#     if LooseVersion(hummingbird_version) != LooseVersion(hummingbird.__version__):
+#         warnings.warn(
+#             "Version of Hummingbird used to save the model ({}) is different than the current version ({}).".format(
+#                 hummingbird_version, hummingbird.__version__
+#             )
+#         )
+#     if LooseVersion(hummingbird_version) != LooseVersion(hummingbird.__version__):
+#         warnings.warn(
+#             "Version of torch used to save the model ({}) is different than the current version ({}).".format(
+#                 torch_version, torch.__version__
+#             )
+#         )
 
 
 class _Constants(object):

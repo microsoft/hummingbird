@@ -9,12 +9,15 @@ Pytorch and TorchScript output containers for the sklearn API are listed here.
 """
 
 import dill
+from distutils.version import LooseVersion
 import os
 import numpy as np
 import shutil
 import torch
+import warnings
 
-from hummingbird.ml._utils import pandas_installed, get_device, from_strings_to_ints
+import hummingbird
+from hummingbird.ml._utils import pandas_installed, get_device, from_strings_to_ints, dump_versions
 from hummingbird.ml.operator_converters import constants
 from hummingbird.ml.containers._sklearn_api_containers import (
     SklearnContainer,
@@ -53,11 +56,13 @@ class PyTorchSklearnContainer(SklearnContainer):
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
 
+        versions = dump_versions(hummingbird, torch)
         if "torch.jit" in str(type(self.model)):
             # This is a torchscript model.
             # Save the model type.
             with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
                 file.write("torch.jit")
+                file.writelines(versions)
 
             # Save the actual model.
             self.model.save(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
@@ -75,6 +80,7 @@ class PyTorchSklearnContainer(SklearnContainer):
             # Save the model type.
             with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
                 file.write("torch")
+                file.writelines(versions)
 
             # Save the actual model plus the container
             with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "wb") as file:
@@ -116,7 +122,9 @@ class PyTorchSklearnContainer(SklearnContainer):
 
         # Load the model type.
         with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
-            model_type = file.readline()
+            configuration = file.readlines()
+
+        model_type = configuration[0]
 
         if model_type == "torch.jit":
             # This is a torch.jit model
