@@ -4,7 +4,6 @@ Tests Hummingbird's backends.
 import unittest
 import warnings
 import os
-import shutil
 import numpy as np
 from typing import Iterator
 from distutils.version import LooseVersion
@@ -109,7 +108,6 @@ class TestBackends(unittest.TestCase):
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("pt-tmp.zip")
-        shutil.rmtree("pt-tmp")
 
     # Test pytorch save and generic load
     def test_pytorch_save_generic_load(self):
@@ -132,7 +130,27 @@ class TestBackends(unittest.TestCase):
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("pt-tmp.zip")
-        shutil.rmtree("pt-tmp")
+
+    def test_pytorch_save_load_load(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(hb_model)
+        hb_model.save("pt-tmp")
+
+        hummingbird.ml.load("pt-tmp")
+        hummingbird.ml.load("pt-tmp")
+
+        os.remove("pt-tmp.zip")
 
     # Test torchscript save and load
     def test_torchscript_save_load(self):
@@ -155,7 +173,6 @@ class TestBackends(unittest.TestCase):
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("ts-tmp.zip")
-        shutil.rmtree("ts-tmp")
 
     # Test torchscript save and generic load
     def test_torchscript_save_generic_load(self):
@@ -178,7 +195,6 @@ class TestBackends(unittest.TestCase):
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("ts-tmp.zip")
-        shutil.rmtree("ts-tmp")
 
     def test_load_fails_bad_path(self):
         # Asserts for bad path with extension
@@ -272,7 +288,6 @@ class TestBackends(unittest.TestCase):
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("tvm-tmp.zip")
-        shutil.rmtree("tvm-tmp")
 
     # Test tvm save and generic load
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
@@ -296,7 +311,6 @@ class TestBackends(unittest.TestCase):
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("tvm-tmp.zip")
-        shutil.rmtree("tvm-tmp")
 
     # Test tvm save and load zip file
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
@@ -320,7 +334,28 @@ class TestBackends(unittest.TestCase):
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("tvm-tmp.zip")
-        shutil.rmtree("tvm-tmp")
+
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_save_load_load(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertIsNotNone(hb_model)
+        hb_model.save("tvm-tmp.zip")
+
+        hummingbird.ml.TVMContainer.load("tvm-tmp.zip")
+        hummingbird.ml.TVMContainer.load("tvm-tmp.zip")
+
+        os.remove("tvm-tmp.zip")
 
     # Test onnx requires test_data or initial_types
     @unittest.skipIf(
@@ -474,7 +509,6 @@ class TestBackends(unittest.TestCase):
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("onnx-tmp.zip")
-        shutil.rmtree("onnx-tmp")
 
     # Test ONNX save and generic load
     @unittest.skipIf(not onnx_runtime_installed(), reason="ONNX test requires ORT")
@@ -498,7 +532,29 @@ class TestBackends(unittest.TestCase):
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("onnx-tmp.zip")
-        shutil.rmtree("onnx-tmp")
+
+    # Test ONNX save and generic load
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNX test requires ORT")
+    def test_onnx_save_load_load(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "onnx", X)
+        self.assertIsNotNone(hb_model)
+        hb_model.save("onnx-tmp")
+
+        hummingbird.ml.load("onnx-tmp")
+        hummingbird.ml.load("onnx-tmp")
+
+        os.remove("onnx-tmp.zip")
 
     # Test for when the user forgets to add a target (ex: convert(model, output) rather than convert(model, 'torch')) due to API change
     def test_forgotten_backend_string(self):

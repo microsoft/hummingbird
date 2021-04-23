@@ -166,7 +166,9 @@ class TVMSklearnContainer(SklearnContainer):
         # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
             container = dill.load(file)
-        assert container is not None, "Failed to load the model container."
+        if container is None:
+            shutil.rmtree(location)
+            raise RuntimeError("Failed to load the model container.")
 
         # Setup the container.
         ctx = tvm.cpu() if container._ctx == "cpu" else tvm.gpu
@@ -182,6 +184,7 @@ class TVMSklearnContainer(SklearnContainer):
 
         # Need to set the number of threads to use as set in the original container.
         os.environ["TVM_NUM_THREADS"] = str(container._n_threads)
+        shutil.rmtree(location)
 
         return container
 
