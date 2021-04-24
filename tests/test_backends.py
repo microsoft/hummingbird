@@ -7,6 +7,7 @@ import os
 import numpy as np
 from typing import Iterator
 from distutils.version import LooseVersion
+import shutil
 
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
@@ -150,6 +151,102 @@ class TestBackends(unittest.TestCase):
         hummingbird.ml.load("pt-tmp")
         hummingbird.ml.load("pt-tmp")
 
+        os.remove("pt-tmp.zip")
+
+    def test_pytorch_save_load_more_versions(self):
+        from hummingbird.ml.operator_converters import constants
+
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(hb_model)
+        hb_model.save("pt-tmp")
+
+        shutil.unpack_archive("pt-tmp.zip", "pt-tmp", format="zip")
+
+        # Adding a new library does not create problems.
+        with open(os.path.join("pt-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+            configuration = file.readlines()
+        configuration.append("\nlibx=1.3")
+        os.remove(os.path.join("pt-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH))
+        with open(os.path.join("pt-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "w") as file:
+            file.writelines(configuration)
+        shutil.make_archive("pt-tmp", "zip", "pt-tmp")
+
+        hummingbird.ml.load("pt-tmp")
+        os.remove("pt-tmp.zip")
+
+    def test_pytorch_save_load_less_versions(self):
+        from hummingbird.ml.operator_converters import constants
+
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(hb_model)
+        hb_model.save("pt-tmp")
+
+        shutil.unpack_archive("pt-tmp.zip", "pt-tmp", format="zip")
+
+        # Removing a library does not create problems.
+        with open(os.path.join("pt-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+            configuration = file.readlines()
+        configuration = configuration[-1]
+        os.remove(os.path.join("pt-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH))
+        with open(os.path.join("pt-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "w") as file:
+            file.writelines(configuration)
+        shutil.make_archive("pt-tmp", "zip", "pt-tmp")
+
+        hummingbird.ml.load("pt-tmp")
+        os.remove("pt-tmp.zip")
+
+    def test_pytorch_save_load_different_versions(self):
+        from hummingbird.ml.operator_converters import constants
+
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(hb_model)
+        hb_model.save("pt-tmp")
+
+        shutil.unpack_archive("pt-tmp.zip", "pt-tmp", format="zip")
+
+        # Changing the version of a library does not create problems.
+        with open(os.path.join("pt-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+            configuration = file.readlines()
+        configuration[0] = "hummingbird=0.0.0.1\n"
+        os.remove(os.path.join("pt-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH))
+        with open(os.path.join("pt-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "w") as file:
+            file.writelines(configuration)
+        shutil.make_archive("pt-tmp", "zip", "pt-tmp")
+
+        hummingbird.ml.load("pt-tmp")
         os.remove("pt-tmp.zip")
 
     # Test torchscript save and load
@@ -357,6 +454,33 @@ class TestBackends(unittest.TestCase):
 
         os.remove("tvm-tmp.zip")
 
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_save_load_no_versions(self):
+        from hummingbird.ml.operator_converters import constants
+
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertIsNotNone(hb_model)
+        hb_model.save("tvm-tmp")
+
+        shutil.unpack_archive("tvm-tmp.zip", "tvm-tmp", format="zip")
+
+        # Removing the configuration file with the versions does not create problems.
+        os.remove(os.path.join("tvm-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH))
+
+        hummingbird.ml.load("tvm-tmp")
+        os.remove("tvm-tmp.zip")
+
     # Test onnx requires test_data or initial_types
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
@@ -554,6 +678,33 @@ class TestBackends(unittest.TestCase):
         hummingbird.ml.load("onnx-tmp")
         hummingbird.ml.load("onnx-tmp")
 
+        os.remove("onnx-tmp.zip")
+
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNX test requires ORT")
+    def test_onnx_save_load_no_versions(self):
+        from hummingbird.ml.operator_converters import constants
+
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "onnx", X)
+        self.assertIsNotNone(hb_model)
+        hb_model.save("onnx-tmp")
+
+        shutil.unpack_archive("onnx-tmp.zip", "onnx-tmp", format="zip")
+
+        # Removing the configuration file with the versions does not create problems.
+        os.remove(os.path.join("onnx-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH))
+
+        hummingbird.ml.load("onnx-tmp")
         os.remove("onnx-tmp.zip")
 
     # Test for when the user forgets to add a target (ex: convert(model, output) rather than convert(model, 'torch')) due to API change

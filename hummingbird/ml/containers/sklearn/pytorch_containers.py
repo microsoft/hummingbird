@@ -13,8 +13,10 @@ import os
 import numpy as np
 import shutil
 import torch
+import warnings
 
-from hummingbird.ml._utils import pandas_installed, get_device, from_strings_to_ints
+import hummingbird
+from hummingbird.ml._utils import pandas_installed, get_device, from_strings_to_ints, dump_versions, check_dumped_versions
 from hummingbird.ml.operator_converters import constants
 from hummingbird.ml.containers._sklearn_api_containers import (
     SklearnContainer,
@@ -83,6 +85,11 @@ class PyTorchSklearnContainer(SklearnContainer):
             shutil.rmtree(location)
             raise RuntimeError("Model type {} not recognized.".format(type(self.model)))
 
+        # Save the module versions.
+        versions = dump_versions(hummingbird, torch)
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "w") as file:
+            file.writelines(versions)
+
         # Zip the dir.
         shutil.make_archive(location, "zip", location)
 
@@ -118,6 +125,16 @@ class PyTorchSklearnContainer(SklearnContainer):
         # Load the model type.
         with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
             model_type = file.readline()
+
+        # Check the versions of the modules used when saving the model.
+        if os.path.exists(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH)):
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+                configuration = file.readlines()
+            check_dumped_versions(configuration, hummingbird, torch)
+        else:
+            warnings.warn(
+                "Cannot find the configuration file with versions. You are likely trying to load a model saved with an old version of Hummingbird."
+            )
 
         if model_type == "torch.jit":
             # This is a torch.jit model

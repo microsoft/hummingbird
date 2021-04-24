@@ -12,8 +12,11 @@ import pickle
 import os
 import numpy as np
 import shutil
+import torch
+import warnings
 
-from hummingbird.ml._utils import onnx_runtime_installed, from_strings_to_ints
+import hummingbird
+from hummingbird.ml._utils import onnx_runtime_installed, from_strings_to_ints, dump_versions, check_dumped_versions
 from hummingbird.ml.operator_converters import constants
 from hummingbird.ml.containers._sklearn_api_containers import (
     SklearnContainer,
@@ -69,6 +72,11 @@ class ONNXSklearnContainer(SklearnContainer):
         # Save the model type.
         with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
             file.write("onnx")
+
+        # Save the module versions.
+        versions = dump_versions(hummingbird, torch, onnx)
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "w") as file:
+            file.writelines(versions)
 
         # Save the actual model.
         onnx.save(self.model, os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
@@ -128,6 +136,16 @@ class ONNXSklearnContainer(SklearnContainer):
             if model_type != "onnx":
                 shutil.rmtree(location)
                 raise RuntimeError("Expected ONNX model type, got {}".format(model_type))
+
+        # Check the versions of the modules used when saving the model.
+        if os.path.exists(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH)):
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+                configuration = file.readlines()
+            check_dumped_versions(configuration, hummingbird, torch, onnx)
+        else:
+            warnings.warn(
+                "Cannot find the configuration file with versions. You are likely trying to load a model saved with an old version of Hummingbird."
+            )
 
         # Load the actual model.
         model = onnx.load(os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
