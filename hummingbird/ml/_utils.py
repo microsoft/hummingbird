@@ -223,32 +223,32 @@ def load(location):
     return model
 
 
-_version_map = {"hummingbird": 1, "torch": 2, "onnx": 3, "tvm": 3}
-
-
-def dump_versions(configuration, *args):
-    configurations = np.array(args.len())
+def dump_versions(*args):
+    configurations = []
     for module in args:
         assert isinstance(module, ModuleType)
-        configurations[_version_map[module]] = module.__version__
+        configurations.append("{}={}".format(str(module.__name__), str(module.__version__)))
     return "\n".join(configurations)
 
 
-# def _check_dumped_versions(configuration, *args):
-#     hummingbird_version = configuration[1]
-#     torch_version = configuration[2]
-#     if LooseVersion(hummingbird_version) != LooseVersion(hummingbird.__version__):
-#         warnings.warn(
-#             "Version of Hummingbird used to save the model ({}) is different than the current version ({}).".format(
-#                 hummingbird_version, hummingbird.__version__
-#             )
-#         )
-#     if LooseVersion(hummingbird_version) != LooseVersion(hummingbird.__version__):
-#         warnings.warn(
-#             "Version of torch used to save the model ({}) is different than the current version ({}).".format(
-#                 torch_version, torch.__version__
-#             )
-#         )
+def check_dumped_versions(configurations, *args):
+    configurations = [configuration.strip() for configuration in configurations]
+    versions = {version.split("=")[0]: version.split("=")[1] for version in configurations}
+    if len(versions) != len(args):
+        warnings.warn(
+            "Loaded model contains an unexpected number of versions. You are probably loading a model coming from a different Hummingbird version."
+        )
+
+    for current_version in args:
+        assert isinstance(current_version, ModuleType)
+        if current_version.__name__ in versions:
+            loaded_version = versions[current_version.__name__]
+            if LooseVersion(loaded_version) != LooseVersion(current_version.__version__):
+                warnings.warn(
+                    "Version of {} used to save the model ({}) is different than the current version ({}).".format(
+                        current_version.__name, loaded_version, current_version.__version__
+                    )
+                )
 
 
 class _Constants(object):

@@ -53,6 +53,9 @@ TVM_INPUT_NAMES = "tvm_input_names"
 SAVE_LOAD_MODEL_TYPE_PATH = "model_type.txt"
 """Path where to find the model type when saving or loading."""
 
+SAVE_LOAD_MODEL_CONFIGURATION_PATH = "model_configuration.txt"
+"""Path where to find the modules versions used when saving or loading."""
+
 SAVE_LOAD_CONTAINER_PATH = "container.pkl"
 """Path where to find the container when saving or loading."""
 

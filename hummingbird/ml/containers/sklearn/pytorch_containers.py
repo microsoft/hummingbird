@@ -9,7 +9,6 @@ Pytorch and TorchScript output containers for the sklearn API are listed here.
 """
 
 import dill
-from distutils.version import LooseVersion
 import os
 import numpy as np
 import shutil
@@ -17,7 +16,7 @@ import torch
 import warnings
 
 import hummingbird
-from hummingbird.ml._utils import pandas_installed, get_device, from_strings_to_ints, dump_versions
+from hummingbird.ml._utils import pandas_installed, get_device, from_strings_to_ints, dump_versions, check_dumped_versions
 from hummingbird.ml.operator_converters import constants
 from hummingbird.ml.containers._sklearn_api_containers import (
     SklearnContainer,
@@ -56,13 +55,11 @@ class PyTorchSklearnContainer(SklearnContainer):
         assert not os.path.exists(location), "Directory {} already exists.".format(location)
         os.makedirs(location)
 
-        versions = dump_versions(hummingbird, torch)
         if "torch.jit" in str(type(self.model)):
             # This is a torchscript model.
             # Save the model type.
             with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
                 file.write("torch.jit")
-                file.writelines(versions)
 
             # Save the actual model.
             self.model.save(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
@@ -80,7 +77,6 @@ class PyTorchSklearnContainer(SklearnContainer):
             # Save the model type.
             with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
                 file.write("torch")
-                file.writelines(versions)
 
             # Save the actual model plus the container
             with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "wb") as file:
@@ -88,6 +84,11 @@ class PyTorchSklearnContainer(SklearnContainer):
         else:
             shutil.rmtree(location)
             raise RuntimeError("Model type {} not recognized.".format(type(self.model)))
+
+        # Save the module versions.
+        versions = dump_versions(hummingbird, torch)
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "w") as file:
+            file.writelines(versions)
 
         # Zip the dir.
         shutil.make_archive(location, "zip", location)
@@ -122,9 +123,12 @@ class PyTorchSklearnContainer(SklearnContainer):
 
         # Load the model type.
         with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
-            configuration = file.readlines()
+            model_type = file.readline()
 
-        model_type = configuration[0]
+        # Check the versions of the modules used when saving the model.
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+            configuration = file.readlines()
+        check_dumped_versions(configuration, hummingbird, torch)
 
         if model_type == "torch.jit":
             # This is a torch.jit model

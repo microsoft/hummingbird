@@ -15,7 +15,7 @@ import shutil
 import torch
 
 import hummingbird
-from hummingbird.ml._utils import tvm_installed, dump_versions
+from hummingbird.ml._utils import tvm_installed, dump_versions, check_dumped_versions
 from hummingbird.ml.operator_converters import constants
 from hummingbird.ml.containers._sklearn_api_containers import (
     SklearnContainer,
@@ -68,9 +68,12 @@ class TVMSklearnContainer(SklearnContainer):
         os.makedirs(location)
 
         # Save the model type.
-        versions = dump_versions(hummingbird, torch, tvm)
         with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
             file.write("tvm")
+
+        # Save the module versions.
+        versions = dump_versions(hummingbird, torch, tvm)
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "w") as file:
             file.writelines(versions)
 
         # Save the actual model.
@@ -158,7 +161,14 @@ class TVMSklearnContainer(SklearnContainer):
             # Load the model type.
             with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
                 model_type = file.readline()
-                assert model_type == "tvm", "Expected TVM model type, got {}".format(model_type)
+            if model_type != "tvm":
+                shutil.rmtree(location)
+                raise RuntimeError("Expected TVM model type, got {}".format(model_type))
+
+        # Check the versions of the modules used when saving the model.
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+            configuration = file.readlines()
+        check_dumped_versions(configuration, hummingbird, torch)
 
         # Load the actual model.
         path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)
