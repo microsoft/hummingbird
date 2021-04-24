@@ -127,9 +127,14 @@ class PyTorchSklearnContainer(SklearnContainer):
             model_type = file.readline()
 
         # Check the versions of the modules used when saving the model.
-        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
-            configuration = file.readlines()
-        check_dumped_versions(configuration, hummingbird, torch)
+        if os.path.exists(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH)):
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+                configuration = file.readlines()
+            check_dumped_versions(configuration, hummingbird, torch)
+        else:
+            warnings.warn(
+                "Cannot find the configuration file with versions. You are likely trying to load a model saved with an old version of Hummingbird."
+            )
 
         if model_type == "torch.jit":
             # This is a torch.jit model

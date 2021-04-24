@@ -225,6 +225,9 @@ def load(location):
 
 
 def dump_versions(*args):
+    """
+    Utility function used to generate a string containing the versions of the main modules used to convert a model.
+    """
     configurations = []
     for module in args:
         assert isinstance(module, ModuleType)
@@ -233,6 +236,9 @@ def dump_versions(*args):
 
 
 def check_dumped_versions(configurations, *args):
+    """
+    When a model is loaded this function is used to check that the versions of the modules used at saving time match with the version at loading time.
+    """
     configurations = [configuration.strip() for configuration in configurations]
     versions = {version.split("=")[0]: version.split("=")[1] for version in configurations}
     if len(versions) != len(args):
@@ -247,9 +253,15 @@ def check_dumped_versions(configurations, *args):
             if LooseVersion(loaded_version) != LooseVersion(current_version.__version__):
                 warnings.warn(
                     "Version of {} used to save the model ({}) is different than the current version ({}).".format(
-                        current_version.__name, loaded_version, current_version.__version__
+                        current_version.__name__, loaded_version, current_version.__version__
                     )
                 )
+        else:
+            warnings.warn(
+                "Module {} expected but not found. You are probably loading a model from a different version of Hummingbird.".format(
+                    current_version.__name__
+                )
+            )
 
 
 class _Constants(object):

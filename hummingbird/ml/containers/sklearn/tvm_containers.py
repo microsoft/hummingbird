@@ -13,6 +13,7 @@ import os
 import numpy as np
 import shutil
 import torch
+import warnings
 
 import hummingbird
 from hummingbird.ml._utils import tvm_installed, dump_versions, check_dumped_versions
@@ -167,9 +168,14 @@ class TVMSklearnContainer(SklearnContainer):
                 raise RuntimeError("Expected TVM model type, got {}".format(model_type))
 
         # Check the versions of the modules used when saving the model.
-        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
-            configuration = file.readlines()
-        check_dumped_versions(configuration, hummingbird, torch)
+        if os.path.exists(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH)):
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+                configuration = file.readlines()
+            check_dumped_versions(configuration, hummingbird, torch)
+        else:
+            warnings.warn(
+                "Cannot find the configuration file with versions. You are likely trying to load a model saved with an old version of Hummingbird."
+            )
 
         # Load the actual model.
         path_lib = os.path.join(location, constants.SAVE_LOAD_TVM_LIB_PATH)
