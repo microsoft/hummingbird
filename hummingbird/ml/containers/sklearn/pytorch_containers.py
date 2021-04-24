@@ -8,13 +8,15 @@
 Pytorch and TorchScript output containers for the sklearn API are listed here.
 """
 
-import dill
+import pickle
 import os
 import numpy as np
 import shutil
 import torch
+import warnings
 
-from hummingbird.ml._utils import pandas_installed, get_device, from_strings_to_ints
+import hummingbird
+from hummingbird.ml._utils import pandas_installed, get_device, from_strings_to_ints, dump_versions, check_dumped_versions
 from hummingbird.ml.operator_converters import constants
 from hummingbird.ml.containers._sklearn_api_containers import (
     SklearnContainer,
@@ -67,7 +69,7 @@ class PyTorchSklearnContainer(SklearnContainer):
 
             # Save the container.
             with open(os.path.join(location, "container.pkl"), "wb") as file:
-                dill.dump(self, file)
+                pickle.dump(self, file)
 
             self._model = model
         elif "Executor" in str(type(self.model)):
@@ -78,9 +80,15 @@ class PyTorchSklearnContainer(SklearnContainer):
 
             # Save the actual model plus the container
             with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "wb") as file:
-                dill.dump(self, file)
+                pickle.dump(self, file)
         else:
+            shutil.rmtree(location)
             raise RuntimeError("Model type {} not recognized.".format(type(self.model)))
+
+        # Save the module versions.
+        versions = dump_versions(hummingbird, torch)
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "w") as file:
+            file.writelines(versions)
 
         # Zip the dir.
         shutil.make_archive(location, "zip", location)
@@ -118,17 +126,28 @@ class PyTorchSklearnContainer(SklearnContainer):
         with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
             model_type = file.readline()
 
+        # Check the versions of the modules used when saving the model.
+        if os.path.exists(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH)):
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+                configuration = file.readlines()
+            check_dumped_versions(configuration, hummingbird, torch)
+        else:
+            warnings.warn(
+                "Cannot find the configuration file with versions. You are likely trying to load a model saved with an old version of Hummingbird."
+            )
+
         if model_type == "torch.jit":
             # This is a torch.jit model
             model = torch.jit.load(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
             with open(os.path.join(location, "container.pkl"), "rb") as file:
-                container = dill.load(file)
+                container = pickle.load(file)
             container._model = model
         elif model_type == "torch":
             # This is a pytorch  model
             with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "rb") as file:
-                container = dill.load(file)
+                container = pickle.load(file)
         else:
+            shutil.rmtree(location)
             raise RuntimeError("Model type {} not recognized".format(model_type))
 
         # Need to set the number of threads to use as set in the original container.
@@ -137,6 +156,7 @@ class PyTorchSklearnContainer(SklearnContainer):
                 torch.set_num_interop_threads(1)
             torch.set_num_threads(container._n_threads)
 
+        shutil.rmtree(location)
         return container
 
     def to(self, device):

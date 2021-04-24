@@ -8,12 +8,15 @@
 ONNX output containers for the sklearn API are listed here.
 """
 
-import dill
+import pickle
 import os
 import numpy as np
 import shutil
+import torch
+import warnings
 
-from hummingbird.ml._utils import onnx_runtime_installed, from_strings_to_ints
+import hummingbird
+from hummingbird.ml._utils import onnx_runtime_installed, from_strings_to_ints, dump_versions, check_dumped_versions
 from hummingbird.ml.operator_converters import constants
 from hummingbird.ml.containers._sklearn_api_containers import (
     SklearnContainer,
@@ -70,6 +73,11 @@ class ONNXSklearnContainer(SklearnContainer):
         with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "w") as file:
             file.write("onnx")
 
+        # Save the module versions.
+        versions = dump_versions(hummingbird, torch, onnx)
+        with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "w") as file:
+            file.writelines(versions)
+
         # Save the actual model.
         onnx.save(self.model, os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
 
@@ -80,7 +88,7 @@ class ONNXSklearnContainer(SklearnContainer):
 
         # Save the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "wb") as file:
-            dill.dump(self, file)
+            pickle.dump(self, file)
 
         # Zip the dir.
         shutil.make_archive(location, "zip", location)
@@ -125,15 +133,29 @@ class ONNXSklearnContainer(SklearnContainer):
             # Load the model type.
             with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
                 model_type = file.readline()
-                assert model_type == "onnx", "Expected ONNX model type, got {}".format(model_type)
+            if model_type != "onnx":
+                shutil.rmtree(location)
+                raise RuntimeError("Expected ONNX model type, got {}".format(model_type))
+
+        # Check the versions of the modules used when saving the model.
+        if os.path.exists(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH)):
+            with open(os.path.join(location, constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH), "r") as file:
+                configuration = file.readlines()
+            check_dumped_versions(configuration, hummingbird, torch, onnx)
+        else:
+            warnings.warn(
+                "Cannot find the configuration file with versions. You are likely trying to load a model saved with an old version of Hummingbird."
+            )
 
         # Load the actual model.
         model = onnx.load(os.path.join(location, constants.SAVE_LOAD_ONNX_PATH))
 
         # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
-            container = dill.load(file)
-        assert container is not None, "Failed to load the model container."
+            container = pickle.load(file)
+        if container is None:
+            shutil.rmtree(location)
+            raise RuntimeError("Failed to load the model container.")
 
         # Setup the container.
         container._model = model
@@ -145,6 +167,7 @@ class ONNXSklearnContainer(SklearnContainer):
             sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
         container._session = ort.InferenceSession(container._model.SerializeToString(), sess_options=sess_options)
 
+        shutil.rmtree(location)
         return container
 
     def _get_named_inputs(self, inputs):

@@ -9,6 +9,7 @@ Collection of utility functions used throughout Hummingbird.
 """
 
 from distutils.version import LooseVersion
+from types import ModuleType
 import numpy as np
 import torch
 import os
@@ -216,10 +217,51 @@ def load(location):
     elif "tvm" in model_type:
         model = TVMSklearnContainer.load(location, do_unzip_and_model_type_check=False)
     else:
+        shutil.rmtree(location)
         raise RuntimeError("Model type {} not recognized.".format(model_type))
 
     assert model.model is not None
     return model
+
+
+def dump_versions(*args):
+    """
+    Utility function used to generate a string containing the versions of the main modules used to convert a model.
+    """
+    configurations = []
+    for module in args:
+        assert isinstance(module, ModuleType)
+        configurations.append("{}={}".format(str(module.__name__), str(module.__version__)))
+    return "\n".join(configurations)
+
+
+def check_dumped_versions(configurations, *args):
+    """
+    When a model is loaded this function is used to check that the versions of the modules used at saving time match with the version at loading time.
+    """
+    configurations = [configuration.strip() for configuration in configurations]
+    versions = {version.split("=")[0]: version.split("=")[1] for version in configurations}
+    if len(versions) != len(args):
+        warnings.warn(
+            "Loaded model contains an unexpected number of versions. You are probably loading a model coming from a different Hummingbird version."
+        )
+
+    for current_version in args:
+        assert isinstance(current_version, ModuleType)
+        if current_version.__name__ in versions:
+            loaded_version = versions[current_version.__name__]
+            if LooseVersion(loaded_version) != LooseVersion(current_version.__version__):
+                warnings.warn(
+                    "Version of {} used to save the model ({}) is different than the current version ({}).".format(
+                        current_version.__name__, loaded_version, current_version.__version__
+                    )
+                )
+        else:
+            warnings.warn(
+                "Module {} expected but not found. You are probably loading a model from a different version of Hummingbird.".format(
+                    current_version.__name__
+                )
+            )
 
 
 class _Constants(object):
