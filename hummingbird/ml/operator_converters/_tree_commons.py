@@ -10,6 +10,7 @@ Collections of classes and functions shared among all tree converters.
 
 import copy
 import numpy as np
+import torch
 
 from ._tree_implementations import TreeImpl
 from ._tree_implementations import GEMMDecisionTreeImpl, TreeTraversalDecisionTreeImpl, PerfectTreeTraversalDecisionTreeImpl
@@ -59,6 +60,61 @@ class TreeParameters:
         self.features = features
         self.thresholds = thresholds
         self.values = values
+
+
+# Post tranform classes.
+class PostTransform:
+    def __call__(self, x):
+        return x
+
+
+class ApplyBasePredictionPostTransform(PostTransform):
+    def __init__(self, base_prediction):
+        self.base_prediction = base_prediction
+
+    def __call__(self, x):
+        x += self.base_prediction
+        return x
+
+
+class ApplySigmoidPostTransform(PostTransform):
+    def __call__(self, x):
+        output = torch.sigmoid(x)
+        return torch.cat([1 - output, output], dim=1)
+
+
+class ApplySigmoidBasePredictionPostTransform(PostTransform):
+    def __init__(self, base_prediction):
+        self.base_prediction = ApplyBasePredictionPostTransform(base_prediction)
+
+    def __call__(self, x):
+        return ApplySigmoidPostTransform()(self.base_prediction(x))
+
+
+class ApplySoftmaxPostTransform(PostTransform):
+    def __call__(self, x):
+        return torch.softmax(x, dim=1)
+
+
+class ApplySoftmaxBasePredictionPostTransform(PostTransform):
+    def __init__(self, base_prediction):
+        self.base_prediction = ApplyBasePredictionPostTransform(base_prediction)
+
+    def __call__(self, x):
+        return ApplySoftmaxPostTransform()(self.base_prediction(x))
+
+
+class ApplyTweediePostTransform(PostTransform):
+    def __call__(self, x):
+        return torch.exp(x)
+
+
+class ApplyTweedieBasePredictionPostTransform(PostTransform):
+    def __init__(self, base_prediction):
+        self.base_prediction = ApplyBasePredictionPostTransform(base_prediction)
+
+    def __call__(self, x):
+        return ApplyTweediePostTransform()(self.base_prediction(x))
 
 
 def _find_max_depth(tree_parameters):

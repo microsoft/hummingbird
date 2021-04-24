@@ -8,7 +8,7 @@
 Pytorch and TorchScript output containers for the sklearn API are listed here.
 """
 
-import dill
+import pickle
 import os
 import numpy as np
 import shutil
@@ -69,7 +69,7 @@ class PyTorchSklearnContainer(SklearnContainer):
 
             # Save the container.
             with open(os.path.join(location, "container.pkl"), "wb") as file:
-                dill.dump(self, file)
+                pickle.dump(self, file)
 
             self._model = model
         elif "Executor" in str(type(self.model)):
@@ -80,7 +80,7 @@ class PyTorchSklearnContainer(SklearnContainer):
 
             # Save the actual model plus the container
             with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "wb") as file:
-                dill.dump(self, file)
+                pickle.dump(self, file)
         else:
             shutil.rmtree(location)
             raise RuntimeError("Model type {} not recognized.".format(type(self.model)))
@@ -117,6 +117,7 @@ class PyTorchSklearnContainer(SklearnContainer):
                 zip_location = location + ".zip"
             else:
                 location = zip_location[:-4]
+            assert os.path.exists(zip_location), "Zip file {} does not exist.".format(zip_location)
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)
@@ -134,12 +135,12 @@ class PyTorchSklearnContainer(SklearnContainer):
             # This is a torch.jit model
             model = torch.jit.load(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
             with open(os.path.join(location, "container.pkl"), "rb") as file:
-                container = dill.load(file)
+                container = pickle.load(file)
             container._model = model
         elif model_type == "torch":
             # This is a pytorch  model
             with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "rb") as file:
-                container = dill.load(file)
+                container = pickle.load(file)
         else:
             shutil.rmtree(location)
             raise RuntimeError("Model type {} not recognized".format(model_type))

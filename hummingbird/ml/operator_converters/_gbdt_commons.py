@@ -12,6 +12,15 @@ import numpy as np
 
 from . import constants
 from ._tree_commons import get_tree_params_and_type, get_parameters_for_tree_trav_common, get_parameters_for_gemm_common
+from ._tree_commons import (
+    ApplySigmoidPostTransform,
+    ApplySoftmaxPostTransform,
+    ApplyTweediePostTransform,
+    ApplyBasePredictionPostTransform,
+    ApplySigmoidBasePredictionPostTransform,
+    ApplySoftmaxBasePredictionPostTransform,
+    ApplyTweedieBasePredictionPostTransform,
+)
 from ._tree_implementations import GEMMGBDTImpl, TreeTraversalGBDTImpl, PerfectTreeTraversalGBDTImpl, TreeImpl
 
 
@@ -122,23 +131,6 @@ def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, c
         base_prediction = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False)
         extra_config[constants.BASE_PREDICTION] = base_prediction
 
-    def apply_base_prediction(base_prediction):
-        def apply(x):
-            x += base_prediction
-            return x
-
-        return apply
-
-    def apply_sigmoid(x):
-        output = torch.sigmoid(x)
-        return torch.cat([1 - output, output], dim=1)
-
-    def apply_softmax(x):
-        return torch.softmax(x, dim=1)
-
-    def apply_tweedie(x):
-        return torch.exp(x)
-
     # For models following the Sklearn API we need to build the post transform ourselves.
     if classes is not None and constants.POST_TRANSFORM not in extra_config:
         if len(classes) <= 2:
@@ -150,23 +142,23 @@ def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, c
     if constants.POST_TRANSFORM in extra_config:
         if extra_config[constants.POST_TRANSFORM] == constants.SIGMOID:
             if constants.BASE_PREDICTION in extra_config:
-                extra_config[constants.POST_TRANSFORM] = lambda x: apply_sigmoid(apply_base_prediction(base_prediction)(x))
+                extra_config[constants.POST_TRANSFORM] = ApplySigmoidBasePredictionPostTransform(base_prediction)
             else:
-                extra_config[constants.POST_TRANSFORM] = apply_sigmoid
+                extra_config[constants.POST_TRANSFORM] = ApplySigmoidPostTransform()
         elif extra_config[constants.POST_TRANSFORM] == constants.SOFTMAX:
             if constants.BASE_PREDICTION in extra_config:
-                extra_config[constants.POST_TRANSFORM] = lambda x: apply_softmax(apply_base_prediction(base_prediction)(x))
+                extra_config[constants.POST_TRANSFORM] = ApplySoftmaxBasePredictionPostTransform(base_prediction)
             else:
-                extra_config[constants.POST_TRANSFORM] = apply_softmax
+                extra_config[constants.POST_TRANSFORM] = ApplySoftmaxPostTransform()
         elif extra_config[constants.POST_TRANSFORM] == constants.TWEEDIE:
             if constants.BASE_PREDICTION in extra_config:
-                extra_config[constants.POST_TRANSFORM] = lambda x: apply_tweedie(apply_base_prediction(base_prediction)(x))
+                extra_config[constants.POST_TRANSFORM] = ApplyTweedieBasePredictionPostTransform(base_prediction)
             else:
-                extra_config[constants.POST_TRANSFORM] = apply_tweedie
+                extra_config[constants.POST_TRANSFORM] = ApplyTweediePostTransform()
         else:
             raise NotImplementedError("Post transform {} not implemeneted yet".format(extra_config[constants.POST_TRANSFORM]))
     elif constants.BASE_PREDICTION in extra_config:
-        extra_config[constants.POST_TRANSFORM] = apply_base_prediction(base_prediction)
+        extra_config[constants.POST_TRANSFORM] = ApplyBasePredictionPostTransform(base_prediction)
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:

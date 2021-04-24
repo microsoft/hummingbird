@@ -8,7 +8,7 @@
 ONNX output containers for the sklearn API are listed here.
 """
 
-import dill
+import pickle
 from distutils.version import LooseVersion
 import os
 import numpy as np
@@ -88,7 +88,7 @@ class ONNXSklearnContainer(SklearnContainer):
 
         # Save the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "wb") as file:
-            dill.dump(self, file)
+            pickle.dump(self, file)
 
         # Zip the dir.
         shutil.make_archive(location, "zip", location)
@@ -125,6 +125,7 @@ class ONNXSklearnContainer(SklearnContainer):
                 zip_location = location + ".zip"
             else:
                 location = zip_location[:-4]
+            assert os.path.exists(zip_location), "Zip file {} does not exist.".format(zip_location)
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)
@@ -146,7 +147,7 @@ class ONNXSklearnContainer(SklearnContainer):
 
         # Load the container.
         with open(os.path.join(location, constants.SAVE_LOAD_CONTAINER_PATH), "rb") as file:
-            container = dill.load(file)
+            container = pickle.load(file)
         if container is None:
             shutil.rmtree(location)
             raise RuntimeError("Failed to load the model container.")
