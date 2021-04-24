@@ -9,7 +9,6 @@ ONNX output containers for the sklearn API are listed here.
 """
 
 import pickle
-from distutils.version import LooseVersion
 import os
 import numpy as np
 import shutil
