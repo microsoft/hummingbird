@@ -21,24 +21,31 @@ with open(README) as f:
     if start_pos >= 0:
         long_description = long_description[start_pos:]
 
-install_requires = ["numpy>=1.15", "onnxconverter-common>=1.6.0", "scikit-learn==0.22.1"]
-if sys.platform == "darwin" or sys.platform == "linux":
-    install_requires.append("torch>=1.4.0")
-else:
-    if sys.version_info[:2] == (3, 8):
-        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp38-cp38-win_amd64.whl")
-    elif sys.version_info[:2] == (3, 7):
-        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-win_amd64.whl")
-    elif sys.version_info[:2] == (3, 6):
-        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp36-cp36m-win_amd64.whl")
-    elif sys.version_info[:2] == (3, 5):
-        install_requires.append("torch @ https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp35-cp35m-win_amd64.whl")
-    else:
-        raise Exception("Python version < 3.5 not supported.")
+install_requires = [
+    "numpy>=1.15,<=1.20.*",
+    "onnxconverter-common>=1.6.0,<=1.7.0",
+    "scipy<=1.5.4",
+    "scikit-learn>=0.21.3,<=0.23.2",
+    "torch>=1.4.*,<=1.8.1",
+    "psutil",
+    "dill",
+]
+onnx_requires = [
+    "onnxruntime>=1.0.0,<1.7.0",
+    "onnxmltools>=1.6.0",
+    "skl2onnx<=1.7.0",
+]
+extra_requires = [
+    # The need each for these depends on which libraries you plan to convert from
+    "xgboost>=0.90,<1.4.0",
+    "lightgbm>=2.2,<3",
+]
 setup(
     name="hummingbird-ml",
     version=version_str,
     description="Convert trained traditional machine learning models into tensor computations",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     license="MIT License",
     author="Microsoft Corporation",
     author_email="hummingbird-dev@microsoft.com",
@@ -48,13 +55,10 @@ setup(
     install_requires=install_requires,
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
-        "docs": ["pdoc"],
-        "onnx": ["onnxruntime>=1.0.0", "onnxmltools>=1.6.0"],
-        "extra": [
-            # The need each for these depends on which libraries you plan to convert from
-            "xgboost==0.90",
-            "lightgbm>=2.2",
-        ],
+        "sparkml": ["pyspark>=2.4.4", "pyarrow>1.0"],
+        "onnx": onnx_requires,
+        "extra": extra_requires,
+        "benchmark": onnx_requires + extra_requires + ["memory-profiler", "psutil"],
     },
     classifiers=[
         "Environment :: Console",
@@ -63,5 +67,5 @@ setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
     ],
-    python_requires=">=3.5",
+    python_requires=">=3.6",
 )

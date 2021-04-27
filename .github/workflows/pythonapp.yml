@@ -6,11 +6,11 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - main
 
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -18,8 +18,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-2019]
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        os: [ubuntu-18.04, macos-10.15, windows-2019]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -27,20 +27,41 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install basic dependencies
+    - name: Lint with flake8
       run: |
         python -m pip install --upgrade pip
-        pip install .[tests]
+        pip install flake8
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # The GitHub editor is 127 chars wide
+        flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
+    # PyTorch for Mac has different pip syntax wrt Win and Linux.
+    # We want to test torch 1.5.x (in this case on python3.6) and torch 1.7.x.
+    # The following cases address the situations above.
+    - name: Install pytorch 1.5.1 if python 3.6 (mac)
+      if: ${{ matrix.python-version == '3.6' && matrix.os == 'macos-10.15' }}
+      run: pip install torch==1.5.1
+    - name: Install pytorch 1.8.0 if python > 3.6 (mac)
+      if: ${{ matrix.python-version != '3.6' && matrix.os == 'macos-10.15' }}
+      run: pip install torch==1.8.0
+    - name: Install pytorch 1.5.1+cpu if python 3.6 (not mac)
+      if: ${{ matrix.python-version == '3.6' && matrix.os != 'macos-10.15' }}
+      run: pip install torch==1.5.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+    - name: Install pytorch 1.8.0+cpu if python > 3.6 (not mac)
+      if:  ${{ matrix.python-version != '3.6' && matrix.os != 'macos-10.15' }}
+      run: pip install torch==1.8.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+    - name: Install basic dependencies
+      run: |
+        pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Run basic tests without extra
-      run: |
-        pytest
+      run: pytest
     - name: Coverage on basic tests without extra
-      run: |
-        coverage run -a -m pytest tests/test_no_extra_install.py
+      run: coverage run -a -m pytest tests/test_no_extra_install.py
     - name: If mac, install libomp to facilitate lgbm install
-      if: matrix.os == 'macOS-latest'
+      if: matrix.os == 'macos-10.15'
       run: |
-        brew install libomp
+        wget https://raw.githubusercontent.com/Homebrew/homebrew-core/fb8323f2b170bd4ae97e1bac9bf3e2983af3fdb0/Formula/libomp.rb
+        brew install ./libomp.rb
         export CC=/usr/bin/clang
         export CXX=/usr/bin/clang++
         export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
@@ -49,22 +70,96 @@ jobs:
         export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
     - name: Install extra dependencies
       run: |
-        pip install .[extra,onnx]
-    - name: Lint with flake8
+        pip install .[extra,onnx,sparkml]
+        pip install pandas
+    - uses: actions/cache@v2
+      # TVM takes forever, we try to cache it.
+      if: ${{ matrix.os != 'windows-2019' }}
+      id: cache
+      env:
+        CACHE_NUMBER: 1
+      with:
+        path: ../../../incubator-tvm
+        key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-tvm-0.7
+    # Getting TVM requires: 1) fetching TVM from github, 2) get LLVM, 3) cmake, 4) make, 5) install python dependecy.
+    # 1 to 4 will be retrieved from the cache.
+    # The pipeline only works for Unix systems. For windows we will have to compile LLVM from source which is a no go.
+    - name: Fetch and prepare TVM for compilation
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os != 'windows-2019' }}
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # The GitHub editor is 127 chars wide
-        flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
+        cd ~/
+        git clone https://github.com/apache/incubator-tvm.git
+        cd incubator-tvm
+        git checkout tags/v0.7.0
+        git submodule update --recursive --init
+        cmake -E make_directory build
+    - name: Get LLVM on Linux
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.6' && matrix.os == 'ubuntu-18.04' }}
+      working-directory: ../../../incubator-tvm
+      run: |
+        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+        tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz && mv clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04 llvm
+    - name: Get LLVM on Mac
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.6' && matrix.os == 'macos-10.15' }}
+      working-directory: ../../../incubator-tvm
+      run: |
+        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+        tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz && mv clang+llvm-10.0.0-x86_64-apple-darwin llvm
+    - name: CMake TVM
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.6' && matrix.os != 'windows-2019' }}
+      working-directory: ../../../incubator-tvm/build
+      run: >-
+        cmake
+        "-DUSE_RPC=ON"
+        "-DUSE_GRAPH_RUNTIME=ON"
+        "-DUSE_LLVM=../llvm/bin/llvm-config"
+        ..
+    - name: Build TVM
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.python-version != '3.6' && matrix.os != 'windows-2019' }}
+      working-directory: ../../../incubator-tvm/build
+      run: |
+        make -j3
+    - name: Install python TVM
+      if: ${{ matrix.python-version != '3.6' && matrix.os != 'windows-2019' }}
+      working-directory: ../../../incubator-tvm/python
+      run: |
+        python setup.py install
+    # We don't run pytest for Linux py3.7 since we do coverage for that case.
     - name: Test with pytest
-      run: |
-        pytest
-    - name: Coverage
+      if: ${{ matrix.python-version != '3.7' || matrix.os != 'ubuntu-18.04' }}
+      run: pytest
+    # Run and push coverage only for two runs (Linux py3.7 and py3.6).
+    - name: Coverage 3.7 Linux
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
-    - name: Upload coverage to Codecov
+    - name: Coverage 3.6 Linux
+      if: ${{ matrix.python-version == '3.6' && matrix.os == 'ubuntu-18.04' }}
+      run: |
+        coverage run -a -m pytest tests
+        coverage xml
+    - name: Upload coverage to Codecov 3.7
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
         flags: unittests
+    - name: Upload coverage to Codecov 3.6
+      if: ${{ matrix.python-version == '3.6' && matrix.os == 'ubuntu-18.04' }}
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        flags: unittests
+    # Compile and push documentation only for one of the runs (Linux py3.7).
+    # - name: Generate Documentation
+    #   if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
+    #   run: |
+    #     make sphinx-site -C website/
+    # - name: Deploy to GitHub pages
+    #   if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
+    #   uses: JamesIves/github-pages-deploy-action@3.6.2
+    #   with:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #     BRANCH: gh-pages
+    #     FOLDER: website/public

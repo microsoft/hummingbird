@@ -9,9 +9,14 @@ Collection of utility functions used throughout Hummingbird.
 """
 
 from distutils.version import LooseVersion
+from types import ModuleType
+import numpy as np
+import torch
+import os
 import warnings
+import shutil
 
-from .exceptions import ConstantError
+from hummingbird.ml.exceptions import ConstantError
 
 
 def torch_installed():
@@ -45,6 +50,18 @@ def onnx_runtime_installed():
     """
     try:
         import onnxruntime
+
+        return True
+    except ImportError:
+        return False
+
+
+def sparkml_installed():
+    """
+    Checks that *Spark ML/PySpark* is available.
+    """
+    try:
+        import pyspark
 
         return True
     except ImportError:
@@ -94,11 +111,157 @@ def xgboost_installed():
     from xgboost import __version__
 
     vers = LooseVersion(__version__)
-    allowed_min = LooseVersion("0.70")
-    allowed_max = LooseVersion("0.90")
-    if vers < allowed_min or vers > allowed_max:
-        warnings.warn("The converter works for xgboost >= 0.7 and <= 0.9. Different versions might not.")
+    allowed_min = LooseVersion("0.90")
+    if vers < allowed_min:
+        warnings.warn("The converter works for xgboost >= 0.9. Different versions might not.")
     return True
+
+
+def tvm_installed():
+    """
+    Checks that *TVM* is available.
+    """
+    try:
+        import tvm
+    except ImportError:
+        return False
+    return True
+
+
+def pandas_installed():
+    """
+    Checks that *Pandas* is available.
+    """
+    try:
+        import pandas
+    except ImportError:
+        return False
+    return True
+
+
+def is_pandas_dataframe(df):
+    import pandas as pd
+
+    if type(df) == pd.DataFrame:
+        return True
+    else:
+        return False
+
+
+def is_spark_dataframe(df):
+    if not sparkml_installed():
+        return False
+
+    import pyspark
+
+    if type(df) == pyspark.sql.DataFrame:
+        return True
+    else:
+        return False
+
+
+def get_device(model):
+    """
+    Convenient function used to get the runtime device for the model.
+    """
+    assert issubclass(model.__class__, torch.nn.Module)
+
+    device = None
+    if len(list(model.parameters())) > 0:
+        device = next(model.parameters()).device  # Assuming we are using a single device for all parameters
+
+    return device
+
+
+def from_strings_to_ints(input, max_string_length):
+    """
+    Utility function used to transform string inputs into a numerical representation.
+    """
+    shape = list(input.shape)
+    shape.append(max_string_length // 4)
+    return np.array(input, dtype="|S" + str(max_string_length)).view(np.int32).reshape(shape)
+
+
+def load(location):
+    """
+    Utility function used to load arbitrary Hummingbird models.
+    """
+    # Add load capabilities.
+    from hummingbird.ml.containers import PyTorchSklearnContainer
+    from hummingbird.ml.containers import TVMSklearnContainer
+    from hummingbird.ml.containers import ONNXSklearnContainer
+    from hummingbird.ml.operator_converters import constants
+
+    model = None
+    model_type = None
+
+    # Unzip the dir.
+    zip_location = location
+    if not location.endswith("zip"):
+        zip_location = location + ".zip"
+    else:
+        location = zip_location[:-4]
+    assert os.path.exists(zip_location), "Zip file {} does not exist.".format(zip_location)
+    shutil.unpack_archive(zip_location, location, format="zip")
+
+    assert os.path.exists(location), "Model location {} does not exist.".format(location)
+
+    # Load the model type.
+    with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
+        model_type = file.readline()
+
+    if "torch" in model_type:
+        model = PyTorchSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+    elif "onnx" in model_type:
+        model = ONNXSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+    elif "tvm" in model_type:
+        model = TVMSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+    else:
+        shutil.rmtree(location)
+        raise RuntimeError("Model type {} not recognized.".format(model_type))
+
+    assert model.model is not None
+    return model
+
+
+def dump_versions(*args):
+    """
+    Utility function used to generate a string containing the versions of the main modules used to convert a model.
+    """
+    configurations = []
+    for module in args:
+        assert isinstance(module, ModuleType)
+        configurations.append("{}={}".format(str(module.__name__), str(module.__version__)))
+    return "\n".join(configurations)
+
+
+def check_dumped_versions(configurations, *args):
+    """
+    When a model is loaded this function is used to check that the versions of the modules used at saving time match with the version at loading time.
+    """
+    configurations = [configuration.strip() for configuration in configurations]
+    versions = {version.split("=")[0]: version.split("=")[1] for version in configurations}
+    if len(versions) != len(args):
+        warnings.warn(
+            "Loaded model contains an unexpected number of versions. You are probably loading a model coming from a different Hummingbird version."
+        )
+
+    for current_version in args:
+        assert isinstance(current_version, ModuleType)
+        if current_version.__name__ in versions:
+            loaded_version = versions[current_version.__name__]
+            if LooseVersion(loaded_version) != LooseVersion(current_version.__version__):
+                warnings.warn(
+                    "Version of {} used to save the model ({}) is different than the current version ({}).".format(
+                        current_version.__name__, loaded_version, current_version.__version__
+                    )
+                )
+        else:
+            warnings.warn(
+                "Module {} expected but not found. You are probably loading a model from a different version of Hummingbird.".format(
+                    current_version.__name__
+                )
+            )
 
 
 class _Constants(object):

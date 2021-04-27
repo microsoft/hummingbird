@@ -18,17 +18,14 @@ from ._utils import _Constants
 # Add constants in scope.
 constants = _Constants(hummingbird_constants)
 
-
 # Add the converters in the Hummingbird scope.
-from .convert import convert  # noqa: F401, E402
+from .convert import convert, convert_batch  # noqa: F401, E402
 
 # Add the supported backends in scope.
 from .supported import backends  # noqa: F401, E402
 
-
-# Pdoc stuff.
-__pdoc__ = {}
-__pdoc__["hummingbird._container"] = True
-__pdoc__["hummingbird._parse"] = True
-__pdoc__["hummingbird._supported_operators"] = True
-__pdoc__["hummingbird._utils"] = True
+# Add load capabilities.
+from .containers import PyTorchSklearnContainer as TorchContainer  # noqa: F401, E402
+from .containers import TVMSklearnContainer as TVMContainer  # noqa: F401, E402
+from .containers import ONNXSklearnContainer as ONNXContainer  # noqa: F401, E402
+from ._utils import load  # noqa: F401, E402

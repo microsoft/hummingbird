@@ -31,9 +31,7 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
 
                 torch_model = hummingbird.ml.convert(model, "torch", extra_config={"tree_implementation": extra_config_param})
                 self.assertIsNotNone(torch_model)
-                self.assertEqual(
-                    str(type(list(torch_model.operator_map.values())[0])), gbdt_implementation_map[extra_config_param]
-                )
+                self.assertEqual(str(type(list(torch_model.model._operators)[0])), gbdt_implementation_map[extra_config_param])
 
     def _run_GB_trees_classifier_converter(self, num_classes, extra_config={}, labels_shift=0):
         warnings.filterwarnings("ignore")
@@ -140,6 +138,34 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
 
             model.fit(X, y)
             torch_model = hummingbird.ml.convert(model, "torch")
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Float 64 data tests
+    def test_float64_GB_trees_classifier_converter(self):
+        warnings.filterwarnings("ignore")
+        num_classes = 3
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.randint(num_classes, size=100)
+
+            model.fit(X, y)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config={})
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+    def test_float64_GB_trees_regressor_converter(self):
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            model = GradientBoostingRegressor(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            y = np.random.normal(size=100)
+
+            model.fit(X, y)
+            torch_model = hummingbird.ml.convert(model, "torch", extra_config={})
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
