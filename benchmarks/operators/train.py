@@ -53,23 +53,8 @@ from sklearn.preprocessing.data import (
 from sklearn.preprocessing._discretization import KBinsDiscretizer
 from sklearn.svm.classes import LinearSVC, NuSVC, SVC
 from sklearn.metrics import accuracy_score
-
+from benchmarks.timer import Timer
 from benchmarks.datasets import LearningTask
-
-
-class Timer:
-    def __init__(self):
-        self.start = None
-        self.end = None
-        self.interval = None
-
-    def __enter__(self):
-        self.start = time.clock()
-        return self
-
-    def __exit__(self, *args):
-        self.end = time.clock()
-        self.interval = self.end - self.start
 
 
 class CreateModel(ABC):

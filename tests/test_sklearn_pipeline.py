@@ -3,11 +3,14 @@ import numpy as np
 from sklearn import datasets
 
 from sklearn.compose import ColumnTransformer
+from sklearn.datasets import load_iris, load_diabetes
+from sklearn.svm import LinearSVC, LinearSVR
+from sklearn.datasets import make_regression
 from sklearn.decomposition import PCA
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LogisticRegression, RidgeCV
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.pipeline import Pipeline, FeatureUnion, make_pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
 
 import hummingbird.ml
@@ -24,6 +27,11 @@ try:
     from sklearn.impute import SimpleImputer
 except ImportError:
     from sklearn.preprocessing import Imputer as SimpleImputer
+
+try:
+    from sklearn.ensemble import StackingClassifier, StackingRegressor
+except ImportError:
+    StackingClassifier = None
 
 if pandas_installed():
     import pandas
@@ -470,7 +478,6 @@ class TestSklearnPipeline(unittest.TestCase):
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_passthrough(self):
         iris = datasets.load_iris()
@@ -514,7 +521,6 @@ class TestSklearnPipeline(unittest.TestCase):
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_passthrough_noweights(self):
         iris = datasets.load_iris()
@@ -557,7 +563,6 @@ class TestSklearnPipeline(unittest.TestCase):
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     def test_pipeline_column_transformer_passthrough_slice(self):
         iris = datasets.load_iris()
@@ -601,7 +606,21 @@ class TestSklearnPipeline(unittest.TestCase):
             model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
+    # Taken from https://github.com/microsoft/hummingbird/issues/388https://github.com/microsoft/hummingbird/issues/388
+    def test_pipeline_pca_rf(self):
+        X, y = make_regression(n_samples=1000, n_features=8, n_informative=5, n_targets=1, random_state=0, shuffle=True)
+        pca = PCA(n_components=8, svd_solver="randomized", whiten=True)
+        clf = make_pipeline(StandardScaler(), pca, RandomForestRegressor(n_estimators=10, max_depth=30, random_state=0))
+        clf.fit(X, y)
+
+        model = hummingbird.ml.convert(clf, "pytorch")
+
+        prediction_sk = clf.predict([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
+
+        prediction_hb = model.predict([[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])
+
+        np.testing.assert_allclose(prediction_sk, prediction_hb, rtol=1e-06, atol=1e-06)
+
     @unittest.skipIf(not onnx_runtime_installed(), reason="Test requires ORT installed")
     def test_pipeline_many_inputs(self):
         n_features = 18
@@ -625,7 +644,6 @@ class TestSklearnPipeline(unittest.TestCase):
             pipeline.predict(X), np.array(hb_model.predict(X_test)).flatten(), rtol=1e-06, atol=1e-06,
         )
 
-    @unittest.skipIf(ColumnTransformer is None, reason="ColumnTransformer not available in 0.19")
     @unittest.skipIf(not onnx_runtime_installed(), reason="Test requires ORT installed")
     def test_pipeline_many_inputs_with_schema(self):
         n_features = 5
@@ -652,6 +670,71 @@ class TestSklearnPipeline(unittest.TestCase):
         assert len(hb_model.model.graph.input) == n_features
         assert graph_inputs == input_column_names
         assert graph_outputs == output_column_names
+
+    @unittest.skipIf(StackingClassifier is None, reason="StackingClassifier not available in scikit-learn < 0.22")
+    def test_stacking_classifier(self):
+        X, y = load_iris(return_X_y=True)
+        estimators = [
+            ("rf", RandomForestClassifier(n_estimators=10, random_state=42)),
+            ("svr", make_pipeline(StandardScaler(), LogisticRegression(random_state=42))),
+        ]
+        clf = StackingClassifier(estimators=estimators, final_estimator=LogisticRegression())
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
+        clf.fit(X_train, y_train)
+
+        hb_model = hummingbird.ml.convert(clf, "torch")
+
+        np.testing.assert_allclose(
+            clf.predict(X_test), hb_model.predict(X_test), rtol=1e-06, atol=1e-06,
+        )
+
+    @unittest.skipIf(StackingClassifier is None, reason="StackingClassifier not available in scikit-learn < 0.22")
+    def test_stacking_classifier_passthrough(self):
+        X, y = load_iris(return_X_y=True)
+        estimators = [
+            ("rf", RandomForestClassifier(n_estimators=10, random_state=42)),
+            ("svr", make_pipeline(StandardScaler(), LogisticRegression(random_state=42))),
+        ]
+        clf = StackingClassifier(estimators=estimators, final_estimator=LogisticRegression(), passthrough=True)
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
+        clf.fit(X_train, y_train)
+
+        hb_model = hummingbird.ml.convert(clf, "torch")
+
+        np.testing.assert_allclose(
+            clf.predict(X_test), hb_model.predict(X_test), rtol=1e-06, atol=1e-06,
+        )
+
+    @unittest.skipIf(StackingClassifier is None, reason="StackingClassifier not available in scikit-learn < 0.22")
+    def test_stacking_classifier_decision_function(self):
+        X, y = load_iris(return_X_y=True)
+        estimators = [
+            ("rf", RandomForestClassifier(n_estimators=10, random_state=42)),
+            ("svr", make_pipeline(StandardScaler(), LinearSVC(random_state=42))),
+        ]
+        clf = StackingClassifier(estimators=estimators, final_estimator=LogisticRegression())
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_state=42)
+        clf.fit(X_train, y_train)
+
+        self.assertRaises(ValueError, hummingbird.ml.convert, clf, "torch")
+
+    @unittest.skipIf(StackingClassifier is None, reason="StackingRegressor not available in scikit-learn < 0.22")
+    def test_stacking_regressor(self):
+        X, y = load_diabetes(return_X_y=True)
+        estimators = [("lr", RidgeCV()), ("svr", LinearSVR(random_state=42))]
+        reg = StackingRegressor(estimators=estimators, final_estimator=RandomForestRegressor(n_estimators=10, random_state=42))
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+        reg.fit(X_train, y_train)
+
+        hb_model = hummingbird.ml.convert(reg, "torch")
+
+        np.testing.assert_allclose(
+            reg.predict(X_test), hb_model.predict(X_test), rtol=1e-06, atol=1e-06,
+        )
 
 
 if __name__ == "__main__":

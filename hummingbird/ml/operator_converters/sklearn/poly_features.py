@@ -7,20 +7,20 @@
 """
 Converter for scikit-learn PolynomialFeatures.
 """
-from .._base_operator import BaseOperator
+from .._physical_operator import PhysicalOperator
 from onnxconverter_common.registration import register_converter
 import torch
 
 
-class PolynomialFeatures(BaseOperator, torch.nn.Module):
+class PolynomialFeatures(PhysicalOperator, torch.nn.Module):
     """
     Class implementing PolynomialFeatures operators in PyTorch.
 
     # TODO extend this class to support higher orders
     """
 
-    def __init__(self, n_features, degree, interaction_only, include_bias, device):
-        super(PolynomialFeatures, self).__init__()
+    def __init__(self, operator, n_features, degree, interaction_only, include_bias, device):
+        super(PolynomialFeatures, self).__init__(operator)
         self.transformer = True
 
         self.n_features = n_features
@@ -69,6 +69,7 @@ def convert_sklearn_poly_features(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
 
     if operator.raw_operator.interaction_only:
         raise NotImplementedError("Hummingbird does not currently support interaction_only flag for PolynomialFeatures")
@@ -76,6 +77,7 @@ def convert_sklearn_poly_features(operator, device, extra_config):
     if operator.raw_operator.degree != 2:
         raise NotImplementedError("Hummingbird currently only supports degree 2 for PolynomialFeatures")
     return PolynomialFeatures(
+        operator,
         operator.raw_operator.n_input_features_,
         operator.raw_operator.degree,
         operator.raw_operator.interaction_only,

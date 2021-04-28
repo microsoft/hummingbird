@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/hummingbird-ml.svg)](https://badge.fury.io/py/hummingbird-ml)
 [![](https://github.com/microsoft/hummingbird/workflows/Build/badge.svg?branch=main)](https://github.com/microsoft/hummingbird/actions)
-![](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7%20%7C%203.8-blue)
+![](https://img.shields.io/badge/3.6%20%7C%203.7%20%7C%203.8-blue)
 [![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/main/graph/badge.svg)](https://codecov.io/github/microsoft/hummingbird?branch=main)
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Downloads](https://pepy.tech/badge/hummingbird-ml)](https://pepy.tech/project/hummingbird-ml)
@@ -23,7 +23,7 @@ Hummingbird also provides a convenient uniform "inference" API following the Skl
 
 ## How Hummingbird Works
 
-Hummingbird works by reconfiguring algorithmic operators such that we can perform more regular computations which are amenable to vectorized and GPU execution. Each operator is slightly different, and we incorporate multiple strategies. This example explains one of Hummingbird’s strategies for translating a decision tree into tensors involving GEMM  (GEneric Matrix Multiplication), where we implement the traversal of the tree using matrix multiplications.  (GEMM is one of the three tree conversion strategies we currently support.)
+Hummingbird works by reconfiguring algorithmic operators such that we can perform more regular computations which are amenable to vectorized and GPU execution. Each operator is slightly different, and we incorporate multiple strategies. This example explains one of Hummingbird's strategies for translating a decision tree into tensors involving GEMM  (GEneric Matrix Multiplication), where we implement the traversal of the tree using matrix multiplications.  (GEMM is one of the three tree conversion strategies we currently support.)
 
 
 <p align="center">
@@ -65,7 +65,7 @@ _Thank you to [Chien Vu](https://www.linkedin.com/in/vumichien/) for contributin
 
 ## Installation
 
-Hummingbird was tested on Python >= 3.5 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
+Hummingbird was tested on Python >= 3.6 on Linux, Windows and MacOS machines.  (Python 3.5 is suppored up to `hummingbird-ml==0.2.1`.)  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
 
 Hummingbird requires PyTorch >= 1.4.0. Please go [here](https://pytorch.org/) for instructions on how to install PyTorch based on your platform and hardware.
 
@@ -91,7 +91,7 @@ In general, Hummingbird syntax is very intuitive and minimal. To run your tradit
 ```python
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from hummingbird.ml import convert
+from hummingbird.ml import convert, load
 
 # Create some random data for binary classification
 num_classes = 2
@@ -111,6 +111,12 @@ model.predict(X)
 # Run predictions on GPU
 model.to('cuda')
 model.predict(X)
+
+# Save the model
+model.save('hb_model')
+
+# Load the model back
+model = load('hb_model')
 ```
 
 # Documentation

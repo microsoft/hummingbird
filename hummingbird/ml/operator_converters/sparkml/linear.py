@@ -39,7 +39,7 @@ def convert_sparkml_linear_model(operator, device, extra_config):
     else:
         multi_class = None
 
-    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class)
+    return LinearModel(operator, coefficients, intercepts, device, classes=classes, multi_class=multi_class)
 
 
 register_converter("SparkMLLogisticRegressionModel", convert_sparkml_linear_model)

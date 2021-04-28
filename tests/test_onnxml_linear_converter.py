@@ -7,7 +7,6 @@ import warnings
 import numpy as np
 import torch
 from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV
-from sklearn.svm import LinearSVC, SVC, NuSVC
 
 from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, lightgbm_installed
 from hummingbird.ml import convert
@@ -137,7 +136,7 @@ class TestONNXLinear(unittest.TestCase):
         onnx_ml_pred, onnx_pred = self._test_regressor(2)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0].ravel(), onnx_pred, rtol=rtol, atol=atol)
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
@@ -147,7 +146,7 @@ class TestONNXLinear(unittest.TestCase):
         onnx_ml_pred, onnx_pred = self._test_regressor(100)
 
         # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        np.testing.assert_allclose(onnx_ml_pred[0].ravel(), onnx_pred, rtol=rtol, atol=atol)
 
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"

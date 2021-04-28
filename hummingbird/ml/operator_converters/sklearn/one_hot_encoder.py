@@ -11,6 +11,7 @@ Converter for scikit-learn one hot encoder.
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
+from .. import constants
 from .._one_hot_encoder_implementations import OneHotEncoderString, OneHotEncoder
 
 
@@ -26,11 +27,18 @@ def convert_sklearn_one_hot_encoder(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    if all([np.array(c).dtype == object for c in operator.raw_operator.categories_]):
+    assert operator is not None, "Cannot convert None operator"
+
+    if all(
+        [
+            np.array(c).dtype == object or np.array(c).dtype.kind in constants.SUPPORTED_STRING_TYPES
+            for c in operator.raw_operator.categories_
+        ]
+    ):
         categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
-        return OneHotEncoderString(categories, device)
+        return OneHotEncoderString(operator, categories, device, extra_config)
     else:
-        return OneHotEncoder(operator.raw_operator.categories_, device)
+        return OneHotEncoder(operator, operator.raw_operator.categories_, device)
 
 
 register_converter("SklearnOneHotEncoder", convert_sklearn_one_hot_encoder)

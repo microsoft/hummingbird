@@ -24,18 +24,24 @@ FastICA,
 GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
+GridSearchCV,
 HistGradientBoostingClassifier,
 HistGradientBoostingRegressor,
 IsolationForest,
 KernelPCA,
 KBinsDiscretizer,
+KMeans,
 KNeighborsClassifier,
 KNeighborsRegressor,
+LabelEncoder,
 LinearRegression,
 LinearSVC,
+LinearSVR,
 LogisticRegression,
 LogisticRegressionCV,
+RidgeCV,
 MaxAbsScaler,
+MeanShift,
 MinMaxScaler,
 MissingIndicator,
 MLPClassifier,
@@ -47,6 +53,7 @@ PCA,
 PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
+RandomizedGridSearchCV,
 RobustScaler,
 SelectKBest,
 SelectPercentile,
@@ -69,18 +76,28 @@ XGBRanker,
 XGBRegressor,
 
 **Supported Operators (ONNX-ML)**
-"ArrayFeatureExtractor",
-"Binarizer"
-"Cast",
-"Concat",
-"LinearClassifier",
-"LinearRegressor",
-"OneHotEncoder",
-"Normalizer",
-"Reshape",
-"Scaler",
-"TreeEnsembleClassifier",
-"TreeEnsembleRegressor",
+Abs,
+Add,
+ArrayFeatureExtractor,
+Binarizer,
+Cast,
+Concat,
+Div,
+Imputer,
+LabelEncoder,
+Less,
+LinearClassifier,
+LinearRegressor,
+Mul,
+Neg,
+Normalizer,
+OneHotEncoder,
+Reshape,
+Sum,
+Scaler,
+SVMClassifier,
+TreeEnsembleClassifier,
+TreeEnsembleRegressor,
 """
 from collections import defaultdict
 
@@ -120,15 +137,10 @@ def _build_sklearn_operator_list():
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
         # Linear-based models
-        from sklearn.linear_model import (
-            LinearRegression,
-            LogisticRegression,
-            LogisticRegressionCV,
-            SGDClassifier,
-        )
+        from sklearn.linear_model import LinearRegression, LogisticRegression, LogisticRegressionCV, SGDClassifier, RidgeCV
 
         # SVM-based models
-        from sklearn.svm import LinearSVC, SVC, NuSVC
+        from sklearn.svm import LinearSVC, SVC, NuSVC, LinearSVR
 
         # Imputers
         from sklearn.impute import MissingIndicator, SimpleImputer
@@ -146,10 +158,17 @@ def _build_sklearn_operator_list():
         from sklearn.neighbors import KNeighborsClassifier
         from sklearn.neighbors import KNeighborsRegressor
 
+        # Clustering models
+        from sklearn.cluster import KMeans, MeanShift
+
+        # Model selection
+        from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+
         # Preprocessing
         from sklearn.preprocessing import (
             Binarizer,
             KBinsDiscretizer,
+            LabelEncoder,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -185,9 +204,14 @@ def _build_sklearn_operator_list():
             # Linear-methods
             LinearRegression,
             LinearSVC,
+            LinearSVR,
             LogisticRegression,
             LogisticRegressionCV,
             SGDClassifier,
+            RidgeCV,
+            # Clustering
+            KMeans,
+            MeanShift,
             # Other models
             BernoulliNB,
             GaussianNB,
@@ -206,6 +230,7 @@ def _build_sklearn_operator_list():
             # Preprocessing
             Binarizer,
             KBinsDiscretizer,
+            LabelEncoder,
             MaxAbsScaler,
             MinMaxScaler,
             Normalizer,
@@ -285,15 +310,28 @@ def _build_onnxml_operator_list():
             "LinearClassifier",
             "LinearRegressor",
             # ONNX operators.
+            "Abs",
+            "Add",
+            "ArgMax",
             "Cast",
             "Concat",
+            "Div",
+            "Less",
+            "MatMul",
+            "Mul",
+            "Neg",
             "Reshape",
+            "Sum",
             # Preprocessing
             "ArrayFeatureExtractor",
             "Binarizer",
+            "FeatureVectorizer",
+            "Imputer",
+            "LabelEncoder",
             "OneHotEncoder",
             "Normalizer",
             "Scaler",
+            "SVMClassifier",
             # Tree-based models
             "TreeEnsembleClassifier",
             "TreeEnsembleRegressor",
@@ -339,6 +377,7 @@ def _build_sklearn_api_operator_name_map():
         "ArrayFeatureExtractor",
         "Concat",
         "Multiply",
+        "Bagging",
     ]
 
     return {
@@ -428,7 +467,7 @@ backends = _build_backend_map()
 # Supported configurations settings accepted by Hummingbird are defined below.
 # Please check `test.test_extra_conf.py` for examples on how to use these.
 TREE_IMPLEMENTATION = "tree_implementation"
-"""Which tree implementation to use. Values can be: gemm, tree-trav, perf_tree_trav."""
+"""Which tree implementation to use. Values can be: gemm, tree_trav, perf_tree_trav."""
 
 ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"
 """For ONNX models we can set the name of the output model."""
@@ -440,6 +479,11 @@ TVM_MAX_FUSE_DEPTH = "tvm_max_fuse_depth"
 """For TVM we can fix the number of operations that will be fused.
 If not set, compilation may take forever (https://github.com/microsoft/hummingbird/issues/232).
 By default Hummingbird uses a max_fuse_depth of 50, but this can be override using this parameter."""
+
+TVM_PAD_INPUT = "tvm_pad_prediction_inputs"
+"""TVM statically compiles models, therefore each input shape is fixed.
+However, at prediction time, we can have inputs with different batch size.
+This option allows to pad the inputs on the batch dimension with zeros. Note that enabling this option may considerably hurt performance"""
 
 INPUT_NAMES = "input_names"
 """Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs."""
@@ -456,3 +500,9 @@ Inter-op threads are by default set to 1 in Hummingbird. Check `tests.test_extra
 
 BATCH_SIZE = "batch_size"
 """Select whether to partition the input dataset at inference time in N batch_size partitions."""
+
+REMAINDER_SIZE = "remainder_size"
+"""Determines the number of rows that an auxiliary remainder model can accept."""
+
+MAX_STRING_LENGTH = "max_string_length"
+"""Maximum expected length for string features. By deafult this value is set using the training information."""

@@ -12,10 +12,21 @@ import numpy as np
 
 from . import constants
 from ._tree_commons import get_tree_params_and_type, get_parameters_for_tree_trav_common, get_parameters_for_gemm_common
+from ._tree_commons import (
+    ApplySigmoidPostTransform,
+    ApplySoftmaxPostTransform,
+    ApplyTweediePostTransform,
+    ApplyBasePredictionPostTransform,
+    ApplySigmoidBasePredictionPostTransform,
+    ApplySoftmaxBasePredictionPostTransform,
+    ApplyTweedieBasePredictionPostTransform,
+)
 from ._tree_implementations import GEMMGBDTImpl, TreeTraversalGBDTImpl, PerfectTreeTraversalGBDTImpl, TreeImpl
 
 
-def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, n_classes, classes=None, extra_config={}):
+def convert_gbdt_classifier_common(
+    operator, tree_infos, get_tree_parameters, n_features, n_classes, classes=None, extra_config={}
+):
     """
     Common converter for GBDT classifiers.
 
@@ -40,16 +51,25 @@ def convert_gbdt_classifier_common(tree_infos, get_tree_parameters, n_features, 
         n_classes -= 1
     if classes is None:
         classes = [i for i in range(n_classes)]
+    # There is a bug in torch < 1.7.0 that causes a mismatch. See Issue #10
+    if n_classes > 2:
+        from distutils.version import LooseVersion
+        import torch
+
+        if LooseVersion(torch.__version__) < LooseVersion("1.7.0"):
+            import warnings
+
+            warnings.warn("torch < 1.7.0 may give a mismatch on multiclass. See issue #10.")
     reorder_trees = True
     if constants.REORDER_TREES in extra_config:
         reorder_trees = extra_config[constants.REORDER_TREES]
     if reorder_trees and n_classes > 1:
         tree_infos = [tree_infos[i * n_classes + j] for j in range(n_classes) for i in range(len(tree_infos) // n_classes)]
 
-    return convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes, extra_config)
+    return convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes, extra_config)
 
 
-def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=None, extra_config={}):
+def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes=None, extra_config={}):
     """
     Common converter for GBDT models.
 
@@ -109,23 +129,7 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
     # Define the post transform.
     if constants.BASE_PREDICTION in extra_config:
         base_prediction = torch.nn.Parameter(torch.FloatTensor(extra_config[constants.BASE_PREDICTION]), requires_grad=False)
-
-    def apply_base_prediction(base_prediction):
-        def apply(x):
-            x += base_prediction
-            return x
-
-        return apply
-
-    def apply_sigmoid(x):
-        output = torch.sigmoid(x)
-        return torch.cat([1 - output, output], dim=1)
-
-    def apply_softmax(x):
-        return torch.softmax(x, dim=1)
-
-    def apply_tweedie(x):
-        return torch.exp(x)
+        extra_config[constants.BASE_PREDICTION] = base_prediction
 
     # For models following the Sklearn API we need to build the post transform ourselves.
     if classes is not None and constants.POST_TRANSFORM not in extra_config:
@@ -138,28 +142,28 @@ def convert_gbdt_common(tree_infos, get_tree_parameters, n_features, classes=Non
     if constants.POST_TRANSFORM in extra_config:
         if extra_config[constants.POST_TRANSFORM] == constants.SIGMOID:
             if constants.BASE_PREDICTION in extra_config:
-                extra_config[constants.POST_TRANSFORM] = lambda x: apply_sigmoid(apply_base_prediction(base_prediction)(x))
+                extra_config[constants.POST_TRANSFORM] = ApplySigmoidBasePredictionPostTransform(base_prediction)
             else:
-                extra_config[constants.POST_TRANSFORM] = apply_sigmoid
+                extra_config[constants.POST_TRANSFORM] = ApplySigmoidPostTransform()
         elif extra_config[constants.POST_TRANSFORM] == constants.SOFTMAX:
             if constants.BASE_PREDICTION in extra_config:
-                extra_config[constants.POST_TRANSFORM] = lambda x: apply_softmax(apply_base_prediction(base_prediction)(x))
+                extra_config[constants.POST_TRANSFORM] = ApplySoftmaxBasePredictionPostTransform(base_prediction)
             else:
-                extra_config[constants.POST_TRANSFORM] = apply_softmax
+                extra_config[constants.POST_TRANSFORM] = ApplySoftmaxPostTransform()
         elif extra_config[constants.POST_TRANSFORM] == constants.TWEEDIE:
             if constants.BASE_PREDICTION in extra_config:
-                extra_config[constants.POST_TRANSFORM] = lambda x: apply_tweedie(apply_base_prediction(base_prediction)(x))
+                extra_config[constants.POST_TRANSFORM] = ApplyTweedieBasePredictionPostTransform(base_prediction)
             else:
-                extra_config[constants.POST_TRANSFORM] = apply_tweedie
+                extra_config[constants.POST_TRANSFORM] = ApplyTweediePostTransform()
         else:
             raise NotImplementedError("Post transform {} not implemeneted yet".format(extra_config[constants.POST_TRANSFORM]))
     elif constants.BASE_PREDICTION in extra_config:
-        extra_config[constants.POST_TRANSFORM] = apply_base_prediction(base_prediction)
+        extra_config[constants.POST_TRANSFORM] = ApplyBasePredictionPostTransform(base_prediction)
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
-        return GEMMGBDTImpl(net_parameters, n_features, classes, extra_config)
+        return GEMMGBDTImpl(operator, net_parameters, n_features, classes, extra_config)
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, extra_config)
+        return TreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav.
-        return PerfectTreeTraversalGBDTImpl(net_parameters, max_depth, n_features, classes, extra_config)
+        return PerfectTreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)

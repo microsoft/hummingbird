@@ -27,6 +27,8 @@ def convert_sklearn_bernouli_naive_bayes(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     model = operator.raw_operator
 
     classes = model.classes_
@@ -39,7 +41,7 @@ def convert_sklearn_bernouli_naive_bayes(operator, device, extra_config):
     feature_log_prob_minus_neg_prob = (model.feature_log_prob_ - neg_prob).T
     jll_calc_bias = (model.class_log_prior_ + neg_prob.sum(1)).reshape(1, -1)
 
-    return BernoulliNBModel(classes, binarize, jll_calc_bias, feature_log_prob_minus_neg_prob, device)
+    return BernoulliNBModel(operator, classes, binarize, jll_calc_bias, feature_log_prob_minus_neg_prob, device)
 
 
 def convert_sklearn_multinomial_naive_bayes(operator, device, extra_config):
@@ -54,6 +56,8 @@ def convert_sklearn_multinomial_naive_bayes(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     model = operator.raw_operator
 
     classes = model.classes_
@@ -63,7 +67,7 @@ def convert_sklearn_multinomial_naive_bayes(operator, device, extra_config):
     feature_log_prob_minus_neg_prob = model.feature_log_prob_.T
     jll_calc_bias = model.class_log_prior_.reshape(1, -1)
 
-    return BernoulliNBModel(classes, None, jll_calc_bias, feature_log_prob_minus_neg_prob, device)
+    return BernoulliNBModel(operator, classes, None, jll_calc_bias, feature_log_prob_minus_neg_prob, device)
 
 
 def convert_sklearn_gaussian_naive_bayes(operator, device, extra_config):
@@ -78,6 +82,8 @@ def convert_sklearn_gaussian_naive_bayes(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     model = operator.raw_operator
     classes = model.classes_
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
@@ -86,7 +92,7 @@ def convert_sklearn_gaussian_naive_bayes(operator, device, extra_config):
     jll_calc_bias = np.log(model.class_prior_.reshape(-1, 1)) - 0.5 * np.sum(np.log(2.0 * np.pi * model.sigma_), 1).reshape(
         -1, 1
     )
-    return GaussianNBModel(classes, jll_calc_bias, model.theta_, model.sigma_, device)
+    return GaussianNBModel(operator, classes, jll_calc_bias, model.theta_, model.sigma_, device)
 
 
 register_converter("SklearnBernoulliNB", convert_sklearn_bernouli_naive_bayes)

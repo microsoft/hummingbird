@@ -11,12 +11,12 @@ Base classes for Naive Bayes model implementation: (BernoulliNB, GaussianNB).
 
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class BernoulliNBModel(BaseOperator, torch.nn.Module):
-    def __init__(self, classes, binarize, jll_calc_bias, feature_log_prob_minus_neg_prob, device):
-        super(BernoulliNBModel, self).__init__()
+class BernoulliNBModel(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator, classes, binarize, jll_calc_bias, feature_log_prob_minus_neg_prob, device):
+        super(BernoulliNBModel, self).__init__(logical_operator)
         self.classification = True
         self.binarize = binarize
         self.jll_calc_bias = torch.nn.Parameter(
@@ -46,9 +46,9 @@ class BernoulliNBModel(BaseOperator, torch.nn.Module):
             return torch.argmax(jll, dim=1), prob_x
 
 
-class GaussianNBModel(BaseOperator, torch.nn.Module):
-    def __init__(self, classes, jll_calc_bias, theta, sigma, device):
-        super(GaussianNBModel, self).__init__()
+class GaussianNBModel(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator, classes, jll_calc_bias, theta, sigma, device):
+        super(GaussianNBModel, self).__init__(logical_operator)
         self.classification = True
         self.jll_calc_bias = torch.nn.Parameter(torch.from_numpy(jll_calc_bias.astype("float32")), requires_grad=False)
         self.theta = torch.nn.Parameter(

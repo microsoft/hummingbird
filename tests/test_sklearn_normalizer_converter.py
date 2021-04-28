@@ -43,7 +43,7 @@ class TestSklearnNormalizer(unittest.TestCase):
 
         torch_model = hummingbird.ml.convert(model, "torch")
 
-        self.assertRaises(RuntimeError, torch_model.model._operator_map.SklearnNormalizer, torch.from_numpy(data))
+        self.assertRaises(RuntimeError, torch_model.transform, torch.from_numpy(data))
 
     # Float 64 data tests
     def test_float64_normalizer_converter(self):
@@ -80,7 +80,7 @@ class TestSklearnNormalizer(unittest.TestCase):
 
             self.assertIsNotNone(hb_model)
             np.testing.assert_allclose(
-                model.transform(data), hb_model.transform(data_tensor)[0], rtol=1e-06, atol=1e-06,
+                model.transform(data), hb_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
     # TVM backend

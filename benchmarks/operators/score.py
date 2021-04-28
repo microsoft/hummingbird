@@ -34,7 +34,7 @@ from benchmarks.timer import Timer
 from benchmarks.datasets import LearningTask
 
 from hummingbird.ml import constants
-from hummingbird.ml import convert
+from hummingbird.ml import convert_batch
 
 
 class ScoreBackend(ABC):
@@ -127,14 +127,16 @@ class HBBackend(ScoreBackend):
         self.configure(data, model, args)
 
         test_data = self.get_data(data.X_test)
+        remainder_size = test_data.shape[0] % self.params["batch_size"]
 
         with Timer() as t:
-            self.model = convert(
+            self.model = convert_batch(
                 model,
                 self.backend,
                 test_data,
+                remainder_size,
                 device=self.params["device"],
-                extra_config={constants.N_THREADS: self.params["nthread"], constants.BATCH_SIZE: self.params["batch_size"]},
+                extra_config={constants.N_THREADS: self.params["nthread"]},
             )
 
         return t.interval

@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 from sklearn.ensemble import ExtraTreesClassifier, ExtraTreesRegressor, RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn import datasets
 
 import hummingbird.ml
 from hummingbird.ml.exceptions import MissingConverter
@@ -32,9 +33,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
                     model, "torch", extra_config={constants.TREE_IMPLEMENTATION: extra_config_param}
                 )
                 self.assertIsNotNone(torch_model)
-                self.assertTrue(
-                    str(type(list(torch_model.model._operator_map.values())[0])) == dt_implementation_map[extra_config_param]
-                )
+                self.assertTrue(str(type(list(torch_model.model._operators)[0])) == dt_implementation_map[extra_config_param])
 
     # Used for classification tests
     def _run_tree_classification_converter(
@@ -52,6 +51,12 @@ class TestSklearnTreeConverter(unittest.TestCase):
             torch_model = hummingbird.ml.convert(model, backend, X, extra_config=extra_config)
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+            from distutils.version import LooseVersion
+            import torch
+
+            if LooseVersion(torch.__version__) >= LooseVersion("1.7.0"):
+                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
     # Random forest binary classifier
     def test_random_forest_classifier_binary_converter(self):
@@ -237,6 +242,19 @@ class TestSklearnTreeConverter(unittest.TestCase):
         self._run_random_forest_classifier_single_node_tree_converter(
             extra_config={constants.TREE_IMPLEMENTATION: "perf_tree_trav"}
         )
+
+    # Another small tree tests
+    def test_random_forest_classifier_small_tree_converter(self):
+        seed = 0
+        np.random.seed(seed=0)
+        N = 9
+        X = np.random.randn(N, 8)
+        y = np.random.randint(low=0, high=2, size=N)
+        model = RandomForestClassifier(random_state=seed)
+        model.fit(X, y)
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(torch_model)
+        np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
     # Float 64 classification test helper
     def _run_float64_tree_classification_converter(self, model_type, num_classes, extra_config={}, labels_shift=0, **kwargs):
@@ -701,6 +719,23 @@ class TestSklearnTreeConverter(unittest.TestCase):
         self._run_tree_classification_converter(
             ExtraTreesClassifier, 3, "tvm", n_estimators=10, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30}
         )
+
+    # TreeRegressor multioutput regression
+    def test_tree_regressors_multioutput_regression(self):
+        for tree_method in ["gemm", "tree_trav", "perf_tree_trav"]:
+            for n_targets in [1, 2, 7]:
+                for tree_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor]:
+                    model = tree_class()
+                    X, y = datasets.make_regression(
+                        n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021
+                    )
+                    model.fit(X, y)
+
+                    torch_model = hummingbird.ml.convert(
+                        model, "torch", extra_config={constants.TREE_IMPLEMENTATION: tree_method}
+                    )
+                    self.assertTrue(torch_model is not None)
+                    np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5)
 
 
 if __name__ == "__main__":

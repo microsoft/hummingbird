@@ -10,10 +10,12 @@ Collections of classes and functions shared among all tree converters.
 
 import copy
 import numpy as np
+import torch
 
 from ._tree_implementations import TreeImpl
 from ._tree_implementations import GEMMDecisionTreeImpl, TreeTraversalDecisionTreeImpl, PerfectTreeTraversalDecisionTreeImpl
 from . import constants
+from hummingbird.ml.exceptions import MissingConverter
 
 
 class Node:
@@ -58,6 +60,61 @@ class TreeParameters:
         self.features = features
         self.thresholds = thresholds
         self.values = values
+
+
+# Post tranform classes.
+class PostTransform:
+    def __call__(self, x):
+        return x
+
+
+class ApplyBasePredictionPostTransform(PostTransform):
+    def __init__(self, base_prediction):
+        self.base_prediction = base_prediction
+
+    def __call__(self, x):
+        x += self.base_prediction
+        return x
+
+
+class ApplySigmoidPostTransform(PostTransform):
+    def __call__(self, x):
+        output = torch.sigmoid(x)
+        return torch.cat([1 - output, output], dim=1)
+
+
+class ApplySigmoidBasePredictionPostTransform(PostTransform):
+    def __init__(self, base_prediction):
+        self.base_prediction = ApplyBasePredictionPostTransform(base_prediction)
+
+    def __call__(self, x):
+        return ApplySigmoidPostTransform()(self.base_prediction(x))
+
+
+class ApplySoftmaxPostTransform(PostTransform):
+    def __call__(self, x):
+        return torch.softmax(x, dim=1)
+
+
+class ApplySoftmaxBasePredictionPostTransform(PostTransform):
+    def __init__(self, base_prediction):
+        self.base_prediction = ApplyBasePredictionPostTransform(base_prediction)
+
+    def __call__(self, x):
+        return ApplySoftmaxPostTransform()(self.base_prediction(x))
+
+
+class ApplyTweediePostTransform(PostTransform):
+    def __call__(self, x):
+        return torch.exp(x)
+
+
+class ApplyTweedieBasePredictionPostTransform(PostTransform):
+    def __init__(self, base_prediction):
+        self.base_prediction = ApplyBasePredictionPostTransform(base_prediction)
+
+    def __call__(self, x):
+        return ApplyTweediePostTransform()(self.base_prediction(x))
 
 
 def _find_max_depth(tree_parameters):
@@ -144,7 +201,7 @@ def get_tree_implementation_by_config_or_depth(extra_config, max_depth, low=3, h
     elif extra_config[constants.TREE_IMPLEMENTATION] == TreeImpl.perf_tree_trav.name:
         return TreeImpl.perf_tree_trav
     else:
-        raise ValueError("Tree implementation {} not found".format(extra_config))
+        raise MissingConverter("Tree implementation {} not found".format(extra_config))
 
 
 def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
@@ -205,7 +262,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
         n_classes = values.shape[1] if type(values) is np.ndarray else 1
-        values = np.array([np.array([0.0]), values[0], values[0]])
+        values = np.array([np.zeros(n_classes), values[0], values[0]])
         values.reshape(3, n_classes)
 
     ids = [i for i in range(len(lefts))]
@@ -250,7 +307,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     return [nodes_map, ids, lefts, rights, features, thresholds, values]
 
 
-def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, extra_config={}):
+def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, classes=None, extra_config={}):
     """
     This function is used to generate tree parameters for sklearn trees.
     Includes SklearnRandomForestClassifier/Regressor, and SklearnGradientBoostingClassifier.
@@ -261,7 +318,7 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
         features: The features used in the decision nodes
         thresholds: The thresholds used in the decision nodes
         values: The values stored in the leaf nodes
-
+        classes: The list of class labels. None if regression model
     Returns:
         An array containing the extracted parameters
     """
@@ -269,7 +326,8 @@ def get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, va
     values = np.array(values)
     if len(values.shape) == 3:
         values = values.reshape(values.shape[0], -1)
-    if values.shape[1] > 1:
+    if values.shape[1] > 1 and classes is not None and len(classes) > 0:
+        # Triggers only for classification.
         values /= np.sum(values, axis=1, keepdims=True)
     if constants.NUM_TREES in extra_config:
         values /= extra_config[constants.NUM_TREES]
@@ -303,7 +361,6 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
         rights = [2, -1, -1]
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
-        n_classes = values.shape[1]
         n_classes = values.shape[1]
         values = np.array([np.zeros(n_classes), values[0], values[0]])
         values.reshape(3, n_classes)
@@ -381,7 +438,7 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
 
 
 def convert_decision_ensemble_tree_common(
-    tree_infos, get_parameters, get_parameters_for_tree_trav, n_features, classes=None, extra_config={}
+    operator, tree_infos, get_parameters, get_parameters_for_tree_trav, n_features, classes=None, extra_config={}
 ):
     tree_parameters, max_depth, tree_type = get_tree_params_and_type(tree_infos, get_parameters, extra_config)
 
@@ -399,7 +456,7 @@ def convert_decision_ensemble_tree_common(
             )
             for tree_param in tree_parameters
         ]
-        return GEMMDecisionTreeImpl(net_parameters, n_features, classes)
+        return GEMMDecisionTreeImpl(operator, net_parameters, n_features, classes)
 
     net_parameters = [
         get_parameters_for_tree_trav(
@@ -408,6 +465,6 @@ def convert_decision_ensemble_tree_common(
         for tree_param in tree_parameters
     ]
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes, extra_config)
+        return TreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
-        return PerfectTreeTraversalDecisionTreeImpl(net_parameters, max_depth, n_features, classes)
+        return PerfectTreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes)

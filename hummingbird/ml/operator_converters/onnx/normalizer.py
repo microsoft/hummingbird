@@ -25,10 +25,12 @@ def convert_onnx_normalizer(operator, device=None, extra_config={}):
     Returns:
         A PyTorch model
     """
+    assert operator is not None, "Cannot convert None operator"
+
     raw_operator = operator.raw_operator.origin.attribute[0].s.lower().decode("UTF-8")  # (ex: b'L1' to 'l1')
     if raw_operator is None or raw_operator == "":
         raise RuntimeError("Error parsing Normalizer, found unexpected None")
-    return Normalizer(raw_operator, device)
+    return Normalizer(operator, raw_operator, device)
 
 
 register_converter("ONNXMLNormalizer", convert_onnx_normalizer)

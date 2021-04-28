@@ -13,15 +13,14 @@ from hummingbird.ml import convert
 from distutils.version import LooseVersion
 
 if sparkml_installed():
-    from pyspark import SparkContext
-    from pyspark.sql import SQLContext
+    from pyspark.sql import SparkSession, SQLContext
     from pyspark.ml import Pipeline
     from pyspark.ml.linalg import Vectors
     from pyspark.ml.classification import LogisticRegression
     from pyspark.ml.feature import QuantileDiscretizer, VectorAssembler
 
-    sc = SparkContext.getOrCreate()
-    sql = SQLContext(sc)
+    spark = SparkSession.builder.master("local[*]").config("spark.driver.bindAddress", "127.0.0.1").getOrCreate()
+    sql = SQLContext(spark)
 
 if pandas_installed():
     import pandas as pd
@@ -29,7 +28,7 @@ if pandas_installed():
 
 class TestSparkMLPipeline(unittest.TestCase):
     @unittest.skipIf(not sparkml_installed(), reason="Spark-ML test requires pyspark")
-    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.16.0")
+    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
     def test_pipeline_1(self):
         n_features = 10
         n_total = 100

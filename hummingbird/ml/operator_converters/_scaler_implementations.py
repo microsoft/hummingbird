@@ -10,31 +10,25 @@ Base classes for scaler implementations.
 
 import torch
 
-from ._base_operator import BaseOperator
+from ._physical_operator import PhysicalOperator
 
 
-class Scaler(BaseOperator, torch.nn.Module):
+class Scaler(PhysicalOperator, torch.nn.Module):
     """
     Class implementing Scaler operators in PyTorch. Supported normalizers are L1, L2 and Max.
     """
 
-    def __init__(self, offset, scale, device):
-        super(Scaler, self).__init__(transformer=True)
+    def __init__(self, logical_operator, offset, scale, device):
+        super(Scaler, self).__init__(logical_operator, transformer=True)
 
         self.offset = offset
         self.scale = scale
 
         if offset is not None:
-            if offset.dtype == "float64":
-                self.offset = torch.nn.Parameter(torch.DoubleTensor([offset]), requires_grad=False)
-            else:
-                self.offset = torch.nn.Parameter(torch.FloatTensor([offset]), requires_grad=False)
+            self.offset = torch.nn.Parameter(torch.from_numpy(offset), requires_grad=False)
 
         if scale is not None:
-            if scale.dtype == "float64":
-                self.scale = torch.nn.Parameter(torch.DoubleTensor([scale]), requires_grad=False)
-            else:
-                self.scale = torch.nn.Parameter(torch.FloatTensor([scale]), requires_grad=False)
+            self.scale = torch.nn.Parameter(torch.from_numpy(scale), requires_grad=False)
 
     def forward(self, x):
         if self.offset is not None:
@@ -43,4 +37,4 @@ class Scaler(BaseOperator, torch.nn.Module):
         if self.scale is not None:
             x = x * self.scale
 
-        return x
+        return x.float()

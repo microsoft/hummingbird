@@ -27,12 +27,11 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
         A PyTorch model
     """
 
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
-    operator = operator.raw_operator
     coefficients = intercepts = classes = multi_class = None
 
-    for attr in operator.origin.attribute:
+    for attr in operator.raw_operator.origin.attribute:
         if attr.name == "coefficients":
             coefficients = np.array(attr.floats).astype("float32")
         elif attr.name == "intercepts":
@@ -67,7 +66,9 @@ def convert_onnx_linear_model(operator, device=None, extra_config={}):
         coefficients = np.array(list(zip(*tmp)))
     else:
         raise RuntimeError("Error parsing LinearClassifier, length of classes {} unexpected:{}".format(len(classes), classes))
-    return LinearModel(coefficients, intercepts, device, classes=classes, multi_class=multi_class, is_linear_regression=False)
+    return LinearModel(
+        operator, coefficients, intercepts, device, classes=classes, multi_class=multi_class, is_linear_regression=False
+    )
 
 
 def convert_onnx_linear_regression_model(operator, device, extra_config):
@@ -80,11 +81,10 @@ def convert_onnx_linear_regression_model(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
-    operator = operator.raw_operator
     coefficients = intercepts = None
-    for attr in operator.origin.attribute:
+    for attr in operator.raw_operator.origin.attribute:
 
         if attr.name == "coefficients":
             coefficients = np.array([[np.array(val).astype("float32")] for val in attr.floats]).astype("float32")
@@ -94,7 +94,7 @@ def convert_onnx_linear_regression_model(operator, device, extra_config):
     if any(v is None for v in [coefficients, intercepts]):
         raise RuntimeError("Error parsing LinearRegression, found unexpected None")
 
-    return LinearModel(coefficients, intercepts, device, is_linear_regression=True)
+    return LinearModel(operator, coefficients, intercepts, device, is_linear_regression=True)
 
 
 register_converter("ONNXMLLinearClassifier", convert_onnx_linear_model)

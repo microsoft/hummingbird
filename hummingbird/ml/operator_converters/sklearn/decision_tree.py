@@ -28,12 +28,22 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.estimators_
     n_features = operator.raw_operator.n_features_
     classes = operator.raw_operator.classes_.tolist()
+
+    # There is a bug in torch < 1.7.0 that causes a mismatch. See Issue #10
+    if len(classes) > 2:
+        from distutils.version import LooseVersion
+        import torch
+
+        if LooseVersion(torch.__version__) < LooseVersion("1.7.0"):
+            import warnings
+
+            warnings.warn("torch < 1.7.0 may give a mismatch on multiclass. See issue #10.")
 
     # For Sklearn Trees we need to know how many trees are there for normalization.
     extra_config[constants.NUM_TREES] = len(tree_infos)
@@ -42,8 +52,17 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
     if not all(isinstance(c, int) for c in classes):
         raise RuntimeError("Random Forest Classifier translation only supports integer class labels")
 
+    def get_parameters_for_tree_trav(lefts, rights, features, thresholds, values, extra_config={}):
+        return get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, classes, extra_config)
+
     return convert_decision_ensemble_tree_common(
-        tree_infos, get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn, n_features, classes, extra_config
+        operator,
+        tree_infos,
+        get_parameters_for_sklearn_common,
+        get_parameters_for_tree_trav,
+        n_features,
+        classes,
+        extra_config,
     )
 
 
@@ -59,7 +78,7 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator.estimators_
@@ -68,10 +87,14 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
     # For Sklearn Trees we need to know how many trees are there for normalization.
     extra_config[constants.NUM_TREES] = len(tree_infos)
 
+    def get_parameters_for_tree_trav(lefts, rights, features, thresholds, values, extra_config={}):
+        return get_parameters_for_tree_trav_sklearn(lefts, rights, features, thresholds, values, None, extra_config)
+
     return convert_decision_ensemble_tree_common(
+        operator,
         tree_infos,
         get_parameters_for_sklearn_common,
-        get_parameters_for_tree_trav_sklearn,
+        get_parameters_for_tree_trav,
         n_features,
         extra_config=extra_config,
     )
@@ -89,7 +112,7 @@ def convert_sklearn_decision_tree_classifier(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     operator.raw_operator.estimators_ = [operator.raw_operator]
     return convert_sklearn_random_forest_classifier(operator, device, extra_config)
@@ -107,7 +130,7 @@ def convert_sklearn_decision_tree_regressor(operator, device, extra_config):
     Returns:
         A PyTorch model
     """
-    assert operator is not None
+    assert operator is not None, "Cannot convert None operator"
 
     operator.raw_operator.estimators_ = [operator.raw_operator]
     return convert_sklearn_random_forest_regressor(operator, device, extra_config)

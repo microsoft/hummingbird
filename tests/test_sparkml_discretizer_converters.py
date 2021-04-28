@@ -13,12 +13,11 @@ from hummingbird.ml._utils import sparkml_installed, pandas_installed
 from hummingbird.ml import convert
 
 if sparkml_installed():
-    from pyspark import SparkContext
-    from pyspark.sql import SQLContext
+    from pyspark.sql import SparkSession, SQLContext
     from pyspark.ml.feature import QuantileDiscretizer
 
-    sc = SparkContext.getOrCreate()
-    sql = SQLContext(sc)
+    spark = SparkSession.builder.master("local[*]").config("spark.driver.bindAddress", "127.0.0.1").getOrCreate()
+    sql = SQLContext(spark)
 
 if pandas_installed():
     import pandas as pd
