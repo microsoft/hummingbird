@@ -159,5 +159,5 @@ jobs:
       if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       uses: JamesIves/github-pages-deploy-action@4.0.0
       with:
-          branch: gh-pages
-          folder: website/public
+        branch: gh-pages
+        folder: website/public
