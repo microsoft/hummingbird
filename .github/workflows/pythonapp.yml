@@ -153,11 +153,11 @@ jobs:
         flags: unittests
     # Compile and push documentation only for one of the runs (Linux py3.7).
     - name: Generate Documentation
-      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       run: |
         make sphinx-site -C website/
     - name: Deploy to GitHub pages 🚀
-      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
+      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
       uses: JamesIves/github-pages-deploy-action@4.0.0
       with:
         branch: gh-pages
