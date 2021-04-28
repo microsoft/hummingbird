@@ -155,10 +155,9 @@ jobs:
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
       run: |
         make sphinx-site -C website/
-    - name: Deploy to GitHub pages
+    - name: Deploy to GitHub pages 🚀
       if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-latest' }}
-      uses: JamesIves/github-pages-deploy-action@3.6.2
+      uses: JamesIves/github-pages-deploy-action@4.0.0
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: website/public
+          branch: gh-pages
+          folder: website/public
