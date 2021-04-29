@@ -72,12 +72,12 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
-    - uses: actions/cache@v2
+    - uses: actions/cache@v1
       # TVM takes forever, we try to cache it.
       if: ${{ matrix.os != 'windows-2019' }}
       id: cache
       env:
-        CACHE_NUMBER: 1
+        CACHE_NUMBER: 3
       with:
         path: ../../../incubator-tvm
         key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-tvm-0.7
@@ -152,14 +152,14 @@ jobs:
         file: ./coverage.xml
         flags: unittests
     # Compile and push documentation only for one of the runs (Linux py3.7).
-    # - name: Generate Documentation
-    #   if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
-    #   run: |
-    #     make sphinx-site -C website/
-    # - name: Deploy to GitHub pages
-    #   if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
-    #   uses: JamesIves/github-pages-deploy-action@3.6.2
-    #   with:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     BRANCH: gh-pages
-    #     FOLDER: website/public
+    - name: Generate Documentation
+      if: ${{ matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
+      run: |
+        make sphinx-site -C website/
+    - name: Deploy to GitHub pages 🚀
+      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.7' && matrix.os == 'ubuntu-18.04' }}
+      uses: JamesIves/github-pages-deploy-action@4.0.0
+      with:
+        branch: gh-pages
+        folder: website/public
+
