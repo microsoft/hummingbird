@@ -301,7 +301,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     lefts = np.array(lefts)
     rights = np.array(rights)
     features = np.array(features)
-    thresholds = np.array(thresholds)
+    thresholds = np.array(thresholds, dtype=np.float64)
     values = np.array(values)
 
     return [nodes_map, ids, lefts, rights, features, thresholds, values]
@@ -373,7 +373,7 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
             hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
             hidden_biases.append(thresh)
     weights.append(np.array(hidden_weights).astype("float32"))
-    biases.append(np.array(hidden_biases).astype("float32"))
+    biases.append(np.array(hidden_biases, dtype=np.float64))
 
     n_splits = len(hidden_weights)
 

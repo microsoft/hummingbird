@@ -17,6 +17,7 @@ from sklearn.svm import LinearSVR
 from sklearn.multioutput import MultiOutputRegressor, RegressorChain
 
 import hummingbird.ml
+from hummingbird.ml import constants
 
 import random
 
@@ -54,7 +55,7 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
                 y = y.astype("float32")
                 model.fit(X, y)
 
-                torch_model = hummingbird.ml.convert(model, "torch")
+                torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_THRESHOLD_DTYPE: "float64"})
                 self.assertTrue(torch_model is not None)
                 np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5)
 
