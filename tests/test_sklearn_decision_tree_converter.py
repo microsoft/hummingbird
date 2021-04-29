@@ -732,7 +732,9 @@ class TestSklearnTreeConverter(unittest.TestCase):
                     model.fit(X, y)
 
                     torch_model = hummingbird.ml.convert(
-                        model, "torch", extra_config={constants.TREE_IMPLEMENTATION: tree_method}
+                        model,
+                        "torch",
+                        extra_config={constants.TREE_IMPLEMENTATION: tree_method, constants.TREE_THRESHOLD_DTYPE: "float64"},
                     )
                     self.assertTrue(torch_model is not None)
                     np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5)
