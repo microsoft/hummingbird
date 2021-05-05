@@ -282,7 +282,7 @@ class TorchScriptSklearnContainerClassification(PyTorchSklearnContainerClassific
     def predict(self, *inputs):
         device = get_device(self.model)
         f = super(TorchScriptSklearnContainerClassification, self)._predict
-        f_wrapped = lambda x: _torchscript_wrapper(device, f, x, extra_config=self._extra_config)  # noqa: E731
+        f_wrapped = lambda x: _torchscript_wrapper(device, f, *x, extra_config=self._extra_config)  # noqa: E731
 
         return self._run(f_wrapped, *inputs)
 
