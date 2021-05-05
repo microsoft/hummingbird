@@ -201,6 +201,8 @@ def load(location):
         zip_location = location + ".zip"
     else:
         location = zip_location[:-4]
+
+    location = location + str(os.getpid())
     assert os.path.exists(zip_location), "Zip file {} does not exist.".format(zip_location)
     shutil.unpack_archive(zip_location, location, format="zip")
 
