@@ -186,8 +186,6 @@ class PyTorchSklearnContainerRegression(SklearnContainerRegression, PyTorchSklea
                 return output
             else:
                 return output.ravel()
-        elif self._is_anomaly_detection:
-            return self.model.forward(*inputs)[0].cpu().numpy().ravel()
         else:
             return self.model.forward(*inputs)[0].cpu().numpy().ravel()
 
