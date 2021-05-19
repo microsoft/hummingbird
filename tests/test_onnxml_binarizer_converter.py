@@ -89,6 +89,22 @@ class TestONNXBinarizer(unittest.TestCase):
 
         self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
 
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    # if the user doesn't add test input when converting to torch, we should get an error
+    def test_onnx_binarizer_converter_raises_rt_no_input(self):
+        warnings.filterwarnings("ignore")
+        X = np.array([[1, 2, 3], [4, 3, 0], [0, 1, 4], [0, 5, 6]], dtype=np.float32)
+        model = Binarizer(threshold=0)
+        model.fit(X)
+
+        # generate test input
+        onnx_ml_model = convert_sklearn(model, initial_types=[("float_input", FloatTensorType_onnx(X.shape))])
+        onnx_ml_model.graph.node[0].attribute[0].name = "".encode()
+
+        self.assertRaises(RuntimeError, convert, onnx_ml_model, "torch")
+
 
 if __name__ == "__main__":
     unittest.main()
