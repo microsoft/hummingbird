@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
 
   
@@ -30,6 +32,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -213,13 +216,13 @@
   <div class="section" id="module-hummingbird.ml._executor">
 <span id="hummingbird-ml-executor"></span><h1>hummingbird.ml._executor<a class="headerlink" href="#module-hummingbird.ml._executor" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="hummingbird.ml._executor.Executor">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml._executor.</span></code><code class="sig-name descname"><span class="pre">Executor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/_executor.py#L19"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml._executor.Executor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">hummingbird.ml._executor.</span></span><span class="sig-name descname"><span class="pre">Executor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/_executor.py#L19"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Executor class able to run Hummingbird’s internal representation of a converted pipeline.</p>
 <dl class="py method">
-<dt id="hummingbird.ml._executor.Executor.forward">
-<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/_executor.py#L65"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor.forward" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml._executor.Executor.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/_executor.py#L65"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml._executor.Executor.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">

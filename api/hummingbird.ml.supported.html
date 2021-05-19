@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
 
   
@@ -30,6 +32,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -301,142 +304,142 @@ SVMClassifier,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,</p>
 <dl class="py data">
-<dt id="hummingbird.ml.supported.BATCH_SIZE">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">BATCH_SIZE</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'batch_size'</span></em><a class="headerlink" href="#hummingbird.ml.supported.BATCH_SIZE" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.BATCH_SIZE">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">BATCH_SIZE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'batch_size'</span></em><a class="headerlink" href="#hummingbird.ml.supported.BATCH_SIZE" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select whether to partition the input dataset at inference time in N batch_size partitions.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.CONTAINER">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">CONTAINER</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'container'</span></em><a class="headerlink" href="#hummingbird.ml.supported.CONTAINER" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.CONTAINER">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">CONTAINER</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'container'</span></em><a class="headerlink" href="#hummingbird.ml.supported.CONTAINER" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean used to chose whether to return the container for Sklearn API or just the model.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.INPUT_NAMES">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">INPUT_NAMES</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'input_names'</span></em><a class="headerlink" href="#hummingbird.ml.supported.INPUT_NAMES" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.INPUT_NAMES">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">INPUT_NAMES</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'input_names'</span></em><a class="headerlink" href="#hummingbird.ml.supported.INPUT_NAMES" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the names of the inputs. Assume that the numbers of inputs_names is equal to the number of inputs.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.MAX_STRING_LENGTH">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">MAX_STRING_LENGTH</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'max_string_length'</span></em><a class="headerlink" href="#hummingbird.ml.supported.MAX_STRING_LENGTH" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.MAX_STRING_LENGTH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">MAX_STRING_LENGTH</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'max_string_length'</span></em><a class="headerlink" href="#hummingbird.ml.supported.MAX_STRING_LENGTH" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maximum expected length for string features. By deafult this value is set using the training information.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.N_THREADS">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">N_THREADS</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'n_threads'</span></em><a class="headerlink" href="#hummingbird.ml.supported.N_THREADS" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.N_THREADS">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">N_THREADS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'n_threads'</span></em><a class="headerlink" href="#hummingbird.ml.supported.N_THREADS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select how many threads to use for scoring. This paremeter will set the number of intra-op threads.
 Inter-op threads are by default set to 1 in Hummingbird. Check <cite>tests.test_extra_conf.py</cite> for usage examples.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">ONNX_OUTPUT_MODEL_NAME</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'onnx_model_name'</span></em><a class="headerlink" href="#hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">ONNX_OUTPUT_MODEL_NAME</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'onnx_model_name'</span></em><a class="headerlink" href="#hummingbird.ml.supported.ONNX_OUTPUT_MODEL_NAME" title="Permalink to this definition">¶</a></dt>
 <dd><p>For ONNX models we can set the name of the output model.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.ONNX_TARGET_OPSET">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">ONNX_TARGET_OPSET</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'onnx_target_opset'</span></em><a class="headerlink" href="#hummingbird.ml.supported.ONNX_TARGET_OPSET" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.ONNX_TARGET_OPSET">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">ONNX_TARGET_OPSET</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'onnx_target_opset'</span></em><a class="headerlink" href="#hummingbird.ml.supported.ONNX_TARGET_OPSET" title="Permalink to this definition">¶</a></dt>
 <dd><p>For ONNX models we can set the target opset to use. 11 by default.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.OUTPUT_NAMES">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">OUTPUT_NAMES</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'output_names'</span></em><a class="headerlink" href="#hummingbird.ml.supported.OUTPUT_NAMES" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.OUTPUT_NAMES">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">OUTPUT_NAMES</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'output_names'</span></em><a class="headerlink" href="#hummingbird.ml.supported.OUTPUT_NAMES" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the names of the outputs.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.REMAINDER_SIZE">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">REMAINDER_SIZE</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'remainder_size'</span></em><a class="headerlink" href="#hummingbird.ml.supported.REMAINDER_SIZE" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.REMAINDER_SIZE">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">REMAINDER_SIZE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'remainder_size'</span></em><a class="headerlink" href="#hummingbird.ml.supported.REMAINDER_SIZE" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines the number of rows that an auxiliary remainder model can accept.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.TREE_IMPLEMENTATION">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">TREE_IMPLEMENTATION</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'tree_implementation'</span></em><a class="headerlink" href="#hummingbird.ml.supported.TREE_IMPLEMENTATION" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.TREE_IMPLEMENTATION">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">TREE_IMPLEMENTATION</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'tree_implementation'</span></em><a class="headerlink" href="#hummingbird.ml.supported.TREE_IMPLEMENTATION" title="Permalink to this definition">¶</a></dt>
 <dd><p>Which tree implementation to use. Values can be: gemm, tree_trav, perf_tree_trav.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.TVM_MAX_FUSE_DEPTH">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">TVM_MAX_FUSE_DEPTH</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'tvm_max_fuse_depth'</span></em><a class="headerlink" href="#hummingbird.ml.supported.TVM_MAX_FUSE_DEPTH" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.TVM_MAX_FUSE_DEPTH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">TVM_MAX_FUSE_DEPTH</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'tvm_max_fuse_depth'</span></em><a class="headerlink" href="#hummingbird.ml.supported.TVM_MAX_FUSE_DEPTH" title="Permalink to this definition">¶</a></dt>
 <dd><p>For TVM we can fix the number of operations that will be fused.
 If not set, compilation may take forever (<a class="reference external" href="https://github.com/microsoft/hummingbird/issues/232">https://github.com/microsoft/hummingbird/issues/232</a>).
 By default Hummingbird uses a max_fuse_depth of 50, but this can be override using this parameter.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="hummingbird.ml.supported.TVM_PAD_INPUT">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">TVM_PAD_INPUT</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'tvm_pad_prediction_inputs'</span></em><a class="headerlink" href="#hummingbird.ml.supported.TVM_PAD_INPUT" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.TVM_PAD_INPUT">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">TVM_PAD_INPUT</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'tvm_pad_prediction_inputs'</span></em><a class="headerlink" href="#hummingbird.ml.supported.TVM_PAD_INPUT" title="Permalink to this definition">¶</a></dt>
 <dd><p>TVM statically compiles models, therefore each input shape is fixed.
 However, at prediction time, we can have inputs with different batch size.
 This option allows to pad the inputs on the batch dimension with zeros. Note that enabling this option may considerably hurt performance</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported._build_backend_map">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">_build_backend_map</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L342"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_backend_map" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported._build_backend_map">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">_build_backend_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L342"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_backend_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>The set of supported backends is defined here.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported._build_lightgbm_operator_list">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">_build_lightgbm_operator_list</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L290"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_lightgbm_operator_list" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported._build_lightgbm_operator_list">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">_build_lightgbm_operator_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L290"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_lightgbm_operator_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>List all suported LightGBM (Sklearn API) operators.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported._build_onnxml_api_operator_name_map">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">_build_onnxml_api_operator_name_map</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L389"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_onnxml_api_operator_name_map" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported._build_onnxml_api_operator_name_map">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">_build_onnxml_api_operator_name_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L389"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_onnxml_api_operator_name_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Associate ONNXML with the operator class names.
 If two ONNXML models share a single name, it means they are equivalent in terms of conversion.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported._build_onnxml_operator_list">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">_build_onnxml_operator_list</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L303"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_onnxml_operator_list" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported._build_onnxml_operator_list">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">_build_onnxml_operator_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L303"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_onnxml_operator_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>List all suported ONNXML operators.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported._build_sklearn_api_operator_name_map">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">_build_sklearn_api_operator_name_map</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L370"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sklearn_api_operator_name_map" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported._build_sklearn_api_operator_name_map">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">_build_sklearn_api_operator_name_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L370"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sklearn_api_operator_name_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Associate Sklearn with the operator class names.
 If two scikit-learn (API) models share a single name, it means they are equivalent in terms of conversion.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported._build_sklearn_operator_list">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">_build_sklearn_operator_list</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L116"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sklearn_operator_list" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported._build_sklearn_operator_list">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">_build_sklearn_operator_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L116"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sklearn_operator_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Put all suported Sklearn operators on a list.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported._build_sparkml_api_operator_name_map">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">_build_sparkml_api_operator_name_map</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L397"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sparkml_api_operator_name_map" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported._build_sparkml_api_operator_name_map">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">_build_sparkml_api_operator_name_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L397"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sparkml_api_operator_name_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Associate Spark-ML with the operator class names.
 If two Spark-ML models share a single name, it means they are equivalent in terms of conversion.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported._build_sparkml_operator_list">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">_build_sparkml_operator_list</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L257"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sparkml_operator_list" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported._build_sparkml_operator_list">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">_build_sparkml_operator_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L257"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_sparkml_operator_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>List all suported SparkML operators.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported._build_xgboost_operator_list">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">_build_xgboost_operator_list</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L278"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_xgboost_operator_list" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported._build_xgboost_operator_list">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">_build_xgboost_operator_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L278"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported._build_xgboost_operator_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>List all suported XGBoost (Sklearn API) operators.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported.get_onnxml_api_operator_name">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">get_onnxml_api_operator_name</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L421"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported.get_onnxml_api_operator_name" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.get_onnxml_api_operator_name">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">get_onnxml_api_operator_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L421"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported.get_onnxml_api_operator_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the operator name for the input model type in <em>ONNX-ML API</em> format.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>model_type: A ONNX-ML model object (e.g., TreeEnsembleClassifier)</p>
@@ -448,8 +451,8 @@ None if the model_type is not supported</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported.get_sklearn_api_operator_name">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">get_sklearn_api_operator_name</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L405"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported.get_sklearn_api_operator_name" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.get_sklearn_api_operator_name">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">get_sklearn_api_operator_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L405"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported.get_sklearn_api_operator_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the operator name for the input model type in <em>scikit-learn API</em> format.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><dl class="simple">
@@ -463,8 +466,8 @@ None if the model_type is not supported</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.supported.get_sparkml_api_operator_name">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></code><code class="sig-name descname"><span class="pre">get_sparkml_api_operator_name</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/supported.py#L437"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported.get_sparkml_api_operator_name" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.supported.get_sparkml_api_operator_name">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.supported.</span></span><span class="sig-name descname"><span class="pre">get_sparkml_api_operator_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/supported.py#L437"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.supported.get_sparkml_api_operator_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the operator name for the input model type in <em>Spark-ML API</em> format.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>model_type: A Spark-ML model object (e.g., LogisticRegression)</p>

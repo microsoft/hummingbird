@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
 
   
@@ -30,6 +32,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -218,17 +221,17 @@
 <span id="hummingbird-ml-operator-converters-sklearn-bagging"></span><h1>hummingbird.ml.operator_converters.sklearn.bagging<a class="headerlink" href="#module-hummingbird.ml.operator_converters.sklearn.bagging" title="Permalink to this headline">¶</a></h1>
 <p>Converter for Bagging operators.</p>
 <dl class="py class">
-<dt id="hummingbird.ml.operator_converters.sklearn.bagging.Bagging">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.sklearn.bagging.</span></code><code class="sig-name descname"><span class="pre">Bagging</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_classifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_estimators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/operator_converters/sklearn/bagging.py#L19"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.bagging.Bagging" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.sklearn.bagging.Bagging">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.sklearn.bagging.</span></span><span class="sig-name descname"><span class="pre">Bagging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_classifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_estimators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/operator_converters/sklearn/bagging.py#L19"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.bagging.Bagging" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._physical_operator.html#hummingbird.ml.operator_converters._physical_operator.PhysicalOperator" title="hummingbird.ml.operator_converters._physical_operator.PhysicalOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._physical_operator.PhysicalOperator</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <dl class="py attribute">
-<dt id="hummingbird.ml.operator_converters.sklearn.bagging.Bagging._abc_impl">
-<code class="sig-name descname"><span class="pre">_abc_impl</span></code><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.bagging.Bagging._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.sklearn.bagging.Bagging._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.bagging.Bagging._abc_impl" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="hummingbird.ml.operator_converters.sklearn.bagging.Bagging.forward">
-<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/operator_converters/sklearn/bagging.py#L33"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.bagging.Bagging.forward" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.sklearn.bagging.Bagging.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/operator_converters/sklearn/bagging.py#L33"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.bagging.Bagging.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -243,8 +246,8 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="hummingbird.ml.operator_converters.sklearn.bagging.convert_sklearn_baggind_model">
-<code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.sklearn.bagging.</span></code><code class="sig-name descname"><span class="pre">convert_sklearn_baggind_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/operator_converters/sklearn/bagging.py#L51"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.bagging.convert_sklearn_baggind_model" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.sklearn.bagging.convert_sklearn_baggind_model">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.sklearn.bagging.</span></span><span class="sig-name descname"><span class="pre">convert_sklearn_baggind_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/operator_converters/sklearn/bagging.py#L51"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters.sklearn.bagging.convert_sklearn_baggind_model" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>

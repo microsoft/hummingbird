@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
 
   
@@ -30,6 +32,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -216,17 +219,17 @@
 <span id="hummingbird-ml-operator-converters-pipeline-implementations"></span><h1>hummingbird.ml.operator_converters._pipeline_implementations<a class="headerlink" href="#module-hummingbird.ml.operator_converters._pipeline_implementations" title="Permalink to this headline">¶</a></h1>
 <p>Converters for operators necessary for supporting scikit-learn Pipelines.</p>
 <dl class="py class">
-<dt id="hummingbird.ml.operator_converters._pipeline_implementations.Concat">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._pipeline_implementations.</span></code><code class="sig-name descname"><span class="pre">Concat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/operator_converters/_pipeline_implementations.py#L19"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._pipeline_implementations.Concat" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters._pipeline_implementations.Concat">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters._pipeline_implementations.</span></span><span class="sig-name descname"><span class="pre">Concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logical_operator</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/operator_converters/_pipeline_implementations.py#L19"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._pipeline_implementations.Concat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="hummingbird.ml.operator_converters._physical_operator.html#hummingbird.ml.operator_converters._physical_operator.PhysicalOperator" title="hummingbird.ml.operator_converters._physical_operator.PhysicalOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">hummingbird.ml.operator_converters._physical_operator.PhysicalOperator</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <dl class="py attribute">
-<dt id="hummingbird.ml.operator_converters._pipeline_implementations.Concat._abc_impl">
-<code class="sig-name descname"><span class="pre">_abc_impl</span></code><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters._pipeline_implementations.Concat._abc_impl" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters._pipeline_implementations.Concat._abc_impl">
+<span class="sig-name descname"><span class="pre">_abc_impl</span></span><em class="property"> <span class="pre">=</span> <span class="pre">&lt;_abc_data</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters._pipeline_implementations.Concat._abc_impl" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="hummingbird.ml.operator_converters._pipeline_implementations.Concat.forward">
-<code class="sig-name descname"><span class="pre">forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/operator_converters/_pipeline_implementations.py#L23"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._pipeline_implementations.Concat.forward" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters._pipeline_implementations.Concat.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/operator_converters/_pipeline_implementations.py#L23"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.operator_converters._pipeline_implementations.Concat.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">

@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/hummingbird.css" type="text/css" />
   <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
 
   
@@ -30,6 +32,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -217,15 +220,15 @@
 <p>Input containers used to wrap input models are listed here.
 These containers are used to represent different input models (e.g., onnx, spark-ml) within Hummingbird in a uniform way.</p>
 <dl class="py class">
-<dt id="hummingbird.ml.containers._input_containers.CommonONNXModelContainer">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.containers._input_containers.</span></code><code class="sig-name descname"><span class="pre">CommonONNXModelContainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">onnx_model</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/containers/_input_containers.py#L14"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.containers._input_containers.CommonONNXModelContainer" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.containers._input_containers.CommonONNXModelContainer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">hummingbird.ml.containers._input_containers.</span></span><span class="sig-name descname"><span class="pre">CommonONNXModelContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">onnx_model</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/containers/_input_containers.py#L14"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.containers._input_containers.CommonONNXModelContainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">onnxconverter_common.container.CommonSklearnModelContainer</span></code></p>
 <p>Common container for input ONNX operators.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="hummingbird.ml.containers._input_containers.CommonSparkMLModelContainer">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">hummingbird.ml.containers._input_containers.</span></code><code class="sig-name descname"><span class="pre">CommonSparkMLModelContainer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sparkml_model</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/e6f1ab2/hummingbirdhummingbird/ml/containers/_input_containers.py#L23"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.containers._input_containers.CommonSparkMLModelContainer" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="hummingbird.ml.containers._input_containers.CommonSparkMLModelContainer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">hummingbird.ml.containers._input_containers.</span></span><span class="sig-name descname"><span class="pre">CommonSparkMLModelContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sparkml_model</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/microsoft/hummingbird/blob/0ea7c44/hummingbirdhummingbird/ml/containers/_input_containers.py#L23"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hummingbird.ml.containers._input_containers.CommonSparkMLModelContainer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">onnxconverter_common.container.CommonSklearnModelContainer</span></code></p>
 <p>Common container for input Spark-ML operators.</p>
 </dd></dl>
