@@ -589,3 +589,16 @@ class PerfectTreeTraversalGBDTImpl(PerfectTreeTraversalTreeImpl):
         output = x.view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
 
         return self.post_transform(output)
+
+
+# Fine-tuning implementations.
+class GEMMTreeImplTraining(GEMMTreeImpl):
+    """
+    Class implementing the GEMM strategy with fine-tuning.
+    """
+
+
+class GEMMDecisionTreeImplFineTune(GEMMTreeImplTraining):
+    """
+    Fine tuning of decision-tree based tree models.
+    """

@@ -506,3 +506,6 @@ REMAINDER_SIZE = "remainder_size"
 
 MAX_STRING_LENGTH = "max_string_length"
 """Maximum expected length for string features. By deafult this value is set using the training information."""
+
+FINE_TUNE = "fine_tune"
+"""Flag enabling fine-tuning implementations (when available)."""
