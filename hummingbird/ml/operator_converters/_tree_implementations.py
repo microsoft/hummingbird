@@ -598,7 +598,7 @@ class GEMMTreeImplTraining(GEMMTreeImpl):
     """
 
 
-class GEMMDecisionTreeImplFineTune(GEMMTreeImplTraining):
+class GEMMDecisionTreeImplTraining(GEMMTreeImplTraining):
     """
     Fine tuning of decision-tree based tree models.
     """
