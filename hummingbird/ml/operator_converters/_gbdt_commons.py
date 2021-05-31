@@ -22,6 +22,7 @@ from ._tree_commons import (
     ApplyTweedieBasePredictionPostTransform,
 )
 from ._tree_implementations import GEMMGBDTImpl, TreeTraversalGBDTImpl, PerfectTreeTraversalGBDTImpl, TreeImpl
+from ._tree_implementations import GEMMGBDTImplTraining
 
 
 def convert_gbdt_classifier_common(
@@ -162,6 +163,9 @@ def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, c
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
+        # Use fine-tuning.
+        if constants.FINE_TUNE in extra_config and extra_config[constants.FINE_TUNE]:
+            return GEMMGBDTImplTraining(operator, net_parameters, n_features, classes, extra_config)
         return GEMMGBDTImpl(operator, net_parameters, n_features, classes, extra_config)
     if tree_type == TreeImpl.tree_trav:
         return TreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)

@@ -14,7 +14,6 @@ import torch
 
 from ._tree_implementations import TreeImpl
 from ._tree_implementations import GEMMDecisionTreeImpl, TreeTraversalDecisionTreeImpl, PerfectTreeTraversalDecisionTreeImpl
-from ._tree_implementations import GEMMDecisionTreeImplFineTune
 from . import constants
 from hummingbird.ml.exceptions import MissingConverter
 
@@ -462,10 +461,6 @@ def convert_decision_ensemble_tree_common(
             )
             for tree_param in tree_parameters
         ]
-
-        # Use fine-tuning.
-        if constants.FINE_TUNE in extra_config and extra_config[constants.FINE_TUNE]:
-            return GEMMDecisionTreeImplFineTune(operator, net_parameters, n_features, classes)
         return GEMMDecisionTreeImpl(operator, net_parameters, n_features, classes)
 
     net_parameters = [

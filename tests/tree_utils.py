@@ -5,13 +5,13 @@ gbdt_implementation_map = {
     "tree_trav": "<class 'hummingbird.ml.operator_converters._tree_implementations.TreeTraversalGBDTImpl'>",
     "perf_tree_trav": "<class 'hummingbird.ml.operator_converters._tree_implementations.PerfectTreeTraversalGBDTImpl'>",
     "gemm": "<class 'hummingbird.ml.operator_converters._tree_implementations.GEMMGBDTImpl'>",
+    "gemm_fine_tune": "<class 'hummingbird.ml.operator_converters._tree_implementations.GEMMGBDTImplTraining'>",
 }
 
 dt_implementation_map = {
     "tree_trav": "<class 'hummingbird.ml.operator_converters._tree_implementations.TreeTraversalDecisionTreeImpl'>",
     "perf_tree_trav": "<class 'hummingbird.ml.operator_converters._tree_implementations.PerfectTreeTraversalDecisionTreeImpl'>",
     "gemm": "<class 'hummingbird.ml.operator_converters._tree_implementations.GEMMDecisionTreeImpl'>",
-    "gemm_fine_tune": "<class 'hummingbird.ml.operator_converters._tree_implementations.GEMMDecisionTreeImplFineTune'>",
 }
 
 iforest_implementation_map = {

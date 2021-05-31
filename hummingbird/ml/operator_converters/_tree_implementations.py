@@ -121,9 +121,9 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         for i, (weight, bias) in enumerate(tree_parameters):
             if len(weight[0]) > 0:
                 weight_1[i, 0 : weight[0].shape[0], 0 : weight[0].shape[1]] = weight[0]
-                bias_1[i, 0 : bias[0].shape[0]] = bias[0]
+                bias_1[i, 0 : bias[0].shape[0]] = bias[0] * -1
                 weight_2[i, 0 : weight[1].shape[0], 0 : weight[1].shape[1]] = weight[1]
-                bias_2[i, 0 : bias[1].shape[0]] = bias[1]
+                bias_2[i, 0 : bias[1].shape[0]] = bias[1] * -1
                 weight_3[i, 0 : weight[2].shape[0], 0 : weight[2].shape[1]] = weight[2]
 
         self.n_trees = n_trees
@@ -136,9 +136,11 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype("float32")))
 
         self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")))
-        self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")))
+        self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.astype("float32")).unsqueeze(-1))
 
         self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype("float32")))
+        # bias_3 is None
+        self.register_parameter('bias_3', None)
 
         # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
         # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
@@ -148,19 +150,27 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
     def aggregation(self, x):
         return x
 
+    def first_layer_activation(self, x):
+        return x < 0
+
+    def second_layer_activation(self, x):
+        return x == 0
+
     def forward(self, x):
         x = x.t()
-        x = torch.mm(self.weight_1, x) < self.bias_1
+        x = torch.mm(self.weight_1, x) + self.bias_1
+        x = self.first_layer_activation(x)
         x = x.view(self.n_trees, self.hidden_one_size, -1)
         x = x.float()
 
-        x = torch.matmul(self.weight_2, x)
-
-        x = x.view(self.n_trees * self.hidden_two_size, -1) == self.bias_2
+        x = torch.matmul(self.weight_2, x) + self.bias_2
+        x = self.second_layer_activation(x)
         x = x.view(self.n_trees, self.hidden_two_size, -1)
         x = x.float()
 
         x = torch.matmul(self.weight_3, x)
+        if self.bias_3 is not None:
+            x = x + self.bias_3
         x = x.view(self.n_trees, self.hidden_three_size, -1)
 
         x = self.aggregation(x)
@@ -596,9 +606,80 @@ class GEMMTreeImplTraining(GEMMTreeImpl):
     """
     Class implementing the GEMM strategy with fine-tuning.
     """
+    def __init__(self, logical_operator, tree_parameters, n_features, classes, n_classes=None, extra_config={}, **kwargs):
+        """
+        Args:
+            tree_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+            n_classes: The total number of used classes
+        """
+        super(GEMMTreeImplTraining, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, extra_config, **kwargs)
+
+        # GEMMTreeImplTraining encodes the first layer's output to have -1 for
+        # left and 1 for right, which is different from other classes that
+        # inherit GEMMTreeImpl without fine-tuning support: 1 for left and 0
+        # for right. Similarly, the second layer's output has 1 if the leaf is
+        # selected and -1 otherwise, while other classes has 1 if leaf and 0
+        # otherwise. Thus we modify the parameters accordingly.
+        old_weight_2 = self.weight_2.detach()
+        self.weight_2 = torch.nn.Parameter(old_weight_2 * -1)
+        self.bias_2 = torch.nn.Parameter(old_weight_2.abs().sum(-1, keepdim=True) * -1 + 1)
+        old_weight_3 = self.weight_3.detach()
+        self.weight_3 = torch.nn.Parameter(old_weight_3 / 2)
+        self.bias_3 = torch.nn.Parameter(old_weight_3.sum(-1, keepdim=True) / 2)
+        if constants.FINE_TUNE_DROPOUT_PROB in extra_config:
+            self.dropout = torch.nn.Dropout(p=extra_config[constants.FINE_TUNE_DROPOUT_PROB])
+        else:
+            self.dropout = lambda x: x
+
+        self.opt_level = 4 # default opt level is 4
+        if constants.TREE_OPT_LEVEL in extra_config:
+            self.opt_level = extra_config[constants.TREE_OPT_LEVEL]
+
+        if self.opt_level < 1 or self.opt_level > 4:
+            raise ValueError("Unknown TREE_OPT_LEVEL: " + self.opt_level)
+
+        if self.opt_level < 4:
+            self.weight_2.requires_grad_(False)
+            self.bias_2.requires_grad_(False)
+        if self.opt_level < 3:
+            self.weight_1.requires_grad_(False)
+        if self.opt_level < 2:
+            self.bias_1.requires_grad_(False)
+
+    def first_layer_activation(self, x):
+        return self.dropout(x.tanh_())
+
+    def second_layer_activation(self, x):
+        return self.dropout(x.tanh_())
 
 
-class GEMMDecisionTreeImplTraining(GEMMTreeImplTraining):
+class GEMMGBDTImplTraining(GEMMTreeImplTraining):
     """
-    Fine tuning of decision-tree based tree models.
+    Fine tuning of GBDT models. For now we only support binary classification.
     """
+
+    def __init__(self, logical_operator, tree_parameters, n_features, classes=None, extra_config={}):
+        """
+        Args:
+            tree_parameters: The parameters defining the tree structure
+            n_features: The number of features input to the model
+            classes: The classes used for classification. None if implementing a regression model
+        """
+        super(GEMMGBDTImplTraining, self).__init__(logical_operator, tree_parameters, n_features, classes, extra_config=extra_config)
+
+        self.n_gbdt_classes = 1
+
+        if constants.POST_TRANSFORM in extra_config:
+            self.post_transform = extra_config[constants.POST_TRANSFORM]
+
+        if classes is not None:
+            self.n_gbdt_classes = len(classes) if len(classes) > 2 else 1
+
+        self.n_trees_per_class = len(tree_parameters) // self.n_gbdt_classes
+
+    def aggregation(self, x):
+        output = torch.squeeze(x).t().view(-1, self.n_gbdt_classes, self.n_trees_per_class).sum(2)
+
+        return self.post_transform(output)
