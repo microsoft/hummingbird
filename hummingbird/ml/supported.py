@@ -509,3 +509,11 @@ MAX_STRING_LENGTH = "max_string_length"
 
 FINE_TUNE = "fine_tune"
 """Flag enabling fine-tuning implementations (when available)."""
+
+FINE_TUNE_DROPOUT_PROB = "fine_tune_dropout_prob"
+"""Determines dropout probability used for fine-tuning.
+Dropout is diabled if this flag is not given."""
+
+TREE_OPT_LEVEL = "tree_opt_level"
+"""Which optimization level to use for fine-tuning Tree-based models. Values can be: 1, 2, 3, 4.
+TREE_OPT_LEVEL is set to 4 by default."""

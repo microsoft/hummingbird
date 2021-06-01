@@ -230,7 +230,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
     operators = list(topology.topological_operator_iterator())
     executor = Executor(
         topology.input_container.input_names, topology.input_container.output_names, operator_map, operators, extra_config
-    ).eval()
+    )
 
     # if constants.REMAINDER_SIZE is present in extra_config, we are in the convert_batch mode.
     remainder_model = None

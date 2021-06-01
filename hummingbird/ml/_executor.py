@@ -62,61 +62,76 @@ class Executor(torch.nn.Module, object):
         if constants.MAX_STRING_LENGTH in extra_config:
             self.max_string_length = extra_config[constants.MAX_STRING_LENGTH]
 
+        if constants.FINE_TUNE in extra_config and extra_config[constants.FINE_TUNE]:
+            self.train()
+        else:
+            self.eval()
+
     def forward(self, *inputs):
-        with torch.no_grad():
-            assert len(self._input_names) == len(inputs) or (
-                type(inputs[0]) == DataFrame
-                and DataFrame is not None
-                and not self.check_dataframe_to_array
-                and len(self._input_names) == len(inputs[0].columns)
-            ), "number of inputs or number of columns in the dataframe do not match with the expected number of inputs {}".format(
-                self._input_names
-            )
+        if self.training:
+            # If this module is set as `training` mode,
+            # whether or not to maintain intermediate results for backpropagation
+            # depends on the caller.
+            return self._forward_internal(*inputs)
+        else:
+            # Explicitly set `torch.no_grad()`` to match previous behavior.
+            with torch.no_grad():
+                return self._forward_internal(*inputs)
 
-            if type(inputs[0]) == DataFrame and DataFrame is not None:
-                # Split the dataframe into column ndarrays.
-                inputs = inputs[0]
-                input_names = list(inputs.columns)
-                splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
-                splits = [df.to_numpy().reshape(-1, 1) for df in splits]
-                inputs = tuple(splits)
-            inputs = [*inputs]
-            variable_map = {}
-            device = get_device(self)
+    def _forward_internal(self, *inputs):
+        assert len(self._input_names) == len(inputs) or (
+            type(inputs[0]) == DataFrame
+            and DataFrame is not None
+            and not self.check_dataframe_to_array
+            and len(self._input_names) == len(inputs[0].columns)
+        ), "number of inputs or number of columns in the dataframe do not match with the expected number of inputs {}".format(
+            self._input_names
+        )
 
-            # Maps data inputs to the expected variables.
-            for i, input_name in enumerate(self._input_names):
-                input_ = inputs[i]
-                if type(input_) is list:
-                    input_ = np.array(input_)
-                if type(input_) is np.ndarray:
-                    # Convert string arrays into int32.
-                    if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
-                        assert self.max_string_length is not None
+        if type(inputs[0]) == DataFrame and DataFrame is not None:
+            # Split the dataframe into column ndarrays.
+            inputs = inputs[0]
+            input_names = list(inputs.columns)
+            splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
+            splits = [df.to_numpy().reshape(-1, 1) for df in splits]
+            inputs = tuple(splits)
+        inputs = [*inputs]
+        variable_map = {}
+        device = get_device(self)
 
-                        input_ = from_strings_to_ints(input_, self.max_string_length)
-                    input_ = torch.from_numpy(input_)
-                elif type(input_) is not torch.Tensor:
-                    raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(input_)))
-                if input_.dtype == torch.float64:
-                    # We convert double precision arrays into single precision. Sklearn does the same.
-                    input_ = input_.float()
-                if device is not None and device.type != "cpu":
-                    input_ = input_.to(device)
-                variable_map[input_name] = input_
+        # Maps data inputs to the expected variables.
+        for i, input_name in enumerate(self._input_names):
+            input_ = inputs[i]
+            if type(input_) is list:
+                input_ = np.array(input_)
+            if type(input_) is np.ndarray:
+                # Convert string arrays into int32.
+                if input_.dtype.kind in constants.SUPPORTED_STRING_TYPES:
+                    assert self.max_string_length is not None
 
-            # Evaluate all the operators in the topology by properly wiring inputs \ outputs
-            for operator in self._operators:
-                outputs = operator(*(variable_map[input_name] for input_name in operator.inputs))
+                    input_ = from_strings_to_ints(input_, self.max_string_length)
+                input_ = torch.from_numpy(input_)
+            elif type(input_) is not torch.Tensor:
+                raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(input_)))
+            if input_.dtype == torch.float64:
+                # We convert double precision arrays into single precision. Sklearn does the same.
+                input_ = input_.float()
+            if device is not None and device.type != "cpu":
+                input_ = input_.to(device)
+            variable_map[input_name] = input_
 
-                if len(operator.outputs) == 1:
-                    variable_map[operator.outputs[0]] = outputs
-                else:
-                    for i, output_name in enumerate(operator.outputs):
-                        variable_map[output_name] = outputs[i]
+        # Evaluate all the operators in the topology by properly wiring inputs \ outputs
+        for operator in self._operators:
+            outputs = operator(*(variable_map[input_name] for input_name in operator.inputs))
 
-            # Prepare and return the output.
-            if len(self._output_names) == 1:
-                return variable_map[self._output_names[0]]
+            if len(operator.outputs) == 1:
+                variable_map[operator.outputs[0]] = outputs
             else:
-                return tuple(variable_map[output_name] for output_name in self._output_names)
+                for i, output_name in enumerate(operator.outputs):
+                    variable_map[output_name] = outputs[i]
+
+        # Prepare and return the output.
+        if len(self._output_names) == 1:
+            return variable_map[self._output_names[0]]
+        else:
+            return tuple(variable_map[output_name] for output_name in self._output_names)
