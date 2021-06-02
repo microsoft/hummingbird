@@ -51,6 +51,7 @@ from .sklearn import scaler as sklearn_scaler  # noqa: E402
 from .sklearn import sv  # noqa: E402
 from . import lightgbm  # noqa: E402
 from . import xgb  # noqa: E402
+from . import prophet  # noqa: E402
 from .sparkml import discretizer  # noqa: E402
 from .sparkml import linear  # noqa: E402
 from .sparkml import vector_assembler  # noqa: E402

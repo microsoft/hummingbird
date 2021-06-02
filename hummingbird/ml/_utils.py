@@ -139,6 +139,17 @@ def pandas_installed():
     return True
 
 
+def prophet_installed():
+    """
+    Checks that *Prophet* is available.
+    """
+    try:
+        import prophet
+    except ImportError:
+        return False
+    return True
+
+
 def is_pandas_dataframe(df):
     import pandas as pd
 
