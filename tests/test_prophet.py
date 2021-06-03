@@ -1,5 +1,7 @@
 import unittest
 import numpy as np
+import os
+import sys
 
 import hummingbird
 from hummingbird.ml._utils import pandas_installed, prophet_installed, onnx_runtime_installed
@@ -10,13 +12,26 @@ if pandas_installed():
 if prophet_installed():
     from prophet import Prophet
 
-DATA = "tests/resources/example_wp_log_peyton_manning.csv"
+if sys.version_info[0] >= 3:
+    from urllib.request import urlretrieve
+else:
+    from urllib import urlretrieve
 
 
 class TestProphet(unittest.TestCase):
+    def _get_data(self):
+        local_path = "tests/resources"
+        local_data = os.path.join(local_path, "example_wp_log_peyton_manning.csv")
+        url = "https://raw.githubusercontent.com/facebook/prophet/master/examples/example_wp_log_peyton_manning.csv"
+        if not os.path.isfile(local_data):
+            os.makedirs(local_path)
+            urlretrieve(url, local_data)
+        data = pd.read_csv(local_data)
+        return data
+
     @unittest.skipIf(not (pandas_installed() and prophet_installed()), reason="Test requires Prophet and Pandas")
     def test_prophet_trend(self):
-        df = pd.read_csv(DATA)
+        df = self._get_data()
 
         m = Prophet()
         m.fit(df)
@@ -36,7 +51,7 @@ class TestProphet(unittest.TestCase):
         reason="Test requires Prophet, Pandas and ONNX runtime.",
     )
     def test_prophet_trend_onnx(self):
-        df = pd.read_csv(DATA)
+        df = self._get_data()
 
         m = Prophet()
         m.fit(df)
