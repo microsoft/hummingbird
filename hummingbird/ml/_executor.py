@@ -5,7 +5,6 @@
 # --------------------------------------------------------------------------
 
 import numpy as np
-from datetime import datetime
 import torch
 
 from hummingbird.ml._utils import pandas_installed, get_device, from_strings_to_ints
@@ -97,6 +96,7 @@ class Executor(torch.nn.Module, object):
 
                         input_ = from_strings_to_ints(input_, self.max_string_length)
                     elif input_.dtype.kind == "M":  # Datetime
+                        # We convert into seconds from 1970-1-1.
                         input_ = (input_ - np.datetime64("1970-01-01T00:00:00.000000000")).astype(np.int64) / 1000000000
                     input_ = torch.from_numpy(input_)
                 elif type(input_) is not torch.Tensor:

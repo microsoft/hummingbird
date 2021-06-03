@@ -14,7 +14,7 @@ DATA = "tests/resources/example_wp_log_peyton_manning.csv"
 
 
 class TestProphet(unittest.TestCase):
-    @unittest.skipIf(not (pandas_installed() and prophet_installed()), reason="Tests requires Prophet and Pandas")
+    @unittest.skipIf(not (pandas_installed() and prophet_installed()), reason="Test requires Prophet and Pandas")
     def test_prophet_trend(self):
         df = pd.read_csv(DATA)
 
@@ -33,7 +33,7 @@ class TestProphet(unittest.TestCase):
 
     @unittest.skipIf(
         not (pandas_installed() and prophet_installed() and onnx_runtime_installed()),
-        reason="Tests requires Prophet and Pandas",
+        reason="Test requires Prophet, Pandas and ONNX runtime.",
     )
     def test_prophet_trend_onnx(self):
         df = pd.read_csv(DATA)
