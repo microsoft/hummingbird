@@ -31,7 +31,7 @@ install_requires = [
     "dill",
 ]
 onnx_requires = [
-    "onnxruntime>=1.0.0,<1.7.0",
+    "onnxruntime>=1.0.0,<=1.7.0",
     "onnxmltools>=1.6.0",
     "skl2onnx<=1.7.0",
 ]
@@ -56,7 +56,7 @@ setup(
     install_requires=install_requires,
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
-        "sparkml": ["pyspark>=2.4.4", "pyarrow>1.0"],
+        "sparkml": ["pyspark>=2.4.4,<3.1.2", "pyarrow>1.0"],
         "onnx": onnx_requires,
         "extra": extra_requires,
         "benchmark": onnx_requires + extra_requires + ["memory-profiler", "psutil"],
