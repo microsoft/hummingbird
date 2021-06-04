@@ -55,10 +55,10 @@ class Prophet(PhysicalOperator, torch.nn.Module):
 
 def convert_prophet(operator, device=None, extra_config={}):
     """
-    Converter for `prophet.Prohpet`
+    Converter for `prophet.Prophet`
 
     Args:
-        operator: An operator wrapping a `ai.onnx.ml.Imputer` model
+        operator: An operator wrapping a `prophet.Prophet` model
         device: String defining the type of device the converted operator should be run on
         extra_config: Extra configuration used to select the best conversion strategy
 
