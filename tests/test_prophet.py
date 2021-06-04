@@ -51,11 +51,11 @@ class TestProphet(unittest.TestCase):
         np.testing.assert_allclose(prophet_trend, hb_trend, rtol=1e-06, atol=1e-06)
 
     @unittest.skipIf(
-        not (pandas_installed() and prophet_installed() and onnx_runtime_installed()),
-        reason="Test requires Prophet, Pandas and ONNX runtime.",
+        not (pandas_installed() and prophet_installed()), reason="Test requires Prophet, Pandas and ONNX runtime.",
     )
     @unittest.skipIf(
-        LooseVersion(onnxruntime.__version__) < LooseVersion("1.7.0"), reason="Prophet test requires onnxruntime => 1.7.0",
+        not onnx_runtime_installed() or LooseVersion(onnxruntime.__version__) < LooseVersion("1.7.0"),
+        reason="Prophet test requires onnxruntime => 1.7.0",
     )
     def test_prophet_trend_onnx(self):
         df = self._get_data()
