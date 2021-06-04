@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import os
 import sys
+from distutils.version import LooseVersion
 
 import hummingbird
 from hummingbird.ml._utils import pandas_installed, prophet_installed, onnx_runtime_installed
@@ -11,6 +12,9 @@ if pandas_installed():
 
 if prophet_installed():
     from prophet import Prophet
+
+if onnx_runtime_installed():
+    import onnxruntime
 
 if sys.version_info[0] >= 3:
     from urllib.request import urlretrieve
@@ -49,6 +53,9 @@ class TestProphet(unittest.TestCase):
     @unittest.skipIf(
         not (pandas_installed() and prophet_installed() and onnx_runtime_installed()),
         reason="Test requires Prophet, Pandas and ONNX runtime.",
+    )
+    @unittest.skipIf(
+        LooseVersion(onnxruntime.__version__) < LooseVersion("1.7.0"), reason="Prophet test requires onnxruntime => 1.7.0",
     )
     def test_prophet_trend_onnx(self):
         df = self._get_data()
