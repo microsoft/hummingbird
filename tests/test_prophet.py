@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import os
 import sys
+import torch
 from distutils.version import LooseVersion
 
 import hummingbird
@@ -52,6 +53,9 @@ class TestProphet(unittest.TestCase):
 
     @unittest.skipIf(
         not (pandas_installed() and prophet_installed()), reason="Test requires Prophet, Pandas and ONNX runtime.",
+    )
+    @unittest.skipIf(
+        LooseVersion(torch.__version__) < LooseVersion("1.8.1"), reason="Test requires Torch 1.8.1.",
     )
     @unittest.skipIf(
         not onnx_runtime_installed() or LooseVersion(onnxruntime.__version__) < LooseVersion("1.7.0"),
