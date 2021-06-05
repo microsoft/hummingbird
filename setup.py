@@ -40,6 +40,7 @@ extra_requires = [
     "xgboost>=0.90,<1.4.0",
     "lightgbm>=2.2,<3",
     "prophet==1.0.1",
+    "plotly==4.14.3",
 ]
 setup(
     name="hummingbird-ml",
