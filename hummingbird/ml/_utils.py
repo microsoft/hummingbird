@@ -31,6 +31,10 @@ def torch_installed():
         return False
 
 
+def assert_torch_installed():
+    assert torch_installed(), "To use Hummingbird you need to install torch."
+
+
 def onnx_ml_tools_installed():
     """
     Checks that *ONNXMLTools* is available.
