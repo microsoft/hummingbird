@@ -342,7 +342,7 @@ def _build_onnxml_operator_list():
 
 def _build_prophet_operator_list():
     """
-    List all suported XGBoost (Sklearn API) operators.
+    List all suported Prophet (Sklearn API) operators.
     """
     if prophet_installed():
         from prophet import Prophet

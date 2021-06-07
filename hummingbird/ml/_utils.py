@@ -144,7 +144,7 @@ def prophet_installed():
     Checks that *Prophet* is available.
     """
     try:
-        import prophet
+        from prophet import Prophet
     except ImportError:
         return False
     return True
