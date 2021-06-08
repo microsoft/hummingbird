@@ -80,9 +80,14 @@ def _supported_backend_check_config(model, backend, extra_config):
     if (
         (backend == torch.jit.__name__ and not _is_onnx_model(model))
         or backend == tvm_backend
-        or (backend == onnx.__name__ and not _is_onnx_model(model))
+        or (backend == onnx.__name__ and not _is_onnx_model(model) or _is_onnx_model(model) and backend == torch.__name__)
     ) and constants.TEST_INPUT not in extra_config:
-        raise RuntimeError("Backend {} requires test inputs. Please pass some test input to the convert.".format(backend))
+        raise RuntimeError(
+            "Backend {} requires test inputs. \
+            Please pass some test input to the convert function.".format(
+                backend
+            )
+        )
 
 
 def _convert_sklearn(model, backend, test_input, device, extra_config={}):
