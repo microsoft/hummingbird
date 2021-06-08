@@ -94,6 +94,10 @@ def lightgbm_installed():
         return True
     except ImportError:
         return False
+    
+    
+def assert_lightgbm_installed():
+    assert lightgbm_installed(), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
 
 
 def xgboost_installed():
@@ -119,6 +123,10 @@ def xgboost_installed():
     if vers < allowed_min:
         warnings.warn("The converter works for xgboost >= 0.9. Different versions might not.")
     return True
+
+
+def assert_xgboost_installed():
+    assert xgboost_installed(), "To convert XGboost models you need to instal XGBoost (or `pip install hummingbird-ml[extra]`)."
 
 
 def tvm_installed():
