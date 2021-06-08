@@ -48,6 +48,10 @@ def onnx_ml_tools_installed():
         return False
 
 
+def assert_onnx_ml_tools_installed():
+    assert onnx_ml_tools_installed(), "ONNXMLTOOLS not installed. Please check https://github.com/onnx/onnxmltools for instructions."
+
+
 def onnx_runtime_installed():
     """
     Checks that *ONNX Runtime* is available.
@@ -58,6 +62,10 @@ def onnx_runtime_installed():
         return True
     except ImportError:
         return False
+
+
+def assert_onnx_runtime_installed():
+    assert onnx_runtime_installed()
 
 
 def sparkml_installed():
@@ -72,6 +80,10 @@ def sparkml_installed():
         return False
 
 
+def assert_sparkml_installed():
+    assert sparkml_installed()
+
+
 def sklearn_installed():
     """
     Checks that *Sklearn* is available.
@@ -82,6 +94,10 @@ def sklearn_installed():
         return True
     except ImportError:
         return False
+
+
+def assert_sklearn_installed():
+    assert sklearn_installed()
 
 
 def lightgbm_installed():
@@ -126,7 +142,7 @@ def xgboost_installed():
 
 
 def assert_xgboost_installed():
-    assert xgboost_installed(), "To convert XGboost models you need to instal XGBoost (or `pip install hummingbird-ml[extra]`)."
+    assert xgboost_installed(), "To convert XGBoost models you need to install XGBoost (or `pip install hummingbird-ml[extra]`)."
 
 
 def tvm_installed():
@@ -140,6 +156,10 @@ def tvm_installed():
     return True
 
 
+def assert_tvm_installed():
+    assert tvm_installed()
+
+
 def pandas_installed():
     """
     Checks that *Pandas* is available.
@@ -149,6 +169,10 @@ def pandas_installed():
     except ImportError:
         return False
     return True
+
+
+def assert_pandas_installed():
+    assert pandas_installed()
 
 
 def is_pandas_dataframe(df):
