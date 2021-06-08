@@ -16,10 +16,10 @@ from ._parse import parse_sklearn_api_model, parse_onnx_api_model, parse_sparkml
 from ._topology import convert as topology_converter
 from ._utils import (
     assert_torch_installed,
-    lightgbm_installed,
-    xgboost_installed,
-    pandas_installed,
-    sparkml_installed,
+    assert_lightgbm_installed,
+    assert_xgboost_installed,
+    assert_pandas_installed,
+    assert_sparkml_installed,
     is_pandas_dataframe,
     is_spark_dataframe,
     tvm_installed,
@@ -46,7 +46,7 @@ def _is_sparkml_model(model):
     """
     Function returning whether the input model is a Spark-ML model or not.
     """
-    if sparkml_installed():
+    if assert_sparkml_installed():
         from pyspark.ml import Model, Transformer
         from pyspark.ml.pipeline import PipelineModel
 
@@ -113,9 +113,7 @@ def _convert_lightgbm(model, backend, test_input, device, extra_config={}):
     This function is used to generate a *backend* model from a given input [LightGBM] model.
     [LightGBM]: https://lightgbm.readthedocs.io/
     """
-    assert (
-        lightgbm_installed()
-    ), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
+    assert_lightgbm_installed()
 
     return _convert_sklearn(model, backend, test_input, device, extra_config)
 
@@ -125,9 +123,7 @@ def _convert_xgboost(model, backend, test_input, device, extra_config={}):
     This function is used to generate a *backend* model from a given input [XGBoost] model.
     [XGBoost]: https://xgboost.readthedocs.io/
     """
-    assert (
-        xgboost_installed()
-    ), "To convert XGboost models you need to instal XGBoost (or `pip install hummingbird-ml[extra]`)."
+    assert_xgboost_installed()
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
@@ -322,7 +318,7 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
             assert all([len(input.shape) == 2 for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_FEATURES] = sum([input.shape[1] for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT])
-        elif pandas_installed() and is_pandas_dataframe(extra_config[constants.TEST_INPUT]):
+        elif assert_pandas_installed() and is_pandas_dataframe(extra_config[constants.TEST_INPUT]):
             # We split the input dataframe into columnar ndarrays
             extra_config[constants.N_INPUTS] = len(extra_config[constants.TEST_INPUT].columns)
             extra_config[constants.N_FEATURES] = extra_config[constants.N_INPUTS]
@@ -331,7 +327,7 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
             splits = [df.to_numpy().reshape(-1, 1) for df in splits]
             extra_config[constants.TEST_INPUT] = tuple(splits) if len(splits) > 1 else splits[0]
             extra_config[constants.INPUT_NAMES] = input_names
-        elif sparkml_installed() and is_spark_dataframe(extra_config[constants.TEST_INPUT]):
+        elif assert_sparkml_installed() and is_spark_dataframe(extra_config[constants.TEST_INPUT]):
             from pyspark.ml.linalg import DenseVector, SparseVector, VectorUDT
             from pyspark.sql.types import ArrayType, FloatType, DoubleType, IntegerType, LongType
 
