@@ -733,8 +733,8 @@ class TestSklearnTreeConverter(unittest.TestCase):
                         n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=seed
                     )
                     model.fit(X, y)
-                    X = X.astype('float64')
-                    y = y.astype('float64')
+                    X = X.astype('float32')
+                    y = y.astype('float32')
 
                     torch_model = hummingbird.ml.convert(
                         model,

@@ -35,8 +35,8 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
                 X, y = datasets.make_regression(
                     n_samples=50, n_features=10, n_informative=5, n_targets=n_targets, random_state=seed
                 )
-                X = X.astype("float64")
-                y = y.astype("float64")
+                X = X.astype("float32")
+                y = y.astype("float32")
                 model.fit(X, y)
 
                 torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_PRECISION_DTYPE: "float64"})
