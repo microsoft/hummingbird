@@ -25,30 +25,30 @@ import random
 class TestSklearnMultioutputRegressor(unittest.TestCase):
     # Test MultiOutputRegressor with different child learners
     def test_sklearn_multioutput_regressor(self):
-       for n_targets in [2, 3, 4]:
-           for model_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor, LinearRegression]:
-               seed = random.randint(0, 2**32-1)
-               if model_class != LinearRegression:
-                   model = MultiOutputRegressor(model_class(random_state=seed))
-               else:
-                   model = MultiOutputRegressor(model_class())
-               X, y = datasets.make_regression(
-                   n_samples=50, n_features=10, n_informative=5, n_targets=n_targets, random_state=seed
-               )
-               X = X.astype("float64")
-               y = y.astype("float64")
-               model.fit(X, y)
+        for n_targets in [2, 3, 4]:
+            for model_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor, LinearRegression]:
+                seed = random.randint(0, 2**32 - 1)
+                if model_class != LinearRegression:
+                    model = MultiOutputRegressor(model_class(random_state=seed))
+                else:
+                    model = MultiOutputRegressor(model_class())
+                X, y = datasets.make_regression(
+                    n_samples=50, n_features=10, n_informative=5, n_targets=n_targets, random_state=seed
+                )
+                X = X.astype("float64")
+                y = y.astype("float64")
+                model.fit(X, y)
 
-               torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_PRECISION_DTYPE: "float64"})
-               self.assertTrue(torch_model is not None)
-               np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-4, err_msg="{}/{}/{}".format(n_targets, model_class, seed))
-
+                torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_PRECISION_DTYPE: "float64"})
+                self.assertTrue(torch_model is not None)
+                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-4, err_msg="{}/{}/{}".format(n_targets, model_class, seed))
 
     # Test RegressorChain with different child learners
+
     def test_sklearn_regressor_chain(self):
         for n_targets in [2, 3, 4]:
             for model_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor, LinearRegression]:
-                seed = random.randint(0, 2**32-1)
+                seed = random.randint(0, 2**32 - 1)
                 order = [i for i in range(n_targets)]
                 random.Random(seed).shuffle(order)
                 if model_class != LinearRegression:

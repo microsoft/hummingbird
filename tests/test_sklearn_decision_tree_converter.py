@@ -17,6 +17,7 @@ from tree_utils import dt_implementation_map
 
 import random
 
+
 class TestSklearnTreeConverter(unittest.TestCase):
     # Check tree implementation
     def test_random_forest_implementation(self):
@@ -726,7 +727,7 @@ class TestSklearnTreeConverter(unittest.TestCase):
         for tree_method in ["gemm", "tree_trav", "perf_tree_trav"]:
             for n_targets in [1, 2, 7]:
                 for tree_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor]:
-                    seed = random.randint(0, 2**32-1)
+                    seed = random.randint(0, 2**32 - 1)
                     model = tree_class(random_state=seed)
                     X, y = datasets.make_regression(
                         n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=seed
