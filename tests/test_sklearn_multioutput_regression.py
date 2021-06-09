@@ -64,7 +64,7 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
 
                 torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_PRECISION_DTYPE: "float64"})
                 self.assertTrue(torch_model is not None)
-                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-4, err_msg="{}/{}/{}".format(n_targets, model_class, seed))
+                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-4, atol=1e-4, err_msg="{}/{}/{}".format(n_targets, model_class, seed))
 
 
 if __name__ == "__main__":
