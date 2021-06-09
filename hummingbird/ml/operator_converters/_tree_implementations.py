@@ -182,11 +182,11 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         x = torch.matmul(self.weight_3, x)
         x = x.view(self.n_trees, self.hidden_three_size, -1)
 
-        x = self.aggregation(x)
-
         if self.tree_op_precision_dtype == 'float64':
             # Converting back to float32 after tree operations.
             x = x.float()
+
+        x = self.aggregation(x)
 
         if self.regression:
             return x
@@ -295,11 +295,11 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         output = torch.index_select(self.values, 0, indexes).view(-1, self.num_trees, self.n_classes)
 
-        output = self.aggregation(output)
-
         if self.tree_op_precision_dtype == 'float64':
             # Converting back to float32 after tree operations.
             output = output.float()
+
+        output = self.aggregation(output)
 
         if self.regression:
             return output
@@ -411,11 +411,11 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         output = torch.index_select(self.leaf_nodes, 0, prev_indices).view(-1, self.num_trees, self.n_classes)
 
-        output = self.aggregation(output)
-
         if self.tree_op_precision_dtype == 'float64':
             # Converting back to float32 after tree operations.
             output = output.float()
+
+        output = self.aggregation(output)
 
         if self.regression:
             return output
