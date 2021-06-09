@@ -110,8 +110,8 @@ def lightgbm_installed():
         return True
     except ImportError:
         return False
-    
-    
+
+
 def assert_lightgbm_installed():
     assert lightgbm_installed(), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
 
