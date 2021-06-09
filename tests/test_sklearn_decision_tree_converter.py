@@ -728,7 +728,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
             for n_targets in [1, 2, 7]:
                 for tree_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor]:
                     seed = random.randint(0, 2**32 - 1)
-                    model = tree_class(random_state=seed)
+                    if tree_method == "perf_tree_trav":
+                        model = tree_class(random_state=seed, max_depth=10)
+                    else:
+                        model = tree_class(random_state=seed)
                     X, y = datasets.make_regression(
                         n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=seed
                     )
