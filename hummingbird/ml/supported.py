@@ -469,7 +469,7 @@ backends = _build_backend_map()
 TREE_IMPLEMENTATION = "tree_implementation"
 """Which tree implementation to use. Values can be: gemm, tree_trav, perf_tree_trav."""
 
-TREE_PRECISION_DTYPE = "tree_precision_dtype"
+TREE_OP_PRECISION_DTYPE = "tree_op_precision_dtype"
 """Which data type to be used for the threshold and leaf values of decision nodes. Values can be: float32 or float64."""
 
 ONNX_OUTPUT_MODEL_NAME = "onnx_model_name"

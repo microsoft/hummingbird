@@ -39,7 +39,7 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
                 y = y.astype("float32")
                 model.fit(X, y)
 
-                torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_PRECISION_DTYPE: "float64"})
+                torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_OP_PRECISION_DTYPE: "float64"})
                 self.assertTrue(torch_model is not None)
                 np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-4, err_msg="{}/{}/{}".format(n_targets, model_class, seed))
 
@@ -62,7 +62,7 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
                 y = y.astype("float32")
                 model.fit(X, y)
 
-                torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_PRECISION_DTYPE: "float64"})
+                torch_model = hummingbird.ml.convert(model, "torch", extra_config={constants.TREE_OP_PRECISION_DTYPE: "float64"})
                 self.assertTrue(torch_model is not None)
                 np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-4, atol=1e-4, err_msg="{}/{}/{}".format(n_targets, model_class, seed))
 
