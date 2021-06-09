@@ -123,7 +123,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         bias_1 = np.zeros((n_trees, hidden_one_size), dtype=np.float64)
         weight_2 = np.zeros((n_trees, hidden_two_size, hidden_one_size))
         bias_2 = np.zeros((n_trees, hidden_two_size))
-        weight_3 = np.zeros((n_trees, hidden_three_size, hidden_two_size))
+        weight_3 = np.zeros((n_trees, hidden_three_size, hidden_two_size), dtype=np.float64)
 
         for i, (weight, bias) in enumerate(tree_parameters):
             if len(weight[0]) > 0:
@@ -140,20 +140,21 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         self.hidden_three_size = hidden_three_size
 
         self.weight_1 = torch.nn.Parameter(torch.from_numpy(weight_1.reshape(-1, self.n_features).astype("float32")))
-        threshold_dtype = None
-        if constants.TREE_THRESHOLD_DTYPE in extra_config:
-            threshold_dtype = extra_config[constants.TREE_THRESHOLD_DTYPE]
-            assert threshold_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
-                constants.TREE_THRESHOLD_DTYPE
+        precision_dtype = None
+        if constants.TREE_PRECISION_DTYPE in extra_config:
+            precision_dtype = extra_config[constants.TREE_PRECISION_DTYPE]
+            assert precision_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
+                constants.TREE_PRECISION_DTYPE
             )
         else:
-            threshold_dtype = "float32"
-        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype(threshold_dtype)))
+            precision_dtype = "float32"
+        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype(precision_dtype)))
+        self.precision_dtype = precision_dtype
 
         self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")))
         self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")))
 
-        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype("float32")))
+        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype(precision_dtype)))
 
         # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
         # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
@@ -173,7 +174,10 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         x = x.view(self.n_trees * self.hidden_two_size, -1) == self.bias_2
         x = x.view(self.n_trees, self.hidden_two_size, -1)
-        x = x.float()
+        if self.precision_dtype == 'float32':
+            x = x.float()
+        else:
+            x = x.double()
 
         x = torch.matmul(self.weight_3, x)
         x = x.view(self.n_trees, self.hidden_three_size, -1)
@@ -232,7 +236,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         features = np.zeros((self.num_trees, self.num_nodes), dtype=np.int64)
         thresholds = np.zeros((self.num_trees, self.num_nodes), dtype=np.float64)
-        values = np.zeros((self.num_trees, self.num_nodes, self.n_classes), dtype=np.float32)
+        values = np.zeros((self.num_trees, self.num_nodes, self.n_classes), dtype=np.float64)
 
         for i in range(self.num_trees):
             lefts[i][: len(tree_parameters[i][0])] = tree_parameters[i][2]
@@ -245,17 +249,17 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.rights = torch.nn.Parameter(torch.from_numpy(rights).view(-1), requires_grad=False)
 
         self.features = torch.nn.Parameter(torch.from_numpy(features).view(-1), requires_grad=False)
-        self.values = torch.nn.Parameter(torch.from_numpy(values).view(-1, self.n_classes))
 
-        threshold_dtype = None
-        if constants.TREE_THRESHOLD_DTYPE in extra_config:
-            threshold_dtype = extra_config[constants.TREE_THRESHOLD_DTYPE]
-            assert threshold_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
-                constants.TREE_THRESHOLD_DTYPE
+        precision_dtype = None
+        if constants.TREE_PRECISION_DTYPE in extra_config:
+            precision_dtype = extra_config[constants.TREE_PRECISION_DTYPE]
+            assert precision_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
+                constants.TREE_PRECISION_DTYPE
             )
         else:
-            threshold_dtype = "float32"
-        self.thresholds = torch.nn.Parameter(torch.from_numpy(thresholds.astype(threshold_dtype)).view(-1))
+            precision_dtype = "float32"
+        self.thresholds = torch.nn.Parameter(torch.from_numpy(thresholds.astype(precision_dtype)).view(-1))
+        self.values = torch.nn.Parameter(torch.from_numpy(values.astype(precision_dtype)).view(-1, self.n_classes))
 
         nodes_offset = [[i * self.num_nodes for i in range(self.num_trees)]]
         self.nodes_offset = torch.nn.Parameter(torch.LongTensor(nodes_offset), requires_grad=False)
@@ -340,17 +344,17 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         node_by_levels = [set() for _ in range(max_depth)]
         self._traverse_by_level(node_by_levels, 0, -1, max_depth)
 
-        threshold_dtype = None
-        if constants.TREE_THRESHOLD_DTYPE in extra_config:
-            threshold_dtype = extra_config[constants.TREE_THRESHOLD_DTYPE]
-            assert threshold_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
-                constants.TREE_THRESHOLD_DTYPE
+        precision_dtype = None
+        if constants.TREE_PRECISION_DTYPE in extra_config:
+            precision_dtype = extra_config[constants.TREE_PRECISION_DTYPE]
+            assert precision_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
+                constants.TREE_PRECISION_DTYPE
             )
         else:
-            threshold_dtype = "float32"
+            precision_dtype = "float32"
 
         self.root_nodes = torch.nn.Parameter(torch.from_numpy(weight_0[:, 0].flatten().astype("int64")), requires_grad=False)
-        self.root_biases = torch.nn.Parameter(torch.from_numpy(bias_0[:, 0].astype(threshold_dtype)), requires_grad=False)
+        self.root_biases = torch.nn.Parameter(torch.from_numpy(bias_0[:, 0].astype(precision_dtype)), requires_grad=False)
 
         tree_indices = np.array([i for i in range(0, 2 * self.num_trees, 2)]).astype("int64")
         self.tree_indices = torch.nn.Parameter(torch.from_numpy(tree_indices), requires_grad=False)
@@ -362,7 +366,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
                 torch.from_numpy(weight_0[:, list(sorted(node_by_levels[i]))].flatten().astype("int64")), requires_grad=False
             )
             biases = torch.nn.Parameter(
-                torch.from_numpy(bias_0[:, list(sorted(node_by_levels[i]))].flatten().astype(threshold_dtype)),
+                torch.from_numpy(bias_0[:, list(sorted(node_by_levels[i]))].flatten().astype(precision_dtype)),
                 requires_grad=False,
             )
             self.nodes.append(nodes)
@@ -372,7 +376,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.biases = torch.nn.ParameterList(self.biases)
 
         self.leaf_nodes = torch.nn.Parameter(
-            torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype("float32")), requires_grad=False
+            torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype(precision_dtype)), requires_grad=False
         )
 
         # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
@@ -463,14 +467,15 @@ class GEMMDecisionTreeImpl(GEMMTreeImpl):
 
     """
 
-    def __init__(self, logical_operator, tree_parameters, n_features, classes=None):
+    def __init__(self, logical_operator, tree_parameters, n_features, classes=None, extra_config={}):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
         """
-        super(GEMMDecisionTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes)
+        super(GEMMDecisionTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, extra_config=extra_config)
 
     def aggregation(self, x):
         output = x.sum(0).t()
@@ -507,16 +512,17 @@ class PerfectTreeTraversalDecisionTreeImpl(PerfectTreeTraversalTreeImpl):
     Class implementing the Perfect Tree Traversal strategy in PyTorch for decision tree models.
     """
 
-    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None, **kwargs):
+    def __init__(self, logical_operator, tree_parameters, max_depth, n_features, classes=None, extra_config={}, **kwargs):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
             max_depth: The maximum tree-depth in the model
             n_features: The number of features input to the model
             classes: The classes used for classification. None if implementing a regression model
+            extra_config: Extra configuration used to properly implement the source tree
         """
         super(PerfectTreeTraversalDecisionTreeImpl, self).__init__(
-            logical_operator, tree_parameters, max_depth, n_features, classes, **kwargs
+            logical_operator, tree_parameters, max_depth, n_features, classes, extra_config=extra_config, **kwargs
         )
 
     def aggregation(self, x):

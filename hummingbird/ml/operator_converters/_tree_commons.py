@@ -302,7 +302,7 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     rights = np.array(rights)
     features = np.array(features)
     thresholds = np.array(thresholds, dtype=np.float64)
-    values = np.array(values)
+    values = np.array(values, dtype=np.float64)
 
     return [nodes_map, ids, lefts, rights, features, thresholds, values]
 
@@ -431,7 +431,7 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
     biases.append(np.array(hidden_biases).astype("float32"))
 
     # OR neurons from the preceding layer in order to get final classes.
-    weights.append(np.transpose(np.array(class_proba).astype("float32")))
+    weights.append(np.transpose(np.array(class_proba).astype("float64")))
     biases.append(None)
 
     return weights, biases
@@ -456,7 +456,7 @@ def convert_decision_ensemble_tree_common(
             )
             for tree_param in tree_parameters
         ]
-        return GEMMDecisionTreeImpl(operator, net_parameters, n_features, classes)
+        return GEMMDecisionTreeImpl(operator, net_parameters, n_features, classes, extra_config=extra_config)
 
     net_parameters = [
         get_parameters_for_tree_trav(
@@ -467,4 +467,4 @@ def convert_decision_ensemble_tree_common(
     if tree_type == TreeImpl.tree_trav:
         return TreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
-        return PerfectTreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes)
+        return PerfectTreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
