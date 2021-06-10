@@ -367,11 +367,11 @@ class TestLGBMConverter(unittest.TestCase):
                 model,
                 "tvm",
                 X,
-                extra_config={constants.TREE_IMPLEMENTATION: tree_implementation, constants.TREE_OP_PRECISION_DTYPE: "float64"},
+                extra_config={constants.TREE_IMPLEMENTATION: tree_implementation}
             )
 
             # Check results.
-            # np.testing.assert_allclose(tvm_model.predict(X), model.predict(X))
+            np.testing.assert_allclose(tvm_model.predict(X), model.predict(X))
             np.testing.assert_allclose(tvm_model.predict_proba(X), model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
 

@@ -148,8 +148,8 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
             )
         else:
             tree_op_precision_dtype = "float32"
-        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype(tree_op_precision_dtype)))
         self.tree_op_precision_dtype = tree_op_precision_dtype
+        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype(tree_op_precision_dtype)))
 
         self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")))
         self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")))
@@ -181,10 +181,6 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         x = torch.matmul(self.weight_3, x)
         x = x.view(self.n_trees, self.hidden_three_size, -1)
-
-        if self.tree_op_precision_dtype == 'float64':
-            # Converting back to float32 after tree operations.
-            x = x.float()
 
         x = self.aggregation(x)
 
@@ -262,7 +258,6 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             )
         else:
             tree_op_precision_dtype = "float32"
-        self.tree_op_precision_dtype = tree_op_precision_dtype
         self.thresholds = torch.nn.Parameter(torch.from_numpy(thresholds.astype(tree_op_precision_dtype)).view(-1))
         self.values = torch.nn.Parameter(torch.from_numpy(values.astype(tree_op_precision_dtype)).view(-1, self.n_classes))
 
@@ -294,10 +289,6 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             indexes = indexes.view(-1)
 
         output = torch.index_select(self.values, 0, indexes).view(-1, self.num_trees, self.n_classes)
-
-        if self.tree_op_precision_dtype == 'float64':
-            # Converting back to float32 after tree operations.
-            output = output.float()
 
         output = self.aggregation(output)
 
@@ -361,7 +352,6 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             )
         else:
             tree_op_precision_dtype = "float32"
-        self.tree_op_precision_dtype = tree_op_precision_dtype
         self.root_nodes = torch.nn.Parameter(torch.from_numpy(weight_0[:, 0].flatten().astype("int64")), requires_grad=False)
         self.root_biases = torch.nn.Parameter(torch.from_numpy(bias_0[:, 0].astype(tree_op_precision_dtype)), requires_grad=False)
 
@@ -410,10 +400,6 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             )
 
         output = torch.index_select(self.leaf_nodes, 0, prev_indices).view(-1, self.num_trees, self.n_classes)
-
-        if self.tree_op_precision_dtype == 'float64':
-            # Converting back to float32 after tree operations.
-            output = output.float()
 
         output = self.aggregation(output)
 

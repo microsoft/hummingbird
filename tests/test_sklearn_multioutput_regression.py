@@ -44,7 +44,6 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
                 np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-4, err_msg="{}/{}/{}".format(n_targets, model_class, seed))
 
     # Test RegressorChain with different child learners
-
     def test_sklearn_regressor_chain(self):
         for n_targets in [2, 3, 4]:
             for model_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor, LinearRegression]:
