@@ -16,6 +16,14 @@ from .._gbdt_commons import convert_gbdt_common, convert_gbdt_classifier_common
 from .._tree_commons import get_parameters_for_sklearn_common, get_parameters_for_tree_trav_sklearn, TreeParameters
 
 
+def _get_n_features(model):
+    try:
+        return model.n_features_
+    except AttributeError:
+        # HistGradientBoosting
+        return model._n_features
+
+
 def _get_parameters_hist_gbdt(trees):
     """
     Extract the tree parameters from SklearnHistGradientBoostingClassifier trees
@@ -54,7 +62,7 @@ def convert_sklearn_gbdt_classifier(operator, device, extra_config):
     # GBDT does not normalize values upfront, we have to do it.
     extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
 
-    n_features = operator.raw_operator.n_features_
+    n_features = _get_n_features(operator.raw_operator)
     classes = operator.raw_operator.classes_.tolist()
     n_classes = len(classes)
 
@@ -111,7 +119,7 @@ def convert_sklearn_gbdt_regressor(operator, device, extra_config):
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator.estimators_.ravel().tolist()
-    n_features = operator.raw_operator.n_features_
+    n_features = _get_n_features(operator.raw_operator)
     extra_config[constants.LEARNING_RATE] = operator.raw_operator.learning_rate
     # For sklearn models we need to massage the parameters a bit before generating the parameters for tree_trav.
     extra_config[constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL] = get_parameters_for_tree_trav_sklearn
@@ -145,7 +153,7 @@ def convert_sklearn_hist_gbdt_classifier(operator, device, extra_config):
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator._predictors
-    n_features = operator.raw_operator.n_features_
+    n_features = _get_n_features(operator.raw_operator)
     classes = operator.raw_operator.classes_.tolist()
     n_classes = len(classes)
 
@@ -189,7 +197,7 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator._predictors
     tree_infos = [tree_infos[i][0] for i in range(len(tree_infos))]
-    n_features = operator.raw_operator.n_features_
+    n_features = _get_n_features(operator.raw_operator)
     extra_config[constants.BASE_PREDICTION] = [[operator.raw_operator._baseline_prediction]]
 
     return convert_gbdt_common(operator, tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)
