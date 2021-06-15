@@ -78,9 +78,12 @@ class ApplyBasePredictionPostTransform(PostTransform):
 
 
 class ApplySigmoidPostTransform(PostTransform):
+    def __init__(self):
+        self.one = torch.tensor(1.0)
+
     def __call__(self, x):
         output = torch.sigmoid(x)
-        return torch.cat([torch.tensor(1.0) - output, output], dim=1)
+        return torch.cat([self.one - output, output], dim=1)
 
 
 class ApplySigmoidBasePredictionPostTransform(PostTransform):
