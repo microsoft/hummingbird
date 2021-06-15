@@ -21,6 +21,11 @@ class Scaler(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, offset, scale, device):
         super(Scaler, self).__init__(logical_operator, transformer=True)
 
+        if len(offset.shape) == 0 or offset.shape == (0, ):
+            offset = numpy.array([0], dtype=numpy.float32)
+        if len(scale.shape) == 0 or scale.shape == (0, ):
+            scale = numpy.array([0], dtype=numpy.float32)
+
         self.offset = offset
         self.scale = scale
 

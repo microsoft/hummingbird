@@ -372,7 +372,19 @@ def convert(topology, backend, test_input, device, extra_config={}):
     ):
         idx -= 1
 
-    assert idx >= 0, "Cannot detect container type. Please fill an issue at https://github.com/microsoft/hummingbird."
+    if idx < 0:
+        rows = []
+        for i in range(len(operators)):
+            rows.append("idx=%d name=%r reg=%r cl=%r an=%r tr=%r" % (
+                idx, operators[idx].full_name,
+                operator_map[operators[idx].full_name].regression,
+                operator_map[operators[idx].full_name].classification,
+                operator_map[operators[idx].full_name].anomaly_detection,
+                operator_map[operators[idx].full_name].transformer))
+        raise RuntimeError(
+            "Cannot detect container type. "
+            "Please fill an issue at https://github.com/microsoft/hummingbird. "
+            "Details\n" + "\n".join(rows))
 
     # If is a transformer, we need to check whether there is another operator type before.
     # E.g., normalization after classification.
