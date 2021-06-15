@@ -242,7 +242,6 @@ class TestLGBMConverter(unittest.TestCase):
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(model.predict_proba(X), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
-
     # Random forest in lgbm
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_classifier_random_forest_gbdt(self):
