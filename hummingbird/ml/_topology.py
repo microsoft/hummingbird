@@ -376,7 +376,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
         rows = []
         for i in range(len(operators)):
             rows.append("idx=%d name=%r reg=%r cl=%r an=%r tr=%r" % (
-                idx, operators[idx].full_name,
+                i, operators[i].full_name,
                 operator_map[operators[idx].full_name].regression,
                 operator_map[operators[idx].full_name].classification,
                 operator_map[operators[idx].full_name].anomaly_detection,
