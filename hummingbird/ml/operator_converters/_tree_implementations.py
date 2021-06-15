@@ -85,11 +85,28 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
                 self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
                 self.perform_class_select = True
 
+        # Set the decision condition.
         decision_cond_map = {"<=": torch.le, "<": torch.lt, ">=": torch.ge, ">": torch.gt}
         assert decision_cond in decision_cond_map.keys(), "decision_cond has to be one of:{}".format(
             ",".join(decision_cond_map.keys())
         )
         self.decision_cond = decision_cond_map[decision_cond]
+
+        # In some cases float64 is required oterwise we will lose precision. 
+        tree_op_precision_dtype = None
+        if constants.TREE_OP_PRECISION_DTYPE in extra_config:
+            tree_op_precision_dtype = extra_config[constants.TREE_OP_PRECISION_DTYPE]
+            assert tree_op_precision_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
+                constants.TREE_OP_PRECISION_DTYPE
+            )
+        else:
+            tree_op_precision_dtype = "float32"
+        self.tree_op_precision_dtype = tree_op_precision_dtype
+
+        # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
+        # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
+        if constants.BASE_PREDICTION in extra_config:
+            self.base_prediction = extra_config[constants.BASE_PREDICTION]
 
 
 class GEMMTreeImpl(AbstractPyTorchTreeImpl):
@@ -107,7 +124,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         """
         # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
         n_classes = n_classes if n_classes is not None else tree_parameters[0][0][2].shape[0]
-        super(GEMMTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, **kwargs)
+        super(GEMMTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, extra_config=extra_config, **kwargs)
 
         # Initialize the actual model.
         hidden_one_size = 0
@@ -140,26 +157,12 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         self.hidden_three_size = hidden_three_size
 
         self.weight_1 = torch.nn.Parameter(torch.from_numpy(weight_1.reshape(-1, self.n_features).astype("float32")))
-        tree_op_precision_dtype = None
-        if constants.TREE_OP_PRECISION_DTYPE in extra_config:
-            tree_op_precision_dtype = extra_config[constants.TREE_OP_PRECISION_DTYPE]
-            assert tree_op_precision_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
-                constants.TREE_OP_PRECISION_DTYPE
-            )
-        else:
-            tree_op_precision_dtype = "float32"
-        self.tree_op_precision_dtype = tree_op_precision_dtype
         self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype(tree_op_precision_dtype)))
 
         self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")))
         self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")))
 
         self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype(tree_op_precision_dtype)))
-
-        # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
-        # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
-        if constants.BASE_PREDICTION in extra_config:
-            self.base_prediction = extra_config[constants.BASE_PREDICTION]
 
     def aggregation(self, x):
         return x
@@ -222,7 +225,7 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
         n_classes = n_classes if n_classes is not None else tree_parameters[0][6].shape[1]
         super(TreeTraversalTreeImpl, self).__init__(
-            logical_operator, tree_parameters, n_features, classes, n_classes, **kwargs
+            logical_operator, tree_parameters, n_features, classes, n_classes, extra_config=extra_config, **kwargs
         )
 
         # Initialize the actual model.
@@ -249,25 +252,11 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.rights = torch.nn.Parameter(torch.from_numpy(rights).view(-1), requires_grad=False)
 
         self.features = torch.nn.Parameter(torch.from_numpy(features).view(-1), requires_grad=False)
-
-        tree_op_precision_dtype = None
-        if constants.TREE_OP_PRECISION_DTYPE in extra_config:
-            tree_op_precision_dtype = extra_config[constants.TREE_OP_PRECISION_DTYPE]
-            assert tree_op_precision_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
-                constants.TREE_OP_PRECISION_DTYPE
-            )
-        else:
-            tree_op_precision_dtype = "float32"
         self.thresholds = torch.nn.Parameter(torch.from_numpy(thresholds.astype(tree_op_precision_dtype)).view(-1))
         self.values = torch.nn.Parameter(torch.from_numpy(values.astype(tree_op_precision_dtype)).view(-1, self.n_classes))
 
         nodes_offset = [[i * self.num_nodes for i in range(self.num_trees)]]
         self.nodes_offset = torch.nn.Parameter(torch.LongTensor(nodes_offset), requires_grad=False)
-
-        # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
-        # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
-        if constants.BASE_PREDICTION in extra_config:
-            self.base_prediction = extra_config[constants.BASE_PREDICTION]
 
     def aggregation(self, x):
         return x
@@ -324,7 +313,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
         n_classes = n_classes if n_classes is not None else tree_parameters[0][6].shape[1]
         super(PerfectTreeTraversalTreeImpl, self).__init__(
-            logical_operator, tree_parameters, n_features, classes, n_classes, **kwargs
+            logical_operator, tree_parameters, n_features, classes, n_classes, extra_config=extra_config, **kwargs
         )
 
         # Initialize the actual model.
@@ -343,15 +332,6 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         node_by_levels = [set() for _ in range(max_depth)]
         self._traverse_by_level(node_by_levels, 0, -1, max_depth)
-
-        tree_op_precision_dtype = None
-        if constants.TREE_OP_PRECISION_DTYPE in extra_config:
-            tree_op_precision_dtype = extra_config[constants.TREE_OP_PRECISION_DTYPE]
-            assert tree_op_precision_dtype in ["float32", "float64"], "{} has to be of type float32 or float64".format(
-                constants.TREE_OP_PRECISION_DTYPE
-            )
-        else:
-            tree_op_precision_dtype = "float32"
         self.root_nodes = torch.nn.Parameter(torch.from_numpy(weight_0[:, 0].flatten().astype("int64")), requires_grad=False)
         self.root_biases = torch.nn.Parameter(torch.from_numpy(bias_0[:, 0].astype(tree_op_precision_dtype)), requires_grad=False)
 
@@ -377,11 +357,6 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.leaf_nodes = torch.nn.Parameter(
             torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype(tree_op_precision_dtype)), requires_grad=False
         )
-
-        # We register also base_prediction here so that tensor will be moved to the proper hardware with the model.
-        # i.e., if cuda is selected, the parameter will be automatically moved on the GPU.
-        if constants.BASE_PREDICTION in extra_config:
-            self.base_prediction = extra_config[constants.BASE_PREDICTION]
 
     def aggregation(self, x):
         return x
