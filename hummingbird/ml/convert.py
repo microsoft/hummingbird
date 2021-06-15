@@ -131,7 +131,7 @@ def _convert_xgboost(model, backend, test_input, device, extra_config={}):
     if hasattr(booster, "num_features"):
         extra_config[constants.N_FEATURES] = booster.num_features()
     elif "_features_count" in dir(model):
-        extra_config[constants.N_FEATURES] = model._features_count        
+        extra_config[constants.N_FEATURES] = model._features_count
     elif test_input is not None:
         if type(test_input) is np.ndarray and len(test_input.shape) == 2:
             extra_config[constants.N_FEATURES] = test_input.shape[1]
