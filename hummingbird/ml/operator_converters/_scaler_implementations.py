@@ -7,7 +7,7 @@
 """
 Base classes for scaler implementations.
 """
-
+import numpy
 import torch
 
 from ._physical_operator import PhysicalOperator
