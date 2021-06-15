@@ -15,9 +15,9 @@ from .operator_converters import constants
 from ._parse import parse_sklearn_api_model, parse_onnx_api_model, parse_sparkml_api_model
 from ._topology import convert as topology_converter
 from ._utils import (
-    torch_installed,
-    lightgbm_installed,
-    xgboost_installed,
+    assert_torch_installed,
+    assert_lightgbm_installed,
+    assert_xgboost_installed,
     pandas_installed,
     sparkml_installed,
     is_pandas_dataframe,
@@ -67,7 +67,7 @@ def _supported_backend_check_config(model, backend, extra_config):
     """
     Function used to check whether the specified backend and configuration pair is supported or not.
     """
-    assert torch_installed(), "To use Hummingbird you need to install torch."
+    assert_torch_installed()
     import onnx
     import torch
 
@@ -96,7 +96,7 @@ def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     The supported operators and backends can be found at `hummingbird.ml.supported`.
     """
     assert model is not None
-    assert torch_installed(), "To use Hummingbird you need to install torch."
+    assert_torch_installed()
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
     # We modify the scikit learn model during translation.
@@ -113,9 +113,7 @@ def _convert_lightgbm(model, backend, test_input, device, extra_config={}):
     This function is used to generate a *backend* model from a given input [LightGBM] model.
     [LightGBM]: https://lightgbm.readthedocs.io/
     """
-    assert (
-        lightgbm_installed()
-    ), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
+    assert_lightgbm_installed()
 
     return _convert_sklearn(model, backend, test_input, device, extra_config)
 
@@ -125,9 +123,7 @@ def _convert_xgboost(model, backend, test_input, device, extra_config={}):
     This function is used to generate a *backend* model from a given input [XGBoost] model.
     [XGBoost]: https://xgboost.readthedocs.io/
     """
-    assert (
-        xgboost_installed()
-    ), "To convert XGboost models you need to instal XGBoost (or `pip install hummingbird-ml[extra]`)."
+    assert_xgboost_installed()
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
@@ -156,7 +152,7 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     The supported operators can be found at `hummingbird.ml.supported`.
     """
     assert model is not None
-    assert torch_installed(), "To use Hummingbird you need to install torch."
+    assert_torch_installed()
 
     import onnx
 
@@ -274,7 +270,7 @@ def _convert_sparkml(model, backend, test_input, device, extra_config={}):
     The supported operators and backends can be found at `hummingbird.ml.supported`.
     """
     assert model is not None
-    assert torch_installed(), "To use Hummingbird you need to install torch."
+    assert_torch_installed()
 
     # Parse Spark-ML model as our internal data structure (i.e., Topology)
     # We modify the Spark-ML model during translation.
