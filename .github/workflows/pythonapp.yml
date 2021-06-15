@@ -53,6 +53,7 @@ jobs:
     - name: Install basic dependencies
       run: |
         pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
+        pip uninstall -y hummingbird-ml
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra
@@ -72,6 +73,7 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
+        pip uninstall -y hummingbird-ml
     - uses: actions/cache@v1
       # TVM takes forever, we try to cache it.
       if: ${{ matrix.os != 'windows-2019' }}
