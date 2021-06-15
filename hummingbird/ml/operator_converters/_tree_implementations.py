@@ -54,7 +54,9 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
     Abstract class definig the basic structure for tree-base models implemented in PyTorch.
     """
 
-    def __init__(self, logical_operator, tree_parameters, n_features, classes, n_classes, decision_cond="<=", **kwargs):
+    def __init__(
+        self, logical_operator, tree_parameters, n_features, classes, n_classes, decision_cond="<=", extra_config={}, **kwargs
+    ):
         """
         Args:
             tree_parameters: The parameters defining the tree structure
@@ -92,7 +94,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
         )
         self.decision_cond = decision_cond_map[decision_cond]
 
-        # In some cases float64 is required oterwise we will lose precision. 
+        # In some cases float64 is required oterwise we will lose precision.
         tree_op_precision_dtype = None
         if constants.TREE_OP_PRECISION_DTYPE in extra_config:
             tree_op_precision_dtype = extra_config[constants.TREE_OP_PRECISION_DTYPE]
@@ -124,7 +126,9 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         """
         # If n_classes is not provided we induce it from tree parameters. Multioutput regression targets are also treated as separate classes.
         n_classes = n_classes if n_classes is not None else tree_parameters[0][0][2].shape[0]
-        super(GEMMTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, n_classes, extra_config=extra_config, **kwargs)
+        super(GEMMTreeImpl, self).__init__(
+            logical_operator, tree_parameters, n_features, classes, n_classes, extra_config=extra_config, **kwargs
+        )
 
         # Initialize the actual model.
         hidden_one_size = 0
@@ -157,12 +161,12 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         self.hidden_three_size = hidden_three_size
 
         self.weight_1 = torch.nn.Parameter(torch.from_numpy(weight_1.reshape(-1, self.n_features).astype("float32")))
-        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype(tree_op_precision_dtype)))
+        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype(self.tree_op_precision_dtype)))
 
         self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")))
         self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")))
 
-        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype(tree_op_precision_dtype)))
+        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype(self.tree_op_precision_dtype)))
 
     def aggregation(self, x):
         return x
@@ -177,7 +181,7 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
 
         x = x.view(self.n_trees * self.hidden_two_size, -1) == self.bias_2
         x = x.view(self.n_trees, self.hidden_two_size, -1)
-        if self.tree_op_precision_dtype == 'float32':
+        if self.tree_op_precision_dtype == "float32":
             x = x.float()
         else:
             x = x.double()
@@ -252,8 +256,10 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.rights = torch.nn.Parameter(torch.from_numpy(rights).view(-1), requires_grad=False)
 
         self.features = torch.nn.Parameter(torch.from_numpy(features).view(-1), requires_grad=False)
-        self.thresholds = torch.nn.Parameter(torch.from_numpy(thresholds.astype(tree_op_precision_dtype)).view(-1))
-        self.values = torch.nn.Parameter(torch.from_numpy(values.astype(tree_op_precision_dtype)).view(-1, self.n_classes))
+        self.thresholds = torch.nn.Parameter(torch.from_numpy(thresholds.astype(self.tree_op_precision_dtype)).view(-1))
+        self.values = torch.nn.Parameter(
+            torch.from_numpy(values.astype(self.tree_op_precision_dtype)).view(-1, self.n_classes)
+        )
 
         nodes_offset = [[i * self.num_nodes for i in range(self.num_trees)]]
         self.nodes_offset = torch.nn.Parameter(torch.LongTensor(nodes_offset), requires_grad=False)
@@ -333,7 +339,9 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         node_by_levels = [set() for _ in range(max_depth)]
         self._traverse_by_level(node_by_levels, 0, -1, max_depth)
         self.root_nodes = torch.nn.Parameter(torch.from_numpy(weight_0[:, 0].flatten().astype("int64")), requires_grad=False)
-        self.root_biases = torch.nn.Parameter(torch.from_numpy(bias_0[:, 0].astype(tree_op_precision_dtype)), requires_grad=False)
+        self.root_biases = torch.nn.Parameter(
+            torch.from_numpy(bias_0[:, 0].astype(self.tree_op_precision_dtype)), requires_grad=False
+        )
 
         tree_indices = np.array([i for i in range(0, 2 * self.num_trees, 2)]).astype("int64")
         self.tree_indices = torch.nn.Parameter(torch.from_numpy(tree_indices), requires_grad=False)
@@ -345,7 +353,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
                 torch.from_numpy(weight_0[:, list(sorted(node_by_levels[i]))].flatten().astype("int64")), requires_grad=False
             )
             biases = torch.nn.Parameter(
-                torch.from_numpy(bias_0[:, list(sorted(node_by_levels[i]))].flatten().astype(tree_op_precision_dtype)),
+                torch.from_numpy(bias_0[:, list(sorted(node_by_levels[i]))].flatten().astype(self.tree_op_precision_dtype)),
                 requires_grad=False,
             )
             self.nodes.append(nodes)
@@ -355,7 +363,7 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.biases = torch.nn.ParameterList(self.biases)
 
         self.leaf_nodes = torch.nn.Parameter(
-            torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype(tree_op_precision_dtype)), requires_grad=False
+            torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype(self.tree_op_precision_dtype)), requires_grad=False
         )
 
     def aggregation(self, x):
@@ -449,7 +457,9 @@ class GEMMDecisionTreeImpl(GEMMTreeImpl):
             classes: The classes used for classification. None if implementing a regression model
             extra_config: Extra configuration used to properly implement the source tree
         """
-        super(GEMMDecisionTreeImpl, self).__init__(logical_operator, tree_parameters, n_features, classes, extra_config=extra_config)
+        super(GEMMDecisionTreeImpl, self).__init__(
+            logical_operator, tree_parameters, n_features, classes, extra_config=extra_config
+        )
 
     def aggregation(self, x):
         output = x.sum(0).t()
