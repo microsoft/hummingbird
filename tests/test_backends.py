@@ -14,6 +14,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
 from onnxconverter_common.data_types import (
     FloatTensorType,
     DoubleTensorType,
@@ -34,6 +35,10 @@ from hummingbird.ml.exceptions import MissingBackend
 
 if onnx_ml_tools_installed():
     from onnxmltools.convert import convert_sklearn
+    try:
+        from skl2onnx.sklapi import CastTransformer
+    except ImportError:
+        CastTransformer = None
 
 if sparkml_installed():
     import pyspark
@@ -514,7 +519,13 @@ class TestBackends(unittest.TestCase):
         warnings.filterwarnings("ignore")
         max_depth = 10
         num_classes = 2
-        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        if CastTransformer is None:
+            model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        else:
+            # newer version of sklearn-onnx
+            model = make_pipeline(
+                CastTransformer(dtype=np.float32),
+                GradientBoostingClassifier(n_estimators=10, max_depth=max_depth))
         np.random.seed(0)
         X = np.random.rand(100, 200)
         y = np.random.randint(num_classes, size=100)
@@ -536,7 +547,13 @@ class TestBackends(unittest.TestCase):
         warnings.filterwarnings("ignore")
         max_depth = 10
         num_classes = 2
-        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        if CastTransformer is None:
+            model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        else:
+            # newer version of sklearn-onnx
+            model = make_pipeline(
+                CastTransformer(dtype=np.float32),
+                GradientBoostingClassifier(n_estimators=10, max_depth=max_depth))
         np.random.seed(0)
         X = np.random.rand(100, 200)
         y = np.random.randint(num_classes, size=100)
