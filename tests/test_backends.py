@@ -545,7 +545,7 @@ class TestBackends(unittest.TestCase):
 
         # Create ONNX-ML model
         onnx_ml_model = convert_sklearn(
-            model, initial_types=[("input", DoubleTensorType([X.shape[0], X.shape[1]]))], target_opset=11
+            model, initial_types=[("input", DoubleTensorType([None, X.shape[1]]))], target_opset=11
         )
 
         # Test onnx requires no test_data
