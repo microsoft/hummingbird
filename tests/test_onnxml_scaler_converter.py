@@ -151,7 +151,8 @@ class TestONNXScaler(unittest.TestCase):
         model.fit(X)
 
         # Generate test input
-        onnx_ml_model = convert_sklearn(model, initial_types=[("double_input", DoubleTensorType(X.shape))])
+        onnx_ml_model = convert_sklearn(
+            model, initial_types=[("double_input", DoubleTensorType([None, X.shape[1]]))])
 
         # Create ONNX model by calling converter
         onnx_model = convert(onnx_ml_model, "onnx", X)

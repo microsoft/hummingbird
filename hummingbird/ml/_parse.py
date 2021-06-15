@@ -624,6 +624,8 @@ def _parse_onnx_single_operator(topology, operator):
 
     # Add the operator in the topology.
     alias = get_onnxml_api_operator_name(operator.op_type)
+    if alias is None:
+        alias = "ONNXML" + operator.op_type
     this_operator = topology.declare_logical_operator(alias, operator)
 
     # Register the operator's inputs.
