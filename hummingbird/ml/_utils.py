@@ -31,6 +31,10 @@ def torch_installed():
         return False
 
 
+def assert_torch_installed():
+    assert torch_installed(), "To use Hummingbird you need to install torch."
+
+
 def onnx_ml_tools_installed():
     """
     Checks that *ONNXMLTools* is available.
@@ -42,6 +46,10 @@ def onnx_ml_tools_installed():
     except ImportError:
         print("ONNXMLTOOLS not installed. Please check https://github.com/onnx/onnxmltools for instructions.")
         return False
+
+
+def assert_onnx_ml_tools_installed():
+    assert onnx_ml_tools_installed(), "ONNXMLTOOLS not installed. Please check https://github.com/onnx/onnxmltools for instructions."
 
 
 def onnx_runtime_installed():
@@ -56,6 +64,10 @@ def onnx_runtime_installed():
         return False
 
 
+def assert_onnx_runtime_installed():
+    assert onnx_runtime_installed()
+
+
 def sparkml_installed():
     """
     Checks that *Spark ML/PySpark* is available.
@@ -66,6 +78,10 @@ def sparkml_installed():
         return True
     except ImportError:
         return False
+
+
+def assert_sparkml_installed():
+    assert sparkml_installed()
 
 
 def sklearn_installed():
@@ -80,6 +96,10 @@ def sklearn_installed():
         return False
 
 
+def assert_sklearn_installed():
+    assert sklearn_installed()
+
+
 def lightgbm_installed():
     """
     Checks that *LightGBM* is available.
@@ -90,6 +110,10 @@ def lightgbm_installed():
         return True
     except ImportError:
         return False
+
+
+def assert_lightgbm_installed():
+    assert lightgbm_installed(), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
 
 
 def xgboost_installed():
@@ -117,6 +141,10 @@ def xgboost_installed():
     return True
 
 
+def assert_xgboost_installed():
+    assert xgboost_installed(), "To convert XGBoost models you need to install XGBoost (or `pip install hummingbird-ml[extra]`)."
+
+
 def tvm_installed():
     """
     Checks that *TVM* is available.
@@ -126,6 +154,10 @@ def tvm_installed():
     except ImportError:
         return False
     return True
+
+
+def assert_tvm_installed():
+    assert tvm_installed()
 
 
 def pandas_installed():
@@ -138,6 +170,8 @@ def pandas_installed():
         return False
     return True
 
+def assert_pandas_installed():
+    assert pandas_installed()
 
 def prophet_installed():
     """
@@ -148,8 +182,7 @@ def prophet_installed():
     except ImportError:
         return False
     return True
-
-
+  
 def is_pandas_dataframe(df):
     import pandas as pd
 

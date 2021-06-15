@@ -25,7 +25,7 @@ from ._tree_implementations import GEMMGBDTImpl, TreeTraversalGBDTImpl, PerfectT
 
 
 def convert_gbdt_classifier_common(
-    operator, tree_infos, get_tree_parameters, n_features, n_classes, classes=None, extra_config={}
+    operator, tree_infos, get_tree_parameters, n_features, n_classes, classes=None, extra_config={}, decision_cond="<="
 ):
     """
     Common converter for GBDT classifiers.
@@ -37,6 +37,7 @@ def convert_gbdt_classifier_common(
         n_classes: How many classes are expected. 1 for regression tasks
         classes: The classes used for classification. None if implementing a regression model
         extra_config: Extra configuration used to properly implement the source tree
+        decision_cond: The condition of the decision nodes in the x <cond> threshold order. Default '<='. Values can be <=, <, >=, >
 
     Returns:
         A tree implementation in PyTorch
@@ -66,10 +67,14 @@ def convert_gbdt_classifier_common(
     if reorder_trees and n_classes > 1:
         tree_infos = [tree_infos[i * n_classes + j] for j in range(n_classes) for i in range(len(tree_infos) // n_classes)]
 
-    return convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes, extra_config)
+    return convert_gbdt_common(
+        operator, tree_infos, get_tree_parameters, n_features, classes, extra_config=extra_config, decision_cond=decision_cond
+    )
 
 
-def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, classes=None, extra_config={}):
+def convert_gbdt_common(
+    operator, tree_infos, get_tree_parameters, n_features, classes=None, extra_config={}, decision_cond="<="
+):
     """
     Common converter for GBDT models.
 
@@ -79,6 +84,7 @@ def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, c
         n_features: The number of features input to the model
         classes: The classes used for classification. None if implementing a regression model
         extra_config: Extra configuration used to properly implement the source tree
+        decision_cond: The condition of the decision nodes in the x <cond> threshold order. Default '<='. Values can be <=, <, >=, >
 
     Returns:
         A tree implementation in PyTorch
@@ -162,8 +168,14 @@ def convert_gbdt_common(operator, tree_infos, get_tree_parameters, n_features, c
 
     # Generate the tree implementation based on the selected strategy.
     if tree_type == TreeImpl.gemm:
-        return GEMMGBDTImpl(operator, net_parameters, n_features, classes, extra_config)
+        return GEMMGBDTImpl(
+            operator, net_parameters, n_features, classes, extra_config=extra_config, decision_cond=decision_cond
+        )
     if tree_type == TreeImpl.tree_trav:
-        return TreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
+        return TreeTraversalGBDTImpl(
+            operator, net_parameters, max_depth, n_features, classes, extra_config=extra_config, decision_cond=decision_cond
+        )
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav.
-        return PerfectTreeTraversalGBDTImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
+        return PerfectTreeTraversalGBDTImpl(
+            operator, net_parameters, max_depth, n_features, classes, extra_config=extra_config, decision_cond=decision_cond
+        )
