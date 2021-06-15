@@ -32,7 +32,11 @@ def _get_parameters_hist_gbdt(trees):
         Returns: The tree parameters wrapped into an instance of `operator_converters._tree_commons_TreeParameters`
     """
     features = [n["feature_idx"] for n in trees.nodes]
-    thresholds = [n["threshold"] if n["threshold"] != 0 else -1 for n in trees.nodes]
+    try:
+        thresholds = [n["threshold"] if n["threshold"] != 0 else -1 for n in trees.nodes]
+    except ValueError:
+        # newer version of scikit-learn
+        thresholds = [n["num_threshold"] if n["num_threshold"] != 0 else -1 for n in trees.nodes]
     lefts = [n["left"] if n["left"] != 0 else -1 for n in trees.nodes]
     rights = [n["right"] if n["right"] != 0 else -1 for n in trees.nodes]
     values = [[n["value"]] if n["value"] != 0 else [-1] for n in trees.nodes]
