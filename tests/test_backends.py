@@ -799,8 +799,7 @@ class TestBackends(unittest.TestCase):
         reason="UDF Test requires spark >= 3",
     )
     @unittest.skipIf(
-        prophet_installed() and sys.platform == "darwin" and sys.version_info < (3, 7),
-        reason="Spark has problems with Prophet on Mac",
+        prophet_installed() and sys.platform == "darwin", reason="Spark has problems with Prophet on Mac",
     )
     def test_udf_torch_jit_spark_file(self):
         import dill
