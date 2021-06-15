@@ -99,7 +99,7 @@ def convert_sklearn_xgb_classifier(operator, device, extra_config):
     n_classes = operator.raw_operator.n_classes_
 
     return convert_gbdt_classifier_common(
-        operator, tree_infos, _get_tree_parameters, n_features, n_classes, extra_config=extra_config
+        operator, tree_infos, _get_tree_parameters, n_features, n_classes, decision_cond="<", extra_config=extra_config
     )
 
 
@@ -133,7 +133,9 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
 
     extra_config[constants.BASE_PREDICTION] = base_prediction
 
-    return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
+    return convert_gbdt_common(
+        operator, tree_infos, _get_tree_parameters, n_features, decision_cond="<", extra_config=extra_config
+    )
 
 
 # Register the converters.

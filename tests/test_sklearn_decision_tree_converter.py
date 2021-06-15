@@ -15,6 +15,8 @@ from hummingbird.ml._utils import tvm_installed
 from hummingbird.ml import constants
 from tree_utils import dt_implementation_map
 
+import random
+
 
 class TestSklearnTreeConverter(unittest.TestCase):
     # Check tree implementation
@@ -725,17 +727,25 @@ class TestSklearnTreeConverter(unittest.TestCase):
         for tree_method in ["gemm", "tree_trav", "perf_tree_trav"]:
             for n_targets in [1, 2, 7]:
                 for tree_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor]:
-                    model = tree_class()
+                    seed = random.randint(0, 2**32 - 1)
+                    if tree_method == "perf_tree_trav":
+                        model = tree_class(random_state=seed, max_depth=10)
+                    else:
+                        model = tree_class(random_state=seed)
                     X, y = datasets.make_regression(
-                        n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=2021
+                        n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=seed
                     )
                     model.fit(X, y)
+                    X = X.astype('float32')
+                    y = y.astype('float32')
 
                     torch_model = hummingbird.ml.convert(
-                        model, "torch", extra_config={constants.TREE_IMPLEMENTATION: tree_method}
+                        model,
+                        "torch",
+                        extra_config={constants.TREE_IMPLEMENTATION: tree_method, constants.TREE_OP_PRECISION_DTYPE: "float64"}
                     )
                     self.assertTrue(torch_model is not None)
-                    np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5)
+                    np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5, err_msg="{}/{}/{}/{}".format(tree_method, n_targets, tree_class, seed))
 
 
 if __name__ == "__main__":
