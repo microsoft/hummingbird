@@ -24,7 +24,7 @@ class Scaler(PhysicalOperator, torch.nn.Module):
         if offset is None or len(offset.shape) == 0 or offset.shape == (0, ):
             offset = numpy.array([0], dtype=numpy.float32)
         if scale is None or len(scale.shape) == 0 or scale.shape == (0, ):
-            scale = numpy.array([0], dtype=numpy.float32)
+            scale = numpy.array([1], dtype=numpy.float32)
 
         self.offset = offset
         self.scale = scale
