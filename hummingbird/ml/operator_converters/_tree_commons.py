@@ -78,9 +78,12 @@ class ApplyBasePredictionPostTransform(PostTransform):
 
 
 class ApplySigmoidPostTransform(PostTransform):
+    def __init__(self):
+        self.one = torch.tensor(1.0)
+
     def __call__(self, x):
         output = torch.sigmoid(x)
-        return torch.cat([1 - output, output], dim=1)
+        return torch.cat([self.one - output, output], dim=1)
 
 
 class ApplySigmoidBasePredictionPostTransform(PostTransform):
@@ -301,8 +304,8 @@ def get_parameters_for_tree_trav_common(lefts, rights, features, thresholds, val
     lefts = np.array(lefts)
     rights = np.array(rights)
     features = np.array(features)
-    thresholds = np.array(thresholds)
-    values = np.array(values)
+    thresholds = np.array(thresholds, dtype=np.float64)
+    values = np.array(values, dtype=np.float64)
 
     return [nodes_map, ids, lefts, rights, features, thresholds, values]
 
@@ -373,7 +376,7 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
             hidden_weights.append([1 if i == feature else 0 for i in range(n_features)])
             hidden_biases.append(thresh)
     weights.append(np.array(hidden_weights).astype("float32"))
-    biases.append(np.array(hidden_biases).astype("float32"))
+    biases.append(np.array(hidden_biases, dtype=np.float64))
 
     n_splits = len(hidden_weights)
 
@@ -431,7 +434,7 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
     biases.append(np.array(hidden_biases).astype("float32"))
 
     # OR neurons from the preceding layer in order to get final classes.
-    weights.append(np.transpose(np.array(class_proba).astype("float32")))
+    weights.append(np.transpose(np.array(class_proba).astype("float64")))
     biases.append(None)
 
     return weights, biases
@@ -456,7 +459,7 @@ def convert_decision_ensemble_tree_common(
             )
             for tree_param in tree_parameters
         ]
-        return GEMMDecisionTreeImpl(operator, net_parameters, n_features, classes)
+        return GEMMDecisionTreeImpl(operator, net_parameters, n_features, classes, extra_config=extra_config)
 
     net_parameters = [
         get_parameters_for_tree_trav(
@@ -467,4 +470,4 @@ def convert_decision_ensemble_tree_common(
     if tree_type == TreeImpl.tree_trav:
         return TreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
     else:  # Remaining possible case: tree_type == TreeImpl.perf_tree_trav
-        return PerfectTreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes)
+        return PerfectTreeTraversalDecisionTreeImpl(operator, net_parameters, max_depth, n_features, classes, extra_config)
