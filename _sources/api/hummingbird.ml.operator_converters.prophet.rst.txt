@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.prophet
+===========================================
+
+.. automodule:: hummingbird.ml.operator_converters.prophet
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

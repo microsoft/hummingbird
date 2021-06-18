@@ -130,6 +130,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._tree_implementations.html">hummingbird.ml.operator_converters._tree_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters.constants.html">hummingbird.ml.operator_converters.constants</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters.lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters.prophet.html">hummingbird.ml.operator_converters.prophet</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters.xgb.html">hummingbird.ml.operator_converters.xgb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters.onnx.html">hummingbird.ml.operator_converters.onnx</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters.sklearn.html">hummingbird.ml.operator_converters.sklearn</a></li>
@@ -375,6 +376,8 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.onnx_operator.html#hummingbird.ml.operator_converters.onnx.onnx_operator.Sum._abc_impl">(hummingbird.ml.operator_converters.onnx.onnx_operator.Sum attribute)</a>
 </li>
+        <li><a href="api/hummingbird.ml.operator_converters.prophet.html#hummingbird.ml.operator_converters.prophet.Prophet._abc_impl">(hummingbird.ml.operator_converters.prophet.Prophet attribute)</a>
+</li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.bagging.html#hummingbird.ml.operator_converters.sklearn.bagging.Bagging._abc_impl">(hummingbird.ml.operator_converters.sklearn.bagging.Bagging attribute)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.cluster.html#hummingbird.ml.operator_converters.sklearn.cluster.KMeans._abc_impl">(hummingbird.ml.operator_converters.sklearn.cluster.KMeans attribute)</a>
@@ -402,6 +405,10 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_prophet_api_operator_name_map">_build_prophet_api_operator_name_map() (in module hummingbird.ml.supported)</a>
+</li>
+      <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_prophet_operator_list">_build_prophet_operator_list() (in module hummingbird.ml.supported)</a>
+</li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_sklearn_api_operator_name_map">_build_sklearn_api_operator_name_map() (in module hummingbird.ml.supported)</a>
 </li>
       <li><a href="api/hummingbird.ml._parse.html#hummingbird.ml._parse._build_sklearn_api_parsers_map">_build_sklearn_api_parsers_map() (in module hummingbird.ml._parse)</a>
@@ -764,6 +771,8 @@
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.onnx.tree_ensemble.html#hummingbird.ml.operator_converters.onnx.tree_ensemble.convert_onnx_tree_ensemble_regressor">convert_onnx_tree_ensemble_regressor() (in module hummingbird.ml.operator_converters.onnx.tree_ensemble)</a>
 </li>
+      <li><a href="api/hummingbird.ml.operator_converters.prophet.html#hummingbird.ml.operator_converters.prophet.convert_prophet">convert_prophet() (in module hummingbird.ml.operator_converters.prophet)</a>
+</li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.pipeline.html#hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_array_feature_extractor">convert_sklearn_array_feature_extractor() (in module hummingbird.ml.operator_converters.sklearn.pipeline)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.bagging.html#hummingbird.ml.operator_converters.sklearn.bagging.convert_sklearn_baggind_model">convert_sklearn_baggind_model() (in module hummingbird.ml.operator_converters.sklearn.bagging)</a>
@@ -980,6 +989,8 @@
         <li><a href="api/hummingbird.ml.operator_converters.onnx.onnx_operator.html#hummingbird.ml.operator_converters.onnx.onnx_operator.Sub.forward">(hummingbird.ml.operator_converters.onnx.onnx_operator.Sub method)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.onnx_operator.html#hummingbird.ml.operator_converters.onnx.onnx_operator.Sum.forward">(hummingbird.ml.operator_converters.onnx.onnx_operator.Sum method)</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters.prophet.html#hummingbird.ml.operator_converters.prophet.Prophet.forward">(hummingbird.ml.operator_converters.prophet.Prophet method)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.bagging.html#hummingbird.ml.operator_converters.sklearn.bagging.Bagging.forward">(hummingbird.ml.operator_converters.sklearn.bagging.Bagging method)</a>
 </li>
@@ -1395,6 +1406,13 @@
 </li>
       </ul></li>
       <li>
+    hummingbird.ml.operator_converters.prophet
+
+      <ul>
+        <li><a href="api/hummingbird.ml.operator_converters.prophet.html#module-hummingbird.ml.operator_converters.prophet">module</a>
+</li>
+      </ul></li>
+      <li>
     hummingbird.ml.operator_converters.sklearn
 
       <ul>
@@ -1777,6 +1795,8 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.onnx.tree_ensemble.html#module-hummingbird.ml.operator_converters.onnx.tree_ensemble">hummingbird.ml.operator_converters.onnx.tree_ensemble</a>
 </li>
+        <li><a href="api/hummingbird.ml.operator_converters.prophet.html#module-hummingbird.ml.operator_converters.prophet">hummingbird.ml.operator_converters.prophet</a>
+</li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.html#module-hummingbird.ml.operator_converters.sklearn">hummingbird.ml.operator_converters.sklearn</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.array_feature_extractor.html#module-hummingbird.ml.operator_converters.sklearn.array_feature_extractor">hummingbird.ml.operator_converters.sklearn.array_feature_extractor</a>
@@ -1930,8 +1950,6 @@
 </li>
       <li><a href="api/hummingbird.ml.operator_converters._tree_commons.html#hummingbird.ml.operator_converters._tree_commons.PostTransform">PostTransform (class in hummingbird.ml.operator_converters._tree_commons)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hummingbird.ml.containers._sklearn_api_containers.html#hummingbird.ml.containers._sklearn_api_containers.SklearnContainerRegression.predict">predict() (hummingbird.ml.containers._sklearn_api_containers.SklearnContainerRegression method)</a>
 
       <ul>
@@ -1944,6 +1962,8 @@
         <li><a href="api/hummingbird.ml.containers.sklearn.pytorch_containers.html#hummingbird.ml.containers.sklearn.pytorch_containers.TorchScriptSklearnContainerRegression.predict">(hummingbird.ml.containers.sklearn.pytorch_containers.TorchScriptSklearnContainerRegression method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hummingbird.ml.containers._sklearn_api_containers.html#hummingbird.ml.containers._sklearn_api_containers.SklearnContainerClassification.predict_proba">predict_proba() (hummingbird.ml.containers._sklearn_api_containers.SklearnContainerClassification method)</a>
 
       <ul>
@@ -1952,6 +1972,10 @@
         <li><a href="api/hummingbird.ml.containers.sklearn.pytorch_containers.html#hummingbird.ml.containers.sklearn.pytorch_containers.TorchScriptSklearnContainerClassification.predict_proba">(hummingbird.ml.containers.sklearn.pytorch_containers.TorchScriptSklearnContainerClassification method)</a>
 </li>
       </ul></li>
+      <li><a href="api/hummingbird.ml.operator_converters.prophet.html#hummingbird.ml.operator_converters.prophet.Prophet">Prophet (class in hummingbird.ml.operator_converters.prophet)</a>
+</li>
+      <li><a href="api/hummingbird.ml._utils.html#hummingbird.ml._utils.prophet_installed">prophet_installed() (in module hummingbird.ml._utils)</a>
+</li>
       <li><a href="api/hummingbird.ml.containers.sklearn.pytorch_containers.html#hummingbird.ml.containers.sklearn.pytorch_containers.PyTorchSklearnContainer">PyTorchSklearnContainer (class in hummingbird.ml.containers.sklearn.pytorch_containers)</a>
 </li>
       <li><a href="api/hummingbird.ml.containers.sklearn.pytorch_containers.html#hummingbird.ml.containers.sklearn.pytorch_containers.PyTorchSklearnContainerAnomalyDetection">PyTorchSklearnContainerAnomalyDetection (class in hummingbird.ml.containers.sklearn.pytorch_containers)</a>

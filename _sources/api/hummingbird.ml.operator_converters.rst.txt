@@ -32,6 +32,7 @@ hummingbird.ml.operator\_converters
    hummingbird.ml.operator_converters._tree_implementations
    hummingbird.ml.operator_converters.constants
    hummingbird.ml.operator_converters.lightgbm
+   hummingbird.ml.operator_converters.prophet
    hummingbird.ml.operator_converters.xgb
 
 .. toctree::
