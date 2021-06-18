@@ -66,6 +66,10 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
         A PyTorch model
     """
     assert operator is not None, "Cannot convert None operator"
+    if operator.raw_operator.boosting_type == 'rf':
+        raise RuntimeError(
+            "Unable to directly convert this model. "
+            "It should be converted into ONNX first.")
 
     n_features = operator.raw_operator._n_features
     tree_infos = operator.raw_operator.booster_.dump_model()["tree_info"]

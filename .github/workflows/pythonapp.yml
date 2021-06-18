@@ -53,6 +53,7 @@ jobs:
     - name: Install basic dependencies
       run: |
         pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
+        pip install git+https://github.com/onnx/sklearn-onnx.git
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra

@@ -40,6 +40,9 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             threshold = attr.floats
         elif attr.name == "class_weights" or attr.name == "target_weights":
             values = attr.floats
+            if len(values) == 0:
+                raise TypeError(
+                    "Type mismatch with attribute {}.".format(attr))
         elif attr.name == "class_nodeids" or attr.name == "target_nodeids":
             target_node_ids = attr.ints
         elif attr.name == "class_treeids" or attr.name == "target_treeids":
@@ -62,6 +65,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
                     raise AssertionError("Modality {} not supported".format(mode))
 
     is_decision_tree = post_transform == "NONE"
+
     # Order values based on target node and tree ids.
     new_values = []
     n_classes = 1 if classes is None or not is_decision_tree else len(classes)

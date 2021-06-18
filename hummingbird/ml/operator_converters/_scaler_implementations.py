@@ -7,7 +7,7 @@
 """
 Base classes for scaler implementations.
 """
-
+import numpy
 import torch
 
 from ._physical_operator import PhysicalOperator
@@ -20,6 +20,11 @@ class Scaler(PhysicalOperator, torch.nn.Module):
 
     def __init__(self, logical_operator, offset, scale, device):
         super(Scaler, self).__init__(logical_operator, transformer=True)
+
+        if offset is None or len(offset.shape) == 0 or offset.shape == (0, ):
+            offset = numpy.array([0], dtype=numpy.float32)
+        if scale is None or len(scale.shape) == 0 or scale.shape == (0, ):
+            scale = numpy.array([1], dtype=numpy.float32)
 
         self.offset = offset
         self.scale = scale
