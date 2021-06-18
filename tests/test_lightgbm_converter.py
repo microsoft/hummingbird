@@ -225,7 +225,13 @@ class TestLGBMConverter(unittest.TestCase):
     def test_float64_lgbm_perf_tree_trav_regressor_converter(self):
         self._run_float64_lgbm_regressor_converter(1000, extra_config={"tree_implementation": "perf_tree_trav"})
 
-    # Random forest in lgbm
+    # Random forest in lgbm, the conversion fails with the latest
+    # version of lightgbm. The direct converter to pytorch should be
+    # updated or the model could be converted into ONNX then
+    # converted into pytorch.
+    # For more details, see ONNX converter at https://github.com/onnx/
+    # onnxmltools/blob/master/onnxmltools/convert/lightgbm/
+    # operator_converters/LightGbm.py#L313.
     @unittest.skipIf(True, reason="boosting_type=='rf' produces different probabilites.")
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
     def test_lgbm_classifier_random_forest_rf(self):
