@@ -372,24 +372,37 @@ def convert(topology, backend, test_input, device, extra_config={}):
     ):
         idx -= 1
 
-    assert idx >= 0, "Cannot detect container type. Please fill an issue at https://github.com/microsoft/hummingbird."
+    force_transformer = False
+    if idx < 0:
+        force_transformer = True
 
     # If is a transformer, we need to check whether there is another operator type before.
     # E.g., normalization after classification.
-    tmp_idx = idx
-    if operator_map[operators[idx].full_name].transformer:
-        while (
-            idx >= 0
-            and not operator_map[operators[idx].full_name].regression
-            and not operator_map[operators[idx].full_name].classification
-            and not operator_map[operators[idx].full_name].anomaly_detection
-        ):
-            idx -= 1
-        if idx < 0:
-            idx = tmp_idx
+    if not force_transformer:
+        tmp_idx = idx
+        if operator_map[operators[idx].full_name].transformer:
+            while (
+                idx >= 0
+                and not operator_map[operators[idx].full_name].regression
+                and not operator_map[operators[idx].full_name].classification
+                and not operator_map[operators[idx].full_name].anomaly_detection
+            ):
+                idx -= 1
+            if idx < 0:
+                idx = tmp_idx
 
     # Get the proper container type.
-    if operator_map[operators[idx].full_name].regression:
+    if force_transformer or operator_map[operators[idx].full_name].transformer:
+        # We are just transforming the input data.
+        if backend == torch.jit.__name__:
+            container = TorchScriptSklearnContainerTransformer
+        elif backend == onnx.__name__:
+            container = ONNXSklearnContainerTransformer
+        elif backend == tvm_backend:
+            container = TVMSklearnContainerTransformer
+        else:
+            container = PyTorchSklearnContainerTransformer
+    elif operator_map[operators[idx].full_name].regression:
         # We are doing a regression task.
         if backend == torch.jit.__name__:
             container = TorchScriptSklearnContainerRegression
@@ -409,16 +422,6 @@ def convert(topology, backend, test_input, device, extra_config={}):
             container = TVMSklearnContainerAnomalyDetection
         else:
             container = PyTorchSklearnContainerAnomalyDetection
-    elif operator_map[operators[idx].full_name].transformer:
-        # We are just transforming the input data.
-        if backend == torch.jit.__name__:
-            container = TorchScriptSklearnContainerTransformer
-        elif backend == onnx.__name__:
-            container = ONNXSklearnContainerTransformer
-        elif backend == tvm_backend:
-            container = TVMSklearnContainerTransformer
-        else:
-            container = PyTorchSklearnContainerTransformer
     else:
         # We are doing a classification task.
         if backend == torch.jit.__name__:

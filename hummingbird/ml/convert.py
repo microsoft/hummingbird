@@ -127,7 +127,10 @@ def _convert_xgboost(model, backend, test_input, device, extra_config={}):
 
     # XGBoostRegressor and Classifier have different APIs for extracting the number of features.
     # In the former case we need to infer them from the test_input.
-    if "_features_count" in dir(model):
+    booster = model.get_booster() if hasattr(model, "get_booster") else model
+    if hasattr(booster, "num_features"):
+        extra_config[constants.N_FEATURES] = booster.num_features()
+    elif "_features_count" in dir(model):
         extra_config[constants.N_FEATURES] = model._features_count
     elif test_input is not None:
         if type(test_input) is np.ndarray and len(test_input.shape) == 2:

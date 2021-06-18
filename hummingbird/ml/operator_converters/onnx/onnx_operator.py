@@ -84,6 +84,20 @@ class Add(PhysicalOperator, torch.nn.Module):
         return torch.add(*x)
 
 
+class Sub(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator, val):
+        super(Sub, self).__init__(logical_operator)
+
+        if val is not None:
+            assert len(self.inputs) == 1, "Unexpected input length for Sub val"
+            self.val = torch.nn.Parameter(torch.FloatTensor(val), requires_grad=False)
+
+    def forward(self, *x):
+        if len(x) == 1:
+            return torch.sub(*x, self.val)
+        return torch.sub(*x)
+
+
 class Less(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, val):
         super(Less, self).__init__(logical_operator)
@@ -135,10 +149,16 @@ class MatMul(PhysicalOperator, torch.nn.Module):
 
 
 class Div(PhysicalOperator, torch.nn.Module):
-    def __init__(self, logical_operator):
+    def __init__(self, logical_operator, val):
         super(Div, self).__init__(logical_operator)
 
+        if val is not None:
+            assert len(self.inputs) == 1, "Unexpected input length for Div val"
+            self.val = torch.nn.Parameter(torch.FloatTensor(val), requires_grad=False)
+
     def forward(self, *x):
+        if len(x) == 1:
+            return torch.div(*x, self.val)
         return torch.div(*x)
 
 
@@ -272,6 +292,35 @@ def convert_onnx_add(operator, device=None, extra_config={}):
     return Add(operator, val)
 
 
+def convert_onnx_sub(operator, device=None, extra_config={}):
+    """
+    Converter for `ai.onnx.Sub`.
+
+    Args:
+        operator: An operator wrapping a `ai.onnx.Sub` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None
+
+    initializers = extra_config[constants.ONNX_INITIALIZERS]
+    val = None
+    if operator.raw_operator.origin.input[1] in initializers:
+        init = initializers[operator.raw_operator.origin.input[1]]
+        if init.data_type == 11:
+            val = list(init.double_data)
+        elif init.data_type == 1:
+            val = list(init.float_data)
+        else:
+            raise TypeError("Data type %r not supported for initializer %r." % (init.data_type, init))
+
+    # Generate the model.
+    return Sub(operator, val)
+
+
 def convert_onnx_neg(operator, device=None, extra_config={}):
     """
     Converter for `ai.onnx.Neg`.
@@ -366,8 +415,19 @@ def convert_onnx_div(operator, device=None, extra_config={}):
     """
     assert operator is not None
 
+    initializers = extra_config[constants.ONNX_INITIALIZERS]
+    val = None
+    if operator.raw_operator.origin.input[1] in initializers:
+        init = initializers[operator.raw_operator.origin.input[1]]
+        if init.data_type == 11:
+            val = list(init.double_data)
+        elif init.data_type == 1:
+            val = list(init.float_data)
+        else:
+            raise TypeError("Data type %r not supported for initializer %r." % (init.data_type, init))
+
     # Generate the model.
-    return Div(operator)
+    return Div(operator, val)
 
 
 def convert_onnx_less(operator, device=None, extra_config={}):
@@ -402,4 +462,5 @@ register_converter("ONNXMLMatMul", convert_onnx_mat_mul)
 register_converter("ONNXMLMul", convert_onnx_mul)
 register_converter("ONNXMLNeg", convert_onnx_neg)
 register_converter("ONNXMLReshape", convert_onnx_reshape)
+register_converter("ONNXMLSub", convert_onnx_sub)
 register_converter("ONNXMLSum", convert_onnx_sum)

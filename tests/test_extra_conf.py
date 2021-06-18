@@ -2,12 +2,11 @@
 Tests extra configurations.
 """
 from distutils.version import LooseVersion
-import psutil
 import unittest
 import warnings
 import sys
-
 import numpy as np
+import psutil
 from onnxconverter_common.data_types import FloatTensorType, DoubleTensorType
 from sklearn import datasets
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, IsolationForest
@@ -31,6 +30,10 @@ if lightgbm_installed():
 
 if onnx_ml_tools_installed():
     from onnxmltools.convert import convert_sklearn, convert_lightgbm
+    try:
+        from skl2onnx.sklapi import CastTransformer
+    except ImportError:
+        CastTransformer = None
 
 
 class TestExtraConf(unittest.TestCase):
@@ -696,12 +699,22 @@ class TestExtraConf(unittest.TestCase):
         columns = ["vA", "vB", "vC"]
         X_train = pandas.DataFrame(X, columns=columns)
 
-        pipeline = Pipeline(
-            steps=[
-                ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
-                ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
-            ]
-        )
+        if CastTransformer is None:
+            pipeline = Pipeline(
+                steps=[
+                    ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
+                    ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
+                ]
+            )
+        else:
+            # newer version of sklearn-onnx
+            pipeline = Pipeline(
+                steps=[
+                    ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
+                    ('cast', CastTransformer(dtype=np.float32)),
+                    ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
+                ]
+            )
 
         pipeline.fit(X_train, y)
 
