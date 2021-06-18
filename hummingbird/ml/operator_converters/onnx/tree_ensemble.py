@@ -42,7 +42,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             values = attr.floats
             if len(values) == 0:
                 raise TypeError(
-                    "Type mismatch with attribute %r." % attr)
+                    "Type mismatch with attribute {}.".format(attr))
         elif attr.name == "class_nodeids" or attr.name == "target_nodeids":
             target_node_ids = attr.ints
         elif attr.name == "class_treeids" or attr.name == "target_treeids":
