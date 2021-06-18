@@ -49,7 +49,9 @@ def onnx_ml_tools_installed():
 
 
 def assert_onnx_ml_tools_installed():
-    assert onnx_ml_tools_installed(), "ONNXMLTOOLS not installed. Please check https://github.com/onnx/onnxmltools for instructions."
+    assert (
+        onnx_ml_tools_installed()
+    ), "ONNXMLTOOLS not installed. Please check https://github.com/onnx/onnxmltools for instructions."
 
 
 def onnx_runtime_installed():
@@ -113,7 +115,9 @@ def lightgbm_installed():
 
 
 def assert_lightgbm_installed():
-    assert lightgbm_installed(), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
+    assert (
+        lightgbm_installed()
+    ), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
 
 
 def xgboost_installed():
@@ -142,7 +146,9 @@ def xgboost_installed():
 
 
 def assert_xgboost_installed():
-    assert xgboost_installed(), "To convert XGBoost models you need to install XGBoost (or `pip install hummingbird-ml[extra]`)."
+    assert (
+        xgboost_installed()
+    ), "To convert XGBoost models you need to install XGBoost (or `pip install hummingbird-ml[extra]`)."
 
 
 def tvm_installed():
@@ -173,6 +179,17 @@ def pandas_installed():
 
 def assert_pandas_installed():
     assert pandas_installed()
+
+
+def prophet_installed():
+    """
+    Checks that *Prophet* is available.
+    """
+    try:
+        from prophet import Prophet
+    except ImportError:
+        return False
+    return True
 
 
 def is_pandas_dataframe(df):

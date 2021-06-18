@@ -95,6 +95,9 @@ class Executor(torch.nn.Module, object):
                         assert self.max_string_length is not None
 
                         input_ = from_strings_to_ints(input_, self.max_string_length)
+                    elif input_.dtype.kind == "M":  # Datetime
+                        # We convert into seconds from 1970-1-1.
+                        input_ = (input_ - np.datetime64("1970-01-01T00:00:00.000000000")).astype(np.int64) / 1000000000
                     input_ = torch.from_numpy(input_)
                 elif type(input_) is not torch.Tensor:
                     raise RuntimeError("Inputer tensor {} of not supported type {}".format(input_name, type(input_)))

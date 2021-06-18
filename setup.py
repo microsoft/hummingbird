@@ -39,6 +39,7 @@ extra_requires = [
     # The need each for these depends on which libraries you plan to convert from
     "xgboost>=0.90",
     "lightgbm>=2.2",
+    "prophet==1.0.1"
 ]
 setup(
     name="hummingbird-ml",
@@ -55,7 +56,7 @@ setup(
     install_requires=install_requires,
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
-        "sparkml": ["pyspark>=2.4.4", "pyarrow>1.0"],
+        "sparkml": ["pyspark>=2.4.4,<3.1.2", "pyarrow>1.0"],
         "onnx": onnx_requires,
         "extra": extra_requires,
         "benchmark": onnx_requires + extra_requires + ["memory-profiler", "psutil"],

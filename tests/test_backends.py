@@ -4,6 +4,7 @@ Tests Hummingbird's backends.
 import unittest
 import warnings
 import os
+import sys
 import numpy as np
 from typing import Iterator
 from distutils.version import LooseVersion
@@ -30,6 +31,7 @@ from hummingbird.ml._utils import (
     tvm_installed,
     sparkml_installed,
     pandas_installed,
+    prophet_installed,
 )
 from hummingbird.ml.exceptions import MissingBackend
 
@@ -756,6 +758,9 @@ class TestBackends(unittest.TestCase):
         os.name == "nt" or not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
         reason="UDF Test requires spark >= 3",
     )
+    @unittest.skipIf(
+        prophet_installed() and sys.platform == "darwin", reason="Spark has problems with Prophet on Mac",
+    )
     def test_udf_torch(self):
         X, y = load_iris(return_X_y=True)
         X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
@@ -808,6 +813,9 @@ class TestBackends(unittest.TestCase):
     @unittest.skipIf(
         os.name == "nt" or not sparkml_installed() or LooseVersion(pyspark.__version__) < LooseVersion("3"),
         reason="UDF Test requires spark >= 3",
+    )
+    @unittest.skipIf(
+        prophet_installed() and sys.platform == "darwin", reason="Spark has problems with Prophet on Mac",
     )
     def test_udf_torch_jit_spark_file(self):
         import dill
