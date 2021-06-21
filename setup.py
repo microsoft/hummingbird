@@ -24,7 +24,7 @@ with open(README) as f:
 install_requires = [
     "numpy>=1.15",
     "onnxconverter-common>=1.6.0",
-    "scipy",
+    "scipy<=1.6.3",
     "scikit-learn>=0.21.3",
     "torch>=1.4",
     "psutil",
@@ -39,7 +39,7 @@ extra_requires = [
     # The need each for these depends on which libraries you plan to convert from
     "xgboost>=0.90",
     "lightgbm>=2.2",
-    "prophet==1.0.1"
+    "prophet==1.0.1",
 ]
 setup(
     name="hummingbird-ml",
