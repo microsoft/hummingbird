@@ -54,6 +54,7 @@ jobs:
       run: |
         pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
         pip install git+https://github.com/onnx/sklearn-onnx.git
+        pip install scipy<=1.6.3
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra
