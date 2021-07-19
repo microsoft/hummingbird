@@ -127,7 +127,9 @@ You can also read about Hummingbird in our blog post [here](https://azuredata.mi
 
 For more details on the vision and on the technical details related to Hummingbird, please check our papers:
 
-* [A Tensor Compiler for Unified Machine Learning Prediction Serving](https://arxiv.org/abs/2010.04804). Supun Nakandala, Karla Saur, Gyeong-In Yu, Konstantinos Karanasos, Carlo Curino, Markus Weimer, Matteo Interlandi. To appear at OSDI 2020.
+* [Tensors: An abstraction for general data processing](http://www.vldb.org/pvldb/vol14/p1797-koutsoukos.pdf). Dimitrios Koutsoukos, Supun Nakandala, Konstantinos Karanasos, Karla Saur, Gustavo Alonso, Matteo Interlandi. PVLDB 2021.
+
+* [A Tensor Compiler for Unified Machine Learning Prediction Serving](https://www.usenix.org/system/files/osdi20-nakandala.pdf). Supun Nakandala, Karla Saur, Gyeong-In Yu, Konstantinos Karanasos, Carlo Curino, Markus Weimer, Matteo Interlandi. OSDI 2020.
 * [Compiling Classical ML Pipelines into Tensor Computations for One-size-fits-all Prediction Serving](http://learningsys.org/neurips19/assets/papers/27_CameraReadySubmission_Hummingbird%20(5).pdf). Supun Nakandala, Gyeong-In Yu, Markus Weimer, Matteo Interlandi. System for ML Workshop. NeurIPS 2019
 
 # Contributing
