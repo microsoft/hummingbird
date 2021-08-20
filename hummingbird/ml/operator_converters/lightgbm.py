@@ -102,8 +102,20 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
 
     return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 
+def convert_lgbm_booster(operator, device, extra_config):
+
+    assert operator is not None, "Cannot convert None operator"
+
+    # Get tree information out of the model.
+    n_features = len(operator.raw_operator.feature_name())
+    tree_infos = operator.raw_operator.dump_model()["tree_info"]
+
+    return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
+
 
 # Register the converters.
 register_converter("SklearnLGBMClassifier", convert_sklearn_lgbm_classifier)
 register_converter("SklearnLGBMRanker", convert_sklearn_lgbm_regressor)
 register_converter("SklearnLGBMRegressor", convert_sklearn_lgbm_regressor)
+register_converter("SklearnBooster", convert_lgbm_booster)
+
