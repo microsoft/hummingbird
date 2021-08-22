@@ -112,10 +112,8 @@ def convert_lgbm_booster(operator, device, extra_config):
 
     return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 
-
 # Register the converters.
 register_converter("SklearnLGBMClassifier", convert_sklearn_lgbm_classifier)
 register_converter("SklearnLGBMRanker", convert_sklearn_lgbm_regressor)
 register_converter("SklearnLGBMRegressor", convert_sklearn_lgbm_regressor)
 register_converter("SklearnBooster", convert_lgbm_booster)
-
