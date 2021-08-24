@@ -103,7 +103,17 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 
 def convert_lgbm_booster(operator, device, extra_config):
+    """
+    Converter for `lightgbm.Booster` 
 
+    Args:
+        operator: An operator wrapping a `lightgbm.Booster` model
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
     assert operator is not None, "Cannot convert None operator"
 
     # Get tree information out of the model.
