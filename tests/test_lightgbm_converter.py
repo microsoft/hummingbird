@@ -144,7 +144,6 @@ class TestLGBMConverter(unittest.TestCase):
             torch_model = hummingbird.ml.convert(model.booster_, "torch", extra_config=extra_config)
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
-    
 
     # Ranker - small, no label gain
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
