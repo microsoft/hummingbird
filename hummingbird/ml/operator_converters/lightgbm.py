@@ -105,7 +105,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
 
 def convert_lgbm_booster(operator, device, extra_config):
     """
-    Converter for `lightgbm.Booster` 
+    Converter for `lightgbm.Booster`
 
     Args:
         operator: An operator wrapping a `lightgbm.Booster` model
