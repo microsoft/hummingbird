@@ -173,7 +173,6 @@ class TestLGBMConverter(unittest.TestCase):
             1000, extra_config={"tree_implementation": "perf_tree_trav"}, label_gain=list(range(1000))
         )
 
-
     def _run_lgbm_regressor_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
