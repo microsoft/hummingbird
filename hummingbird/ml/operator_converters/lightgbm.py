@@ -102,6 +102,7 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
 
     return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 
+
 def convert_lgbm_booster(operator, device, extra_config):
     """
     Converter for `lightgbm.Booster` 
@@ -121,6 +122,7 @@ def convert_lgbm_booster(operator, device, extra_config):
     tree_infos = operator.raw_operator.dump_model()["tree_info"]
 
     return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
+
 
 # Register the converters.
 register_converter("SklearnLGBMClassifier", convert_sklearn_lgbm_classifier)
