@@ -130,6 +130,48 @@ class TestLGBMConverter(unittest.TestCase):
             1000, extra_config={"tree_implementation": "perf_tree_trav"}, label_gain=list(range(1000))
         )
 
+    def _run_lgbm_booster_converter(self, num_classes, extra_config={}, label_gain=None):
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            model = lgb.LGBMRanker(n_estimators=10, max_depth=max_depth, label_gain=label_gain)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(num_classes, size=100)
+
+            model.fit(X, y, group=[X.shape[0]], eval_set=[(X, y)], eval_group=[X.shape[0]])
+
+            torch_model = hummingbird.ml.convert(model.booster_, "torch", extra_config=extra_config)
+            self.assertIsNotNone(torch_model)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    # Ranker - small, no label gain
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_binary_booster_converter_no_label(self):
+        self._run_lgbm_booster_converter(30)
+
+    # Ranker
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_binary_booster_converter(self):
+        self._run_lgbm_booster_converter(1000, label_gain=list(range(1000)))
+
+    # Gemm ranker
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_gemm_booster_converter(self):
+        self._run_lgbm_booster_converter(1000, extra_config={"tree_implementation": "gemm"}, label_gain=list(range(1000)))
+
+    # Tree_trav ranker
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_tree_trav_booster_converter(self):
+        self._run_lgbm_booster_converter(1000, extra_config={"tree_implementation": "tree_trav"}, label_gain=list(range(1000)))
+
+    # Perf_tree_trav ranker
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_perf_tree_trav_booster_converter(self):
+        self._run_lgbm_booster_converter(
+            1000, extra_config={"tree_implementation": "perf_tree_trav"}, label_gain=list(range(1000))
+        )
+
     def _run_lgbm_regressor_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
