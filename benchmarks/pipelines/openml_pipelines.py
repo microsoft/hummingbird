@@ -4,6 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 
+from distutils.version import LooseVersion
 import openml
 import sklearn
 import operator
@@ -239,9 +240,16 @@ if __name__ == "__main__":
             if openml.tasks.get_task(task_id).get_dataset().features[i].data_type == "nominal" and i < X.shape[1]
         ]
 
-        runs_df = openml.evaluations.list_evaluations(
-            function="predictive_accuracy", task=[task_id], output_format="dataframe"
-        )
+        vers = LooseVersion(openml.__version__)
+        renamed_version = LooseVersion("0.11")
+        if vers < renamed_version:
+            runs_df = openml.evaluations.list_evaluations(
+                function="predictive_accuracy", task=[task_id], output_format="dataframe"
+            )
+        else:
+            runs_df = openml.evaluations.list_evaluations(
+                function="predictive_accuracy", tasks=[task_id], output_format="dataframe"
+            )
         sk_runs_df = runs_df[runs_df["flow_name"].str.startswith("sklearn.pipeline.Pipeline(")]
         sk_runs_df = sk_runs_df.loc[sk_runs_df.groupby("flow_id")["value"].idxmax()]
 

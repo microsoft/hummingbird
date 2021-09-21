@@ -154,8 +154,9 @@ class ONNXMLBackend(ScoreBackend):
         with Timer() as t:
             if self.params["operator"] == "xgb":
                 initial_type = [("input", FloatTensorType([1, self.params["input_size"]]))]
-                fixed_names = list(map(lambda x: str(x), range(len(model._Booster.feature_names))))
-                model._Booster.feature_names = fixed_names
+                if model._Booster.feature_names is not None:
+                    fixed_names = list(map(lambda x: str(x), range(len(model._Booster.feature_names))))
+                    model._Booster.feature_names = fixed_names
                 self.model = convert_xgboost(model, initial_types=initial_type, target_opset=11)
             else:
                 batch = min(len(data.X_test), self.params["batch_size"])
@@ -207,7 +208,10 @@ class ONNXMLBackend(ScoreBackend):
                 end = min(start + batch_size, total_size)
 
                 if self.params["operator"] == "xgb":
-                    self.predictions[start:end, :] = self.sess.run([output_name], {input_name: predict_data[start:end, :]})
+                    pred = self.sess.run([output_name], {input_name: predict_data[start:end, :]})
+                    if type(pred) is list:
+                        pred = pred[0]
+                    self.predictions[start:end, :] = pred
                 elif self.params["operator"] == "lgbm" or "rf":
                     if total_size > batch_size and i == iterations - 1 and self.remainder_model is not None:
                         pred = self.remainder_sess.run([output_name], {input_name: predict_data[start:end, :]})
