@@ -33,6 +33,7 @@ class TestSklearnKNeighbors(unittest.TestCase):
             elif metric == "mahalanobis":
                 V = np.cov(X.T)
                 metric_params["V"] = V
+                metric_params["VI"] = np.linalg.inv(V)
 
             model = KNeighborsClassifier(
                 n_neighbors=n_neighbors, algorithm=algorithm, weights=weights, metric=metric, metric_params=metric_params
