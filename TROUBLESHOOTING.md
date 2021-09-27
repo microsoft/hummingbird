@@ -16,6 +16,9 @@ In order to run Hummingbird on PyTorch with GPU, you will need to `pip uninstall
     * There is a fixed issue with lgbm and MacOS.  See [LightGBM#1369](https://github.com/Microsoft/LightGBM/issues/1369).
     * see also our [build file](https://github.com/microsoft/hummingbird/blob/main/.github/workflows/pythonapp.yml) with `brew install libomp`
 
+#### Linux
+ * With Yum-based Linux systems, there is an issue installing LightGBM: `OSError: libgomp.so.1: cannot open shared object file: No such file or directory`
+   * Install `libgomp` with `yum install libgomp`
 
 #### Windows
 * *Pytorch installation:* ` ERROR: Could not find a version that satisfies the requirement torch>=1.4.0`).
