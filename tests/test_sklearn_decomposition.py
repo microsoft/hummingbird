@@ -10,6 +10,7 @@ import numpy as np
 import torch
 import sklearn
 from sklearn.decomposition import FastICA, KernelPCA, PCA, TruncatedSVD
+from sklearn.cross_decomposition import PLSRegression as PLSR
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_digits
 
@@ -140,6 +141,25 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
     # TruncatedSVD converter with n_components 3 algorithm arpack
     def test_truncated_svd_converter_3_arpack(self):
         self._fit_model_pca(TruncatedSVD(n_components=3, algorithm="arpack"))
+
+
+class TestSklearnCrossDecomposition(unittest.TestCase):
+    def _fit_model_pls_regressor(self, model):
+        X = [[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [2.0, 2.0, 2.0], [2.0, 5.0, 4.0]]
+        Y = [[0.1, -0.2], [0.9, 1.1], [6.2, 5.9], [11.9, 12.3]]
+        model.fit(X, Y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=2 * 1e-5)
+
+    # PLS regressor n_componenets two
+    def test_pca_converter_two(self):
+        self._fit_model_pls_regressor(PLSR(n_components=2))
+
+    # PLS regressor n_componenets two no scale
+    def test_pca_converter_two_no_scale(self):
+        self._fit_model_pls_regressor(PLSR(n_components=10, scale=False))
 
 
 if __name__ == "__main__":

@@ -6,13 +6,13 @@
 # --------------------------------------------------------------------------
 
 """
-Converters for scikit-learn matrix decomposition transformers: PCA, KernelPCA, TruncatedSVD, FastICA.
+Converters for scikit-learn matrix and cross decomposition transformers: PCA, KernelPCA, TruncatedSVD, FastICA.
 """
 
 import numpy as np
 from onnxconverter_common.registration import register_converter
 
-from .._decomposition_implementations import KernelPCA, Decomposition
+from .._decomposition_implementations import KernelPCA, Decomposition, CrossDecomposition
 
 
 def convert_sklearn_pca(operator, device, extra_config):
@@ -34,7 +34,7 @@ def convert_sklearn_pca(operator, device, extra_config):
     if operator.raw_operator.whiten:
         transform_matrix = transform_matrix / np.sqrt(operator.raw_operator.explained_variance_)
 
-    return Decomposition(operator, mean, transform_matrix, device)
+    return Decomposition(operator, mean, transform_matrix.astype("float32"), device)
 
 
 def convert_sklearn_kernel_pca(operator, device, extra_config):
@@ -121,7 +121,29 @@ def convert_sklearn_truncated_svd(operator, device, extra_config):
     return Decomposition(operator, None, transform_matrix.astype("float32"), device)
 
 
+def convert_sklearn_pls_regression(operator, device, extra_config):
+    """
+    Converter for `sklearn.cross_decomposition.PLSRegression`
+
+    Args:
+        operator: An operator wrapping a `sklearn.cross_decomposition.PLSRegression` transformer
+        device: String defining the type of device the converted operator should be run on
+        extra_config: Extra configuration used to select the best conversion strategy
+
+    Returns:
+        A PyTorch model
+    """
+    assert operator is not None, "Cannot convert None operator"
+
+    coefficients = operator.raw_operator.coef_
+    x_mean = operator.raw_operator._x_mean
+    x_std = operator.raw_operator._x_std
+    y_mean = operator.raw_operator._y_mean
+    return CrossDecomposition(operator, x_mean, x_std, y_mean, coefficients.astype("float32"), device)
+
+
 register_converter("SklearnPCA", convert_sklearn_pca)
 register_converter("SklearnKernelPCA", convert_sklearn_kernel_pca)
 register_converter("SklearnFastICA", convert_sklearn_fast_ica)
 register_converter("SklearnTruncatedSVD", convert_sklearn_truncated_svd)
+register_converter("SklearnPLSRegression", convert_sklearn_pls_regression)
