@@ -50,6 +50,7 @@ MultinomialNB,
 Normalizer,
 OneHotEncoder,
 PCA,
+PLSRegression,
 PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
@@ -155,6 +156,9 @@ def _build_sklearn_operator_list():
         # Matrix decomposition transformers
         from sklearn.decomposition import PCA, KernelPCA, FastICA, TruncatedSVD
 
+        # Cross decomposition
+        from sklearn.cross_decomposition import PLSRegression
+
         # KNeighbors models
         from sklearn.neighbors import KNeighborsClassifier
         from sklearn.neighbors import KNeighborsRegressor
@@ -243,6 +247,8 @@ def _build_sklearn_operator_list():
             KernelPCA,
             PCA,
             TruncatedSVD,
+            # Cross Decomposition
+            PLSRegression,
             # Feature selection
             SelectKBest,
             SelectPercentile,

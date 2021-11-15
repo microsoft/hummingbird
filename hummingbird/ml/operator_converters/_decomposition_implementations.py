@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------
 
 """
-Base classes for matrix decomposition algorithm implementations.
+Base classes for matrix and cross decomposition algorithm implementations.
 """
 
 import torch
@@ -26,7 +26,7 @@ class Decomposition(PhysicalOperator, torch.nn.Module):
 
     def forward(self, x):
         if self.mean is not None:
-            x = x - self.mean
+            x -= self.mean
         return torch.mm(x, self.transform_matrix).float()
 
 
@@ -82,3 +82,20 @@ class KernelPCA(PhysicalOperator, torch.nn.Module):
         k += self.k_fit_all
 
         return torch.mm(k, self.scaled_alphas)
+
+
+class CrossDecomposition(PhysicalOperator, torch.nn.Module):
+    def __init__(self, logical_operator, x_mean, x_std, y_mean, coefficients, device):
+        super(CrossDecomposition, self).__init__(logical_operator)
+        self.regression = True
+
+        self.x_mean = torch.nn.Parameter(torch.from_numpy(x_mean), requires_grad=False)
+        self.x_std = torch.nn.Parameter(torch.from_numpy(x_std), requires_grad=False)
+        self.y_mean = torch.nn.Parameter(torch.from_numpy(y_mean), requires_grad=False)
+        self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients), requires_grad=False)
+
+    def forward(self, x):
+        x -= self.x_mean
+        x /= self.x_std
+        y_pred = torch.mm(x, self.coefficients).float()
+        return y_pred + self.y_mean
