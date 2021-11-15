@@ -123,7 +123,7 @@ model = load('hb_model')
 
 The API documentation is [here](https://microsoft.github.io/hummingbird/).
 
-You can also read about Hummingbird in our blog post [here](https://azuredata.microsoft.com/articles/ebd95ec0-1eae-44a3-90f5-c11f5c916d15).
+You can also read about Hummingbird in our blog post [here](https://www.microsoft.com/en-us/research/group/gray-systems-lab/articles/announcing-hummingbird-a-library-for-accelerating-inference-with-traditional-machine-learning-models/).
 
 For more details on the vision and on the technical details related to Hummingbird, please check our papers:
 
