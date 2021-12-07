@@ -27,13 +27,12 @@ class TestSklearnKNeighbors(unittest.TestCase):
             X = X.astype(np.float32)
 
             if metric == "wminkowski":
-                metric_params["w"] = np.random.rand(X.shape[1])
+                metric_params = {"w": np.random.rand(X.shape[1])}
             elif metric == "seuclidean":
-                metric_params["V"] = np.random.rand(X.shape[1])
+                metric_params = {"V": np.random.rand(X.shape[1])}
             elif metric == "mahalanobis":
                 V = np.cov(X.T)
-                metric_params["V"] = V
-                metric_params["VI"] = np.linalg.inv(V)
+                metric_params = {"VI": np.linalg.inv(V)}
 
             model = KNeighborsClassifier(
                 n_neighbors=n_neighbors, algorithm=algorithm, weights=weights, metric=metric, metric_params=metric_params
@@ -118,12 +117,12 @@ class TestSklearnKNeighbors(unittest.TestCase):
             X = X.astype(np.float32)
 
             if metric == "wminkowski":
-                metric_params["w"] = np.random.rand(X.shape[1])
+                metric_params = {"w": np.random.rand(X.shape[1])}
             elif metric == "seuclidean":
-                metric_params["V"] = np.random.rand(X.shape[1])
+                metric_params = {"V": np.random.rand(X.shape[1])}
             elif metric == "mahalanobis":
                 V = np.cov(X.T)
-                metric_params["VI"] = np.linalg.inv(V)
+                metric_params = {"VI": np.linalg.inv(V)}
 
             model = KNeighborsRegressor(
                 n_neighbors=n_neighbors, algorithm=algorithm, weights=weights, metric=metric, metric_params=metric_params
