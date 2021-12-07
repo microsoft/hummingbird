@@ -44,9 +44,9 @@ jobs:
     - name: Install pytorch 1.10.0 if python > 3.6 (mac)
       if: ${{ matrix.python-version != '3.6' && matrix.os == 'macos-10.15' }}
       run: pip install torch==1.10.0
-    - name: Install pytorch 1.10.0+cpu if python 3.6 (not mac)
+    - name: Install pytorch 1.5.1+cpu if python 3.6 (not mac)
       if: ${{ matrix.python-version == '3.6' && matrix.os != 'macos-10.15' }}
-      run: pip install torch==1.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+      run: pip install torch==1.5.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install pytorch 1.10.0+cpu if python > 3.6 (not mac)
       if:  ${{ matrix.python-version != '3.6' && matrix.os != 'macos-10.15' }}
       run: pip install torch==1.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
