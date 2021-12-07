@@ -112,8 +112,9 @@ class TestSklearnKNeighbors(unittest.TestCase):
         metric_params={"p": 2},
         score_w_train_data=False,
     ):
-        for data in [datasets.load_boston(), datasets.load_diabetes()]:
-            X, y = data.data, data.target
+        for data in [datasets.fetch_california_housing(), datasets.load_diabetes()]:
+            # take all of diabetes and a subset of housing (which is slow to test otherwise)
+            X, y = data.data[0:441], data.target
             X = X.astype(np.float32)
 
             if metric == "wminkowski":
