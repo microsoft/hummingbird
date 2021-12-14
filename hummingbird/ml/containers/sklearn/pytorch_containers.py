@@ -97,13 +97,15 @@ class PyTorchSklearnContainer(SklearnContainer):
         shutil.rmtree(location)
 
     @staticmethod
-    def load(location, do_unzip_and_model_type_check=True):
+    def load(location, do_unzip_and_model_type_check=True, delete_unzip_location_folder: bool = True):
         """
         Method used to load a container from the file system.
 
         Args:
             location: The location on the file system where to load the model.
             do_unzip_and_model_type_check: Whether to unzip the model and check the type.
+            delete_unzip_location_folder: Whether to delete the folder provided by caller or created by this method
+                                            where the model is unzipped
 
         Returns:
             The loaded model.
@@ -147,7 +149,8 @@ class PyTorchSklearnContainer(SklearnContainer):
             with open(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH), "rb") as file:
                 container = pickle.load(file)
         else:
-            shutil.rmtree(location)
+            if delete_unzip_location_folder:
+                shutil.rmtree(location)
             raise RuntimeError("Model type {} not recognized".format(model_type))
 
         # Need to set the number of threads to use as set in the original container.
@@ -156,7 +159,8 @@ class PyTorchSklearnContainer(SklearnContainer):
                 torch.set_num_interop_threads(1)
             torch.set_num_threads(container._n_threads)
 
-        shutil.rmtree(location)
+        if delete_unzip_location_folder:
+            shutil.rmtree(location)
         return container
 
     def to(self, device):
