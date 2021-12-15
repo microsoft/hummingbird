@@ -160,13 +160,17 @@ class GEMMTreeImpl(AbstractPyTorchTreeImpl):
         self.hidden_two_size = hidden_two_size
         self.hidden_three_size = hidden_three_size
 
-        self.weight_1 = torch.nn.Parameter(torch.from_numpy(weight_1.reshape(-1, self.n_features).astype("float32")))
-        self.bias_1 = torch.nn.Parameter(torch.from_numpy(bias_1.reshape(-1, 1).astype(self.tree_op_precision_dtype)))
+        self.weight_1 = torch.nn.Parameter(
+            torch.from_numpy(weight_1.reshape(-1, self.n_features).astype("float32")).detach().clone()
+        )
+        self.bias_1 = torch.nn.Parameter(
+            torch.from_numpy(bias_1.reshape(-1, 1).astype(self.tree_op_precision_dtype)).detach().clone()
+        )
 
-        self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")))
-        self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")))
+        self.weight_2 = torch.nn.Parameter(torch.from_numpy(weight_2.astype("float32")).detach().clone())
+        self.bias_2 = torch.nn.Parameter(torch.from_numpy(bias_2.reshape(-1, 1).astype("float32")).detach().clone())
 
-        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype(self.tree_op_precision_dtype)))
+        self.weight_3 = torch.nn.Parameter(torch.from_numpy(weight_3.astype(self.tree_op_precision_dtype)).detach().clone())
 
     def aggregation(self, x):
         return x
@@ -252,13 +256,15 @@ class TreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
             thresholds[i][: len(tree_parameters[i][0])] = tree_parameters[i][5]
             values[i][: len(tree_parameters[i][0])][:] = tree_parameters[i][6]
 
-        self.lefts = torch.nn.Parameter(torch.from_numpy(lefts).view(-1), requires_grad=False)
-        self.rights = torch.nn.Parameter(torch.from_numpy(rights).view(-1), requires_grad=False)
+        self.lefts = torch.nn.Parameter(torch.from_numpy(lefts).view(-1).detach().clone(), requires_grad=False)
+        self.rights = torch.nn.Parameter(torch.from_numpy(rights).view(-1).detach().clone(), requires_grad=False)
 
-        self.features = torch.nn.Parameter(torch.from_numpy(features).view(-1), requires_grad=False)
-        self.thresholds = torch.nn.Parameter(torch.from_numpy(thresholds.astype(self.tree_op_precision_dtype)).view(-1))
+        self.features = torch.nn.Parameter(torch.from_numpy(features).view(-1).detach().clone(), requires_grad=False)
+        self.thresholds = torch.nn.Parameter(
+            torch.from_numpy(thresholds.astype(self.tree_op_precision_dtype)).view(-1).detach().clone()
+        )
         self.values = torch.nn.Parameter(
-            torch.from_numpy(values.astype(self.tree_op_precision_dtype)).view(-1, self.n_classes)
+            torch.from_numpy(values.astype(self.tree_op_precision_dtype)).view(-1, self.n_classes).detach().clone()
         )
 
         nodes_offset = [[i * self.num_nodes for i in range(self.num_trees)]]
@@ -338,22 +344,27 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         node_by_levels = [set() for _ in range(max_depth)]
         self._traverse_by_level(node_by_levels, 0, -1, max_depth)
-        self.root_nodes = torch.nn.Parameter(torch.from_numpy(weight_0[:, 0].flatten().astype("int64")), requires_grad=False)
+        self.root_nodes = torch.nn.Parameter(
+            torch.from_numpy(weight_0[:, 0].flatten().astype("int64")).detach().clone(), requires_grad=False
+        )
         self.root_biases = torch.nn.Parameter(
-            torch.from_numpy(bias_0[:, 0].astype(self.tree_op_precision_dtype)), requires_grad=False
+            torch.from_numpy(bias_0[:, 0].astype(self.tree_op_precision_dtype)).detach().clone(), requires_grad=False
         )
 
         tree_indices = np.array([i for i in range(0, 2 * self.num_trees, 2)]).astype("int64")
-        self.tree_indices = torch.nn.Parameter(torch.from_numpy(tree_indices), requires_grad=False)
+        self.tree_indices = torch.nn.Parameter(torch.from_numpy(tree_indices).detach().clone(), requires_grad=False)
 
         self.nodes = []
         self.biases = []
         for i in range(1, max_depth):
             nodes = torch.nn.Parameter(
-                torch.from_numpy(weight_0[:, list(sorted(node_by_levels[i]))].flatten().astype("int64")), requires_grad=False
+                torch.from_numpy(weight_0[:, list(sorted(node_by_levels[i]))].flatten().astype("int64")).detach().clone(),
+                requires_grad=False,
             )
             biases = torch.nn.Parameter(
-                torch.from_numpy(bias_0[:, list(sorted(node_by_levels[i]))].flatten().astype(self.tree_op_precision_dtype)),
+                torch.from_numpy(bias_0[:, list(sorted(node_by_levels[i]))].flatten().astype(self.tree_op_precision_dtype))
+                .detach()
+                .clone(),
                 requires_grad=False,
             )
             self.nodes.append(nodes)
@@ -363,7 +374,8 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
         self.biases = torch.nn.ParameterList(self.biases)
 
         self.leaf_nodes = torch.nn.Parameter(
-            torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype(self.tree_op_precision_dtype)), requires_grad=False
+            torch.from_numpy(weight_1.reshape((-1, self.n_classes)).astype(self.tree_op_precision_dtype)).detach().clone(),
+            requires_grad=False,
         )
 
     def aggregation(self, x):
