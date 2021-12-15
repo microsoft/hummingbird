@@ -26,8 +26,8 @@ class LinearModel(PhysicalOperator, torch.nn.Module):
         is_linear_regression=False,
     ):
         super(LinearModel, self).__init__(logical_operator)
-        self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients), requires_grad=False)
-        self.intercepts = torch.nn.Parameter(torch.from_numpy(intercepts).view(-1), requires_grad=False)
+        self.coefficients = torch.nn.Parameter(torch.from_numpy(coefficients).detach().clone(), requires_grad=False)
+        self.intercepts = torch.nn.Parameter(torch.from_numpy(intercepts).view(-1).detach().clone(), requires_grad=False)
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
         self.multi_class = multi_class
         self.regression = is_linear_regression
