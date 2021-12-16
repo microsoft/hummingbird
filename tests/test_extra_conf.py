@@ -1,6 +1,7 @@
 """
 Tests extra configurations.
 """
+from distutils.version import LooseVersion
 import unittest
 import warnings
 import sys
@@ -29,7 +30,6 @@ if lightgbm_installed():
 
 if onnx_ml_tools_installed():
     from onnxmltools.convert import convert_sklearn, convert_lightgbm
-
     try:
         from skl2onnx.sklapi import CastTransformer
     except ImportError:
@@ -38,6 +38,10 @@ if onnx_ml_tools_installed():
 
 class TestExtraConf(unittest.TestCase):
     # Test default number of threads. It will only work on mac after 1.6 https://github.com/pytorch/pytorch/issues/43036
+    @unittest.skipIf(
+        sys.platform == "darwin" and LooseVersion(torch.__version__) <= LooseVersion("1.6.0"),
+        reason="PyTorch has a bug on mac related to multi-threading",
+    )
     def test_torch_deafault_n_threads(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -57,6 +61,10 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(torch.get_num_interop_threads() == 1)
 
     # Test one thread in pytorch.
+    @unittest.skipIf(
+        sys.platform == "darwin" and LooseVersion(torch.__version__) > LooseVersion("1.6.0"),
+        reason="Setting threading multi times will break on mac",
+    )
     def test_torch_one_thread(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -590,13 +598,7 @@ class TestExtraConf(unittest.TestCase):
 
         pipeline = Pipeline(
             steps=[
-                (
-                    "preprocessor",
-                    ColumnTransformer(
-                        transformers=[],
-                        remainder="passthrough",
-                    ),
-                ),
+                ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
                 ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
             ]
         )
@@ -612,10 +614,7 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            pipeline.predict_proba(X_train),
-            torch_model.predict_proba(X_train),
-            rtol=1e-06,
-            atol=1e-06,
+            pipeline.predict_proba(X_train), torch_model.predict_proba(X_train), rtol=1e-06, atol=1e-06,
         )
 
     # Test batch with pandas ts.
@@ -632,13 +631,7 @@ class TestExtraConf(unittest.TestCase):
 
         pipeline = Pipeline(
             steps=[
-                (
-                    "preprocessor",
-                    ColumnTransformer(
-                        transformers=[],
-                        remainder="passthrough",
-                    ),
-                ),
+                ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
                 ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
             ]
         )
@@ -654,10 +647,7 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            pipeline.predict_proba(X_train),
-            torch_model.predict_proba(X_train),
-            rtol=1e-06,
-            atol=1e-06,
+            pipeline.predict_proba(X_train), torch_model.predict_proba(X_train), rtol=1e-06, atol=1e-06,
         )
 
     # Test batch with pandas onnx.
@@ -675,13 +665,7 @@ class TestExtraConf(unittest.TestCase):
 
         pipeline = Pipeline(
             steps=[
-                (
-                    "preprocessor",
-                    ColumnTransformer(
-                        transformers=[],
-                        remainder="passthrough",
-                    ),
-                ),
+                ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
                 ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
             ]
         )
@@ -697,10 +681,7 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(hb_model is not None)
 
         np.testing.assert_allclose(
-            pipeline.predict_proba(X_train),
-            hb_model.predict_proba(X_train),
-            rtol=1e-06,
-            atol=1e-06,
+            pipeline.predict_proba(X_train), hb_model.predict_proba(X_train), rtol=1e-06, atol=1e-06,
         )
 
     # Test batch with pandas from onnxml.
@@ -721,13 +702,7 @@ class TestExtraConf(unittest.TestCase):
         if CastTransformer is None:
             pipeline = Pipeline(
                 steps=[
-                    (
-                        "preprocessor",
-                        ColumnTransformer(
-                            transformers=[],
-                            remainder="passthrough",
-                        ),
-                    ),
+                    ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
                     ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
                 ]
             )
@@ -735,14 +710,8 @@ class TestExtraConf(unittest.TestCase):
             # newer version of sklearn-onnx
             pipeline = Pipeline(
                 steps=[
-                    (
-                        "preprocessor",
-                        ColumnTransformer(
-                            transformers=[],
-                            remainder="passthrough",
-                        ),
-                    ),
-                    ("cast", CastTransformer(dtype=np.float32)),
+                    ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
+                    ('cast', CastTransformer(dtype=np.float32)),
                     ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
                 ]
             )
@@ -769,10 +738,7 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(hb_model is not None)
 
         np.testing.assert_allclose(
-            pipeline.predict_proba(X_train),
-            hb_model.predict_proba(X_train),
-            rtol=1e-06,
-            atol=1e-06,
+            pipeline.predict_proba(X_train), hb_model.predict_proba(X_train), rtol=1e-06, atol=1e-06,
         )
 
     # Test batch with pandas tvm.
@@ -790,13 +756,7 @@ class TestExtraConf(unittest.TestCase):
 
         pipeline = Pipeline(
             steps=[
-                (
-                    "preprocessor",
-                    ColumnTransformer(
-                        transformers=[],
-                        remainder="passthrough",
-                    ),
-                ),
+                ("preprocessor", ColumnTransformer(transformers=[], remainder="passthrough",)),
                 ("classifier", GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)),
             ]
         )
@@ -812,10 +772,7 @@ class TestExtraConf(unittest.TestCase):
         self.assertTrue(hb_model is not None)
 
         np.testing.assert_allclose(
-            pipeline.predict_proba(X_train),
-            hb_model.predict_proba(X_train),
-            rtol=1e-06,
-            atol=1e-06,
+            pipeline.predict_proba(X_train), hb_model.predict_proba(X_train), rtol=1e-06, atol=1e-06,
         )
 
     # Check converter with model name set as extra_config.
