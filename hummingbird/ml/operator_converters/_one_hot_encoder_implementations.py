@@ -81,7 +81,7 @@ class OneHotEncoder(PhysicalOperator, torch.nn.Module):
 
         condition_tensors = []
         for arr in categories:
-            condition_tensors.append(torch.nn.Parameter(torch.LongTensor(arr), requires_grad=False))
+            condition_tensors.append(torch.nn.Parameter(torch.LongTensor(arr).detach().clone(), requires_grad=False))
         self.condition_tensors = torch.nn.ParameterList(condition_tensors)
 
     def forward(self, *x):

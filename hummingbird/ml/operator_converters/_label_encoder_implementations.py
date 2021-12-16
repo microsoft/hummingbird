@@ -38,10 +38,10 @@ class StringLabelEncoder(PhysicalOperator, torch.nn.Module):
 
         # Sort the classes and convert to torch.int32
         self.max_word_length = self.max_word_length // 4
-        classes_conv = torch.from_numpy(np.array(sorted(set(classes)), dtype=data_type).view(np.int32))
+        classes_conv = torch.from_numpy(np.array(sorted(set(classes)), dtype=data_type).view(np.int32)).detach().clone()
         classes_conv = classes_conv.view(1, -1, self.max_word_length)
 
-        self.condition_tensors = torch.nn.Parameter(torch.IntTensor(classes_conv), requires_grad=False)
+        self.condition_tensors = torch.nn.Parameter(classes_conv, requires_grad=False)
 
     def forward(self, x):
         x = x.view(-1, 1, self.max_word_length)

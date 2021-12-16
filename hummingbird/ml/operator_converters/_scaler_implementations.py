@@ -21,19 +21,19 @@ class Scaler(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, offset, scale, device):
         super(Scaler, self).__init__(logical_operator, transformer=True)
 
-        if offset is None or len(offset.shape) == 0 or offset.shape == (0, ):
+        if offset is None or len(offset.shape) == 0 or offset.shape == (0,):
             offset = numpy.array([0], dtype=numpy.float32)
-        if scale is None or len(scale.shape) == 0 or scale.shape == (0, ):
+        if scale is None or len(scale.shape) == 0 or scale.shape == (0,):
             scale = numpy.array([1], dtype=numpy.float32)
 
         self.offset = offset
         self.scale = scale
 
         if offset is not None:
-            self.offset = torch.nn.Parameter(torch.from_numpy(offset), requires_grad=False)
+            self.offset = torch.nn.Parameter(torch.from_numpy(offset).detach().clone(), requires_grad=False)
 
         if scale is not None:
-            self.scale = torch.nn.Parameter(torch.from_numpy(scale), requires_grad=False)
+            self.scale = torch.nn.Parameter(torch.from_numpy(scale).detach().clone(), requires_grad=False)
 
     def forward(self, x):
         if self.offset is not None:

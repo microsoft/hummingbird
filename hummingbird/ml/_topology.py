@@ -250,7 +250,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
             output_model_name = str(uuid4().hex) + ".onnx"
 
         # Put the tracing test input into the right format.
-        batch_trace_input, _ = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
+        batch_trace_input, remainder_input = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -265,6 +265,20 @@ def convert(topology, backend, test_input, device, extra_config={}):
         )
         hb_model = onnx.load(output_model_name)
         os.remove(output_model_name)
+
+        if remainder_size:
+            torch.onnx.export(
+                executor,
+                remainder_input,
+                output_model_name,
+                input_names=topology.input_container.input_names,
+                output_names=topology.input_container.output_names,
+                keep_initializers_as_inputs=False,
+                opset_version=target_opset,
+                do_constant_folding=True,
+            )
+            remainder_model = onnx.load(output_model_name)
+            os.remove(output_model_name)
 
         # Set the ONNX model name if any.
         if onnx_model_name is not None:
