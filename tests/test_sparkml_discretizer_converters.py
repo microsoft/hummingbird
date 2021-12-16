@@ -7,7 +7,6 @@ import warnings
 import numpy as np
 import torch
 from sklearn.datasets import load_iris
-from distutils.version import LooseVersion
 
 from hummingbird.ml._utils import sparkml_installed, pandas_installed
 from hummingbird.ml import convert
@@ -26,7 +25,6 @@ if pandas_installed():
 class TestSparkMLDiscretizers(unittest.TestCase):
     # Test QuantileDiscretizer
     @unittest.skipIf((not sparkml_installed()) or (not pandas_installed()), reason="Spark-ML test requires pyspark and pandas")
-    @unittest.skipIf(LooseVersion(torch.__version__) < LooseVersion("1.6.0"), reason="Spark-ML test requires torch >= 1.6.0")
     def test_quantilediscretizer_converter(self):
         iris = load_iris()
         features = ["sepal_length", "sepal_width", "petal_length", "petal_width"]

@@ -7,7 +7,6 @@
 """
 Converters for topology IR are stored in this file.
 """
-from distutils.version import LooseVersion
 import numpy as np
 import os
 import torch
@@ -153,7 +152,10 @@ def _compile_to_tvm(topology, executor, trace_input, target, ctx, config, extra_
 
     ts_model = _jit_trace(executor, trace_input, "cpu", extra_config)
     test_input = [
-        (topology.input_container.input_names[i], trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,)
+        (
+            topology.input_container.input_names[i],
+            trace_input[i].shape if type(trace_input) is tuple else trace_input.shape,
+        )
         for i in range(len(topology.input_container.input_names))
     ]
 
@@ -208,11 +210,6 @@ def convert(topology, backend, test_input, device, extra_config={}):
             )
 
         if backend == onnx.__name__:
-            # vers = LooseVersion(torch.__version__)
-            # allowed_min = LooseVersion("1.6.0")
-            # Pytorch <= 1.6.0 has a bug with exporting GEMM into ONNX.
-            # For the moment only tree_trav is enabled for pytorch <= 1.6.0
-            # if vers < allowed_min:
             extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
         operator_map[operator.full_name] = converter(operator, device, extra_config)
 
