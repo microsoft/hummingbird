@@ -227,7 +227,7 @@ def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
     return tree_parameters, max_depth, tree_type
 
 
-def get_parameters_for_sklearn_common(tree_infos):
+def get_parameters_for_sklearn_common(tree_infos, extra_config):
     """
     Parse sklearn-based trees, including SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier/Regressor
     Args:
