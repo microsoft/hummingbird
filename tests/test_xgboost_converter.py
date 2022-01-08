@@ -5,7 +5,6 @@ import unittest
 import warnings
 
 import numpy as np
-import pandas
 from sklearn.datasets import load_boston
 from sklearn.model_selection import train_test_split
 
