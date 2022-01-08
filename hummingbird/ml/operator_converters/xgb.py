@@ -59,7 +59,7 @@ def _tree_traversal(tree_info, lefts, rights, features, thresholds, values):
             count += 1
 
 
-def _get_tree_parameters(tree_info):
+def _get_tree_parameters(tree_info, extra_config):
     """
     Parse the tree and returns an in-memory friendly representation of its structure.
     """
@@ -68,6 +68,12 @@ def _get_tree_parameters(tree_info):
     features = []
     thresholds = []
     values = []
+
+    # Subsitute feature names with ids if necessary.
+    if constants.FEATURE_NAMES in extra_config:
+        feature_names = extra_config[constants.FEATURE_NAMES]
+        for f_id, f_name in enumerate(feature_names):
+            tree_info = tree_info.replace(f_name, str(f_id))
     _tree_traversal(
         tree_info.replace("[f", "").replace("[", "").replace("]", "").split(), lefts, rights, features, thresholds, values
     )
@@ -125,6 +131,10 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
         )
 
     tree_infos = operator.raw_operator.get_booster().get_dump()
+    if hasattr(operator.raw_operator.get_booster(), "feature_names"):
+        feature_names = operator.raw_operator.get_booster().feature_names
+        if feature_names is not None:
+            extra_config[constants.FEATURE_NAMES] = feature_names
     base_prediction = operator.raw_operator.base_score
     if base_prediction is None:
         base_prediction = [0.5]

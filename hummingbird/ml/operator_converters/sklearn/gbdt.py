@@ -24,7 +24,7 @@ def _get_n_features(model):
         return model._n_features
 
 
-def _get_parameters_hist_gbdt(trees):
+def _get_parameters_hist_gbdt(trees, extra_config):
     """
     Extract the tree parameters from SklearnHistGradientBoostingClassifier trees
     Args:

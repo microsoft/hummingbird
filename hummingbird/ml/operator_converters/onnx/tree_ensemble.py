@@ -41,8 +41,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
         elif attr.name == "class_weights" or attr.name == "target_weights":
             values = attr.floats
             if len(values) == 0:
-                raise TypeError(
-                    "Type mismatch with attribute {}.".format(attr))
+                raise TypeError("Type mismatch with attribute {}.".format(attr))
         elif attr.name == "class_nodeids" or attr.name == "target_nodeids":
             target_node_ids = attr.ints
         elif attr.name == "class_treeids" or attr.name == "target_treeids":
@@ -169,7 +168,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
     return tree_infos, classes, post_transform
 
 
-def _dummy_get_parameter(tree_info):
+def _dummy_get_parameter(tree_info, extra_config):
     """
     Dummy function used to return parameters (TreeEnsemble converters already have parameters in the right format)
     """

@@ -220,14 +220,14 @@ def get_tree_params_and_type(tree_infos, get_tree_parameters, extra_config):
     Returns:
         The tree parameters, the maximum tree-depth and the tre implementation to use
     """
-    tree_parameters = [get_tree_parameters(tree_info) for tree_info in tree_infos]
+    tree_parameters = [get_tree_parameters(tree_info, extra_config) for tree_info in tree_infos]
     max_depth = max(1, _find_max_depth(tree_parameters))
     tree_type = get_tree_implementation_by_config_or_depth(extra_config, max_depth)
 
     return tree_parameters, max_depth, tree_type
 
 
-def get_parameters_for_sklearn_common(tree_infos):
+def get_parameters_for_sklearn_common(tree_infos, extra_config):
     """
     Parse sklearn-based trees, including SklearnRandomForestClassifier/Regressor and SklearnGradientBoostingClassifier/Regressor
     Args:
