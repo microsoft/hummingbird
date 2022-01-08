@@ -39,7 +39,7 @@ def _tree_traversal(node, lefts, rights, features, thresholds, values, count):
         return count
 
 
-def _get_tree_parameters(tree_info):
+def _get_tree_parameters(tree_info, extra_config):
     """
     Parse the tree and returns an in-memory friendly representation of its structure.
     """
@@ -66,10 +66,8 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
         A PyTorch model
     """
     assert operator is not None, "Cannot convert None operator"
-    if operator.raw_operator.boosting_type == 'rf':
-        raise RuntimeError(
-            "Unable to directly convert this model. "
-            "It should be converted into ONNX first.")
+    if operator.raw_operator.boosting_type == "rf":
+        raise RuntimeError("Unable to directly convert this model. " "It should be converted into ONNX first.")
 
     n_features = operator.raw_operator._n_features
     tree_infos = operator.raw_operator.booster_.dump_model()["tree_info"]
