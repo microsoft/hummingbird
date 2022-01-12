@@ -64,7 +64,7 @@ _Thank you to [Chien Vu](https://www.linkedin.com/in/vumichien/) for contributin
 
 ## Installation
 
-Hummingbird was tested on Python >= 3.7 on Linux, Windows and MacOS machines.  (Python 3.6 is suppored up to `hummingbird-ml==0.4.2`.)  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
+Hummingbird was tested on Python >= 3.7 on Linux, Windows and MacOS machines.  (Python 3.6 is supported up to `hummingbird-ml==0.4.2`.)  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
 
 Hummingbird requires PyTorch >= 1.6.0. Please go [here](https://pytorch.org/) for instructions on how to install PyTorch based on your platform and hardware.
 

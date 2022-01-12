@@ -210,6 +210,10 @@ def convert(topology, backend, test_input, device, extra_config={}):
             )
 
         if backend == onnx.__name__:
+            # allowed_min = LooseVersion("1.6.0")
+            # Pytorch <= 1.6.0 has a bug with exporting GEMM into ONNX.
+            # For the moment only tree_trav is enabled for pytorch <= 1.6.0
+            # if vers < allowed_min:
             extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
         operator_map[operator.full_name] = converter(operator, device, extra_config)
 
