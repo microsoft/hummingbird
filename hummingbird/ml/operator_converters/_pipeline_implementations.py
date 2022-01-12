@@ -8,7 +8,6 @@
 Converters for operators necessary for supporting scikit-learn Pipelines.
 """
 
-from distutils.version import LooseVersion
 import numpy as np
 from onnxconverter_common.registration import register_converter
 import torch
