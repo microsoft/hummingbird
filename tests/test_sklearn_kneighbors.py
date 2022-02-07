@@ -2,9 +2,10 @@
 Tests sklearn KNeighbor model (KNeighborsClassifier, KNeighborsRegressor) converters.
 """
 import unittest
-import warnings
+from distutils.version import LooseVersion
 
 import numpy as np
+import sklearn
 import torch
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn import datasets
@@ -87,6 +88,10 @@ class TestSklearnKNeighbors(unittest.TestCase):
     #     self._test_kneighbors_classifier(3, metric="chebyshev", metric_params={})
 
     # KNeighborsClassifier wminkowski metric type
+    @unittest.skipIf(
+        LooseVersion(sklearn.__version__) > LooseVersion("1.0"),
+        reason="wminkowski metric is not supported anymore for sklearn > 1.0",
+    )
     def test_kneighbors_classifer_wminkowski(self):
         self._test_kneighbors_classifier(3, metric="wminkowski")
 
@@ -177,6 +182,10 @@ class TestSklearnKNeighbors(unittest.TestCase):
     #     self._test_kneighbors_regressor(3, metric="chebyshev", metric_params={})
 
     # KNeighborsRegressor wminkowski metric type
+    @unittest.skipIf(
+        LooseVersion(sklearn.__version__) > LooseVersion("1.0"),
+        reason="wminkowski metric is not supported anymore for sklearn > 1.0",
+    )
     def test_kneighbors_regressor_wminkowski(self):
         self._test_kneighbors_regressor(3, metric="wminkowski")
 
