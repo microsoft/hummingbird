@@ -9,6 +9,7 @@ Converters for topology IR are stored in this file.
 """
 import numpy as np
 import os
+from distutils.version import LooseVersion
 import torch
 from uuid import uuid4
 
@@ -210,11 +211,14 @@ def convert(topology, backend, test_input, device, extra_config={}):
             )
 
         if backend == onnx.__name__:
-            # allowed_min = LooseVersion("1.6.0")
-            # Pytorch <= 1.6.0 has a bug with exporting GEMM into ONNX.
-            # For the moment only tree_trav is enabled for pytorch <= 1.6.0
-            # if vers < allowed_min:
-            extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
+            # Pytorch <= 1.4.0 has a bug with exporting GEMM into ONNX.
+            if LooseVersion(torch.__version__) <= LooseVersion("1.4"):
+                # Raise en error and warn user that the torch version is not supported with onnx backend
+                raise Exception(
+                    f"The current torch version {torch.__version__} is not supported with {backend} backend. "
+                    "Please use a torch version > 1.4 or change the backend."
+                )
+
         operator_map[operator.full_name] = converter(operator, device, extra_config)
 
     # Set the parameters for the model / container

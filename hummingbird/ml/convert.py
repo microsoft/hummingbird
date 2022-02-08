@@ -259,6 +259,9 @@ def _convert_onnxml(model, backend, test_input, device, extra_config={}):
     initializers = {} if model.graph.initializer is None else {in_.name: in_ for in_ in model.graph.initializer}
     extra_config[constants.ONNX_INITIALIZERS] = initializers
 
+    # Force constants.TREE_IMPLEMENTATION="tree_trav" as onnxml has a bug with "gemm".
+    extra_config[constants.TREE_IMPLEMENTATION] = "tree_trav"
+
     # Parse ONNX model as our internal data structure (i.e., Topology).
     topology = parse_onnx_api_model(model)
 
