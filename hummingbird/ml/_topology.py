@@ -203,7 +203,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
     for operator in topology.topological_operator_iterator():
         converter = get_converter(operator.type)
-        if convert is None:
+        if converter is None:
             raise MissingConverter(
                 "Unable to find converter for {} type {} with extra config: {}.".format(
                     operator.type, type(getattr(operator, "raw_model", None)), extra_config
