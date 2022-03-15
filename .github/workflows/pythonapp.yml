@@ -36,20 +36,20 @@ jobs:
         # The GitHub editor is 127 chars wide
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     # PyTorch for Mac has different pip syntax wrt Win and Linux.
-    # We want to test torch 1.6.0 (in this case on python3.7) and torch 1.10.x.
+    # We want to test torch 1.6.0 (in this case on python3.7) and torch 1.11.x.
     # The following cases address the situations above.
     - name: Install pytorch 1.6.0 if python 3.7 (mac)
       if: ${{ matrix.python-version == '3.7' && matrix.os == 'macos-10.15' }}
       run: pip install torch==1.6.0
-    - name: Install pytorch 1.10.0 if python > 3.7 (mac)
+    - name: Install pytorch 1.11.0 if python > 3.7 (mac)
       if: ${{ matrix.python-version != '3.7' && matrix.os == 'macos-10.15' }}
-      run: pip install torch==1.10.0
+      run: pip install torch==1.11.0
     - name: Install pytorch 1.6.0+cpu if python 3.7 (not mac)
       if: ${{ matrix.python-version == '3.7' && matrix.os != 'macos-10.15' }}
       run: pip install torch==1.6.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
-    - name: Install pytorch 1.10.0+cpu if python > 3.7 (not mac)
+    - name: Install pytorch 1.11.0+cpu if python > 3.7 (not mac)
       if:  ${{ matrix.python-version != '3.7' && matrix.os != 'macos-10.15' }}
-      run: pip install torch==1.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+      run: pip install torch==1.11.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
         pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
