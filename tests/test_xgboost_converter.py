@@ -28,7 +28,7 @@ class TestXGBoostConverter(unittest.TestCase):
         np.random.seed(0)
         X = np.random.rand(1, 1)
         X = np.array(X, dtype=np.float32)
-        y = np.random.randint(2, size=1)
+        y = np.array([0], dtype=int)
 
         for model in [xgb.XGBClassifier(n_estimators=1, max_depth=1), xgb.XGBRegressor(n_estimators=1, max_depth=1)]:
             for extra_config_param in ["tree_trav", "perf_tree_trav", "gemm"]:
@@ -221,7 +221,7 @@ class TestXGBoostConverter(unittest.TestCase):
             np.random.seed(0)
             X = np.random.rand(1, 1)
             X = np.array(X, dtype=np.float32)
-            y = np.random.randint(2, size=1)
+            y = np.array([0], dtype=int)
 
             model.fit(X, y)
 
