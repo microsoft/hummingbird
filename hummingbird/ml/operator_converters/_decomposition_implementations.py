@@ -37,15 +37,15 @@ class KernelPCA(PhysicalOperator, torch.nn.Module):
         self.kernel = kernel
         self.degree = degree
         self.n_samples = sv.shape[0]
-        self.sv = torch.from_numpy(sv).float()
+        self.sv = torch.nn.Parameter(torch.from_numpy(sv).float())
         self.n_features = sv.shape[1]
-        self.k_fit_rows = torch.from_numpy(k_fit_rows).float()
+        self.k_fit_rows = torch.nn.Parameter(torch.from_numpy(k_fit_rows).float())
         self.k_fit_all = k_fit_all
         if gamma is None:
             gamma = 1.0 / self.n_features
         self.gamma = gamma
         self.coef0 = coef0
-        self.scaled_alphas = torch.from_numpy(scaled_alphas).float()
+        self.scaled_alphas = torch.nn.Parameter(torch.from_numpy(scaled_alphas).float())
 
     def forward(self, x):
         if self.kernel == "linear":
