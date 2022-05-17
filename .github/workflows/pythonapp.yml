@@ -91,7 +91,7 @@ jobs:
         cd ~/
         git clone https://github.com/apache/incubator-tvm.git
         cd incubator-tvm
-        git checkout tags/v0.7.0
+        git checkout tags/v0.8.0
         git submodule update --recursive --init
         cmake -E make_directory build
     - name: Get LLVM on Linux
