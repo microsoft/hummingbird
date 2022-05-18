@@ -52,6 +52,7 @@ jobs:
       run: pip install torch==1.11.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
+        pip install scikit-learn==1.0.2
         pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
         pip install git+https://github.com/onnx/sklearn-onnx.git@9b551d8ecfd9f97ad8771909e34cfffea7b6e99d
     - name: Run basic tests without extra
