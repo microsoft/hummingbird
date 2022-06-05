@@ -42,7 +42,7 @@ In this example, the decision tree has four decision nodes (orange), and five le
 **Step 1:** Multiply the `input tensor` with tensor `A` (computed from the decision tree model above) that captures the relationship between input features and internal nodes. Then compare it with tensor `B` which is set to the value of each internal node (orange) to create the tensor `input path` that represents the path from input to node. In this case, the tree model has 4 conditions and the input vector is 5, therefore, the shape of tensor `A` is 5x4 and tensor B is 1x4.
 
 <p align="center">
-<img src="https://github.com/microsoft/hummingbird/raw/main/website/images/3-matrix.png" width=450 >
+<img src="https://github.com/bishtanuj/hummingbird/blob/main/website/images/3-matrix.png" width=450 >
 </p>
 
 **Step 2:** The `input path` tensor will be multiplied with tensor `C` that captures whether the internal node is a parent of that internal node, and if so, whether it is in the left or right sub-tree (left = 1, right =-1, otherwise =0) and then check the equals with tensor `D` that captures the count of the left child of its parent in the path from a leaf node to the tree root to create the tensor output path that represents the path from node to output. In this case, this tree model has 5 outputs with 4 conditions, therefore, the shape of tensor `C` is 4x5 and tensor `D` is 1x5.
