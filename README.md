@@ -26,7 +26,7 @@ Hummingbird works by reconfiguring algorithmic operators such that we can perfor
 
 
 <p align="center">
-    <img src="https://github.com/microsoft/hummingbird/raw/main/website/images/1-simple-reg-tree.png" width=600 >
+    <img src="https://github.com/bishtanuj/hummingbird/blob/main/website/images/1-simple-reg-tree.png" width=600 >
     <br>
     <em>Simple decision tree</em>
 </p>
@@ -36,7 +36,7 @@ In this example, the decision tree has four decision nodes (orange), and five le
 
 
 <p align="center">
-    <img src="https://github.com/microsoft/hummingbird/raw/main/website/images/2-calc-output.png" width=400 >
+    <img src="https://github.com/bishtanuj/hummingbird/blob/main/website/images/2-calc-output.png" width=400 >
 </p>
 
 **Step 1:** Multiply the `input tensor` with tensor `A` (computed from the decision tree model above) that captures the relationship between input features and internal nodes. Then compare it with tensor `B` which is set to the value of each internal node (orange) to create the tensor `input path` that represents the path from input to node. In this case, the tree model has 4 conditions and the input vector is 5, therefore, the shape of tensor `A` is 5x4 and tensor B is 1x4.
