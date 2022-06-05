@@ -54,7 +54,7 @@ In this example, the decision tree has four decision nodes (orange), and five le
 **Step 3:** The `output path` will be multiplied with tensor `E` that captures the mapping between leaf nodes to infer the final prediction. In this case, tree model has 5 outputs, therefore, shape of tensor `E` is 5x1.
 
 <p align="center">
-<img src="https://github.com/microsoft/hummingbird/raw/main/website/images/5-singletensor.png" width=450>
+<img src="https://github.com/bishtanuj/hummingbird/blob/main/website/images/5-singletensor.png" width=450>
 </p>
 
 And now Hummingbird has compiled a tree-based model using the GEMM strategy!  For more details, please see [Figure 3](https://scnakandala.github.io/papers/TR_2020_Hummingbird.pdf) of our paper.
