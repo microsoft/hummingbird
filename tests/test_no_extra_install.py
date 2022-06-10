@@ -46,7 +46,7 @@ class TestNoExtra(unittest.TestCase):
         assert not onnx_ml_tools_installed()
 
     # Test no TVM returns false on tvm_installed()
-    @unittest.skipIf(onnx_ml_tools_installed(), reason="Test when TVM is not installed")
+    @unittest.skipIf(tvm_installed(), reason="Test when TVM is not installed")
     def test_tvm_installed_false(self):
         warnings.filterwarnings("ignore")
         assert not tvm_installed()
