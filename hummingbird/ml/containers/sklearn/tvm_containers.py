@@ -144,7 +144,12 @@ class TVMSklearnContainer(SklearnContainer):
             if isinstance(param_bytes, (bytes, str)):
                 param_bytes = bytearray(param_bytes)
             load_arr = _load_param_dict(param_bytes)
-            return {v.name: v.array for v in load_arr}
+
+            # On TVM v0.7 and earlier, we have to convert params to Dict type.
+            from distutils.version import LooseVersion
+            if LooseVersion(tvm.__version__) < LooseVersion("0.8.0"):
+                return {v.name: v.array for v in load_arr}
+            return load_arr
 
         container = None
 
