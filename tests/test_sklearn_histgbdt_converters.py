@@ -28,8 +28,7 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
             model.fit(X, y)
             torch_model = hummingbird.ml.convert(model, "torch", extra_config={})
             self.assertIsNotNone(torch_model)
-            model.predict(X)
-            torch_model.predict(X)
+            np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
 
 if __name__ == "__main__":

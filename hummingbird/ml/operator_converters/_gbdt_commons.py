@@ -134,7 +134,14 @@ def convert_gbdt_common(
 
     # Define the post transform.
     if constants.BASE_PREDICTION in extra_config:
-        base_prediction = torch.nn.Parameter(torch.FloatTensor([[0.0130]]), requires_grad=False)
+
+        base_pred = torch.FloatTensor(extra_config[constants.BASE_PREDICTION])
+
+        # For newer versions of scikit-learn (>1.1.1),
+        if len(base_pred.shape) == 4:
+            base_pred = torch.nn.Parameter(torch.FloatTensor(base_pred[0][0]), requires_grad=False)
+
+        base_prediction = torch.nn.Parameter(base_pred, requires_grad=False)
         extra_config[constants.BASE_PREDICTION] = base_prediction
 
     # For models following the Sklearn API we need to build the post transform ourselves.
