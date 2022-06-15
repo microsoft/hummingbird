@@ -139,7 +139,7 @@ def convert_gbdt_common(
 
         # For newer versions of scikit-learn (>1.1.1),
         if len(base_pred.shape) == 4:
-            base_pred = torch.nn.Parameter(torch.FloatTensor(base_pred[0][0]), requires_grad=False)
+            base_pred = base_pred[0][0]
 
         base_prediction = torch.nn.Parameter(base_pred, requires_grad=False)
         extra_config[constants.BASE_PREDICTION] = base_prediction
