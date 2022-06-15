@@ -159,7 +159,7 @@ class TestSklearnCrossDecomposition(unittest.TestCase):
 
     # PLS regressor n_componenets two no scale
     def test_pca_converter_two_no_scale(self):
-        self._fit_model_pls_regressor(PLSR(n_components=10, scale=False))
+        self._fit_model_pls_regressor(PLSR(n_components=3, scale=False))
 
 
 if __name__ == "__main__":
