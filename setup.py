@@ -32,7 +32,7 @@ install_requires = [
 ]
 onnx_requires = [
     "onnxruntime>=1.0.0",
-    "onnxmltools>=1.6.0",
+    "onnxmltools>=1.6.0,<=1.11.0",
     "skl2onnx>=1.7.0",
 ]
 extra_requires = [
