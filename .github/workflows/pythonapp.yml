@@ -54,7 +54,7 @@ jobs:
       run: |
         pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
         pip install git+https://github.com/onnx/sklearn-onnx.git@9b551d8ecfd9f97ad8771909e34cfffea7b6e99d
-        pip install "scikit-learn>=0.21.3,<1.1.0"
+        pip install "scikit-learn>1.1.0"
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra
