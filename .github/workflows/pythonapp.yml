@@ -74,6 +74,8 @@ jobs:
       run: |
         pip install .[extra,onnx,sparkml]
         pip install pandas
+    - name: pip list
+      run: pip list
     - uses: actions/cache@v1
       # TVM takes forever, we try to cache it.
       if: ${{ matrix.os != 'windows-2019' }}
@@ -126,6 +128,8 @@ jobs:
       working-directory: ../../../tvm/python
       run: |
         python setup.py install
+    - name: pip list
+      run: pip list
     # We don't run pytest for Linux py3.7 since we do coverage for that case.
     - name: Test with pytest
       if: ${{ matrix.python-version != '3.7' || matrix.os != 'ubuntu-18.04' }}
