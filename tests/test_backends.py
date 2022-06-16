@@ -542,34 +542,6 @@ class TestBackends(unittest.TestCase):
         hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx")
         assert hb_model
 
-    # Test onnx 0 shape input
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
-    )
-    def test_onnx_zero_shape_input(self):
-        warnings.filterwarnings("ignore")
-        max_depth = 10
-        num_classes = 2
-        if CastTransformer is None:
-            model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
-        else:
-            # newer version of sklearn-onnx
-            model = make_pipeline(
-                CastTransformer(dtype=np.float32), GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
-            )
-        np.random.seed(0)
-        X = np.random.rand(100, 200)
-        y = np.random.randint(num_classes, size=100)
-
-        model.fit(X, y)
-
-        # Create ONNX-ML model
-        onnx_ml_model = convert_sklearn(model, initial_types=[("input", DoubleTensorType([0, X.shape[1]]))], target_opset=11)
-
-        # Test onnx requires no test_data
-        hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx")
-        assert hb_model
-
     # Test onnx no test_data, double input
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"

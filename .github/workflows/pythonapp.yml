@@ -53,7 +53,7 @@ jobs:
     - name: Install basic dependencies
       run: |
         pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
-        pip install "scikit-learn>1.1.0"
+        pip install scikit-learn
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra

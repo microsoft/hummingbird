@@ -65,17 +65,6 @@ class TestONNXScaler(unittest.TestCase):
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
 
-    # Test StandardScaler with_mean=False, with_std=False
-    @unittest.skipIf(
-        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
-    )
-    def test_standard_scaler_onnx_ff(self, rtol=1e-06, atol=1e-06):
-        model = StandardScaler(with_mean=False, with_std=False)
-        onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
-
-        # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
-
     # Test RobustScaler with with_centering=True
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
