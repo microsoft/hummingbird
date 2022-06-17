@@ -95,13 +95,13 @@ jobs:
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz && mv clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04 llvm
     - name: Get LLVM on Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true'  && matrix.os == 'macos-10.15' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-10.15' }}
       working-directory: ../../../tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz && mv clang+llvm-10.0.0-x86_64-apple-darwin llvm
     - name: CMake TVM
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && && matrix.os != 'windows-2019' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os != 'windows-2019' }}
       working-directory: ../../../tvm/build
       run: >-
         cmake
