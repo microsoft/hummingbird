@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, macos-10.15, windows-2019]
+        os: [ubuntu-18.04, macos-11, windows-2019]
         python-version: [3.8, 3.9]
 
     steps:
@@ -37,10 +37,10 @@ jobs:
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     # PyTorch for Mac has different pip syntax wrt Win and Linux.
     - name: Install pytorch 1.11.0 if mac
-      if: ${{  matrix.os == 'macos-10.15' }}
+      if: ${{  matrix.os == 'macos-11' }}
       run: pip install torch==1.11.0
     - name: Install pytorch 1.11.0+cpu if not mac
-      if:  ${{  matrix.os != 'macos-10.15' }}
+      if:  ${{  matrix.os != 'macos-11' }}
       run: pip install torch==1.11.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
@@ -50,7 +50,7 @@ jobs:
     - name: Coverage on basic tests without extra
       run: coverage run -a -m pytest tests/test_no_extra_install.py
     - name: If mac, install libomp to facilitate lgbm install
-      if: matrix.os == 'macos-10.15'
+      if: matrix.os == 'macos-11'
       run: |
         wget https://raw.githubusercontent.com/Homebrew/homebrew-core/fb8323f2b170bd4ae97e1bac9bf3e2983af3fdb0/Formula/libomp.rb
         brew unlink libomp
@@ -95,7 +95,7 @@ jobs:
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz && mv clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04 llvm
     - name: Get LLVM on Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-10.15' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
       working-directory: ../../../tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
@@ -131,19 +131,19 @@ jobs:
       run: |
         coverage run -a -m pytest tests
         coverage xml
-    - name: Upload coverage to Codecov 8
+    - name: Upload coverage to Codecov
       if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
         flags: unittests
-    # Compile and push documentation only for one of the runs (Linux py3.8).
+    # Compile and push documentation only for one of the runs (Linux py3.9).
     - name: Generate Documentation
-      if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
+      if: ${{ matrix.python-version == '3.9' && matrix.os == 'ubuntu-18.04' }}
       run: |
         make sphinx-site -C website/
     - name: Deploy to GitHub pages 🚀
-      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
+      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.9' && matrix.os == 'ubuntu-18.04' }}
       uses: JamesIves/github-pages-deploy-action@4.0.0
       with:
         branch: gh-pages
