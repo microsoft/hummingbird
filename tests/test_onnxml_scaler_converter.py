@@ -20,7 +20,7 @@ if onnx_ml_tools_installed():
 
 
 class TestONNXScaler(unittest.TestCase):
-    def _test_scaler_converter(self, model):
+    def _test_scaler_converter(self, model, check_raise=False):
         warnings.filterwarnings("ignore")
         X = np.array([[0.0, 0.0, 3.0], [1.0, -1.0, 0.0], [0.0, 2.0, 1.0], [1.0, 0.0, -2.0]], dtype=np.float32)
         model.fit(X)
@@ -30,8 +30,14 @@ class TestONNXScaler(unittest.TestCase):
             model, initial_types=[("float_input", FloatTensorType([None, X.shape[1]]))]
         )
 
+        # Having with_mean=False, with_std=False returns identity model in convert_sklearn
+        if check_raise:
+            self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
+            return
+
         # Create ONNX model by calling converter
         onnx_model = convert(onnx_ml_model, "onnx", X)
+
         # Get the predictions for the ONNX-ML model
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
         output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
@@ -64,6 +70,16 @@ class TestONNXScaler(unittest.TestCase):
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+
+    # Test StandardScaler with_mean=False, with_std=False
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_standard_scaler_onnx_ff(self, rtol=1e-06, atol=1e-06):
+        model = StandardScaler(with_mean=False, with_std=False)
+
+        # Expect that this raises an error due to unsuppoted model type
+        self._test_scaler_converter(model, check_raise=True)
 
     # Test RobustScaler with with_centering=True
     @unittest.skipIf(
