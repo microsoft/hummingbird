@@ -30,16 +30,6 @@ def convert_sklearn_mlp_classifier(operator, device, extra_config):
     assert operator is not None, "Cannot convert None operator"
 
     classes = operator.raw_operator.classes_
-    # There is a bug in torch < 1.7.0 that causes a mismatch. See Issue #10
-    if len(classes) > 2:
-        from distutils.version import LooseVersion
-        import torch
-
-        if LooseVersion(torch.__version__) < LooseVersion("1.7.0"):
-            import warnings
-
-            warnings.warn("torch < 1.7.0 may give a mismatch on multiclass. See issue #10.")
-
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
         raise RuntimeError("Hummingbird supports only integer labels for class labels.")
 

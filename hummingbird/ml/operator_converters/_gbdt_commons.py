@@ -52,15 +52,7 @@ def convert_gbdt_classifier_common(
         n_classes -= 1
     if classes is None:
         classes = [i for i in range(n_classes)]
-    # There is a bug in torch < 1.7.0 that causes a mismatch. See Issue #10
-    if n_classes > 2:
-        from distutils.version import LooseVersion
-        import torch
 
-        if LooseVersion(torch.__version__) < LooseVersion("1.7.0"):
-            import warnings
-
-            warnings.warn("torch < 1.7.0 may give a mismatch on multiclass. See issue #10.")
     reorder_trees = True
     if constants.REORDER_TREES in extra_config:
         reorder_trees = extra_config[constants.REORDER_TREES]

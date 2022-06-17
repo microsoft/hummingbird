@@ -25,6 +25,9 @@ def torch_installed():
     """
     try:
         import torch
+        assert (
+            LooseVersion(torch.__version__) > LooseVersion("1.7.0")
+        ), "Please install torch >1.7.0"
 
         return True
     except ImportError:
@@ -32,7 +35,7 @@ def torch_installed():
 
 
 def assert_torch_installed():
-    assert torch_installed(), "To use Hummingbird you need to install torch."
+    assert torch_installed(), "To use Hummingbird you need to install torch>1.7.0."
 
 
 def onnx_ml_tools_installed():
