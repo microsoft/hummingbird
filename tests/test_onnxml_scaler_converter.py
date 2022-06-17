@@ -20,7 +20,7 @@ if onnx_ml_tools_installed():
 
 
 class TestONNXScaler(unittest.TestCase):
-    def _test_scaler_converter(self, model, check_raise=False):
+    def _test_scaler_converter(self, model):
         warnings.filterwarnings("ignore")
         X = np.array([[0.0, 0.0, 3.0], [1.0, -1.0, 0.0], [0.0, 2.0, 1.0], [1.0, 0.0, -2.0]], dtype=np.float32)
         model.fit(X)
@@ -29,11 +29,6 @@ class TestONNXScaler(unittest.TestCase):
         onnx_ml_model = convert_sklearn(
             model, initial_types=[("float_input", FloatTensorType([None, X.shape[1]]))]
         )
-
-        # Having with_mean=False, with_std=False returns identity model in convert_sklearn
-        if check_raise:
-            self.assertRaises(RuntimeError, convert, onnx_ml_model, "onnx", X)
-            return
 
         # Create ONNX model by calling converter
         onnx_model = convert(onnx_ml_model, "onnx", X)
@@ -79,7 +74,7 @@ class TestONNXScaler(unittest.TestCase):
         model = StandardScaler(with_mean=False, with_std=False)
 
         # Expect that this raises an error due to unsuppoted model type
-        self._test_scaler_converter(model, check_raise=True)
+        self.assertRaises(RuntimeError, self._test_scaler_converter, model)
 
     # Test RobustScaler with with_centering=True
     @unittest.skipIf(
