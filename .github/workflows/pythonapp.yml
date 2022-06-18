@@ -49,18 +49,6 @@ jobs:
       run: pytest
     - name: Coverage on basic tests without extra
       run: coverage run -a -m pytest tests/test_no_extra_install.py
-    - name: If mac, install libomp to facilitate lgbm install
-      if: matrix.os == 'macos-11'
-      run: |
-        wget https://raw.githubusercontent.com/Homebrew/homebrew-core/fb8323f2b170bd4ae97e1bac9bf3e2983af3fdb0/Formula/libomp.rb
-        brew unlink libomp
-        brew install ./libomp.rb
-        export CC=/usr/bin/clang
-        export CXX=/usr/bin/clang++
-        export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
-        export CFLAGS="$CFLAGS -I/usr/local/opt/libomp/include"
-        export CXXFLAGS="$CXXFLAGS -I/usr/local/opt/libomp/include"
-        export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
     - name: Install extra dependencies
       run: |
         pip install .[extra,onnx,sparkml]
