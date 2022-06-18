@@ -22,6 +22,47 @@ jobs:
         python-version: [3.8, 3.9]
 
     steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Lint with flake8
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # The GitHub editor is 127 chars wide
+        flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
+    # PyTorch for Mac has different pip syntax wrt Win and Linux.
+    - name: Install pytorch 1.11.0 if mac
+      if: ${{  matrix.os == 'macos-11' }}
+      run: pip install torch==1.11.0
+    - name: Install pytorch 1.11.0+cpu if not mac
+      if:  ${{  matrix.os != 'macos-11' }}
+      run: pip install torch==1.11.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+    - name: Install basic dependencies
+      run: |
+        pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
+    - name: If mac, install libomp to facilitate lgbm install
+      if: matrix.os == 'macos-11'
+      run: |
+        wget https://raw.githubusercontent.com/Homebrew/homebrew-core/fb8323f2b170bd4ae97e1bac9bf3e2983af3fdb0/Formula/libomp.rb
+        brew unlink libomp
+        brew install ./libomp.rb
+        export CC=/usr/bin/clang
+        export CXX=/usr/bin/clang++
+        export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
+        export CFLAGS="$CFLAGS -I/usr/local/opt/libomp/include"
+        export CXXFLAGS="$CXXFLAGS -I/usr/local/opt/libomp/include"
+        export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+    - name: Install extra dependencies
+      run: |
+        pip install .[extra,onnx,sparkml]
+        pip install pandas
+    - name: pip list
+      run: pip list
     - name: Generate Documentation
       if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
       run: |
