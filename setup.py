@@ -26,7 +26,7 @@ install_requires = [
     "onnxconverter-common>=1.6.0",
     "scipy",
     "scikit-learn",
-    "torch>=1.4",
+    "torch>1.7.0",
     "psutil",
     "dill",
     "protobuf>=3.20.0,<=3.20.1",
@@ -69,5 +69,5 @@ setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.8",
 )

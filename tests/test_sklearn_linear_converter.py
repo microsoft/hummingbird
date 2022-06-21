@@ -201,9 +201,6 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         self._test_sgd_classifier(3)
 
     # SGDClassifier with modified huber loss
-    @unittest.skipIf(
-        LooseVersion(torch.__version__) < LooseVersion("1.7.0"), reason="Modified Huber loss test requires torch >= 1.7.0"
-    )
     def test_modified_huber(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
         Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
@@ -217,9 +214,6 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
         np.testing.assert_allclose(model.predict_proba(inputs), hb_model.predict_proba(inputs), rtol=1e-6, atol=1e-6)
 
-    @unittest.skipIf(
-        LooseVersion(torch.__version__) < LooseVersion("1.7.0"), reason="Modified Huber loss test requires torch >= 1.7.0"
-    )
     def test_modified_huber2(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
         Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
@@ -232,10 +226,6 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-6, atol=1e-6)
 
-    # SGDClassifier with modified huber loss multiclass
-    @unittest.skipIf(
-        LooseVersion(torch.__version__) < LooseVersion("1.7.0"), reason="Modified Huber loss test requires torch >= 1.7.0"
-    )
     def test_modified_huber_multi(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
         Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])

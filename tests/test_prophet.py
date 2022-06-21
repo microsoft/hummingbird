@@ -55,9 +55,6 @@ class TestProphet(unittest.TestCase):
         not (pandas_installed() and prophet_installed()), reason="Test requires Prophet, Pandas and ONNX runtime.",
     )
     @unittest.skipIf(
-        LooseVersion(torch.__version__) < LooseVersion("1.8.1"), reason="Test requires Torch 1.8.1.",
-    )
-    @unittest.skipIf(
         not onnx_runtime_installed() or LooseVersion(onnxruntime.__version__) < LooseVersion("1.7.0"),
         reason="Prophet test requires onnxruntime => 1.7.0",
     )
