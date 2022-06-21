@@ -50,6 +50,8 @@ class Executor(torch.nn.Module, object):
                             map[i.raw_name] = i.full_name
                 if len(map) == len(names):
                     break
+            if map == {}:
+                return names
             for name in names:
                 new_names.append(map[name])
             return new_names

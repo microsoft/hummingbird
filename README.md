@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/hummingbird-ml.svg)](https://badge.fury.io/py/hummingbird-ml)
 [![](https://github.com/microsoft/hummingbird/workflows/Build/badge.svg?branch=main)](https://github.com/microsoft/hummingbird/actions)
-![](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue)
+![](https://img.shields.io/badge/python-3.8%20%7C%203.9-blue)
 [![coverage](https://codecov.io/gh/microsoft/hummingbird/branch/main/graph/badge.svg)](https://codecov.io/github/microsoft/hummingbird?branch=main)
 [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Downloads](https://pepy.tech/badge/hummingbird-ml)](https://pepy.tech/project/hummingbird-ml)
@@ -64,7 +64,7 @@ _Thank you to [Chien Vu](https://www.linkedin.com/in/vumichien/) for contributin
 
 ## Installation
 
-Hummingbird was tested on Python >= 3.7 on Linux, Windows and MacOS machines.  (Python 3.6 is supported up to `hummingbird-ml==0.4.2`.)  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
+Hummingbird was tested on Python 3.8 and 3.9 on Linux, Windows and MacOS machines.  It is recommended to use a virtual environment (See: [python3 venv doc](https://docs.python.org/3/tutorial/venv.html) or [Using Python environments in VS Code](https://code.visualstudio.com/docs/python/environments).)
 
 Hummingbird requires PyTorch >= 1.6.0. Please go [here](https://pytorch.org/) for instructions on how to install PyTorch based on your platform and hardware.
 

@@ -32,6 +32,7 @@ class TestONNXScaler(unittest.TestCase):
 
         # Create ONNX model by calling converter
         onnx_model = convert(onnx_ml_model, "onnx", X)
+
         # Get the predictions for the ONNX-ML model
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
         output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
@@ -71,10 +72,9 @@ class TestONNXScaler(unittest.TestCase):
     )
     def test_standard_scaler_onnx_ff(self, rtol=1e-06, atol=1e-06):
         model = StandardScaler(with_mean=False, with_std=False)
-        onnx_ml_pred, onnx_pred = self._test_scaler_converter(model)
 
-        # Check that predicted values match
-        np.testing.assert_allclose(onnx_ml_pred, onnx_pred, rtol=rtol, atol=atol)
+        # Expect that this raises an error due to unsuppoted model type
+        self.assertRaises(RuntimeError, self._test_scaler_converter, model)
 
     # Test RobustScaler with with_centering=True
     @unittest.skipIf(
