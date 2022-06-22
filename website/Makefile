@@ -23,6 +23,9 @@ clean-sphinx-site:
 .PHONY:
 sphinx-site: #clean-sphinx-site
 	pip install sphinx sphinx_rtd_theme psutil
+	# We're mocking out the torch. So now we also need to sub this on out
+	find ../. -type f -exec sed -i 's/{torch.__version__}/1.11.0/g' {} +
+	find ../. -type f -exec sed -i 's/torch.__version__/"1.11.0"/g' {} +
 
 	sphinx-apidoc --private -o sphinx/api -t sphinx/_templates ../hummingbird  -d 1 -f -e
 	$(MAKE) -C sphinx
