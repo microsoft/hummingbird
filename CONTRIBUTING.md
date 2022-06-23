@@ -11,7 +11,7 @@ This project welcomes contributions and suggestions.
 
 ## Getting Started
 
-Please join the community on Gitter *gitter badge*. Also please make sure to take a look at the project [roadmap](wiki/Roadmap-for-Upcoming-Features-and-Support).
+Please join the community on Gitter *gitter badge*. Also please make sure to take a look at the project [roadmap](../../wiki/Roadmap-for-Upcoming-Features-and-Support).
 
 
 ### Pull requests
