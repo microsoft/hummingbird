@@ -122,8 +122,195 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="hummingbird-ml-operator-converters-constants">
-<h1>hummingbird.ml.operator_converters.constants<a class="headerlink" href="#hummingbird-ml-operator-converters-constants" title="Permalink to this heading">¶</a></h1>
+  <section id="module-hummingbird.ml.operator_converters.constants">
+<span id="hummingbird-ml-operator-converters-constants"></span><h1>hummingbird.ml.operator_converters.constants<a class="headerlink" href="#module-hummingbird.ml.operator_converters.constants" title="Permalink to this heading">¶</a></h1>
+<p>Constants used in the Hummingbird converters are defined here.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.BASE_PREDICTION">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">BASE_PREDICTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'base_prediction'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.BASE_PREDICTION" title="Permalink to this definition">¶</a></dt>
+<dd><p>base prediction for ensemble models requiring it.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.FEATURE_NAMES">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">FEATURE_NAMES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'feature_names'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.FEATURE_NAMES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Names of the features used for training.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">GET_PARAMETERS_FOR_TREE_TRAVERSAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'get_parameters_for_tree_trav'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.GET_PARAMETERS_FOR_TREE_TRAVERSAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Which function to use to extract the parameters for the tree traversal strategy.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.IFOREST_THRESHOLD">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">IFOREST_THRESHOLD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'iforest_threshold'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.IFOREST_THRESHOLD" title="Permalink to this definition">¶</a></dt>
+<dd><p>threshold of the sklearn isolation forest implementation, backward compatibility for sklearn &lt;= 0.21.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.LEARNING_RATE">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">LEARNING_RATE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'learning_rate'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.LEARNING_RATE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learning Rate.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.MAX_SAMPLES">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">MAX_SAMPLES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'max_samples'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.MAX_SAMPLES" title="Permalink to this definition">¶</a></dt>
+<dd><p>max_samples of sklearn isolation forest implementation.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.NUM_TREES">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">NUM_TREES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'n_trees'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.NUM_TREES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of trees composing an ensemble.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.N_FEATURES">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">N_FEATURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'n_features'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.N_FEATURES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of features expected in the input data.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.N_INPUTS">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">N_INPUTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'n_inputs'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.N_INPUTS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of inputs expected by the model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.OFFSET">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">OFFSET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'offset'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.OFFSET" title="Permalink to this definition">¶</a></dt>
+<dd><p>offset of the sklearn anomaly detection implementation.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">ONNX_INITIALIZERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'onnx_initializers'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.ONNX_INITIALIZERS" title="Permalink to this definition">¶</a></dt>
+<dd><p>The initializers of the onnx model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.POST_TRANSFORM">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">POST_TRANSFORM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'post_transform'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.POST_TRANSFORM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post transform for tree inference.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.REORDER_TREES">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">REORDER_TREES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'reorder_trees'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.REORDER_TREES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether to reorder trees in multiclass tasks.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_CONTAINER_PATH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SAVE_LOAD_CONTAINER_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'container.pkl'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_CONTAINER_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the container when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SAVE_LOAD_MODEL_CONFIGURATION_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'model_configuration.txt'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the modules versions used when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_MODEL_TYPE_PATH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SAVE_LOAD_MODEL_TYPE_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'model_type.txt'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_MODEL_TYPE_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the model type when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_ONNX_PATH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SAVE_LOAD_ONNX_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'deploy_model.onnx'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_ONNX_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the onnx model when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_TORCH_JIT_PATH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SAVE_LOAD_TORCH_JIT_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'deploy_model.zip'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_TORCH_JIT_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the torchscript model when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_GRAPH_PATH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SAVE_LOAD_TVM_GRAPH_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'deploy_graph.json'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_GRAPH_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the TVM graph when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_LIB_PATH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SAVE_LOAD_TVM_LIB_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'deploy_lib.tar'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_LIB_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the TVM lib when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_PARAMS_PATH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SAVE_LOAD_TVM_PARAMS_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'deploy_param.params'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SAVE_LOAD_TVM_PARAMS_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path where to find the TVM params when saving or loading.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SIGMOID">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SIGMOID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LOGISTIC'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SIGMOID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sigmoid post transform.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SOFTMAX">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SOFTMAX</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SOFTMAX'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SOFTMAX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Softmax post transform.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.SUPPORTED_STRING_TYPES">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">SUPPORTED_STRING_TYPES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'S',</span> <span class="pre">'U'}</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.SUPPORTED_STRING_TYPES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numpy string types suppoted by Humingbird.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.TEST_INPUT">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">TEST_INPUT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'test_input'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TEST_INPUT" title="Permalink to this definition">¶</a></dt>
+<dd><p>The test input data for models that need to be traced.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.TVM_CONTEXT">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">TVM_CONTEXT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tvm_context'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TVM_CONTEXT" title="Permalink to this definition">¶</a></dt>
+<dd><p>The context for TVM containing information on the target.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.TVM_GRAPH">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">TVM_GRAPH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tvm_graph'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TVM_GRAPH" title="Permalink to this definition">¶</a></dt>
+<dd><p>The graph defining the TVM model. This parameter is used for saving and loading a TVM model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.TVM_INPUT_NAMES">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">TVM_INPUT_NAMES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tvm_input_names'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TVM_INPUT_NAMES" title="Permalink to this definition">¶</a></dt>
+<dd><p>TVM expects named inputs. This is used to set the names for the inputs.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.TVM_LIB">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">TVM_LIB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tvm_lib'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TVM_LIB" title="Permalink to this definition">¶</a></dt>
+<dd><p>The lib for the TVM model. This parameter is used for saving and loading a TVM model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.TVM_PARAMS">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">TVM_PARAMS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'tvm_params'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TVM_PARAMS" title="Permalink to this definition">¶</a></dt>
+<dd><p>The params for the TVM model. This parameter is used for saving and loading a TVM model.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="hummingbird.ml.operator_converters.constants.TWEEDIE">
+<span class="sig-prename descclassname"><span class="pre">hummingbird.ml.operator_converters.constants.</span></span><span class="sig-name descname"><span class="pre">TWEEDIE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TWEEDIE'</span></em><a class="headerlink" href="#hummingbird.ml.operator_converters.constants.TWEEDIE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tweedie post transform.</p>
+</dd></dl>
+
 </section>
 
 
