@@ -44,7 +44,7 @@ jobs:
       run: pip install torch==1.11.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
-        pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
+        pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     # Compile (but not push) documentation only for one of the runs (Linux py3.8).
     - name: Generate Documentation
       if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
@@ -53,7 +53,8 @@ jobs:
         find ../. -type f -exec sed -i 's/{torch.__version__}/1.11.0/g' {} +
         find ../. -type f -exec sed -i 's/torch.__version__/"1.11.0"/g' {} +
         make sphinx-site -C website/
-        git checkout . && pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
+        # now refresh the code
+        git checkout . && pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra
