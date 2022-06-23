@@ -45,6 +45,15 @@ jobs:
     - name: Install basic dependencies
       run: |
         pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
+    # Compile (but not push) documentation only for one of the runs (Linux py3.8).
+    - name: Generate Documentation
+      if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
+      run: |
+        # We're mocking out the torch. So now we also need to sub this on out
+        find ../. -type f -exec sed -i 's/{torch.__version__}/1.11.0/g' {} +
+        find ../. -type f -exec sed -i 's/torch.__version__/"1.11.0"/g' {} +
+        make sphinx-site -C website/
+        git checkout . && pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra
@@ -137,15 +146,6 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
-    # Compile and push documentation only for one of the runs (Linux py3.8).
-    - name: Generate Documentation
-      if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
-      run: |
-        # We're mocking out the torch. So now we also need to sub this on out
-        find ../. -type f -exec sed -i 's/{torch.__version__}/1.11.0/g' {} +
-        find ../. -type f -exec sed -i 's/torch.__version__/"1.11.0"/g' {} +
-        pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
-        make sphinx-site -C website/
     - name: Deploy to GitHub pages 🚀
       if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
       uses: JamesIves/github-pages-deploy-action@4.0.0
