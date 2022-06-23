@@ -44,7 +44,7 @@ jobs:
       run: pip install torch==1.11.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
-        pip install .[tests] -f https://download.pytorch.org/whl/torch_stable.html
+        pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra
@@ -141,6 +141,10 @@ jobs:
     - name: Generate Documentation
       if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
       run: |
+        # We're mocking out the torch. So now we also need to sub this on out
+        find ../. -type f -exec sed -i 's/{torch.__version__}/1.11.0/g' {} +
+        find ../. -type f -exec sed -i 's/torch.__version__/"1.11.0"/g' {} +
+        pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
         make sphinx-site -C website/
     - name: Deploy to GitHub pages 🚀
       if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
