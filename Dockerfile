@@ -1,5 +1,5 @@
 # basic setup
-FROM python:3.8
+FROM mcr.microsoft.com/mirror/docker/library/python:3.8-buster
 RUN apt-get update && apt-get -y update
 RUN apt-get install -y sudo git
 
