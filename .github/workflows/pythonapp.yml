@@ -36,12 +36,12 @@ jobs:
         # The GitHub editor is 127 chars wide
         flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
     # PyTorch for Mac has different pip syntax wrt Win and Linux.
-    - name: Install pytorch 1.11.0 if mac
+    - name: Install pytorch 1.12.0 if mac
       if: ${{  matrix.os == 'macos-11' }}
-      run: pip install torch==1.11.0
-    - name: Install pytorch 1.11.0+cpu if not mac
+      run: pip install torch==1.12.0
+    - name: Install pytorch 1.12.0+cpu if not mac
       if:  ${{  matrix.os != 'macos-11' }}
-      run: pip install torch==1.11.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+      run: pip install torch==1.12.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
     - name: Install basic dependencies
       run: |
         pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
@@ -50,8 +50,8 @@ jobs:
       if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
       run: |
         # We're mocking out the torch. So now we also need to sub this on out
-        find ../. -type f -exec sed -i 's/{torch.__version__}/1.11.0/g' {} +
-        find ../. -type f -exec sed -i 's/torch.__version__/"1.11.0"/g' {} +
+        find ../. -type f -exec sed -i 's/{torch.__version__}/1.12.0/g' {} +
+        find ../. -type f -exec sed -i 's/torch.__version__/"1.12.0"/g' {} +
         make sphinx-site -C website/
         # now refresh the code
         git checkout . && pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
