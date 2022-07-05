@@ -70,12 +70,12 @@ Hummingbird requires PyTorch >= 1.6.0. Please go [here](https://pytorch.org/) fo
 
 Once PyTorch is installed, you can get Hummingbird from pip with:
 ```
-pip install hummingbird-ml
+python -m pip install hummingbird-ml
 ```
 
 If you require the optional dependencies lightgbm and xgboost, you can use:
 ```
-pip install hummingbird-ml[extra]
+python -m pip install hummingbird-ml[extra]
 ```
 
 

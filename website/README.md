@@ -7,7 +7,7 @@ This document has some brief notes about how we turn our in-code documentation i
 We use [`sphinx`](https://www.sphinx-doc.org/en/master/) to generate html documentation from the Python source code comments.
 
 ```
-pip install sphinx sphinx_rtd_theme
+python -m pip install sphinx sphinx_rtd_theme
 ```
 
 ## Commands

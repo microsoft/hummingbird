@@ -120,7 +120,7 @@ def lightgbm_installed():
 def assert_lightgbm_installed():
     assert (
         lightgbm_installed()
-    ), "To convert LightGBM models you need to install LightGBM (or `pip install hummingbird-ml[extra]`)."
+    ), "To convert LightGBM models you need to install LightGBM (or `python -m pip install hummingbird-ml[extra]`)."
 
 
 def xgboost_installed():
@@ -151,7 +151,7 @@ def xgboost_installed():
 def assert_xgboost_installed():
     assert (
         xgboost_installed()
-    ), "To convert XGBoost models you need to install XGBoost (or `pip install hummingbird-ml[extra]`)."
+    ), "To convert XGBoost models you need to install XGBoost (or `python -m pip install hummingbird-ml[extra]`)."
 
 
 def tvm_installed():

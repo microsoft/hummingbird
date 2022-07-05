@@ -35,7 +35,7 @@ The simplest setup (assuming you have PyTorch already installed) is:
 mkdir hummingbird
 cd hummingbird
 git clone https://github.com/microsoft/hummingbird.git .
-pip install -e .[tests,extra]
+python -m pip install -e .[tests,extra]
 ```
 
 If you do not have pytorch installed, please [install it](https://pytorch.org/get-started/locally/) first.
@@ -51,7 +51,7 @@ For a light-weight, web-based experience, we provide the configuration ([.devcon
 
 ### Tools
 #### Pre-commit
-This project uses [pre-commit](https://pre-commit.com/) hooks. Run  `pip install pre-commit` if you don't already have this in your machine. Afterward, run `pre-commit install` to install pre-commit into your git hooks.
+This project uses [pre-commit](https://pre-commit.com/) hooks. Run  `python -m pip install pre-commit` if you don't already have this in your machine. Afterward, run `pre-commit install` to install pre-commit into your git hooks.
 
 And before you commit, you can run it like this `pre-commit run --all-files` and should see output such as:
 
@@ -84,7 +84,7 @@ flake8 . --count  --max-complexity=10 --max-line-length=127 --statistics
 
 #### Coverage
 
-For coverage, we use [coverage.py](https://coverage.readthedocs.io/en/coverage-5.0.4/) in our Github Actions.  Run  `pip install coverage` if you don't already have this, and any code you commit should generally not significantly impact coverage.
+For coverage, we use [coverage.py](https://coverage.readthedocs.io/en/coverage-5.0.4/) in our Github Actions.  Run  `python -m pip install coverage` if you don't already have this, and any code you commit should generally not significantly impact coverage.
 
 We strive to not let check-ins decrease coverage.  To run all unit tests:
 ```
