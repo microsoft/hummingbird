@@ -18,7 +18,7 @@ from .._tree_commons import get_parameters_for_sklearn_common, get_parameters_fo
 
 def _get_n_features(model):
     try:
-        return model.n_features_
+        return model.n_features_in_
     except AttributeError:
         # HistGradientBoosting
         return model._n_features
