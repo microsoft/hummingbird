@@ -221,7 +221,7 @@ def convert_sklearn_isolation_forest(operator, device, extra_config):
     assert operator is not None, "Cannot convert None operator"
 
     tree_infos = operator.raw_operator.estimators_
-    n_features = operator.raw_operator.n_features_
+    n_features = operator.raw_operator.n_features_in_
     # Following constants will be passed in the tree implementation to normalize the anomaly score.
     extra_config[constants.OFFSET] = operator.raw_operator.offset_
     if hasattr(operator.raw_operator, "threshold_"):

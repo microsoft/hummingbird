@@ -32,7 +32,7 @@ def convert_sklearn_random_forest_classifier(operator, device, extra_config):
 
     # Get tree information out of the model.
     tree_infos = operator.raw_operator.estimators_
-    n_features = operator.raw_operator.n_features_
+    n_features = operator.raw_operator.n_features_in_
     classes = operator.raw_operator.classes_.tolist()
 
     # For Sklearn Trees we need to know how many trees are there for normalization.
@@ -72,7 +72,7 @@ def convert_sklearn_random_forest_regressor(operator, device, extra_config):
 
     # Get tree information out of the operator.
     tree_infos = operator.raw_operator.estimators_
-    n_features = operator.raw_operator.n_features_
+    n_features = operator.raw_operator.n_features_in_
 
     # For Sklearn Trees we need to know how many trees are there for normalization.
     extra_config[constants.NUM_TREES] = len(tree_infos)
