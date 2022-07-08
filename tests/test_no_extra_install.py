@@ -18,7 +18,7 @@ from hummingbird.ml._utils import (
 class TestNoExtra(unittest.TestCase):
     """
     These tests are meant to be run on a clean container after doing
-    `pip install hummingbird-ml` without any of the `extra` packages
+    `python -m pip install hummingbird-ml` without any of the `extra` packages
     """
 
     # Test no LGBM returns false on lightgbm_installed()

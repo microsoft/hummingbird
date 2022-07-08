@@ -2,7 +2,7 @@
 
 ### Running PyTorch on GPU:
 
-In order to run Hummingbird on PyTorch with GPU, you will need to `pip uninstall torch` and re-install pytorch using the CUDA version of your machine.
+In order to run Hummingbird on PyTorch with GPU, you will need to `python -m pip uninstall torch` and re-install pytorch using the CUDA version of your machine.
 
 ### Installation Issues with External Libraries:
 

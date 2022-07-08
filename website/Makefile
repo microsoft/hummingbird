@@ -22,7 +22,7 @@ clean-sphinx-site:
 # Note: this is an expensive target.
 .PHONY:
 sphinx-site: #clean-sphinx-site
-	pip install sphinx sphinx_rtd_theme psutil
+	python -m pip install sphinx sphinx_rtd_theme psutil
 
 	sphinx-apidoc --private -o sphinx/api -t sphinx/_templates ../hummingbird  -d 1 -f -e
 	$(MAKE) -C sphinx
