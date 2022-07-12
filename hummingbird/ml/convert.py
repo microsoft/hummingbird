@@ -26,6 +26,7 @@ from ._utils import (
 )
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
+from sklearn.utils.validation import check_is_fitted
 
 # Invoke the registration of all our converters.
 from . import operator_converters  # noqa
@@ -96,6 +97,7 @@ def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     The supported operators and backends can be found at `hummingbird.ml.supported`.
     """
     assert model is not None
+    assert check_is_fitted(estimator=model) is None
     assert_torch_installed()
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
