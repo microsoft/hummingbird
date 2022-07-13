@@ -97,7 +97,8 @@ def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     The supported operators and backends can be found at `hummingbird.ml.supported`.
     """
     assert model is not None
-    assert check_is_fitted(estimator=model) is None
+    if "sklearn" in str(type(model)):
+        assert check_is_fitted(estimator=model) is None
     assert_torch_installed()
 
     # Parse scikit-learn model as our internal data structure (i.e., Topology)
