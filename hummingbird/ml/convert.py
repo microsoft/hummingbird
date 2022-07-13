@@ -26,6 +26,7 @@ from ._utils import (
 )
 from .exceptions import MissingConverter, MissingBackend
 from .supported import backends
+from sklearn.utils import all_estimators
 from sklearn.utils.validation import check_is_fitted
 
 # Invoke the registration of all our converters.
@@ -97,7 +98,7 @@ def _convert_sklearn(model, backend, test_input, device, extra_config={}):
     The supported operators and backends can be found at `hummingbird.ml.supported`.
     """
     assert model is not None
-    if "sklearn" in str(type(model)):
+    if type(model).__name__ in [e[0] for e in all_estimators()]:
         assert check_is_fitted(estimator=model) is None
     assert_torch_installed()
 
