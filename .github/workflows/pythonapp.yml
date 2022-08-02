@@ -77,55 +77,52 @@ jobs:
         python -m pip install pandas
     - name: python -m pip list
       run: python -m pip list
+    - name: Install TVM from pypi if Ubuntu
+      if: ${{ matrix.os == 'ubuntu-18.04' }}
+      run: python -m pip install apache-tvm==0.9.0
     - uses: actions/cache@v1
       # TVM takes forever, we try to cache it.
-      if: ${{ matrix.os != 'windows-2019' }}
+      if: ${{ matrix.os == 'macos-11' }}
       id: cache
       env:
         CACHE_NUMBER: 6
       with:
         path: ../../../tvm
-        key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-${{ matrix.python-version }}-tvm-0.8
+        key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-${{ matrix.python-version }}-tvm-0.9
     # Getting TVM requires: 1) fetching TVM from github, 2) get LLVM, 3) cmake, 4) make, 5) install python dependecy.
     # 1 to 4 will be retrieved from the cache.
     # The pipeline only works for Unix systems. For windows we will have to compile LLVM from source which is a no go.
-    - name: Fetch and prepare TVM for compilation
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os != 'windows-2019' }}
+    - name: Fetch and prepare TVM for compilation if Mac
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
       run: |
         cd ~/
         git clone https://github.com/apache/tvm.git
         cd tvm
-        git checkout tags/v0.8.0
+        git checkout tags/v0.9.0
         git submodule update --recursive --init
         cmake -E make_directory build
-    - name: Get LLVM on Linux
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'ubuntu-18.04' }}
-      working-directory: ../../../tvm
-      run: |
-        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-        tar -xf clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz && mv clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04 llvm
     - name: Get LLVM on Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
       working-directory: ../../../tvm
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
         tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz && mv clang+llvm-10.0.0-x86_64-apple-darwin llvm
-    - name: CMake TVM
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os != 'windows-2019' }}
+    - name: CMake TVM if Mac
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
       working-directory: ../../../tvm/build
       run: >-
         cmake
         "-DUSE_RPC=ON"
         "-DUSE_GRAPH_RUNTIME=ON"
-        "-DUSE_LLVM=../llvm/bin/llvm-config"
+        "-DUSE_LLVM=../llvm/bin/llvm-config --link-static"
         ..
-    - name: Build TVM
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os != 'windows-2019' }}
+    - name: Build TVM if Mac
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
       working-directory: ../../../tvm/build
       run: |
         make -j3
-    - name: Install python TVM
-      if: ${{  matrix.os != 'windows-2019' }}
+    - name: Install python TVM if Mac
+      if: ${{  matrix.os == 'macos-11' }}
       working-directory: ../../../tvm/python
       run: |
         python setup.py install
