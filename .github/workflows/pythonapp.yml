@@ -114,7 +114,7 @@ jobs:
         cmake
         "-DUSE_RPC=ON"
         "-DUSE_GRAPH_RUNTIME=ON"
-        "-DUSE_LLVM=../llvm/bin/llvm-config"
+        "-DUSE_LLVM=../llvm/bin/llvm-config --link-static"
         ..
     - name: Build TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
