@@ -89,8 +89,8 @@ jobs:
       with:
         path: ../../../tvm
         key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-${{ matrix.python-version }}-tvm-0.9
-    # Getting TVM requires: 1) fetching TVM from github, 2) get LLVM, 3) cmake, 4) make, 5) install python dependecy.
-    # 1 to 4 will be retrieved from the cache.
+    # Getting TVM requires: 1) fetching TVM from github, 2) cmake, 3) make, 4) install python dependecy.
+    # 1 to 3 will be retrieved from the cache.
     # The pipeline only works for Unix systems. For windows we will have to compile LLVM from source which is a no go.
     - name: Fetch and prepare TVM for compilation if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
@@ -101,12 +101,6 @@ jobs:
         git checkout tags/v0.9.0
         git submodule update --recursive --init
         cmake -E make_directory build
-    - name: Get LLVM on Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
-      working-directory: ../../../tvm
-      run: |
-        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
-        tar -xf clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz && mv clang+llvm-10.0.0-x86_64-apple-darwin llvm
     - name: CMake TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
       working-directory: ../../../tvm/build
@@ -114,7 +108,7 @@ jobs:
         cmake
         "-DUSE_RPC=ON"
         "-DUSE_GRAPH_RUNTIME=ON"
-        "-DUSE_LLVM=../llvm/bin/llvm-config --link-static"
+        "-DUSE_LLVM=$(brew --prefix llvm@14)/bin/llvm-config --link-static"
         ..
     - name: Build TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
