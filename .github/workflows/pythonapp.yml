@@ -85,7 +85,7 @@ jobs:
       if: ${{ matrix.os == 'macos-11' }}
       id: cache
       env:
-        CACHE_NUMBER: 6
+        CACHE_NUMBER: 7
       with:
         path: ../../../tvm
         key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-${{ matrix.python-version }}-tvm-0.9
