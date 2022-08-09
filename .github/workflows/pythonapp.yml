@@ -87,7 +87,7 @@ jobs:
       env:
         CACHE_NUMBER: 7
       with:
-        path: ../../../tvm
+        path: ~/work/tvm
         key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-${{ matrix.python-version }}-tvm-0.9
     # Getting TVM requires: 1) fetching TVM from github, 2) cmake, 3) make, 4) install python dependecy.
     # 1 to 3 will be retrieved from the cache.
@@ -95,7 +95,7 @@ jobs:
     - name: Fetch and prepare TVM for compilation if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
       run: |
-        cd ~/
+        cd ~/work
         git clone https://github.com/apache/tvm.git
         cd tvm
         git checkout tags/v0.9.0
@@ -103,7 +103,7 @@ jobs:
         cmake -E make_directory build
     - name: CMake TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
-      working-directory: ../../../tvm/build
+      working-directory: ~/work/tvm/build
       run: >-
         cmake
         "-DUSE_RPC=ON"
@@ -112,12 +112,12 @@ jobs:
         ..
     - name: Build TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
-      working-directory: ../../../tvm/build
+      working-directory: ~/work/tvm/build
       run: |
         make -j3
     - name: Install python TVM if Mac
       if: ${{  matrix.os == 'macos-11' }}
-      working-directory: ../../../tvm/python
+      working-directory: ~/work/tvm/python
       run: |
         python setup.py install
     - name: python -m pip list
