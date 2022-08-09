@@ -112,12 +112,12 @@ jobs:
         ..
     - name: Build TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
-      working-directory: ../work/tvm/build
+      working-directory: ../tvm/build
       run: |
         make -j3
     - name: Install python TVM if Mac
       if: ${{  matrix.os == 'macos-11' }}
-      working-directory: ../work/tvm/python
+      working-directory: ../tvm/python
       run: |
         python setup.py install
     - name: python -m pip list
