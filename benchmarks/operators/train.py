@@ -157,7 +157,7 @@ class CreateLogisticRegressionCV(CreateModel):
 
 class CreateSGDClassifier(CreateModel):
     def fit(self, data, args):
-        self.model = SGDClassifier(loss="log")
+        self.model = SGDClassifier(loss="log_loss")
 
         with Timer() as t:
             self.model.fit(data.X_train, data.y_train)
