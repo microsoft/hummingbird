@@ -89,10 +89,10 @@ def convert_sklearn_gaussian_naive_bayes(operator, device, extra_config):
     if not all([type(x) in [int, np.int32, np.int64] for x in classes]):
         raise RuntimeError("Hummingbird supports only integer labels for class labels.")
 
-    jll_calc_bias = np.log(model.class_prior_.reshape(-1, 1)) - 0.5 * np.sum(np.log(2.0 * np.pi * model.sigma_), 1).reshape(
+    jll_calc_bias = np.log(model.class_prior_.reshape(-1, 1)) - 0.5 * np.sum(np.log(2.0 * np.pi * model.var_), 1).reshape(
         -1, 1
     )
-    return GaussianNBModel(operator, classes, jll_calc_bias, model.theta_, model.sigma_, device)
+    return GaussianNBModel(operator, classes, jll_calc_bias, model.theta_, model.var_, device)
 
 
 register_converter("SklearnBernoulliNB", convert_sklearn_bernouli_naive_bayes)

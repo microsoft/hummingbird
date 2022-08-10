@@ -23,7 +23,7 @@ class SVC(PhysicalOperator, torch.nn.Module):
         self.degree = degree
         self.gamma = gamma
         self.regression = False
-        sv = sv.toarray() if type(sv) == scipy.sparse.csr.csr_matrix else sv
+        sv = sv.toarray() if type(sv) == scipy.sparse.csr_matrix else sv
         self.sv = torch.nn.Parameter(torch.from_numpy(sv).double(), requires_grad=False)
         self.sv_t = torch.nn.Parameter(torch.transpose(self.sv, 0, 1), requires_grad=False)
         self.sv_norm = torch.nn.Parameter(-self.gamma * (self.sv ** 2).sum(1).view(1, -1), requires_grad=False)
