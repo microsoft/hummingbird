@@ -141,8 +141,6 @@ Also, see our [roadmap](https://github.com/microsoft/hummingbird/wiki/Roadmap-fo
 
 Join our community! [![Gitter](https://badges.gitter.im/hummingbird-ml/community.svg)](https://gitter.im/hummingbird-ml/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
- For more formal enquiries, you can [contact us](mailto:hummingbird-dev@microsoft.com).
-
 # Authors
 
 * Supun Nakandala
