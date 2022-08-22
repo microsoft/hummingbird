@@ -20,7 +20,7 @@ except Exception:
 
 class TestSklearnClustering(unittest.TestCase):
     # KMeans test function to be parameterized
-    def _test_kmeans(self, n_clusters, algorithm="full", backend="torch", extra_config={}):
+    def _test_kmeans(self, n_clusters, algorithm="lloyd", backend="torch", extra_config={}):
         model = KMeans(n_clusters=n_clusters, algorithm=algorithm, random_state=0)
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -41,11 +41,11 @@ class TestSklearnClustering(unittest.TestCase):
 
     # KMeans 2 auto
     def test_kmeans_2_auto(self):
-        self._test_kmeans(2, "auto")
+        self._test_kmeans(2, "lloyd")
 
     # KMeans 5 full
     def test_kmeans_5_auto(self):
-        self._test_kmeans(5, "auto")
+        self._test_kmeans(5, "lloyd")
 
     # KMeans 2 elkan
     def test_kmeans_2_elkan(self):

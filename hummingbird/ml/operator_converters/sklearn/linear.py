@@ -30,7 +30,7 @@ def convert_sklearn_linear_model(operator, device, extra_config):
     """
     assert operator is not None, "Cannot convert None operator"
 
-    supported_loss = {"log", "modified_huber", "squared_hinge"}
+    supported_loss = {"log_loss", "modified_huber", "squared_hinge"}
     classes = [0] if not hasattr(operator.raw_operator, "classes_") else operator.raw_operator.classes_
 
     if not all(["int" in str(type(x)) for x in classes]):

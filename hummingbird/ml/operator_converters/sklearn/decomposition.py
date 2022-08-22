@@ -55,10 +55,10 @@ def convert_sklearn_kernel_pca(operator, device, extra_config):
         kernel = operator.raw_operator.kernel
         degree = operator.raw_operator.degree
         sv = operator.raw_operator.X_fit_
-        non_zeros = np.flatnonzero(operator.raw_operator.lambdas_)
-        scaled_alphas = np.zeros_like(operator.raw_operator.alphas_)
-        scaled_alphas[:, non_zeros] = operator.raw_operator.alphas_[:, non_zeros] / np.sqrt(
-            operator.raw_operator.lambdas_[non_zeros]
+        non_zeros = np.flatnonzero(operator.raw_operator.eigenvalues_)
+        scaled_alphas = np.zeros_like(operator.raw_operator.eigenvectors_)
+        scaled_alphas[:, non_zeros] = operator.raw_operator.eigenvectors_[:, non_zeros] / np.sqrt(
+            operator.raw_operator.eigenvalues_[non_zeros]
         )
         return KernelPCA(
             operator,

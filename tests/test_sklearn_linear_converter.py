@@ -266,7 +266,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     # SGDClassifier test function to be parameterized
     def _test_sgd_classifier(self, num_classes):
 
-        model = SGDClassifier(loss="log")
+        model = SGDClassifier(loss="log_loss")
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -353,7 +353,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
     def test_float64_sgd_classifier(self):
 
-        model = SGDClassifier(loss="log")
+        model = SGDClassifier(loss="log_loss")
 
         np.random.seed(0)
         num_classes = 3
@@ -419,7 +419,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
     def test_sgd_classifier_tvm(self):
 
-        model = SGDClassifier(loss="log")
+        model = SGDClassifier(loss="log_loss")
 
         np.random.seed(0)
         num_classes = 3
