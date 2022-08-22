@@ -47,7 +47,7 @@ jobs:
         python -m pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     # Compile (but not push) documentation only for one of the runs (Linux py3.8).
     - name: Generate Documentation
-      if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-22.04' }}
+      if: ${{ matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
       run: |
         # We're mocking out the torch. So now we also need to sub this on out
         find ../. -type f -exec sed -i 's/{torch.__version__}/1.12.0/g' {} +
@@ -78,7 +78,7 @@ jobs:
     - name: python -m pip list
       run: python -m pip list
     - name: Install TVM from pypi if Ubuntu
-      if: ${{ matrix.os == 'ubuntu-22.04' }}
+      if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: python -m pip install apache-tvm==0.9.0
     - uses: actions/cache@v3
       # TVM takes forever, we try to cache it.
@@ -124,22 +124,22 @@ jobs:
       run: python -m pip list
     # We don't run pytest for Linux py3.8 since we do coverage for that case.
     - name: Test with pytest
-      if: ${{ matrix.python-version != '3.8' || matrix.os != 'ubuntu-22.04' }}
+      if: ${{ matrix.python-version != '3.8' || startsWith(matrix.os, 'ubuntu') != true }}
       run: pytest
     # Run and push coverage only for Linux py3.8
     - name: Coverage 3.8 Linux
-      if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-22.04' }}
+      if: ${{ matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov
-      if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-22.04' }}
+      if: ${{ matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
         flags: unittests
     - name: Deploy to GitHub pages 🚀
-      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' && matrix.os == 'ubuntu-22.04' }}
+      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
       uses: JamesIves/github-pages-deploy-action@4.0.0
       with:
         branch: gh-pages
