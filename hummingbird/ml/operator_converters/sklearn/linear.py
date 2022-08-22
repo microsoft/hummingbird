@@ -63,7 +63,7 @@ def convert_sklearn_linear_model(operator, device, extra_config):
 
 def convert_sklearn_linear_regression_model(operator, device, extra_config):
     """
-    Converter for `sklearn.linear_model.LinearRegression`, `sklearn.svm.LinearSVR` and `sklearn.linear_model.RidgeCV`
+    Converter for `sklearn.linear_model.LinearRegression`, `sklearn.linear_model.Lasso`, `sklearn.linear_model.ElasticNet`, `sklearn.linear_model.Ridge`, `sklearn.svm.LinearSVR` and `sklearn.linear_model.RidgeCV`
 
     Args:
         operator: An operator wrapping a `sklearn.linear_model.LinearRegression`, `sklearn.svm.LinearSVR`
@@ -85,6 +85,9 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
 
 
 register_converter("SklearnLinearRegression", convert_sklearn_linear_regression_model)
+register_converter("SklearnLasso", convert_sklearn_linear_regression_model)
+register_converter("SklearnElasticNet", convert_sklearn_linear_regression_model)
+register_converter("SklearnRidge", convert_sklearn_linear_regression_model)
 register_converter("SklearnLogisticRegression", convert_sklearn_linear_model)
 register_converter("SklearnLinearSVC", convert_sklearn_linear_model)
 register_converter("SklearnLinearSVR", convert_sklearn_linear_regression_model)

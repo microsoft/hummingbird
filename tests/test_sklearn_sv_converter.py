@@ -37,7 +37,7 @@ class TestSklearnSVC(unittest.TestCase):
     def test_linear_svc_shifted(self):
         self._test_linear_svc(3, labels_shift=2)
 
-    # RidgeCV test function to be parameterized
+    # LinearSVR test function to be parameterized
     def _test_svr(self, y_input):
         model = LinearSVR()
 
@@ -53,12 +53,12 @@ class TestSklearnSVC(unittest.TestCase):
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
-    # RidgeCV with ints
+    # LinearSVR with ints
     def test_svr_int(self):
         np.random.seed(0)
         self._test_svr(np.random.randint(2, size=100))
 
-    # RidgeCV with floats
+    # LinearSVR with floats
     def test_svr_float(self):
         np.random.seed(0)
         self._test_svr(np.random.rand(100))
