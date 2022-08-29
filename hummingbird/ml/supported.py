@@ -136,7 +136,16 @@ def _build_sklearn_operator_list():
         from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
         # Linear-based models
-        from sklearn.linear_model import LinearRegression, LogisticRegression, LogisticRegressionCV, SGDClassifier, RidgeCV
+        from sklearn.linear_model import (
+            LinearRegression,
+            LogisticRegression,
+            LogisticRegressionCV,
+            SGDClassifier,
+            RidgeCV,
+            ElasticNet,
+            Ridge,
+            Lasso,
+        )
 
         # SVM-based models
         from sklearn.svm import LinearSVC, SVC, NuSVC, LinearSVR
@@ -211,6 +220,9 @@ def _build_sklearn_operator_list():
             LogisticRegressionCV,
             SGDClassifier,
             RidgeCV,
+            Lasso,
+            ElasticNet,
+            Ridge,
             # Clustering
             KMeans,
             MeanShift,

@@ -7,7 +7,16 @@ from distutils.version import LooseVersion
 
 import numpy as np
 import torch
-from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassifier, LogisticRegressionCV, RidgeCV
+from sklearn.linear_model import (
+    LinearRegression,
+    LogisticRegression,
+    SGDClassifier,
+    LogisticRegressionCV,
+    RidgeCV,
+    Lasso,
+    ElasticNet,
+    Ridge,
+)
 from sklearn import datasets
 
 import hummingbird.ml
@@ -110,6 +119,84 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     def test_linear_regression_float(self):
         np.random.seed(0)
         self._test_linear_regression(np.random.rand(100))
+
+    # Lasso test function to be parameterized
+    def _test_lasso(self, y_input):
+        model = Lasso()
+
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = y_input
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    # Lasso with ints
+    def test_lasso_int(self):
+        np.random.seed(0)
+        self._test_lasso(np.random.randint(2, size=100))
+
+    # Lasso with floats
+    def test_lasso_float(self):
+        np.random.seed(0)
+        self._test_lasso(np.random.rand(100))
+
+    # Ridge test function to be parameterized
+    def _test_ridge(self, y_input):
+        model = Ridge()
+
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = y_input
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    # Ridge with ints
+    def test_ridge_int(self):
+        np.random.seed(0)
+        self._test_ridge(np.random.randint(2, size=100))
+
+    # Ridge with floats
+    def test_ridge_float(self):
+        np.random.seed(0)
+        self._test_ridge(np.random.rand(100))
+
+    # ElasticNet test function to be parameterized
+    def _test_elastic_net(self, y_input):
+        model = ElasticNet()
+
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = y_input
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "torch")
+
+        self.assertTrue(torch_model is not None)
+        np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    # ElasticNet with ints
+    def test_elastic_net_int(self):
+        np.random.seed(0)
+        self._test_elastic_net(np.random.randint(2, size=100))
+
+    # ElasticNet with floats
+    def test_elastic_net_float(self):
+        np.random.seed(0)
+        self._test_elastic_net(np.random.rand(100))
 
     # RidgeCV test function to be parameterized
     def _test_ridge_cv(self, y_input):
