@@ -39,7 +39,12 @@ def convert_sklearn_linear_model(operator, device, extra_config):
         )
 
     coefficients = operator.raw_operator.coef_.transpose().astype("float32")
-    intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
+
+    intercepts = operator.raw_operator.intercept_
+    if np.ndim(intercepts) == 0:
+        intercepts = np.array(intercepts, dtype="float32")
+    else:
+        intercepts = intercepts.reshape(1, -1).astype("float32")
 
     multi_class = None
     loss = None
@@ -79,7 +84,12 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
     coefficients = operator.raw_operator.coef_.transpose().astype("float32")
     if len(coefficients.shape) == 1:
         coefficients = coefficients.reshape(-1, 1)
-    intercepts = operator.raw_operator.intercept_.reshape(1, -1).astype("float32")
+
+    intercepts = operator.raw_operator.intercept_
+    if np.ndim(intercepts) == 0:
+        intercepts = np.array(intercepts, dtype="float32")
+    else:
+        intercepts = intercepts.reshape(1, -1).astype("float32")
 
     return LinearModel(operator, coefficients, intercepts, device, is_linear_regression=True)
 
