@@ -30,11 +30,13 @@ if pandas_installed():
 class TestSklearnLinearClassifiers(unittest.TestCase):
 
     # LogisticRegression test function to be parameterized
-    def _test_logistic_regression(self, num_classes, solver="liblinear", multi_class="auto", labels_shift=0):
+    def _test_logistic_regression(
+        self, num_classes, solver="liblinear", multi_class="auto", labels_shift=0, fit_intercept=True
+    ):
         if num_classes > 2:
-            model = LogisticRegression(solver=solver, multi_class=multi_class, fit_intercept=True)
+            model = LogisticRegression(solver=solver, multi_class=multi_class, fit_intercept=fit_intercept)
         else:
-            model = LogisticRegression(solver="liblinear", fit_intercept=True)
+            model = LogisticRegression(solver="liblinear", fit_intercept=fit_intercept)
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -94,9 +96,15 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         # this will not converge due to small test size
         self._test_logistic_regression(3, multi_class="ovr", solver="lbfgs")
 
+    # LogisticRegression with fit_intercept set to False
+    def test_logistic_regression_no_intercept(self):
+        warnings.filterwarnings("ignore")
+        # this will not converge due to small test size
+        self._test_logistic_regression(3, fit_intercept=False)
+
     # LinearRegression test function to be parameterized
-    def _test_linear_regression(self, y_input):
-        model = LinearRegression()
+    def _test_linear_regression(self, y_input, fit_intercept=True):
+        model = LinearRegression(fit_intercept=fit_intercept)
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -120,9 +128,14 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         np.random.seed(0)
         self._test_linear_regression(np.random.rand(100))
 
+    # LinearRegression with fit_intercept set to False
+    def test_linear_regression_no_intercept(self):
+        np.random.seed(0)
+        self._test_linear_regression(np.random.rand(100), fit_intercept=False)
+
     # Lasso test function to be parameterized
-    def _test_lasso(self, y_input):
-        model = Lasso()
+    def _test_lasso(self, y_input, fit_intercept=True):
+        model = Lasso(fit_intercept=fit_intercept)
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -146,9 +159,14 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         np.random.seed(0)
         self._test_lasso(np.random.rand(100))
 
+    # Lasso with fit_intercept set to False
+    def test_lasso_no_intercept(self):
+        np.random.seed(0)
+        self._test_lasso(np.random.rand(100), fit_intercept=False)
+
     # Ridge test function to be parameterized
-    def _test_ridge(self, y_input):
-        model = Ridge()
+    def _test_ridge(self, y_input, fit_intercept=True):
+        model = Ridge(fit_intercept=fit_intercept)
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -172,9 +190,14 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         np.random.seed(0)
         self._test_ridge(np.random.rand(100))
 
+    # Ridge with fit_intercept set to False
+    def test_ridge_no_intercept(self):
+        np.random.seed(0)
+        self._test_ridge(np.random.rand(100), fit_intercept=False)
+
     # ElasticNet test function to be parameterized
-    def _test_elastic_net(self, y_input):
-        model = ElasticNet()
+    def _test_elastic_net(self, y_input, fit_intercept=True):
+        model = ElasticNet(fit_intercept=fit_intercept)
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -198,9 +221,14 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         np.random.seed(0)
         self._test_elastic_net(np.random.rand(100))
 
+    # ElasticNet with fit_intercept set to False
+    def test_elastic_net_no_intercept(self):
+        np.random.seed(0)
+        self._test_elastic_net(np.random.rand(100), fit_intercept=False)
+
     # RidgeCV test function to be parameterized
-    def _test_ridge_cv(self, y_input):
-        model = RidgeCV()
+    def _test_ridge_cv(self, y_input, fit_intercept=True):
+        model = RidgeCV(fit_intercept=fit_intercept)
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -224,12 +252,19 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         np.random.seed(0)
         self._test_ridge_cv(np.random.rand(100))
 
+    # RidgeCV with fit_intercept set to False
+    def test_ridge_cv_no_intercept(self):
+        np.random.seed(0)
+        self._test_ridge_cv(np.random.rand(100), fit_intercept=False)
+
     # LogisticRegressionCV test function to be parameterized
-    def _test_logistic_regression_cv(self, num_classes, solver="liblinear", multi_class="auto", labels_shift=0):
+    def _test_logistic_regression_cv(
+        self, num_classes, solver="liblinear", multi_class="auto", labels_shift=0, fit_intercept=True
+    ):
         if num_classes > 2:
-            model = LogisticRegressionCV(solver=solver, multi_class=multi_class, fit_intercept=True)
+            model = LogisticRegressionCV(solver=solver, multi_class=multi_class, fit_intercept=fit_intercept)
         else:
-            model = LogisticRegressionCV(solver="liblinear", fit_intercept=True)
+            model = LogisticRegressionCV(solver="liblinear", fit_intercept=fit_intercept)
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -263,10 +298,14 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         # this will not converge due to small test size
         self._test_logistic_regression_cv(3, multi_class="multinomial", solver="sag")
 
-    # SGDClassifier test function to be parameterized
-    def _test_sgd_classifier(self, num_classes):
+    # LogisticRegressionCV with fit_intercept set to False
+    def test_logistic_regression_cv_no_intercept(self):
+        self._test_logistic_regression_cv(3, fit_intercept=False)
 
-        model = SGDClassifier(loss="log_loss")
+    # SGDClassifier test function to be parameterized
+    def _test_sgd_classifier(self, num_classes, fit_intercept=True):
+
+        model = SGDClassifier(loss="log_loss", fit_intercept=fit_intercept)
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -286,6 +325,10 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     # SGDClassifier with 3 classes
     def test_sgd_classifier_multi(self):
         self._test_sgd_classifier(3)
+
+    # SGDClassifier with fit_intercept set to False
+    def test_sgd_classifier_no_intercept(self):
+        self._test_sgd_classifier(3, fit_intercept=False)
 
     # SGDClassifier with modified huber loss
     def test_modified_huber(self):
