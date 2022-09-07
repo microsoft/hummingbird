@@ -29,6 +29,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
     # The operators descriptions can be found here
     # https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md#aionnxmltreeensembleclassifier and
     # here https://github.com/onnx/onnx/blob/master/docs/Operators-ml.md#aionnxmltreeensembleregressor
+    decision_cond = "<="
     for attr in model.origin.attribute:
         if attr.name == "nodes_falsenodeids":
             right = attr.ints
@@ -59,9 +60,20 @@ def _get_tree_infos_from_onnx_ml_operator(model):
                 raise AssertionError("Post transform {} not supported".format(post_transform))
         elif attr.name == "nodes_modes":
             modes = attr.strings
-            for mode in modes:
-                if (not mode == b"BRANCH_LEQ") and (not mode == b"LEAF"):
-                    raise AssertionError("Modality {} not supported".format(mode))
+            unique_modes = set(modes)
+            unique_modes.discard(b"LEAF")
+            if len(unique_modes) > 1:
+                raise AssertionError("Mixed Comparison Modalities are not supported: {}".format(unique_modes))
+            elif len(unique_modes) != 0:
+                decision_cond_map = {
+                    b"BRANCH_LEQ": "<=",
+                    b"BRANCH_LT": "<",
+                    b"BRANCH_GTE": ">=",
+                    b"BRANCH_GT": ">",
+                    b"BRANCH_EQ": "=",
+                    b"BRANCH_NEQ": "!=",
+                }
+                decision_cond = decision_cond_map[unique_modes.pop()]
 
     is_decision_tree = post_transform == "NONE"
 
@@ -165,7 +177,7 @@ def _get_tree_infos_from_onnx_ml_operator(model):
             prob = (1 / (max(tree_ids) + 1)) - t_values[k][1]
             t_values[k][0] = prob
     tree_infos.append(TreeParameters(t_left, t_right, t_features, t_threshold, np.array(t_values).reshape(-1, n_classes)))
-    return tree_infos, classes, post_transform
+    return tree_infos, classes, post_transform, decision_cond
 
 
 def _dummy_get_parameter(tree_info, extra_config):
@@ -186,10 +198,10 @@ def _get_tree_infos_from_tree_ensemble(operator, device=None, extra_config={}):
     # Get the number of features.
     n_features = extra_config[constants.N_FEATURES]
 
-    tree_infos, classes, post_transform = _get_tree_infos_from_onnx_ml_operator(operator)
+    tree_infos, classes, post_transform, decision_cond = _get_tree_infos_from_onnx_ml_operator(operator)
 
     # Get tree informations from the operator.
-    return n_features, tree_infos, classes, post_transform
+    return n_features, tree_infos, classes, post_transform, decision_cond
 
 
 def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}):
@@ -207,7 +219,7 @@ def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}
     assert operator is not None, "Cannot convert None operator"
 
     # Get tree informations from the operator.
-    n_features, tree_infos, classes, post_transform = _get_tree_infos_from_tree_ensemble(
+    n_features, tree_infos, classes, post_transform, decision_cond = _get_tree_infos_from_tree_ensemble(
         operator.raw_operator, device, extra_config
     )
 
@@ -218,7 +230,7 @@ def convert_onnx_tree_ensemble_classifier(operator, device=None, extra_config={}
         )
     extra_config[constants.POST_TRANSFORM] = post_transform
     return convert_gbdt_classifier_common(
-        operator, tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config
+        operator, tree_infos, _dummy_get_parameter, n_features, len(classes), classes, extra_config, decision_cond
     )
 
 
@@ -237,10 +249,14 @@ def convert_onnx_tree_ensemble_regressor(operator, device=None, extra_config={})
     assert operator is not None, "Cannot convert None operator"
 
     # Get tree informations from the operator.
-    n_features, tree_infos, _, _ = _get_tree_infos_from_tree_ensemble(operator.raw_operator, device, extra_config)
+    n_features, tree_infos, _, _, decision_cond = _get_tree_infos_from_tree_ensemble(
+        operator.raw_operator, device, extra_config
+    )
 
     # Generate the model.
-    return convert_gbdt_common(operator, tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config)
+    return convert_gbdt_common(
+        operator, tree_infos, _dummy_get_parameter, n_features, extra_config=extra_config, decision_cond=decision_cond
+    )
 
 
 register_converter("ONNXMLTreeEnsembleClassifier", convert_onnx_tree_ensemble_classifier)
