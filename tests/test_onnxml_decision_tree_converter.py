@@ -15,8 +15,7 @@ from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installe
 if onnx_runtime_installed():
     import onnxruntime as ort
 if onnx_ml_tools_installed():
-    from onnxmltools.convert import convert_sklearn
-    from onnxmltools import convert_xgboost
+    from onnxmltools.utils.tests_helper import convert_model
 if xgboost_installed():
     import xgboost as xgb
 
@@ -26,11 +25,10 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
         super(TestONNXDecisionTreeConverter, self).__init__(*args, **kwargs)
 
     # Base test implementation comparing ONNXML and ONNX models.
-    def _test_decision_tree(self, X, model, extra_config={}, conversion_function=None):
+    def _test_decision_tree(self, X, model, extra_config={}):
         # Create ONNX-ML model
-        conversion_function = conversion_function or convert_sklearn
-        onnx_ml_model = conversion_function(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=11
+        onnx_ml_model, _ = convert_model(
+            model, "model", input_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=11
         )
 
         # Create ONNX model
@@ -62,15 +60,15 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
         return onnx_ml_pred, onnx_pred, output_names
 
     # Utility function for testing regression models.
-    def _test_regressor(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}, conversion_function=None):
-        onnx_ml_pred, onnx_pred, output_names = self._test_decision_tree(X, model, extra_config, conversion_function)
+    def _test_regressor(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
+        onnx_ml_pred, onnx_pred, output_names = self._test_decision_tree(X, model, extra_config)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred[0].ravel(), onnx_pred, rtol=rtol, atol=atol)
 
     # Utility function for testing classification models.
-    def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}, conversion_function=None):
-        onnx_ml_pred, onnx_pred, output_names = self._test_decision_tree(X, model, extra_config, conversion_function)
+    def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
+        onnx_ml_pred, onnx_pred, output_names = self._test_decision_tree(X, model, extra_config)
 
         np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
         np.testing.assert_allclose(
@@ -255,6 +253,7 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
         model.fit(X, y)
         self._test_classifier(X, model)
 
+    # Used to test whether BRANCH_LT operator is processed correctly.
     @unittest.skipIf(
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
@@ -271,7 +270,7 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
         # Create XGBoost Model
         model = xgb.XGBClassifier()
         model.fit(X, y)
-        self._test_classifier(X, model, conversion_function=convert_xgboost)
+        self._test_classifier(X, model)
 
     # # Used for small tree tests
     # # Commenting this test for the moment because it hits a bug in ORT / ONNXMLTOOLS (https://github.com/onnx/onnxmltools/issues/415)
