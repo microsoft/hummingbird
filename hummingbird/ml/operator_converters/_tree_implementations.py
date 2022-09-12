@@ -88,7 +88,7 @@ class AbstractPyTorchTreeImpl(AbstracTreeImpl, torch.nn.Module):
                 self.perform_class_select = True
 
         # Set the decision condition.
-        decision_cond_map = {"<=": torch.le, "<": torch.lt, ">=": torch.ge, ">": torch.gt}
+        decision_cond_map = {"<=": torch.le, "<": torch.lt, ">=": torch.ge, ">": torch.gt, "=": torch.eq, "!=": torch.ne}
         assert decision_cond in decision_cond_map.keys(), "decision_cond has to be one of:{}".format(
             ",".join(decision_cond_map.keys())
         )
