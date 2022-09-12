@@ -411,7 +411,7 @@ def convert(model, backend, test_input=None, device="cpu", extra_config={}):
     *Convert* supports [Sklearn], [LightGBM], [XGBoost], [ONNX], and [SparkML] models.
     For *LightGBM* and *XGBoost* currently only the Sklearn API is supported.
     The detailed list of models and backends can be found at `hummingbird.ml.supported`.
-    The *onnx* backend requires either a test_input of a the initial types set through the exta_config parameter.
+    The *onnx* backend works best with a test_input, but we try to generate one if none is provided.
     The *torch.jit* and *tvm* backends require a test_input.
     For *tvm* backend, the output container can do prediction only on the test data with the same size as test_input.
     [Sklearn]: https://scikit-learn.org/

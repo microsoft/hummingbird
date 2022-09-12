@@ -117,7 +117,7 @@ from ._utils import (
 
 def _build_sklearn_operator_list():
     """
-    Put all suported Sklearn operators on a list.
+    Put all supported Sklearn operators on a list.
     """
     if sklearn_installed():
         # Tree-based models
@@ -272,7 +272,7 @@ def _build_sklearn_operator_list():
 
 def _build_sparkml_operator_list():
     """
-    List all suported SparkML operators.
+    List all supported SparkML operators.
     """
     if sparkml_installed():
         from pyspark.ml.classification import LogisticRegressionModel
@@ -293,7 +293,7 @@ def _build_sparkml_operator_list():
 
 def _build_xgboost_operator_list():
     """
-    List all suported XGBoost (Sklearn API) operators.
+    List all supported XGBoost (Sklearn API) operators.
     """
     if xgboost_installed():
         from xgboost import XGBClassifier, XGBRanker, XGBRegressor
@@ -305,7 +305,7 @@ def _build_xgboost_operator_list():
 
 def _build_lightgbm_operator_list():
     """
-    List all suported LightGBM (Sklearn API) operators.
+    List all supported LightGBM (Sklearn API) operators.
     """
     if lightgbm_installed():
         from lightgbm import LGBMClassifier, LGBMRanker, LGBMRegressor, Booster
@@ -318,7 +318,7 @@ def _build_lightgbm_operator_list():
 # Associate onnxml types with our operator names.
 def _build_onnxml_operator_list():
     """
-    List all suported ONNXML operators.
+    List all supported ONNXML operators.
     """
     if onnx_runtime_installed():
         return [
@@ -357,7 +357,7 @@ def _build_onnxml_operator_list():
 
 def _build_prophet_operator_list():
     """
-    List all suported Prophet (Sklearn API) operators.
+    List all supported Prophet (Sklearn API) operators.
     """
     if prophet_installed():
         from prophet import Prophet
@@ -538,7 +538,7 @@ CONTAINER = "container"
 """Boolean used to chose whether to return the container for Sklearn API or just the model."""
 
 N_THREADS = "n_threads"
-"""Select how many threads to use for scoring. This paremeter will set the number of intra-op threads.
+"""Select how many threads to use for scoring. This parameter will set the number of intra-op threads.
 Inter-op threads are by default set to 1 in Hummingbird. Check `tests.test_extra_conf.py` for usage examples."""
 
 BATCH_SIZE = "batch_size"
@@ -548,4 +548,4 @@ REMAINDER_SIZE = "remainder_size"
 """Determines the number of rows that an auxiliary remainder model can accept."""
 
 MAX_STRING_LENGTH = "max_string_length"
-"""Maximum expected length for string features. By deafult this value is set using the training information."""
+"""Maximum expected length for string features. By default this value is set using the training information."""
