@@ -67,7 +67,7 @@ class Executor(torch.nn.Module, object):
     def forward(self, *inputs):
         with torch.no_grad():
             assert len(self._input_names) == len(inputs) or (
-                type(inputs[0]) == DataFrame
+                isinstance(inputs[0], DataFrame)
                 and DataFrame is not None
                 and not self.check_dataframe_to_array
                 and len(self._input_names) == len(inputs[0].columns)
@@ -75,7 +75,7 @@ class Executor(torch.nn.Module, object):
                 self._input_names
             )
 
-            if type(inputs[0]) == DataFrame and DataFrame is not None:
+            if isinstance(inputs[0], DataFrame) and DataFrame is not None:
                 # Split the dataframe into column ndarrays.
                 inputs = inputs[0]
                 input_names = list(inputs.columns)

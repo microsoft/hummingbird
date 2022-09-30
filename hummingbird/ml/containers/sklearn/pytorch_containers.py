@@ -223,7 +223,7 @@ def _torchscript_wrapper(device, function, *inputs, extra_config={}):
     inputs = [*inputs]
 
     with torch.no_grad():
-        if type(inputs) == DataFrame and DataFrame is not None:
+        if isinstance(inputs, DataFrame) and DataFrame is not None:
             # Split the dataframe into column ndarrays
             inputs = inputs[0]
             input_names = list(inputs.columns)
