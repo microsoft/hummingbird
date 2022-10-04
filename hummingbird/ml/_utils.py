@@ -198,7 +198,7 @@ def prophet_installed():
 def is_pandas_dataframe(df):
     import pandas as pd
 
-    if type(df) == pd.DataFrame:
+    if isinstance(df, pd.DataFrame):
         return True
     else:
         return False
@@ -210,7 +210,7 @@ def is_spark_dataframe(df):
 
     import pyspark
 
-    if type(df) == pyspark.sql.DataFrame:
+    if isinstance(df, pyspark.sql.DataFrame):
         return True
     else:
         return False
