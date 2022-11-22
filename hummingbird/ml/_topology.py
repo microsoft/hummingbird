@@ -256,6 +256,9 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
         # Put the tracing test input into the right format.
         batch_trace_input, remainder_input = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
+        dynamic_axes_output = {
+            k: {0: "custom"} for k in topology.input_container.input_names + topology.input_container.output_names
+        }
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -263,6 +266,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
             batch_trace_input,
             output_model_name,
             input_names=topology.input_container.input_names,
+            dynamic_axes=dynamic_axes_output,
             output_names=topology.input_container.output_names,
             keep_initializers_as_inputs=False,
             opset_version=target_opset,
@@ -277,6 +281,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
                 remainder_input,
                 output_model_name,
                 input_names=topology.input_container.input_names,
+                dynamic_axes=dynamic_axes_output,
                 output_names=topology.input_container.output_names,
                 keep_initializers_as_inputs=False,
                 opset_version=target_opset,
