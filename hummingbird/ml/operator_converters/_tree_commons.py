@@ -463,7 +463,12 @@ def convert_decision_ensemble_tree_common(
 
     net_parameters = [
         get_parameters_for_tree_trav(
-            tree_param.lefts, tree_param.rights, tree_param.features, tree_param.thresholds, tree_param.values, extra_config,
+            tree_param.lefts,
+            tree_param.rights,
+            tree_param.features,
+            tree_param.thresholds,
+            tree_param.values,
+            extra_config,
         )
         for tree_param in tree_parameters
     ]

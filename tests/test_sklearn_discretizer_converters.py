@@ -25,7 +25,10 @@ class TestSklearnDiscretizers(unittest.TestCase):
             torch_model = hummingbird.ml.convert(model, "torch")
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(
-                model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+                model.transform(data),
+                torch_model.transform(data_tensor),
+                rtol=1e-06,
+                atol=1e-06,
             )
 
     def _test_k_bin_discretizer_base(self, data):

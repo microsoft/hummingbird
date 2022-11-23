@@ -20,7 +20,10 @@ class TestSklearnBagging(unittest.TestCase):
         hb_model = hummingbird.ml.convert(clf, "torch")
 
         np.testing.assert_allclose(
-            clf.predict_proba([[0, 0, 0, 0]]), hb_model.predict_proba(np.array([[0, 0, 0, 0]])), rtol=1e-06, atol=1e-06,
+            clf.predict_proba([[0, 0, 0, 0]]),
+            hb_model.predict_proba(np.array([[0, 0, 0, 0]])),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
     def test_bagging_svc(self):
@@ -32,7 +35,10 @@ class TestSklearnBagging(unittest.TestCase):
         hb_model = hummingbird.ml.convert(clf, "torch")
 
         np.testing.assert_allclose(
-            clf.predict_proba([[0, 0, 0, 0]]), hb_model.predict_proba(np.array([[0, 0, 0, 0]])), rtol=1e-06, atol=1e-06,
+            clf.predict_proba([[0, 0, 0, 0]]),
+            hb_model.predict_proba(np.array([[0, 0, 0, 0]])),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
     def test_bagging_logistic_regression(self):
@@ -44,7 +50,10 @@ class TestSklearnBagging(unittest.TestCase):
         hb_model = hummingbird.ml.convert(clf, "torch")
 
         np.testing.assert_allclose(
-            clf.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06,
+            clf.predict_proba(X),
+            hb_model.predict_proba(X),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
     def test_bagging_linear_svr_1(self):
@@ -71,7 +80,10 @@ class TestSklearnBagging(unittest.TestCase):
         hb_model = hummingbird.ml.convert(reg, "torch")
 
         np.testing.assert_allclose(
-            reg.predict(X), hb_model.predict(X), rtol=1e-04, atol=1e-04,
+            reg.predict(X),
+            hb_model.predict(X),
+            rtol=1e-04,
+            atol=1e-04,
         )
 
     def test_bagging_linear_regression(self):
@@ -83,7 +95,10 @@ class TestSklearnBagging(unittest.TestCase):
         hb_model = hummingbird.ml.convert(reg, "torch")
 
         np.testing.assert_allclose(
-            reg.predict(X), hb_model.predict(X), rtol=1e-04, atol=1e-04,
+            reg.predict(X),
+            hb_model.predict(X),
+            rtol=1e-04,
+            atol=1e-04,
         )
 
 

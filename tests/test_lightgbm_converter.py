@@ -433,7 +433,10 @@ class TestLGBMConverter(unittest.TestCase):
                 model,
                 "tvm",
                 X,
-                extra_config={constants.TREE_IMPLEMENTATION: tree_implementation, constants.TREE_OP_PRECISION_DTYPE: "float64"}
+                extra_config={
+                    constants.TREE_IMPLEMENTATION: tree_implementation,
+                    constants.TREE_OP_PRECISION_DTYPE: "float64",
+                },
             )
 
             # Check results.

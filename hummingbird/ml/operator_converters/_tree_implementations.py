@@ -335,9 +335,9 @@ class PerfectTreeTraversalTreeImpl(AbstractPyTorchTreeImpl):
 
         node_maps = [tp[0] for tp in tree_parameters]
 
-        weight_0 = np.zeros((self.num_trees, 2 ** max_depth - 1))
-        bias_0 = np.zeros((self.num_trees, 2 ** max_depth - 1), dtype=np.float64)
-        weight_1 = np.zeros((self.num_trees, 2 ** max_depth, self.n_classes))
+        weight_0 = np.zeros((self.num_trees, 2**max_depth - 1))
+        bias_0 = np.zeros((self.num_trees, 2**max_depth - 1), dtype=np.float64)
+        weight_1 = np.zeros((self.num_trees, 2**max_depth, self.n_classes))
 
         for i, node_map in enumerate(node_maps):
             self._get_weights_and_biases(node_map, max_depth, weight_0[i], weight_1[i], bias_0[i])

@@ -493,7 +493,9 @@ class TestSklearnTreeConverter(unittest.TestCase):
     # Decision tree classifier
     def test_decision_tree_ts_classifier_converter(self):
         self._run_tree_classification_converter(
-            DecisionTreeClassifier, 3, "torch.jit",
+            DecisionTreeClassifier,
+            3,
+            "torch.jit",
         )
 
     # Extra trees classifier
@@ -732,16 +734,25 @@ class TestSklearnTreeConverter(unittest.TestCase):
                         n_samples=100, n_features=10, n_informative=5, n_targets=n_targets, random_state=seed
                     )
                     model.fit(X, y)
-                    X = X.astype('float32')
-                    y = y.astype('float32')
+                    X = X.astype("float32")
+                    y = y.astype("float32")
 
                     torch_model = hummingbird.ml.convert(
                         model,
                         "torch",
-                        extra_config={constants.TREE_IMPLEMENTATION: tree_method, constants.TREE_OP_PRECISION_DTYPE: "float64"}
+                        extra_config={
+                            constants.TREE_IMPLEMENTATION: tree_method,
+                            constants.TREE_OP_PRECISION_DTYPE: "float64",
+                        },
                     )
                     self.assertTrue(torch_model is not None)
-                    np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-5, atol=1e-5, err_msg="{}/{}/{}/{}".format(tree_method, n_targets, tree_class, seed))
+                    np.testing.assert_allclose(
+                        model.predict(X),
+                        torch_model.predict(X),
+                        rtol=1e-5,
+                        atol=1e-5,
+                        err_msg="{}/{}/{}/{}".format(tree_method, n_targets, tree_class, seed),
+                    )
 
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@ class PolynomialFeatures(PhysicalOperator, torch.nn.Module):
     def forward(self, x):
         x_orig = x
         x = x.view(-1, self.n_features, 1) * x.view(-1, 1, self.n_features)
-        x = x.view(-1, self.n_features ** 2)
+        x = x.view(-1, self.n_features**2)
         x = torch.index_select(x, 1, self.indices)
 
         # TODO: This gives mismatched elements

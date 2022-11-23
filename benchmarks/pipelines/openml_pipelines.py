@@ -74,7 +74,12 @@ def get_sk_op(comp_class, unsupported_ops, not_sk_ops):
 
 
 def get_column_transformer(
-    flow, component_map, unsupported_ops, not_sk_ops, numeric_columns, nominal_columns,
+    flow,
+    component_map,
+    unsupported_ops,
+    not_sk_ops,
+    numeric_columns,
+    nominal_columns,
 ):
     col_transformer_id = flow.flow_id
     transformers = []
@@ -83,7 +88,12 @@ def get_column_transformer(
         comp_class = flow.components[key].class_name
         if comp_class == "sklearn.pipeline.Pipeline":
             comp = get_pipeline(
-                flow.components[key], component_map, unsupported_ops, not_sk_ops, numeric_columns, nominal_columns,
+                flow.components[key],
+                component_map,
+                unsupported_ops,
+                not_sk_ops,
+                numeric_columns,
+                nominal_columns,
             )
         else:
             comp = get_sk_op(comp_class, unsupported_ops, not_sk_ops)
@@ -103,7 +113,12 @@ def get_column_transformer(
 
 
 def get_pipeline(
-    flow, component_map, unsupported_ops, not_sk_ops, numeric_columns, nominal_columns,
+    flow,
+    component_map,
+    unsupported_ops,
+    not_sk_ops,
+    numeric_columns,
+    nominal_columns,
 ):
     steps = []
     pipeline_id = flow.flow_id
@@ -322,14 +337,16 @@ if __name__ == "__main__":
             log_file.write("--------------------------------------------------------------------------------------------\n")
             log_file.flush()
 
-        message = "Task: {}, Total: {},  Not Pure SK: {}, Unsupported: {}, Train Failures: {}, Generated: {}, Coverage: {}\n".format(
-            task_id,
-            sk_runs_df.shape[0],
-            not_sk,
-            unsupported,
-            failures_on_train,
-            sk_runs_df.shape[0] - not_sk - unsupported - failures_on_train,
-            1 - (unsupported) / (sk_runs_df.shape[0] - not_sk - failures_on_train),
+        message = (
+            "Task: {}, Total: {},  Not Pure SK: {}, Unsupported: {}, Train Failures: {}, Generated: {}, Coverage: {}\n".format(
+                task_id,
+                sk_runs_df.shape[0],
+                not_sk,
+                unsupported,
+                failures_on_train,
+                sk_runs_df.shape[0] - not_sk - unsupported - failures_on_train,
+                1 - (unsupported) / (sk_runs_df.shape[0] - not_sk - failures_on_train),
+            )
         )
         log_file.write(message)
         print(message)

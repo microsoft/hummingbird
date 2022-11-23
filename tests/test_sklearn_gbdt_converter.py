@@ -176,12 +176,12 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
             np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
-            y = np.random.randint(2, size=100) 
+            y = np.random.randint(2, size=100)
 
             model.fit(X, y)
             torch_model = hummingbird.ml.convert(model, "torch", extra_config={})
             self.assertIsNotNone(torch_model)
-            # 
+
             for batch_size in [1, 30, 100, 200]:
                 X_test = np.random.rand(batch_size, 200)
                 X_test = np.array(X_test, dtype=np.float32)

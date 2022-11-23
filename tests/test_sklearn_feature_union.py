@@ -26,7 +26,10 @@ class TestSklearnFeatureUnion(unittest.TestCase):
         torch_model = hummingbird.ml.convert(model, "torch")
 
         np.testing.assert_allclose(
-            model.transform(X_test), torch_model.transform(X_test), rtol=1e-06, atol=1e-06,
+            model.transform(X_test),
+            torch_model.transform(X_test),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
     def test_feature_union_transformer_weights(self):
@@ -41,7 +44,10 @@ class TestSklearnFeatureUnion(unittest.TestCase):
         torch_model = hummingbird.ml.convert(model, "torch")
 
         np.testing.assert_allclose(
-            model.transform(X_test), torch_model.transform(X_test), rtol=1e-06, atol=1e-06,
+            model.transform(X_test),
+            torch_model.transform(X_test),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
 

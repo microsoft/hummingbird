@@ -26,7 +26,7 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
     def test_sklearn_multioutput_regressor(self):
         for n_targets in [2, 3, 4]:
             for model_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor, LinearRegression]:
-                seed = random.randint(0, 2 ** 32 - 1)
+                seed = random.randint(0, 2**32 - 1)
                 if model_class != LinearRegression:
                     model = MultiOutputRegressor(model_class(random_state=seed))
                 else:
@@ -54,7 +54,7 @@ class TestSklearnMultioutputRegressor(unittest.TestCase):
     def test_sklearn_regressor_chain(self):
         for n_targets in [2, 3, 4]:
             for model_class in [DecisionTreeRegressor, ExtraTreesRegressor, RandomForestRegressor, LinearRegression]:
-                seed = random.randint(0, 2 ** 32 - 1)
+                seed = random.randint(0, 2**32 - 1)
                 order = [i for i in range(n_targets)]
                 random.Random(seed).shuffle(order)
                 if model_class != LinearRegression:

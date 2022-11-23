@@ -26,7 +26,10 @@ class TestSklearnArrayFeatureExtractor(unittest.TestCase):
 
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(
-            selector.transform(X), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+            selector.transform(X),
+            torch_model.transform(data_tensor),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
     # tests SelectPercentile converter (convert_sklearn_select_percentile) with chi2
@@ -41,7 +44,10 @@ class TestSklearnArrayFeatureExtractor(unittest.TestCase):
 
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(
-            selector.transform(X), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+            selector.transform(X),
+            torch_model.transform(data_tensor),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
     # tests VarianceThreshold converter (convert_sklearn_variance_threshold)
@@ -56,7 +62,10 @@ class TestSklearnArrayFeatureExtractor(unittest.TestCase):
 
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(
-            selector.transform(X), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+            selector.transform(X),
+            torch_model.transform(data_tensor),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
     # tests SelectKBest converter (convert_sklearn_select_k_best) with mutual_info_classif
@@ -71,7 +80,10 @@ class TestSklearnArrayFeatureExtractor(unittest.TestCase):
 
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(
-            selector.transform(X), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
+            selector.transform(X),
+            torch_model.transform(data_tensor),
+            rtol=1e-06,
+            atol=1e-06,
         )
 
     # tests SelectKBest converter (convert_sklearn_select_k_best) with chi2

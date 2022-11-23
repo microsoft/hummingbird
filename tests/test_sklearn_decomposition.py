@@ -130,7 +130,7 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
     # FastICA converter with n_components 3 fun custom
     def test_fast_ica_converter_3_custom(self):
         def my_g(x):
-            return x ** 3, (3 * x ** 2).mean(axis=-1)
+            return x**3, (3 * x**2).mean(axis=-1)
 
         self._fit_model_pca(FastICA(n_components=3, fun=my_g))
 

@@ -602,7 +602,7 @@ def _parse_onnx_api(topology, model, inputs):
     node_list = LinkedNode.build_from_onnx(graph.node, [], inputs_names + [in_.name for in_ in initializers], output_names)
 
     # Make sure the entire node_list isn't only 'Identity'
-    if all([x.op_type == 'Identity' for x in node_list]):
+    if all([x.op_type == "Identity" for x in node_list]):
         raise RuntimeError("ONNX model contained only Identity nodes {}.".format(node_list))
 
     # This a new node list but with some node been removed plus eventual variable renaming.
