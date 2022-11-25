@@ -67,12 +67,14 @@ class TestONNXLightGBMConverter(unittest.TestCase):
 
     # Utility function for testing classification models.
     def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
-        onnx_ml_pred, onnx_pred, output_names = self._test_lgbm(X, model, extra_config)
+        for n in [2, len(X)]:
+            onnx_ml_pred, onnx_pred, _ = self._test_lgbm(X, model, extra_config)
 
-        np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
-        np.testing.assert_allclose(
-            list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
-        )  # probs
+            np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
+            np.testing.assert_allclose(
+                list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
+            )  # probs
+            np.testing.assert_equal(n, len(onnx_pred)) # pred count
 
     # Check that ONNXML models can also target other backends.
     @unittest.skipIf(
@@ -334,6 +336,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
             data,
         )
         self._test_classifier(X, model)
+
 
 
 if __name__ == "__main__":

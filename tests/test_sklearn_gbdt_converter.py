@@ -179,17 +179,18 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
             y = np.random.randint(2, size=100)
 
             model.fit(X, y)
-            torch_model = hummingbird.ml.convert(model, "torch", extra_config={})
-            self.assertIsNotNone(torch_model)
+            for backend in ["torch", "onnx"]:
+                conv_model = hummingbird.ml.convert(model, backend, X, extra_config={})
+                self.assertIsNotNone(conv_model)
 
-            for batch_size in [1, 30, 100, 200]:
-                X_test = np.random.rand(batch_size, 200)
-                X_test = np.array(X_test, dtype=np.float32)
-                y = np.random.randint(2, size=batch_size)
-                model_probs = model.predict_proba(X_test)
-                torch_probs = torch_model.predict_proba(X_test)
-                np.testing.assert_allclose(model_probs, torch_probs, rtol=1e-06, atol=1e-06)
-                np.testing.assert_equal(len(model_probs), len(torch_probs))
+                for batch_size in [2, 50, 100, 200]:
+                    X_test = np.random.rand(batch_size, 200)
+                    X_test = np.array(X_test, dtype=np.float32)
+                    print(X_test.shape, X.shape)
+                    model_probs = model.predict_proba(X_test)
+                    conv_probs = conv_model.predict_proba(X_test)
+                    np.testing.assert_allclose(model_probs, conv_probs, rtol=1e-06, atol=1e-06)
+                    np.testing.assert_equal(len(model_probs), len(conv_probs))
 
     # Failure Cases
     def test_sklearn_GBDT_classifier_raises_wrong_type(self):

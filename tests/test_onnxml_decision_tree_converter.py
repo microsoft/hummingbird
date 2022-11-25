@@ -68,15 +68,18 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
 
     # Utility function for testing classification models.
     def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
-        onnx_ml_pred, onnx_pred, output_names = self._test_decision_tree(X, model, extra_config)
+        for n in [1, len(X)]:
+            onnx_ml_pred, onnx_pred, _ = self._test_decision_tree(X[:n], model, extra_config)
 
-        np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
-        np.testing.assert_allclose(
-            list(map(lambda x: x if isinstance(x, np.ndarray) else list(x.values()), onnx_ml_pred[0])),
-            onnx_pred[0],
-            rtol=rtol,
-            atol=atol,
-        )  # probs
+            np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
+            np.testing.assert_allclose(
+                list(map(lambda x: x if isinstance(x, np.ndarray) else list(x.values()), onnx_ml_pred[0])),
+                onnx_pred[0],
+                rtol=rtol,
+                atol=atol,
+            )  # probs
+            np.testing.assert_equal(n, len(onnx_pred)) #length
+
 
     # Regression.
     # Regression test with Decision Tree.
