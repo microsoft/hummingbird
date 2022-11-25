@@ -23,7 +23,6 @@
 # Copyright (c) 2018, NVIDIA CORPORATION. All rights reserved.
 
 import os
-import sys
 from enum import Enum
 import pandas as pd
 import pickle
@@ -32,10 +31,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_svmlight_file
 
-if sys.version_info[0] >= 3:
-    from urllib.request import urlretrieve
-else:
-    from urllib import urlretrieve
+from urllib.request import urlretrieve
 
 
 class LearningTask(Enum):

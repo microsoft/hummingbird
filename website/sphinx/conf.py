@@ -39,9 +39,9 @@ extensions = [
 
 # pngmath / imgmath compatibility layer for different sphinx versions
 import sphinx  # noqa: E402
-from distutils.version import LooseVersion  # noqa: E402
+from packaging.version import Version, parse  # noqa: E402
 
-if LooseVersion(sphinx.__version__) < LooseVersion("1.4"):
+if parse(sphinx.__version__) < Version("1.4"):
     extensions.append("sphinx.ext.pngmath")
 else:
     extensions.append("sphinx.ext.imgmath")

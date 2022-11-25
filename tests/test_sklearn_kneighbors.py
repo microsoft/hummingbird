@@ -2,7 +2,7 @@
 Tests sklearn KNeighbor model (KNeighborsClassifier, KNeighborsRegressor) converters.
 """
 import unittest
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 
 import numpy as np
 import sklearn
@@ -89,7 +89,7 @@ class TestSklearnKNeighbors(unittest.TestCase):
 
     # KNeighborsClassifier wminkowski metric type
     @unittest.skipIf(
-        LooseVersion(sklearn.__version__) > LooseVersion("1.0"),
+        parse(sklearn.__version__) > Version("1.0"),
         reason="wminkowski metric is not supported anymore for sklearn > 1.0",
     )
     def test_kneighbors_classifer_wminkowski(self):
@@ -183,7 +183,7 @@ class TestSklearnKNeighbors(unittest.TestCase):
 
     # KNeighborsRegressor wminkowski metric type
     @unittest.skipIf(
-        LooseVersion(sklearn.__version__) > LooseVersion("1.0"),
+        parse(sklearn.__version__) > Version("1.0"),
         reason="wminkowski metric is not supported anymore for sklearn > 1.0",
     )
     def test_kneighbors_regressor_wminkowski(self):

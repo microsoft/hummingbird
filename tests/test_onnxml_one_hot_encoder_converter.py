@@ -1,7 +1,7 @@
 """
 Tests onnxml OneHotEncoderconverter
 """
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 import unittest
 import warnings
 
@@ -111,7 +111,7 @@ class TestONNXOneHotEncoder(unittest.TestCase):
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
     @unittest.skipIf(
-        LooseVersion(torch.__version__) < LooseVersion("1.8.0"),
+        parse(torch.__version__) < Version("1.8.0"),
         reason="PyTorch exporter returns an error until version 1.8.0",
     )
     def test_model_one_hot_encoder_string(self):
