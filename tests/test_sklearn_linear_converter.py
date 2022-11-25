@@ -3,7 +3,7 @@ Tests sklearn linear classifiers (LinearRegression, LogisticRegression, SGDClass
 """
 import unittest
 import warnings
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 
 import numpy as np
 import torch

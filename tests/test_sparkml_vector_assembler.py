@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import torch
 from sklearn.datasets import load_iris
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 
 from hummingbird.ml._utils import sparkml_installed, pandas_installed
 from hummingbird.ml import convert

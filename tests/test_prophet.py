@@ -3,7 +3,7 @@ import numpy as np
 import os
 import sys
 import torch
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 
 import hummingbird
 from hummingbird.ml._utils import pandas_installed, prophet_installed, onnx_runtime_installed
@@ -55,7 +55,7 @@ class TestProphet(unittest.TestCase):
         not (pandas_installed() and prophet_installed()), reason="Test requires Prophet, Pandas and ONNX runtime.",
     )
     @unittest.skipIf(
-        not onnx_runtime_installed() or LooseVersion(onnxruntime.__version__) < LooseVersion("1.7.0"),
+        not onnx_runtime_installed() or parse(onnxruntime.__version__) < Version("1.7.0"),
         reason="Prophet test requires onnxruntime => 1.7.0",
     )
     def test_prophet_trend_onnx(self):

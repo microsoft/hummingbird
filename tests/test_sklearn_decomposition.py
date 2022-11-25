@@ -4,7 +4,7 @@ Tests sklearn matrix decomposition converters
 import unittest
 import warnings
 import sys
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 
 import numpy as np
 import torch
@@ -44,7 +44,7 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
 
     # PCA n_componenets mle and whiten true
     @unittest.skipIf(
-        LooseVersion(sklearn.__version__) < LooseVersion("0.23.2"),
+        parse(sklearn.__version__) < Version("0.23.2"),
         reason="With Sklearn version < 0.23.2 returns ValueError: math domain error (https://github.com/scikit-learn/scikit-learn/issues/4441)",
     )
     def test_pca_converter_mle_whiten(self):
@@ -52,7 +52,7 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
 
     # PCA n_componenets mle and solver full
     @unittest.skipIf(
-        LooseVersion(sklearn.__version__) < LooseVersion("0.23.2"),
+        parse(sklearn.__version__) < Version("0.23.2"),
         reason="With Sklearn version < 0.23.2 returns ValueError: math domain error (https://github.com/scikit-learn/scikit-learn/issues/4441)",
     )
     def test_pca_converter_mle_full(self):

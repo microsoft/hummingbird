@@ -9,7 +9,7 @@ Converters for topology IR are stored in this file.
 """
 import numpy as np
 import os
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 import torch
 from uuid import uuid4
 
@@ -212,7 +212,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
         if backend == onnx.__name__:
             # Pytorch <= 1.4.0 has a bug with exporting GEMM into ONNX.
-            if LooseVersion(torch.__version__) <= LooseVersion("1.4"):
+            if parse(torch.__version__) <= Version("1.4"):
                 # Raise en error and warn user that the torch version is not supported with onnx backend
                 raise Exception(
                     f"The current torch version {torch.__version__} is not supported with {backend} backend. "

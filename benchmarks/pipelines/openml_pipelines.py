@@ -4,7 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 import openml
 import sklearn
 import operator
@@ -240,8 +240,8 @@ if __name__ == "__main__":
             if openml.tasks.get_task(task_id).get_dataset().features[i].data_type == "nominal" and i < X.shape[1]
         ]
 
-        vers = LooseVersion(openml.__version__)
-        renamed_version = LooseVersion("0.11")
+        vers = parse(openml.__version__)
+        renamed_version = Version("0.11")
         if vers < renamed_version:
             runs_df = openml.evaluations.list_evaluations(
                 function="predictive_accuracy", task=[task_id], output_format="dataframe"
