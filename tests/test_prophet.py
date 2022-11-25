@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
 import os
-import sys
 import torch
 from packaging.version import Version, parse
 
@@ -17,10 +16,7 @@ if prophet_installed():
 if onnx_runtime_installed():
     import onnxruntime
 
-if sys.version_info[0] >= 3:
-    from urllib.request import urlretrieve
-else:
-    from urllib import urlretrieve
+from urllib.request import urlretrieve
 
 
 class TestProphet(unittest.TestCase):
