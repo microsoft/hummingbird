@@ -48,7 +48,7 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
         reason="With Sklearn version < 0.23.2 returns ValueError: math domain error (https://github.com/scikit-learn/scikit-learn/issues/4441)",
     )
     def test_pca_converter_mle_whiten(self):
-        self._fit_model_pca(PCA(n_components="mle", whiten=True))
+        self._fit_model_pca(PCA(n_components="mle", whiten="arbitrary-variance"))
 
     # PCA n_componenets mle and solver full
     @unittest.skipIf(
@@ -113,7 +113,7 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
 
     # FastICA converter with n_components 3 whiten
     def test_fast_ica_converter_3_whiten(self):
-        self._fit_model_pca(FastICA(n_components=3, whiten=True))
+        self._fit_model_pca(FastICA(n_components=3, whiten="arbitrary-variance"))
 
     # FastICA converter with n_components 3 deflation algorithm
     def test_fast_ica_converter_3_deflation(self):

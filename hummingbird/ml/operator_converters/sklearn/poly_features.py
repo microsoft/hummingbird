@@ -78,7 +78,7 @@ def convert_sklearn_poly_features(operator, device, extra_config):
         raise NotImplementedError("Hummingbird currently only supports degree 2 for PolynomialFeatures")
     return PolynomialFeatures(
         operator,
-        operator.raw_operator.n_input_features_,
+        operator.raw_operator.n_features_in_,
         operator.raw_operator.degree,
         operator.raw_operator.interaction_only,
         operator.raw_operator.include_bias,
