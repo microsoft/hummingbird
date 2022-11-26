@@ -5,8 +5,8 @@ import unittest
 import warnings
 
 import numpy as np
-import torch
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
+from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed
 
 import hummingbird.ml
 from tree_utils import gbdt_implementation_map
@@ -169,6 +169,9 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
     def test_varying_batch_sizes(self):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
