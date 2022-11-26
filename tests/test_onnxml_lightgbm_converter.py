@@ -74,7 +74,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
             np.testing.assert_allclose(
                 list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
             )  # probs
-            np.testing.assert_equal(n, len(onnx_pred)) # pred count
+            np.testing.assert_equal(n, len(onnx_pred))  # pred count
 
     # Check that ONNXML models can also target other backends.
     @unittest.skipIf(
@@ -336,7 +336,6 @@ class TestONNXLightGBMConverter(unittest.TestCase):
             data,
         )
         self._test_classifier(X, model)
-
 
 
 if __name__ == "__main__":

@@ -25,9 +25,8 @@ def torch_installed():
     """
     try:
         import torch
-        assert (
-            parse(torch.__version__) > Version("1.7.0")
-        ), "Please install torch >1.7.0"
+
+        assert parse(torch.__version__) > Version("1.7.0"), "Please install torch >1.7.0"
 
         return True
     except ImportError:
