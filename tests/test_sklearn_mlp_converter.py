@@ -17,14 +17,7 @@ class TestSklearnMLPClassifier(unittest.TestCase):
 
     # MLPClassifier test function to be parameterized
     def _test_mlp_classifer(self, num_classes, activation="relu", labels_shift=0, backend="torch", extra_config={}):
-        model = MLPClassifier(
-            hidden_layer_sizes=(
-                100,
-                100,
-                50,
-            ),
-            activation=activation,
-        )
+        model = MLPClassifier(hidden_layer_sizes=(100, 100, 50,), activation=activation)
         np.random.seed(0)
         X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)
@@ -92,14 +85,7 @@ class TestSklearnMLPClassifier(unittest.TestCase):
 
     # MLPRegressor test function to be parameterized
     def _test_mlp_regressor(self, activation="relu"):
-        model = MLPRegressor(
-            hidden_layer_sizes=(
-                100,
-                100,
-                50,
-            ),
-            activation=activation,
-        )
+        model = MLPRegressor(hidden_layer_sizes=(100, 100, 50,), activation=activation)
         np.random.seed(0)
         X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)

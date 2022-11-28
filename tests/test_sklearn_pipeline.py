@@ -49,10 +49,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.transform(data),
-            torch_model.transform(data),
-            rtol=1e-06,
-            atol=1e-06,
+            model.transform(data), torch_model.transform(data), rtol=1e-06, atol=1e-06,
         )
 
     def test_pipeline2(self):
@@ -66,10 +63,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.transform(data),
-            torch_model.transform(data),
-            rtol=1e-06,
-            atol=1e-06,
+            model.transform(data), torch_model.transform(data), rtol=1e-06, atol=1e-06,
         )
 
     def test_combine_inputs_union_in_pipeline(self):
@@ -90,10 +84,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.transform(data),
-            torch_model.transform(data),
-            rtol=1e-06,
-            atol=1e-06,
+            model.transform(data), torch_model.transform(data), rtol=1e-06, atol=1e-06,
         )
 
     def test_combine_inputs_floats_ints(self):
@@ -107,10 +98,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.transform(data),
-            torch_model.transform(data),
-            rtol=1e-06,
-            atol=1e-06,
+            model.transform(data), torch_model.transform(data), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -125,12 +113,7 @@ class TestSklearnPipeline(unittest.TestCase):
         numeric_features = [0, 1, 2]  # ["vA", "vB", "vC"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -148,10 +131,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test.values),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -203,10 +183,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            clf.predict(X_test),
-            torch_model.predict(X_test),
-            rtol=1e-06,
-            atol=1e-06,
+            clf.predict(X_test), torch_model.predict(X_test), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -222,12 +199,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = [3, 4]  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -252,10 +224,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test.values),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -271,12 +240,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = [3, 4]  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -301,10 +265,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -320,12 +281,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = [3, 4]  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -350,10 +306,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -369,12 +322,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = [3, 4]  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -400,10 +348,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test.values),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -419,12 +364,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = [3, 4]  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -450,10 +390,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -469,12 +406,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = [3, 4]  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -501,10 +433,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test.values),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -520,12 +449,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = [3, 4]  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -551,10 +475,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test.values),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -570,12 +491,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = [3, 4]  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -602,10 +518,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test.values),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -621,12 +534,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = [3, 4]  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -652,10 +560,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test.values),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
@@ -671,12 +576,7 @@ class TestSklearnPipeline(unittest.TestCase):
         categorical_features = slice(3, 4)  # ["vcat", "vcat2"]
 
         classifier = LogisticRegression(
-            C=0.01,
-            class_weight=dict(zip([False, True], [0.2, 0.8])),
-            n_jobs=1,
-            max_iter=10,
-            solver="liblinear",
-            tol=1e-3,
+            C=0.01, class_weight=dict(zip([False, True], [0.2, 0.8])), n_jobs=1, max_iter=10, solver="liblinear", tol=1e-3,
         )
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
@@ -703,10 +603,7 @@ class TestSklearnPipeline(unittest.TestCase):
         self.assertTrue(torch_model is not None)
 
         np.testing.assert_allclose(
-            model.predict_proba(X_test),
-            torch_model.predict_proba(X_test.values),
-            rtol=1e-06,
-            atol=1e-06,
+            model.predict_proba(X_test), torch_model.predict_proba(X_test.values), rtol=1e-06, atol=1e-06,
         )
 
     # Taken from https://github.com/microsoft/hummingbird/issues/388https://github.com/microsoft/hummingbird/issues/388
@@ -744,10 +641,7 @@ class TestSklearnPipeline(unittest.TestCase):
         assert len(hb_model.model.graph.input) == n_features
 
         np.testing.assert_allclose(
-            pipeline.predict(X),
-            np.array(hb_model.predict(X_test)).flatten(),
-            rtol=1e-06,
-            atol=1e-06,
+            pipeline.predict(X), np.array(hb_model.predict(X_test)).flatten(), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(not onnx_runtime_installed(), reason="Test requires ORT installed")
@@ -792,10 +686,7 @@ class TestSklearnPipeline(unittest.TestCase):
         hb_model = hummingbird.ml.convert(clf, "torch")
 
         np.testing.assert_allclose(
-            clf.predict(X_test),
-            hb_model.predict(X_test),
-            rtol=1e-06,
-            atol=1e-06,
+            clf.predict(X_test), hb_model.predict(X_test), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(StackingClassifier is None, reason="StackingClassifier not available in scikit-learn < 0.22")
@@ -813,10 +704,7 @@ class TestSklearnPipeline(unittest.TestCase):
         hb_model = hummingbird.ml.convert(clf, "torch")
 
         np.testing.assert_allclose(
-            clf.predict(X_test),
-            hb_model.predict(X_test),
-            rtol=1e-06,
-            atol=1e-06,
+            clf.predict(X_test), hb_model.predict(X_test), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(StackingClassifier is None, reason="StackingClassifier not available in scikit-learn < 0.22")
@@ -845,10 +733,7 @@ class TestSklearnPipeline(unittest.TestCase):
         hb_model = hummingbird.ml.convert(reg, "torch")
 
         np.testing.assert_allclose(
-            reg.predict(X_test),
-            hb_model.predict(X_test),
-            rtol=1e-06,
-            atol=1e-06,
+            reg.predict(X_test), hb_model.predict(X_test), rtol=1e-06, atol=1e-06,
         )
 
 

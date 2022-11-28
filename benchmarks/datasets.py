@@ -115,12 +115,7 @@ def prepare_airline(dataset_folder, nrows):  # pylint: disable=too-many-locals
     X = df[df.columns.difference(["ArrDelay", "ArrDelayBinary"])]
     y = df["ArrDelayBinary"]
     del df
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        random_state=77,
-        test_size=0.2,
-    )
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
     data = Data(
         X_train.astype("|f4").to_numpy(), X_test.astype("|f4").to_numpy(), y_train, y_test, LearningTask.CLASSIFICATION
     )
@@ -143,12 +138,7 @@ def prepare_fraud(dataset_folder, nrows):
     df = pd.read_csv(local_url + ".zip", dtype=np.float32, nrows=nrows)
     X = df[[col for col in df.columns if col.startswith("V")]]
     y = df["Class"]
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        random_state=77,
-        test_size=0.2,
-    )
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
     data = Data(
         X_train.astype("|f4").to_numpy(), X_test.astype("|f4").to_numpy(), y_train, y_test, LearningTask.CLASSIFICATION
     )
@@ -171,12 +161,7 @@ def prepare_higgs(dataset_folder, nrows):
     X = higgs.iloc[:, 1:]
     y = higgs.iloc[:, 0]
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        random_state=77,
-        test_size=0.2,
-    )
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
     data = Data(
         X_train.astype("|f4").to_numpy(), X_test.astype("|f4").to_numpy(), y_train, y_test, LearningTask.CLASSIFICATION
     )
@@ -206,12 +191,7 @@ def prepare_year(dataset_folder, nrows):
         X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, train_size=463715, test_size=51630)
     else:
         print("Warning: nrows is specified, not using predefined test/train split for " "YearPredictionMSD.")
-        X_train, X_test, y_train, y_test = train_test_split(
-            X,
-            y,
-            random_state=77,
-            test_size=0.2,
-        )
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
 
     data = Data(X_train.astype("|f4").to_numpy(), X_test.astype("|f4").to_numpy(), y_train, y_test, LearningTask.REGRESSION)
     pickle.dump(data, open(pickle_url, "wb"), protocol=4)
@@ -248,12 +228,7 @@ def prepare_epsilon(dataset_folder, nrows):
         y_train = np.append(y_train, y_test)
         X_train = X_train[:nrows]
         y_train = y_train[:nrows]
-        X_train, X_test, y_train, y_test = train_test_split(
-            X_train,
-            y_train,
-            random_state=77,
-            test_size=0.2,
-        )
+        X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, random_state=77, test_size=0.2,)
 
     data = Data(X_train.astype("|f4"), X_test.astype("|f4"), y_train, y_test, LearningTask.CLASSIFICATION)
     pickle.dump(data, open(pickle_url, "wb"), protocol=4)
@@ -269,12 +244,7 @@ def prepare_covtype(dataset_folder, nrows=None):
         X = X[0:nrows]
         y = y[0:nrows]
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        random_state=77,
-        test_size=0.2,
-    )
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
     return Data(X_train.astype("|f4"), X_test.astype("|f4"), y_train, y_test, LearningTask.MULTICLASS_CLASSIFICATION)
 
 

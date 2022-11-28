@@ -26,7 +26,7 @@ class SVC(PhysicalOperator, torch.nn.Module):
         sv = sv.toarray() if type(sv) == scipy.sparse.csr_matrix else sv
         self.sv = torch.nn.Parameter(torch.from_numpy(sv).double(), requires_grad=False)
         self.sv_t = torch.nn.Parameter(torch.transpose(self.sv, 0, 1), requires_grad=False)
-        self.sv_norm = torch.nn.Parameter(-self.gamma * (self.sv**2).sum(1).view(1, -1), requires_grad=False)
+        self.sv_norm = torch.nn.Parameter(-self.gamma * (self.sv ** 2).sum(1).view(1, -1), requires_grad=False)
         self.coef0 = coef0
         self.n_features = sv.shape[1]
         self.a = a
@@ -51,7 +51,7 @@ class SVC(PhysicalOperator, torch.nn.Module):
         elif self.kernel == "rbf":
             # using quadratic expansion--susseptible to rounding-off errors
             # http://www.robots.ox.ac.uk/~albanie/notes/Euclidean_distance_trick.pdf
-            x_norm = -self.gamma * (x**2).sum(1).view(-1, 1)
+            x_norm = -self.gamma * (x ** 2).sum(1).view(-1, 1)
             k = torch.exp(x_norm + self.sv_norm + 2.0 * self.gamma * torch.mm(x, self.sv_t).double())
         elif self.kernel == "sigmoid":
             k = torch.sigmoid(self.gamma * torch.mm(x, self.sv_t) + self.coef0)

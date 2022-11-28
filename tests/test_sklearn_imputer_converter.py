@@ -28,10 +28,7 @@ class TestSklearnSimpleImputer(unittest.TestCase):
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(
-            model.transform(data),
-            hb_model.transform(data),
-            rtol=1e-06,
-            atol=1e-06,
+            model.transform(data), hb_model.transform(data), rtol=1e-06, atol=1e-06,
         )
 
     def test_simple_imputer_float_inputs(self):
@@ -88,10 +85,7 @@ class TestSklearnImputer(unittest.TestCase):
 
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(
-            model.transform(data),
-            torch_model.transform(data_tensor),
-            rtol=1e-06,
-            atol=1e-06,
+            model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
         )
 
     @unittest.skipIf(Imputer is None, reason="Imputer was deprecated in scikit-learn >= 0.22")
@@ -116,10 +110,7 @@ class TestSklearnMissingIndicator(unittest.TestCase):
 
         self.assertIsNotNone(hb_model)
         np.testing.assert_allclose(
-            model.transform(data),
-            hb_model.transform(data_tensor),
-            rtol=1e-06,
-            atol=1e-06,
+            model.transform(data), hb_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
         )
 
     def test_missing_indicator_float_inputs(self):

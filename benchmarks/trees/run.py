@@ -195,9 +195,7 @@ def parse_args():
     args = parser.parse_args()
     # Default value for output json file.
     if not args.output:
-        args.output = "result-{}-{}-{}-{}.json".format(
-            "gpu" if args.gpu else args.cpus, args.ntrees, args.max_depth, args.batch_size
-        )
+        args.output = "result-{}-{}-{}-{}.json".format("gpu" if args.gpu else args.cpus, args.ntrees, args.max_depth, args.batch_size)
     return args
 
 

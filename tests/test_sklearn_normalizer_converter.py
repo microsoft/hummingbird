@@ -29,10 +29,7 @@ class TestSklearnNormalizer(unittest.TestCase):
 
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(
-                model.transform(data),
-                torch_model.transform(data_tensor),
-                rtol=1e-06,
-                atol=1e-06,
+                model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
     def test_normalizer_converter_raises_wrong_type(self):
@@ -63,10 +60,7 @@ class TestSklearnNormalizer(unittest.TestCase):
 
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(
-                model.transform(data),
-                torch_model.transform(data_tensor),
-                rtol=1e-06,
-                atol=1e-06,
+                model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
     # ONNX backend
@@ -86,10 +80,7 @@ class TestSklearnNormalizer(unittest.TestCase):
 
             self.assertIsNotNone(hb_model)
             np.testing.assert_allclose(
-                model.transform(data),
-                hb_model.transform(data_tensor),
-                rtol=1e-06,
-                atol=1e-06,
+                model.transform(data), hb_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
     # TVM backend
@@ -109,10 +100,7 @@ class TestSklearnNormalizer(unittest.TestCase):
 
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(
-                model.transform(data),
-                torch_model.transform(data_tensor),
-                rtol=1e-06,
-                atol=1e-06,
+                model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
 
