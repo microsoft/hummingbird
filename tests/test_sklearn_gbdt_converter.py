@@ -189,7 +189,6 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
                 for batch_size in [2, 50, 100, 200]:
                     X_test = np.random.rand(batch_size, 200)
                     X_test = np.array(X_test, dtype=np.float32)
-                    print(X_test.shape, X.shape)
                     model_probs = model.predict_proba(X_test)
                     conv_probs = conv_model.predict_proba(X_test)
                     np.testing.assert_allclose(model_probs, conv_probs, rtol=1e-06, atol=1e-06)
