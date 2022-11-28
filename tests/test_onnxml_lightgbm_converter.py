@@ -30,7 +30,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     def _test_lgbm(self, X, model, extra_config={}):
         # Create ONNX-ML model
         onnx_ml_model = convert_lightgbm(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+            model, initial_types=[("input", FloatTensorType([None, X.shape[1]]))], target_opset=9
         )
 
         # Create ONNX model
@@ -92,7 +92,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
 
         # Create ONNX-ML model
         onnx_ml_model = convert_lightgbm(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+            model, initial_types=[("input", FloatTensorType([None, X.shape[1]]))], target_opset=9
         )
 
         pt_model = convert(onnx_ml_model, "torch", X)

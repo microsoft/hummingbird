@@ -24,16 +24,16 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestONNXDecisionTreeConverter, self).__init__(*args, **kwargs)
 
-    # Base test implementation comparing ONNXML and ONNX models.
-    def _test_decision_tree(self, X, model, extra_config={}):
-        # Create ONNX-ML model
+    def _convert_decision_tree(self, X, model, extra_config={}):
         onnx_ml_model, _ = convert_model(
-            model, "model", input_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=11
+            model, "model", input_types=[("input", FloatTensorType([None, X.shape[1]]))], target_opset=11
         )
 
-        # Create ONNX model
         onnx_model = convert(onnx_ml_model, "onnx", X, extra_config)
+        return onnx_ml_model, onnx_model
 
+    # Base test implementation comparing ONNXML and ONNX models.
+    def _test_decision_tree(self, X, onnx_ml_model, onnx_model):
         # Get the predictions for the ONNX-ML model
         session = ort.InferenceSession(onnx_ml_model.SerializeToString())
         output_names = [session.get_outputs()[i].name for i in range(len(session.get_outputs()))]
@@ -61,16 +61,19 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
 
     # Utility function for testing regression models.
     def _test_regressor(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
-        onnx_ml_pred, onnx_pred, output_names = self._test_decision_tree(X, model, extra_config)
+        onnx_ml_model, onnx_model = self._convert_decision_tree(X, model, extra_config)
+        onnx_ml_pred, onnx_pred, _ = self._test_decision_tree(X, onnx_ml_model, onnx_model)
 
         # Check that predicted values match
         np.testing.assert_allclose(onnx_ml_pred[0].ravel(), onnx_pred, rtol=rtol, atol=atol)
 
     # Utility function for testing classification models.
     def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
+        # convert model with entire dataset
+        onnx_ml_model, onnx_model = self._convert_decision_tree(X, model, extra_config)
+        # test model predictions with subset of data
         for n in [1, len(X)]:
-            onnx_ml_pred, onnx_pred, _ = self._test_decision_tree(X[:n], model, extra_config)
-
+            onnx_ml_pred, onnx_pred, _ = self._test_decision_tree(X[:n], onnx_ml_model, onnx_model)
             np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
             np.testing.assert_allclose(
                 list(map(lambda x: x if isinstance(x, np.ndarray) else list(x.values()), onnx_ml_pred[0])),

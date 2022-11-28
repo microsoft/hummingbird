@@ -101,7 +101,7 @@ class TestExtraConf(unittest.TestCase):
 
         # Create ONNX-ML model
         onnx_ml_model = convert_sklearn(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+            model, initial_types=[("input", FloatTensorType([None, X.shape[1]]))], target_opset=9
         )
 
         hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx", X)
@@ -790,7 +790,7 @@ class TestExtraConf(unittest.TestCase):
 
         # Create ONNX-ML model
         onnx_ml_model = convert_lightgbm(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+            model, initial_types=[("input", FloatTensorType([None, X.shape[1]]))], target_opset=9
         )
 
         # Create ONNX model
