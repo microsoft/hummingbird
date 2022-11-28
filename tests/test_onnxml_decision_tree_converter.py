@@ -78,7 +78,8 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
                 rtol=rtol,
                 atol=atol,
             )  # probs
-            np.testing.assert_equal(n, len(onnx_pred))  # length
+            print("predictions", onnx_pred)
+            np.testing.assert_equal(n, len(onnx_pred[0]))  # length
 
     # Regression.
     # Regression test with Decision Tree.

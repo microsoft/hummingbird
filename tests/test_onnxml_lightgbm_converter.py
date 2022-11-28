@@ -74,7 +74,9 @@ class TestONNXLightGBMConverter(unittest.TestCase):
             np.testing.assert_allclose(
                 list(map(lambda x: list(x.values()), onnx_ml_pred[0])), onnx_pred[0], rtol=rtol, atol=atol
             )  # probs
-            np.testing.assert_equal(n, len(onnx_pred))  # pred count
+
+            print("dfs", n, onnx_pred[0].shape, onnx_pred[0])
+            np.testing.assert_equal(n, len(onnx_pred[0]))  # pred count
 
     # Check that ONNXML models can also target other backends.
     @unittest.skipIf(
