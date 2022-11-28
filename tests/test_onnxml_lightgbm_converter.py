@@ -68,7 +68,7 @@ class TestONNXLightGBMConverter(unittest.TestCase):
     # Utility function for testing classification models.
     def _test_classifier(self, X, model, rtol=1e-06, atol=1e-06, extra_config={}):
         for n in [2, len(X)]:
-            onnx_ml_pred, onnx_pred, _ = self._test_lgbm(X, model, extra_config)
+            onnx_ml_pred, onnx_pred, _ = self._test_lgbm(X[:n], model, extra_config)
 
             np.testing.assert_allclose(onnx_ml_pred[1], onnx_pred[1], rtol=rtol, atol=atol)  # labels
             np.testing.assert_allclose(
