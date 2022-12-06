@@ -87,7 +87,7 @@ jobs:
       with:
         path: ~/work/hummingbird/tvm
         key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-${{ matrix.python-version }}-tvm-0.10
-    # Getting TVM requires: 1) fetching TVM from github, 2) cmake, 3) make, 4) install python dependecy.
+    # Getting TVM requires: 1) fetching TVM from github, 2) cmake, 3) make, 4) install python dependency.
     # 1 to 3 will be retrieved from the cache.
     # The pipeline only works for Unix systems. For windows we will have to compile LLVM from source which is a no go.
     - name: Fetch and prepare TVM for compilation if Mac
