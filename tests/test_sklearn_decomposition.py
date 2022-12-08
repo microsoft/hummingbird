@@ -48,7 +48,15 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
         reason="With Sklearn version < 0.23.2 returns ValueError: math domain error (https://github.com/scikit-learn/scikit-learn/issues/4441)",
     )
     def test_pca_converter_mle_whiten(self):
-        self._fit_model_pca(PCA(n_components="mle", whiten="arbitrary-variance"))
+        self._fit_model_pca(PCA(n_components="mle", whiten=True))
+
+    # PCA n_componenets mle and whiten False
+    @unittest.skipIf(
+        parse(sklearn.__version__) < Version("0.23.2"),
+        reason="With Sklearn version < 0.23.2 returns ValueError: math domain error (https://github.com/scikit-learn/scikit-learn/issues/4441)",
+    )
+    def test_pca_converter_mle_whiten_false(self):
+        self._fit_model_pca(PCA(n_components="mle", whiten=False))
 
     # PCA n_componenets mle and solver full
     @unittest.skipIf(
