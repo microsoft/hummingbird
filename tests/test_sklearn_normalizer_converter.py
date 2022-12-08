@@ -32,7 +32,6 @@ class TestSklearnNormalizer(unittest.TestCase):
                 model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
-
     # Float 64 data tests
     def test_float64_normalizer_converter(self):
         # Generate a random 2D array with values in [0, 1000)
