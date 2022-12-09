@@ -624,6 +624,11 @@ def _parse_onnx_single_operator(topology, operator):
 
     # Identify nodes can just be skipped.
     if operator.op_type == "Identity":
+        if operator.origin.input[0] != operator.origin.output[0]:
+            variable = topology.variables[operator.origin.input[0]]
+            #variable.full_name = operator.origin.output[0]
+            variable.raw_name = operator.origin.output[0]
+            variable.onnx_name = operator.origin.output[0]
         return
 
     # Add the operator in the topology.
