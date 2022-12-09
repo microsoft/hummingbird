@@ -32,19 +32,6 @@ class TestSklearnNormalizer(unittest.TestCase):
                 model.transform(data), torch_model.transform(data_tensor), rtol=1e-06, atol=1e-06,
             )
 
-    def test_normalizer_converter_raises_wrong_type(self):
-        # Generate a random 2D array with values in [0, 1000)
-        np.random.seed(0)
-        data = np.random.rand(100, 200) * 1000
-        data = np.array(data, dtype=np.float32)
-
-        model = Normalizer(norm="invalid")
-        model.fit(data)
-
-        torch_model = hummingbird.ml.convert(model, "torch")
-
-        self.assertRaises(RuntimeError, torch_model.transform, torch.from_numpy(data))
-
     # Float 64 data tests
     def test_float64_normalizer_converter(self):
         # Generate a random 2D array with values in [0, 1000)
