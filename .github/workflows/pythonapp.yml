@@ -75,6 +75,7 @@ jobs:
     - name: Install extra dependencies
       run: |
         python -m pip install .[extra,onnx,sparkml]
+        pip install git+https://github.com/onnx/sklearn-onnx.git
         python -m pip install pandas
     - name: Install TVM from pypi if Ubuntu
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
