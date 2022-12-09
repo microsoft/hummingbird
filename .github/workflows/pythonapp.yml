@@ -45,6 +45,7 @@ jobs:
     - name: Install basic dependencies
       run: |
         python -m pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
+        pip install git+https://github.com/onnx/sklearn-onnx.git
     # Compile (but not push) documentation only for one of the runs (Linux py3.8).
     - name: Generate Documentation
       if: ${{ matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
