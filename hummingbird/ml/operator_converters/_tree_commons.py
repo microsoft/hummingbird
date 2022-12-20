@@ -365,7 +365,7 @@ def get_parameters_for_gemm_common(lefts, rights, features, thresholds, values, 
         features = [0, 0, 0]
         thresholds = [0, 0, 0]
         n_classes = values.shape[1]
-        values = np.array([np.zeros(n_classes), values[0], values[0]])
+        values = np.array([np.zeros(n_classes), values.reshape(1), values.reshape(1)])
         values.reshape(3, n_classes)
 
     # First hidden layer has all inequalities.
