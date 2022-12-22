@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-11, windows-2022]
+        os: [ubuntu-22.04, macos-12, windows-2022]
         python-version: ['3.8', '3.9', '3.10']
 
     steps:
@@ -61,7 +61,7 @@ jobs:
     - name: Coverage on basic tests without extra
       run: coverage run -a -m pytest tests/test_no_extra_install.py
     - name: If mac, install libomp to facilitate lgbm install
-      if: matrix.os == 'macos-11'
+      if: ${{ startsWith(matrix.os, 'macos')}}
       run: |
         wget https://raw.githubusercontent.com/Homebrew/homebrew-core/fb8323f2b170bd4ae97e1bac9bf3e2983af3fdb0/Formula/libomp.rb
         brew unlink libomp
@@ -82,7 +82,7 @@ jobs:
       run: python -m pip install apache-tvm==0.10.0
     - uses: actions/cache@v3
       # TVM takes forever, we try to cache it.
-      if: ${{ matrix.os == 'macos-11' }}
+      if: ${{ startsWith(matrix.os, 'macos')}}
       id: cache
       env:
         CACHE_NUMBER: 7
@@ -93,7 +93,7 @@ jobs:
     # 1 to 3 will be retrieved from the cache.
     # The pipeline only works for Unix systems. For windows we will have to compile LLVM from source which is a no go.
     - name: Fetch and prepare TVM for compilation if Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
       run: |
         cd ~/work/hummingbird
         git clone https://github.com/apache/tvm.git
@@ -102,7 +102,7 @@ jobs:
         git submodule update --recursive --init
         cmake -E make_directory build
     - name: CMake TVM if Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
       working-directory: ../tvm/build
       run: >-
         cmake
@@ -111,12 +111,12 @@ jobs:
         "-DUSE_LLVM=$(brew --prefix llvm@14)/bin/llvm-config --link-static"
         ..
     - name: Build TVM if Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos-11' }}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
       working-directory: ../tvm/build
       run: |
         make -j3
     - name: Install python TVM if Mac
-      if: ${{  matrix.os == 'macos-11' }}
+      if: ${{  startsWith(matrix.os, 'macos') }}
       working-directory: ../tvm/python
       run: |
         python setup.py install
