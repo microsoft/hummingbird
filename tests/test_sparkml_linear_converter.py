@@ -9,7 +9,7 @@ import torch
 
 from hummingbird.ml._utils import sparkml_installed, pandas_installed
 from hummingbird.ml import convert
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 
 if sparkml_installed():
     from pyspark.sql import SparkSession, SQLContext

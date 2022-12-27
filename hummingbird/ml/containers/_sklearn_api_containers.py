@@ -53,7 +53,7 @@ class SklearnContainer(ABC):
         """
         This function scores the full dataset at once. See BatchContainer below for batched scoring.
         """
-        if DataFrame is not None and type(inputs[0]) == DataFrame:
+        if DataFrame is not None and isinstance(inputs[0], DataFrame):
             if self._check_dataframe_to_array:
                 # We were expecting a numpy array as input but we got a dataframe: call values() on it to get the array.
                 inputs = [inputs[0].values]

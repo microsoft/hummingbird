@@ -5,7 +5,6 @@
 # --------------------------------------------------------------------------
 
 import unittest
-from distutils.version import StrictVersion
 
 import numpy as np
 from sklearn.datasets import load_digits, load_iris

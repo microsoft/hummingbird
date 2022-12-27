@@ -88,7 +88,7 @@ class BatchContainer:
         )
 
     def _predict_common(self, predict_func, remainder_predict_func, *inputs, concatenate_outputs=True):
-        if DataFrame is not None and type(inputs[0]) == DataFrame:
+        if DataFrame is not None and isinstance(inputs[0], DataFrame):
             # Split the dataframe into column ndarrays.
             inputs = inputs[0]
             input_names = list(inputs.columns)

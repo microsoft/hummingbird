@@ -1,7 +1,7 @@
 """
 Tests onnxml LabelEncoder converter
 """
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 import unittest
 import warnings
 
@@ -57,7 +57,7 @@ class TestONNXLabelEncoder(unittest.TestCase):
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
     @unittest.skipIf(
-        LooseVersion(torch.__version__) < LooseVersion("1.8.0"),
+        parse(torch.__version__) < Version("1.8.0"),
         reason="PyTorch exporter don't support nonzero until version 1.8.0",
     )
     def test_model_label_encoder_str_onnxml(self):
@@ -91,7 +91,7 @@ class TestONNXLabelEncoder(unittest.TestCase):
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
     )
     @unittest.skipIf(
-        LooseVersion(torch.__version__) >= LooseVersion("1.8.0"),
+        parse(torch.__version__) >= Version("1.8.0"),
         reason="PyTorch exporter supports nonzero only from version 1.8.0 and should fail on older versions",
     )
     def test_le_string_raises_rt_onnx(self):

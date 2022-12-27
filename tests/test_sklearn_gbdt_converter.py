@@ -5,8 +5,8 @@ import unittest
 import warnings
 
 import numpy as np
-import torch
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
+from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed
 
 import hummingbird.ml
 from tree_utils import gbdt_implementation_map
@@ -168,6 +168,31 @@ class TestSklearnGradientBoostingConverter(unittest.TestCase):
             torch_model = hummingbird.ml.convert(model, "torch", extra_config={})
             self.assertIsNotNone(torch_model)
             np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_varying_batch_sizes(self):
+        warnings.filterwarnings("ignore")
+        for max_depth in [1, 3, 8, 10, 12, None]:
+            model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+            np.random.seed(0)
+            X = np.random.rand(100, 200)
+            X = np.array(X, dtype=np.float32)
+            y = np.random.randint(2, size=100)
+
+            model.fit(X, y)
+            for backend in ["torch", "onnx"]:
+                conv_model = hummingbird.ml.convert(model, backend, X, extra_config={})
+                self.assertIsNotNone(conv_model)
+
+                for batch_size in [2, 50, 100, 200]:
+                    X_test = np.random.rand(batch_size, 200)
+                    X_test = np.array(X_test, dtype=np.float32)
+                    model_probs = model.predict_proba(X_test)
+                    conv_probs = conv_model.predict_proba(X_test)
+                    np.testing.assert_allclose(model_probs, conv_probs, rtol=1e-06, atol=1e-06)
+                    np.testing.assert_equal(len(model_probs), len(conv_probs))
 
     # Failure Cases
     def test_sklearn_GBDT_classifier_raises_wrong_type(self):

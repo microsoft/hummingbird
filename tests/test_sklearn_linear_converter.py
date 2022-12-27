@@ -3,7 +3,7 @@ Tests sklearn linear classifiers (LinearRegression, LogisticRegression, SGDClass
 """
 import unittest
 import warnings
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 
 import numpy as np
 import torch
@@ -16,6 +16,9 @@ from sklearn.linear_model import (
     Lasso,
     ElasticNet,
     Ridge,
+    TweedieRegressor,
+    PoissonRegressor,
+    GammaRegressor,
 )
 from sklearn import datasets
 
@@ -494,6 +497,36 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
         self.assertTrue(tvm_model is not None)
 
         np.testing.assert_allclose(model.predict(X), tvm_model.predict(X), rtol=1e-6, atol=1e-3)
+
+    def test_tweedie_regressor(self):
+        clf = TweedieRegressor()
+        X = [[1, 2], [2, 3], [3, 4], [4, 3]]
+        y = [2, 3.5, 5, 5.5]
+
+        clf.fit(X, y)
+        hb_model = hummingbird.ml.convert(clf, "torch")
+
+        np.testing.assert_allclose(clf.predict([[1, 1], [3, 4]]), hb_model.predict([[1, 1], [3, 4]]), rtol=1e-6, atol=1e-3)
+
+    def test_poisson_regressor(self):
+        clf = PoissonRegressor()
+        X = [[1, 2], [2, 3], [3, 4], [4, 3]]
+        y = [12, 17, 22, 21]
+
+        clf.fit(X, y)
+        hb_model = hummingbird.ml.convert(clf, "torch")
+
+        np.testing.assert_allclose(clf.predict([[1, 1], [3, 4]]), hb_model.predict([[1, 1], [3, 4]]), rtol=1e-6, atol=1e-3)
+
+    def test_gamma_regressor(self):
+        clf = GammaRegressor()
+        X = [[1, 2], [2, 3], [3, 4], [4, 3]]
+        y = [19, 26, 33, 30]
+
+        clf.fit(X, y)
+        hb_model = hummingbird.ml.convert(clf, "torch")
+
+        np.testing.assert_allclose(clf.predict([[1, 1], [3, 4]]), hb_model.predict([[1, 1], [3, 4]]), rtol=1e-6, atol=1e-3)
 
 
 if __name__ == "__main__":

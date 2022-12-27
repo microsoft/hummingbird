@@ -1,7 +1,7 @@
 """
 Tests extra configurations.
 """
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 import unittest
 import warnings
 import sys
@@ -39,7 +39,7 @@ if onnx_ml_tools_installed():
 class TestExtraConf(unittest.TestCase):
     # Test default number of threads. It will only work on mac after 1.6 https://github.com/pytorch/pytorch/issues/43036
     @unittest.skipIf(
-        sys.platform == "darwin" and LooseVersion(torch.__version__) <= LooseVersion("1.6.0"),
+        sys.platform == "darwin" and parse(torch.__version__) <= Version("1.6.0"),
         reason="PyTorch has a bug on mac related to multi-threading",
     )
     def test_torch_deafault_n_threads(self):
@@ -62,7 +62,7 @@ class TestExtraConf(unittest.TestCase):
 
     # Test one thread in pytorch.
     @unittest.skipIf(
-        sys.platform == "darwin" and LooseVersion(torch.__version__) > LooseVersion("1.6.0"),
+        sys.platform == "darwin" and parse(torch.__version__) > Version("1.6.0"),
         reason="Setting threading multi times will break on mac",
     )
     def test_torch_one_thread(self):
@@ -101,7 +101,7 @@ class TestExtraConf(unittest.TestCase):
 
         # Create ONNX-ML model
         onnx_ml_model = convert_sklearn(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+            model, initial_types=[("input", FloatTensorType([None, X.shape[1]]))], target_opset=9
         )
 
         hb_model = hummingbird.ml.convert(onnx_ml_model, "onnx", X)
@@ -790,7 +790,7 @@ class TestExtraConf(unittest.TestCase):
 
         # Create ONNX-ML model
         onnx_ml_model = convert_lightgbm(
-            model, initial_types=[("input", FloatTensorType([X.shape[0], X.shape[1]]))], target_opset=9
+            model, initial_types=[("input", FloatTensorType([None, X.shape[1]]))], target_opset=9
         )
 
         # Create ONNX model

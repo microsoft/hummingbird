@@ -8,7 +8,7 @@
 Converter for Bagging operators.
 """
 
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 import numpy as np
 from onnxconverter_common.registration import register_converter
 import torch

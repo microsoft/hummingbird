@@ -21,6 +21,7 @@ DecisionTreeRegressor,
 ExtraTreesClassifier,
 ExtraTreesRegressor,
 FastICA,
+GammaRegressor,
 GaussianNB,
 GradientBoostingClassifier,
 GradientBoostingRegressor,
@@ -51,6 +52,7 @@ Normalizer,
 OneHotEncoder,
 PCA,
 PLSRegression,
+PoissonRegressor,
 PolynomialFeatures,
 RandomForestClassifier,
 RandomForestRegressor,
@@ -64,6 +66,7 @@ StandardScaler,
 TreeEnsembleClassifier,
 TreeEnsembleRegressor,
 TruncatedSVD,
+TweedieRegressor,
 VarianceThreshold,
 
 **Supported Operators (LGBM)**
@@ -145,6 +148,9 @@ def _build_sklearn_operator_list():
             ElasticNet,
             Ridge,
             Lasso,
+            TweedieRegressor,
+            PoissonRegressor,
+            GammaRegressor,
         )
 
         # SVM-based models
@@ -223,6 +229,9 @@ def _build_sklearn_operator_list():
             Lasso,
             ElasticNet,
             Ridge,
+            TweedieRegressor,
+            PoissonRegressor,
+            GammaRegressor,
             # Clustering
             KMeans,
             MeanShift,

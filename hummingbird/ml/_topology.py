@@ -9,7 +9,7 @@ Converters for topology IR are stored in this file.
 """
 import numpy as np
 import os
-from distutils.version import LooseVersion
+from packaging.version import Version, parse
 import torch
 from uuid import uuid4
 
@@ -212,7 +212,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
         if backend == onnx.__name__:
             # Pytorch <= 1.4.0 has a bug with exporting GEMM into ONNX.
-            if LooseVersion(torch.__version__) <= LooseVersion("1.4"):
+            if parse(torch.__version__) <= Version("1.4"):
                 # Raise en error and warn user that the torch version is not supported with onnx backend
                 raise Exception(
                     f"The current torch version {torch.__version__} is not supported with {backend} backend. "
@@ -256,6 +256,10 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
         # Put the tracing test input into the right format.
         batch_trace_input, remainder_input = _get_trace_input_from_test_input(test_input, remainder_size, extra_config)
+        # Supports dynamic batch size
+        dynamic_axes_cfg = {
+            k: {0: "sym"} for k in topology.input_container.input_names + topology.input_container.output_names
+        }
 
         # Generate the ONNX models
         torch.onnx.export(
@@ -264,6 +268,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
             output_model_name,
             input_names=topology.input_container.input_names,
             output_names=topology.input_container.output_names,
+            dynamic_axes=dynamic_axes_cfg,
             keep_initializers_as_inputs=False,
             opset_version=target_opset,
             do_constant_folding=True,
@@ -278,6 +283,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
                 output_model_name,
                 input_names=topology.input_container.input_names,
                 output_names=topology.input_container.output_names,
+                dynamic_axes=dynamic_axes_cfg,
                 keep_initializers_as_inputs=False,
                 opset_version=target_opset,
                 do_constant_folding=True,
@@ -289,43 +295,6 @@ def convert(topology, backend, test_input, device, extra_config={}):
         if onnx_model_name is not None:
             hb_model.graph.name = onnx_model_name
 
-        # Fix the model to use arbitrary batch dimensions
-        def fix_dim(dim):
-            updated = False
-            if dim.HasField("dim_value"):
-                dim.Clear()
-                updated = True
-                dim.dim_param = "sym"
-
-            return updated
-
-        def fix_value_info(value):
-            num_fixed = 0
-            if value.type.HasField("tensor_type"):
-                shape = value.type.tensor_type.shape
-                if shape:
-                    dim = shape.dim[0]
-                    if fix_dim(dim):
-                        num_fixed += 1
-
-            return num_fixed
-
-        def fix_graph(graph):
-            num_fixed = 0
-            for input in graph.input:
-                num_fixed += fix_value_info(input)
-
-            for output in graph.output:
-                num_fixed += fix_value_info(output)
-
-            for node in graph.node:
-                for attr in node.attribute:
-                    if attr.HasField("g"):
-                        num_fixed += fix_graph(attr.g)
-
-            return num_fixed
-
-        fix_graph(hb_model.graph)
     elif backend == tvm_backend:
         # Pick the proper target.
         if device == "cuda":

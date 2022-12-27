@@ -5,7 +5,7 @@ import unittest
 import warnings
 
 import numpy as np
-from sklearn.datasets import load_boston
+from sklearn.datasets import fetch_california_housing
 from sklearn.model_selection import train_test_split
 
 import hummingbird.ml
@@ -232,9 +232,9 @@ class TestXGBoostConverter(unittest.TestCase):
     # Test xgboost with pandas.
     @unittest.skipIf(not xgboost_installed() or not pandas_installed(), reason="test requires XGBoost and Pandas installed")
     def test_run_xgb_pandas(self):
-        boston = load_boston()
-        data = pd.DataFrame(boston.data)
-        data.columns = boston.feature_names
+        cali = fetch_california_housing()
+        data = pd.DataFrame(cali.data)
+        data.columns = cali.feature_names
 
         X, y = data.iloc[:, :-1], data.iloc[:, -1]
         # Split the data into training and testing dataset by taking train_size as 75%

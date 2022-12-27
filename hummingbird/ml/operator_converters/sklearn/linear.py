@@ -10,6 +10,7 @@ Converters for scikit-learn linear models: LinearRegression, LogisticRegression,
 
 import numpy as np
 from onnxconverter_common.registration import register_converter
+from sklearn._loss.link import LogLink
 
 from .._linear_implementations import LinearModel
 
@@ -81,6 +82,7 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
     """
     assert operator is not None, "Cannot convert None operator"
 
+    loss = None
     coefficients = operator.raw_operator.coef_.transpose().astype("float32")
     if len(coefficients.shape) == 1:
         coefficients = coefficients.reshape(-1, 1)
@@ -91,7 +93,10 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
     else:
         intercepts = intercepts.reshape(1, -1).astype("float32")
 
-    return LinearModel(operator, coefficients, intercepts, device, is_linear_regression=True)
+    if hasattr(operator.raw_operator, "_base_loss") and type(operator.raw_operator._base_loss.link) == LogLink:
+        loss = "log"
+
+    return LinearModel(operator, coefficients, intercepts, device, loss=loss, is_linear_regression=True)
 
 
 register_converter("SklearnLinearRegression", convert_sklearn_linear_regression_model)
@@ -104,3 +109,6 @@ register_converter("SklearnLinearSVR", convert_sklearn_linear_regression_model)
 register_converter("SklearnSGDClassifier", convert_sklearn_linear_model)
 register_converter("SklearnLogisticRegressionCV", convert_sklearn_linear_model)
 register_converter("SklearnRidgeCV", convert_sklearn_linear_regression_model)
+register_converter("SklearnTweedieRegressor", convert_sklearn_linear_regression_model)
+register_converter("SklearnPoissonRegressor", convert_sklearn_linear_regression_model)
+register_converter("SklearnGammaRegressor", convert_sklearn_linear_regression_model)
