@@ -143,9 +143,14 @@ Join our community! [![Gitter](https://badges.gitter.im/hummingbird-ml/community
 
 # Authors
 
-* Supun Nakandala
-* Matteo Interlandi
-* Karla Saur
+* Supun Nakandala ([@scnakandala](https://github.com/scnakandala))
+* Matteo Interlandi ([@interesaaat](https://github.com/interesaaat))
+* Karla Saur ([@ksaur](https://github.com/ksaur))
+
+# Special Thanks
+
+* Masahiro Hiramori ([@mshr-h](https://github.com/mshr-h)) for the ongoing contributions
+* Masahiro Masuda ([@masahi](https://github.com/masahi)) for the TVM and batching contributions
 
 # License
 [MIT License](LICENSE)
