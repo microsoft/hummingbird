@@ -135,7 +135,7 @@ def prepare_fraud(dataset_folder, nrows):
     if not os.path.isfile(local_url):
         urlretrieve(url, local_url)
 
-    df = pd.read_csv(local_url, nro ws=nrows)
+    df = pd.read_csv(local_url, nrows=nrows)
     X = df[[col for col in df.columns if col.startswith("V")]]
     y = df["Class"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
