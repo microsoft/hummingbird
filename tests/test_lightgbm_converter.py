@@ -88,6 +88,25 @@ class TestLGBMConverter(unittest.TestCase):
     def test_lgbm_perf_tree_trav_multi_classifier_converter(self):
         self._run_lgbm_classifier_converter(3, extra_config={"tree_implementation": "perf_tree_trav"})
 
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_raw_logits(self):
+        warnings.filterwarnings("ignore")
+        model = lgb.LGBMClassifier(n_estimators=10)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(3, size=100)
+
+        model.fit(X, y)
+
+        # "post_transform": None should return raw scores
+        torch_model = hummingbird.ml.convert(model, "torch", extra_config={"post_transform": None})
+        self.assertIsNotNone(torch_model)
+
+        np.testing.assert_allclose(
+            model.predict_proba(X, raw_score=True), torch_model.predict_proba(X), rtol=1e-06, atol=1e-06
+        )
+
     def _run_lgbm_ranker_converter(self, num_classes, extra_config={}, label_gain=None):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12, None]:
