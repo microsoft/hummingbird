@@ -124,18 +124,18 @@ def prepare_airline(dataset_folder, nrows):  # pylint: disable=too-many-locals
 
 
 def prepare_fraud(dataset_folder, nrows):
-    if not os.path.exists(dataset_folder):
-        os.makedirs(dataset_folder)
-    filename = "creditcard.csv"
-    local_url = os.path.join(dataset_folder, filename)
+    url = "https://datahub.io/machine-learning/creditcard/r/creditcard.csv"
+    local_url = os.path.join(dataset_folder, os.path.basename(url))
     pickle_url = os.path.join(dataset_folder, "fraud" + ("" if nrows is None else "-" + str(nrows)) + "-pickle.dat")
+
     if os.path.exists(pickle_url):
         return pickle.load(open(pickle_url, "rb"))
-
     print("Preparing dataset ...")
 
-    os.system("kaggle datasets download mlg-ulb/creditcardfraud -f" + filename + " -p " + dataset_folder)
-    df = pd.read_csv(local_url + ".zip", dtype=np.float32, nrows=nrows)
+    if not os.path.isfile(local_url):
+        urlretrieve(url, local_url)
+
+    df = pd.read_csv(local_url, nrows=nrows)
     X = df[[col for col in df.columns if col.startswith("V")]]
     y = df["Class"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=77, test_size=0.2,)
