@@ -27,8 +27,8 @@ install_requires = [
     "torch>1.7.0",
     "psutil",
     "dill",
-    "onnx>=1.7.0,<=1.12.0",
     "protobuf>=3.20.2",
+    "onnx>=1.7.0,<=1.12.0",
 ]
 onnx_requires = [
     "onnxruntime>=1.0.0",
