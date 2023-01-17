@@ -427,6 +427,60 @@ def _build_sklearn_api_operator_name_map():
     }
 
 
+def _build_sklearn_operator_with_two_outputs():
+    """
+    Associate Sklearn with the operator class names that have two outputs.
+    """
+    """
+    Put all supported Sklearn operators on a list.
+    """
+    ops = set()
+
+    if sklearn_installed():
+        # Tree-based models
+        from sklearn.ensemble import (
+            ExtraTreesClassifier,
+            GradientBoostingClassifier,
+            HistGradientBoostingClassifier,
+            RandomForestClassifier,
+        )
+
+        from sklearn.tree import DecisionTreeClassifier
+
+        # Linear-based models
+        from sklearn.linear_model import (
+            LogisticRegression,
+            LogisticRegressionCV,
+            SGDClassifier,
+        )
+
+        # SVM-based models
+        from sklearn.svm import LinearSVC, SVC, NuSVC
+
+        ops.add(
+            [
+                # Trees
+                DecisionTreeClassifier,
+                ExtraTreesClassifier,
+                GradientBoostingClassifier,
+                HistGradientBoostingClassifier,
+                RandomForestClassifier,
+                LinearSVC,
+                LogisticRegression,
+                LogisticRegressionCV,
+                SGDClassifier,
+                # SVM
+                NuSVC,
+                SVC,
+            ]
+        )
+
+        ops.add(xgb_operator_list[0] if len(xgb_operator_list) > 0 else None)
+        ops.add(lgbm_operator_list[0] if len(lgbm_operator_list) > 0 else None)
+
+    return ops
+
+
 def _build_onnxml_api_operator_name_map():
     """
     Associate ONNXML with the operator class names.
@@ -464,6 +518,22 @@ def get_sklearn_api_operator_name(model_type):
     if model_type not in sklearn_api_operator_name_map:
         raise MissingConverter("Unable to find converter for model type {}.".format(model_type))
     return sklearn_api_operator_name_map[model_type]
+
+
+def is_sklearn_models_with_two_outputs(model_type):
+    """
+    Get the operator name for the input model type in *scikit-learn API* format.
+
+    Args:
+        model_type: A scikit-learn model object (e.g., RandomForestClassifier)
+                    or an object with scikit-learn API (e.g., LightGBM)
+
+    Returns:
+        A string which stands for the type of the input model in the Hummingbird conversion framework
+    """
+    assert model_type in sklearn_api_operator_name_map
+
+    return sklearn_operator_with_two_outputs[model_type]
 
 
 def get_onnxml_api_operator_name(model_type):
@@ -507,6 +577,7 @@ sparkml_operator_list = _build_sparkml_operator_list()
 prophet_operator_list = _build_prophet_operator_list()
 
 sklearn_api_operator_name_map = _build_sklearn_api_operator_name_map()
+sklearn_operator_with_two_outputs = _build_sklearn_operator_with_two_outputs()
 onnxml_api_operator_name_map = _build_onnxml_api_operator_name_map()
 sparkml_api_operator_name_map = _build_sparkml_api_operator_name_map()
 

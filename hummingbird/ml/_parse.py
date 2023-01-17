@@ -11,7 +11,6 @@ Some code here have been copied from https://github.com/onnx/sklearn-onnx/.
 from collections import OrderedDict
 from copy import deepcopy
 import pprint
-from uuid import uuid4
 
 import numpy as np
 from onnxconverter_common.optimizer import LinkedNode, _topological_sort
@@ -27,7 +26,12 @@ from .containers import CommonSklearnModelContainer, CommonONNXModelContainer, C
 from ._topology import Topology
 from ._utils import sklearn_installed, sparkml_installed
 from .operator_converters import constants
-from .supported import get_sklearn_api_operator_name, get_onnxml_api_operator_name, get_sparkml_api_operator_name
+from .supported import (
+    get_sklearn_api_operator_name,
+    is_sklearn_models_with_two_outputs,
+    get_onnxml_api_operator_name,
+    get_sparkml_api_operator_name,
+)
 
 # Stacking is only supported starting from scikit-learn 0.22.
 try:
@@ -249,13 +253,22 @@ def _parse_sklearn_single_model(topology, model, inputs):
     if isinstance(model, str):
         raise RuntimeError("Parameter model must be an object not a " "string '{0}'.".format(model))
 
-    alias = get_sklearn_api_operator_name(type(model))
+    model_type = type(model)
+    alias = get_sklearn_api_operator_name(model_type)
     this_operator = topology.declare_logical_operator(alias, model)
     this_operator.inputs = inputs
 
-    # We assume that all scikit-learn operators produce a single output.
-    variable = topology.declare_logical_variable("variable")
-    this_operator.outputs.append(variable)
+    if is_sklearn_models_with_two_outputs(model_type):
+        # This operator produces two outputs (e.g., label and probability)
+        variable = topology.declare_logical_variable("variable1")
+        this_operator.outputs.append(variable)
+
+        variable = topology.declare_logical_variable("variable2")
+        this_operator.outputs.append(variable)
+    else:
+        # We assume that all scikit-learn operators produce a single output.
+        variable = topology.declare_logical_variable("variable")
+        this_operator.outputs.append(variable)
 
     return this_operator.outputs
 
@@ -602,7 +615,7 @@ def _parse_onnx_api(topology, model, inputs):
     node_list = LinkedNode.build_from_onnx(graph.node, [], inputs_names + [in_.name for in_ in initializers], output_names)
 
     # Make sure the entire node_list isn't only 'Identity'
-    if all([x.op_type == 'Identity' for x in node_list]):
+    if all([x.op_type == "Identity" for x in node_list]):
         raise RuntimeError("ONNX model contained only Identity nodes {}.".format(node_list))
 
     # This a new node list but with some node been removed plus eventual variable renaming.
