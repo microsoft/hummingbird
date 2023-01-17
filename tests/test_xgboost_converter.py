@@ -346,14 +346,18 @@ class TestXGBoostConverter(unittest.TestCase):
     @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires LightGBM installed")
     def test_xgb_onnx_two_outputs(self):
         model = xgb.XGBClassifier(n_estimators=3, max_depth=5)
-        X = [[0, 1], [1, 1], [2, 0]]
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)
-        y = np.array([100, -10, 50], dtype=np.float32)
+        y = np.random.randint(2, size=100)
 
         model.fit(X, y)
 
-        torch_model = hummingbird.ml.convert(model, "onnx", X)
+        torch_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.OUTPUT_NAMES: ['labels', 'predictions']})
         self.assertIsNotNone(torch_model)
+
+        assert(torch_model.model.graph.output[0].name == 'labels')
+        assert(torch_model.model.graph.output[1].name == 'predictions')
 
 
 if __name__ == "__main__":

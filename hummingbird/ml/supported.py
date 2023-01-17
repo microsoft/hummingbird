@@ -457,7 +457,7 @@ def _build_sklearn_operator_with_two_outputs():
         # SVM-based models
         from sklearn.svm import LinearSVC, SVC, NuSVC
 
-        ops.add(
+        ops.update(
             [
                 # Trees
                 DecisionTreeClassifier,
@@ -475,8 +475,8 @@ def _build_sklearn_operator_with_two_outputs():
             ]
         )
 
-        ops.add(xgb_operator_list[0] if len(xgb_operator_list) > 0 else None)
-        ops.add(lgbm_operator_list[0] if len(lgbm_operator_list) > 0 else None)
+        ops.update([xgb_operator_list[0]] if len(xgb_operator_list) > 0 else [])
+        ops.update([lgbm_operator_list[0]] if len(lgbm_operator_list) > 0 else [])
 
     return ops
 
@@ -533,7 +533,7 @@ def is_sklearn_models_with_two_outputs(model_type):
     """
     assert model_type in sklearn_api_operator_name_map
 
-    return sklearn_operator_with_two_outputs[model_type]
+    return model_type in sklearn_operator_with_two_outputs
 
 
 def get_onnxml_api_operator_name(model_type):
