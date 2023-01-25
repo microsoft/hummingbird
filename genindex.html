@@ -233,6 +233,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._kneighbors_implementations.html">hummingbird.ml.operator_converters._kneighbors_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html">hummingbird.ml.operator_converters._label_encoder_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._linear_implementations.html">hummingbird.ml.operator_converters._linear_implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._mixture_implementations.html">hummingbird.ml.operator_converters._mixture_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._mlp_implementations.html">hummingbird.ml.operator_converters._mlp_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/hummingbird.ml.operator_converters._normalizer_implementations.html">hummingbird.ml.operator_converters._normalizer_implementations</a></li>
@@ -425,6 +426,8 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._linear_implementations.html#hummingbird.ml.operator_converters._linear_implementations.LinearModel._abc_impl">(hummingbird.ml.operator_converters._linear_implementations.LinearModel attribute)</a>
 </li>
+        <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture._abc_impl">(hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture attribute)</a>
+</li>
         <li><a href="api/hummingbird.ml.operator_converters._mlp_implementations.html#hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel._abc_impl">(hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel attribute)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._mlp_implementations.html#hummingbird.ml.operator_converters._mlp_implementations.MLPModel._abc_impl">(hummingbird.ml.operator_converters._mlp_implementations.MLPModel attribute)</a>
@@ -520,12 +523,12 @@
 </li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_onnxml_operator_list">_build_onnxml_operator_list() (in module hummingbird.ml.supported)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_prophet_api_operator_name_map">_build_prophet_api_operator_name_map() (in module hummingbird.ml.supported)</a>
 </li>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_prophet_operator_list">_build_prophet_operator_list() (in module hummingbird.ml.supported)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_sklearn_api_operator_name_map">_build_sklearn_api_operator_name_map() (in module hummingbird.ml.supported)</a>
 </li>
       <li><a href="api/hummingbird.ml._parse.html#hummingbird.ml._parse._build_sklearn_api_parsers_map">_build_sklearn_api_parsers_map() (in module hummingbird.ml._parse)</a>
@@ -541,6 +544,10 @@
       <li><a href="api/hummingbird.ml.supported.html#hummingbird.ml.supported._build_xgboost_operator_list">_build_xgboost_operator_list() (in module hummingbird.ml.supported)</a>
 </li>
       <li><a href="api/hummingbird.ml._topology.html#hummingbird.ml._topology._compile_to_tvm">_compile_to_tvm() (in module hummingbird.ml._topology)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#hummingbird.ml.operator_converters._mixture_implementations._compute_log_det_cholesky">_compute_log_det_cholesky() (in module hummingbird.ml.operator_converters._mixture_implementations)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#hummingbird.ml.operator_converters._mixture_implementations._compute_precision_cholesky">_compute_precision_cholesky() (in module hummingbird.ml.operator_converters._mixture_implementations)</a>
 </li>
       <li><a href="api/hummingbird.ml._utils.html#hummingbird.ml._utils._Constants">_Constants (class in hummingbird.ml._utils)</a>
 </li>
@@ -573,6 +580,14 @@
       <li><a href="api/hummingbird.ml._parse.html#hummingbird.ml._parse._declare_output_variables">_declare_output_variables() (in module hummingbird.ml._parse)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.onnx.tree_ensemble.html#hummingbird.ml.operator_converters.onnx.tree_ensemble._dummy_get_parameter">_dummy_get_parameter() (in module hummingbird.ml.operator_converters.onnx.tree_ensemble)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#hummingbird.ml.operator_converters._mixture_implementations._estimate_log_gaussian_prob">_estimate_log_gaussian_prob() (in module hummingbird.ml.operator_converters._mixture_implementations)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture._estimate_log_prob">_estimate_log_prob() (hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture method)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture._estimate_log_weights">_estimate_log_weights() (hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture method)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture._estimate_weighted_log_prob">_estimate_weighted_log_prob() (hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture method)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters._tree_implementations.html#hummingbird.ml.operator_converters._tree_implementations.TreeTraversalTreeImpl._expand_indexes">_expand_indexes() (hummingbird.ml.operator_converters._tree_implementations.TreeTraversalTreeImpl method)</a>
 </li>
@@ -798,6 +813,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hummingbird.ml.containers.batch_container.html#hummingbird.ml.containers.batch_container.BatchContainer">BatchContainer (class in hummingbird.ml.containers.batch_container)</a>
 </li>
+      <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture">BayesianGaussianMixture (class in hummingbird.ml.operator_converters._mixture_implementations)</a>
+</li>
       <li><a href="api/hummingbird.ml.operator_converters._nb_implementations.html#hummingbird.ml.operator_converters._nb_implementations.BernoulliNBModel">BernoulliNBModel (class in hummingbird.ml.operator_converters._nb_implementations)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters._discretizer_implementations.html#hummingbird.ml.operator_converters._discretizer_implementations.Binarizer">Binarizer (class in hummingbird.ml.operator_converters._discretizer_implementations)</a>
@@ -895,6 +912,8 @@
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.pipeline.html#hummingbird.ml.operator_converters.sklearn.pipeline.convert_sklearn_array_feature_extractor">convert_sklearn_array_feature_extractor() (in module hummingbird.ml.operator_converters.sklearn.pipeline)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.bagging.html#hummingbird.ml.operator_converters.sklearn.bagging.convert_sklearn_baggind_model">convert_sklearn_baggind_model() (in module hummingbird.ml.operator_converters.sklearn.bagging)</a>
+</li>
+      <li><a href="api/hummingbird.ml.operator_converters.sklearn.mixture.html#hummingbird.ml.operator_converters.sklearn.mixture.convert_sklearn_BayesianGaussianMixture">convert_sklearn_BayesianGaussianMixture() (in module hummingbird.ml.operator_converters.sklearn.mixture)</a>
 </li>
       <li><a href="api/hummingbird.ml.operator_converters.sklearn.nb.html#hummingbird.ml.operator_converters.sklearn.nb.convert_sklearn_bernouli_naive_bayes">convert_sklearn_bernouli_naive_bayes() (in module hummingbird.ml.operator_converters.sklearn.nb)</a>
 </li>
@@ -1066,6 +1085,8 @@
         <li><a href="api/hummingbird.ml.operator_converters._label_encoder_implementations.html#hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder.forward">(hummingbird.ml.operator_converters._label_encoder_implementations.StringLabelEncoder method)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._linear_implementations.html#hummingbird.ml.operator_converters._linear_implementations.LinearModel.forward">(hummingbird.ml.operator_converters._linear_implementations.LinearModel method)</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture.forward">(hummingbird.ml.operator_converters._mixture_implementations.BayesianGaussianMixture method)</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._mlp_implementations.html#hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel.forward">(hummingbird.ml.operator_converters._mlp_implementations.MLPClassificationModel method)</a>
 </li>
@@ -1356,6 +1377,13 @@
 </li>
       </ul></li>
       <li>
+    hummingbird.ml.operator_converters._mixture_implementations
+
+      <ul>
+        <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#module-hummingbird.ml.operator_converters._mixture_implementations">module</a>
+</li>
+      </ul></li>
+      <li>
     hummingbird.ml.operator_converters._mlp_implementations
 
       <ul>
@@ -1631,6 +1659,13 @@
 </li>
       </ul></li>
       <li>
+    hummingbird.ml.operator_converters.sklearn.mixture
+
+      <ul>
+        <li><a href="api/hummingbird.ml.operator_converters.sklearn.mixture.html#module-hummingbird.ml.operator_converters.sklearn.mixture">module</a>
+</li>
+      </ul></li>
+      <li>
     hummingbird.ml.operator_converters.sklearn.mlp
 
       <ul>
@@ -1872,6 +1907,8 @@
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._linear_implementations.html#module-hummingbird.ml.operator_converters._linear_implementations">hummingbird.ml.operator_converters._linear_implementations</a>
 </li>
+        <li><a href="api/hummingbird.ml.operator_converters._mixture_implementations.html#module-hummingbird.ml.operator_converters._mixture_implementations">hummingbird.ml.operator_converters._mixture_implementations</a>
+</li>
         <li><a href="api/hummingbird.ml.operator_converters._mlp_implementations.html#module-hummingbird.ml.operator_converters._mlp_implementations">hummingbird.ml.operator_converters._mlp_implementations</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters._nb_implementations.html#module-hummingbird.ml.operator_converters._nb_implementations">hummingbird.ml.operator_converters._nb_implementations</a>
@@ -1949,6 +1986,8 @@
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.label_encoder.html#module-hummingbird.ml.operator_converters.sklearn.label_encoder">hummingbird.ml.operator_converters.sklearn.label_encoder</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.linear.html#module-hummingbird.ml.operator_converters.sklearn.linear">hummingbird.ml.operator_converters.sklearn.linear</a>
+</li>
+        <li><a href="api/hummingbird.ml.operator_converters.sklearn.mixture.html#module-hummingbird.ml.operator_converters.sklearn.mixture">hummingbird.ml.operator_converters.sklearn.mixture</a>
 </li>
         <li><a href="api/hummingbird.ml.operator_converters.sklearn.mlp.html#module-hummingbird.ml.operator_converters.sklearn.mlp">hummingbird.ml.operator_converters.sklearn.mlp</a>
 </li>

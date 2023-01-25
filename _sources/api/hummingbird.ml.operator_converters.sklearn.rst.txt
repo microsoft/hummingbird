@@ -24,6 +24,7 @@ hummingbird.ml.operator\_converters.sklearn
    hummingbird.ml.operator_converters.sklearn.kneighbors
    hummingbird.ml.operator_converters.sklearn.label_encoder
    hummingbird.ml.operator_converters.sklearn.linear
+   hummingbird.ml.operator_converters.sklearn.mixture
    hummingbird.ml.operator_converters.sklearn.mlp
    hummingbird.ml.operator_converters.sklearn.nb
    hummingbird.ml.operator_converters.sklearn.normalizer

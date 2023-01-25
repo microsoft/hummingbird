@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.\_mixture\_implementations
+==============================================================
+
+.. automodule:: hummingbird.ml.operator_converters._mixture_implementations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

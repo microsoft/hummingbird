@@ -1,0 +1,8 @@
+hummingbird.ml.operator\_converters.sklearn.mixture
+===================================================
+
+.. automodule:: hummingbird.ml.operator_converters.sklearn.mixture
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
