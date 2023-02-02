@@ -356,8 +356,8 @@ class TestXGBoostConverter(unittest.TestCase):
         torch_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.OUTPUT_NAMES: ['labels', 'predictions']})
         self.assertIsNotNone(torch_model)
 
-        assert(torch_model.model.graph.output[0].name == 'labels')
-        assert(torch_model.model.graph.output[1].name == 'predictions')
+        self.assertTrue(torch_model.model.graph.output[0].name == 'labels')
+        self.assertTrue(torch_model.model.graph.output[1].name == 'predictions')
 
 
 if __name__ == "__main__":
