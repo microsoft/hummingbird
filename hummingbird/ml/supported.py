@@ -45,6 +45,7 @@ MaxAbsScaler,
 MeanShift,
 MinMaxScaler,
 MissingIndicator,
+Mixture,
 MLPClassifier,
 MLPRegressor,
 MultinomialNB,
@@ -204,6 +205,9 @@ def _build_sklearn_operator_list():
         # Features
         from sklearn.feature_selection import SelectKBest, SelectPercentile, VarianceThreshold
 
+        # Mixture models
+        from sklearn.mixture import BayesianGaussianMixture
+
         supported_ops = [
             # Trees
             DecisionTreeClassifier,
@@ -271,6 +275,8 @@ def _build_sklearn_operator_list():
             SelectKBest,
             SelectPercentile,
             VarianceThreshold,
+            # Mixture models
+            BayesianGaussianMixture,
         ]
 
         # Remove all deprecated operators given the sklearn version. E.g., Imputer for sklearn > 0.21.3.
