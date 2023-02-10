@@ -13,7 +13,7 @@ on:
       - main
       
   schedule:
-    - cron: "15 19 * * FRI"
+    - cron: "15 21 * * FRI"
 
 jobs:
   build:
