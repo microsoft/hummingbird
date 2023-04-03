@@ -22,10 +22,12 @@ class OneHotEncoderString(PhysicalOperator, torch.nn.Module):
     Because we are dealing with tensors, strings require additional length information for processing.
     """
 
-    def __init__(self, logical_operator, categories, device, extra_config={}):
+    def __init__(self, logical_operator, categories, handle_unknown, infrequent, device, extra_config={}):
         super(OneHotEncoderString, self).__init__(logical_operator, transformer=True)
 
         self.num_columns = len(categories)
+        self.handle_unknown = handle_unknown
+        self.infrequent = infrequent
         self.max_word_length = max([max([len(c) for c in cat]) for cat in categories])
 
         # Strings are casted to int32, therefore we need to properly size the tensor to me dividable by 4.
@@ -74,10 +76,12 @@ class OneHotEncoder(PhysicalOperator, torch.nn.Module):
     Class implementing OneHotEncoder operators for ints in PyTorch.
     """
 
-    def __init__(self, logical_operator, categories, device):
+    def __init__(self, logical_operator, categories, handle_unknown, infrequent, device):
         super(OneHotEncoder, self).__init__(logical_operator, transformer=True)
 
         self.num_columns = len(categories)
+        self.handle_unknown = handle_unknown
+        self.infrequent = infrequent
 
         condition_tensors = []
         for arr in categories:
@@ -86,6 +90,16 @@ class OneHotEncoder(PhysicalOperator, torch.nn.Module):
 
     def forward(self, *x):
         encoded_tensors = []
+
+
+        if self.handle_unknown == "ignore":
+            pass
+        elif self.handle_unknown == "infrequent_if_exist":
+            pass
+        elif self.handle_unknown == "error":
+            pass
+        else:
+            raise RuntimeError("Unsupported handle_unknown setting: {0}".format(self.handle_unknown))
 
         if len(x) > 1:
             assert len(x) == self.num_columns

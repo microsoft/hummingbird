@@ -29,6 +29,14 @@ def convert_sklearn_one_hot_encoder(operator, device, extra_config):
     """
     assert operator is not None, "Cannot convert None operator"
 
+    # scikit-learn >= 1.1 with handle_unknown = 'frequent_if_exist'
+    if hasattr(operator.raw_operator, "infrequent_categories_"):
+        infrequent = operator.raw_operator.infrequent_categories_
+    else:
+        infrequent = None
+
+    # TODO: What to do about min_frequency and max_categories? Either support them or raise an error.
+
     if all(
         [
             np.array(c).dtype == object or np.array(c).dtype.kind in constants.SUPPORTED_STRING_TYPES
@@ -36,9 +44,11 @@ def convert_sklearn_one_hot_encoder(operator, device, extra_config):
         ]
     ):
         categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
-        return OneHotEncoderString(operator, categories, device, extra_config)
+        return OneHotEncoderString(operator, categories, operator.raw_operator.handle_unknown,
+                                   infrequent, device, extra_config)
     else:
-        return OneHotEncoder(operator, operator.raw_operator.categories_, device)
+        return OneHotEncoder(operator, operator.raw_operator.categories_, operator.raw_operator.handle_unknown,
+                             infrequent, device)
 
 
 register_converter("SklearnOneHotEncoder", convert_sklearn_one_hot_encoder)
