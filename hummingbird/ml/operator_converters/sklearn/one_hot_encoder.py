@@ -36,6 +36,7 @@ def convert_sklearn_one_hot_encoder(operator, device, extra_config):
         infrequent = None
 
     # TODO: What to do about min_frequency and max_categories? Either support them or raise an error.
+    # see https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/preprocessing/_encoders.py#L178
 
     if all(
         [

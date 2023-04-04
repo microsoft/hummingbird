@@ -4,10 +4,11 @@ Tests sklearn OneHotEncoder converter
 import unittest
 
 import numpy as np
-import torch
+import sklearn
 from sklearn.preprocessing import OneHotEncoder
 import hummingbird.ml
 
+from packaging.version import Version, parse
 
 class TestSklearnOneHotEncoderConverter(unittest.TestCase):
     def test_model_one_hot_encoder_int(self):
@@ -91,6 +92,41 @@ class TestSklearnOneHotEncoderConverter(unittest.TestCase):
 
         np.testing.assert_allclose(model.transform(data).todense(), pytorch_model.transform(data), rtol=1e-06, atol=1e-06)
 
+
+    @unittest.skipIf(parse(sklearn.__version__) < Version("1.1"), "Skipping test because sklearn version is too old.")
+    def test_infrequent_if_exists(self):
+
+        # This test is a copy of the test in sklearn.
+        # https://github.com/scikit-learn/scikit-learn/blob/
+        #       ecb9a70e82d4ee352e2958c555536a395b53d2bd/sklearn/preprocessing/tests/test_encoders.py#L868
+
+        X_train = np.array([["a"] * 5 + ["b"] * 2000 + ["c"] * 10 + ["d"] * 3]).T
+        model = OneHotEncoder(
+            categories=[["a", "b", "c", "d"]],
+            handle_unknown="infrequent_if_exist",
+            sparse_output=False,
+            min_frequency=15,
+
+        ).fit(X_train)
+        np.testing.assert_array_equal(model.infrequent_categories_, [["a", "c", "d"]])
+
+
+        pytorch_model = hummingbird.ml.convert(model, "torch", device="cpu")
+        self.assertIsNotNone(pytorch_model)
+
+        X_test = [["b"], ["a"], ["c"], ["d"], ["e"]]
+        expected = np.array([[1, 0], [0, 1], [0, 1], [0, 1], [0, 1]])
+        orig = model.transform(X_test)
+        np.testing.assert_allclose(expected, orig)
+
+
+        hb = pytorch_model.transform(X_test)
+
+        print("In progress.  This is where it fails.")
+        print("orig: ", orig)
+        print("hb: ", hb)
+        np.testing.assert_allclose(orig, hb, rtol=1e-06, atol=1e-06)
+        np.testing.assert_allclose(orig.shape, hb.shape, rtol=1e-06, atol=1e-06)
 
 if __name__ == "__main__":
     unittest.main()
