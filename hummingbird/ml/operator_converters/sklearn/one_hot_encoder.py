@@ -35,8 +35,12 @@ def convert_sklearn_one_hot_encoder(operator, device, extra_config):
     else:
         infrequent = None
 
-    # TODO: What to do about min_frequency and max_categories? Either support them or raise an error.
+    # TODO: What to do about min_frequency and max_categories?
+    # If I understand correctly, they are only used prior to "fit", and we won't need them for inference.
+    # Both min_frequency and max_categories trigger the creation of the "infrequent" categories, but then
+    # are not used again.  So, we can ignore them for HB....i think?
     # see https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/preprocessing/_encoders.py#L178
+    # and the comment on line 503 same file.
 
     if all(
         [
