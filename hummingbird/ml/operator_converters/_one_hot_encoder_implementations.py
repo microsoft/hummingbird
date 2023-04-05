@@ -22,7 +22,7 @@ class OneHotEncoderString(PhysicalOperator, torch.nn.Module):
     Because we are dealing with tensors, strings require additional length information for processing.
     """
 
-    def __init__(self, logical_operator, categories, handle_unknown, device, infrequent=None, extra_config={}):
+    def __init__(self, logical_operator, categories, device, extra_config={}, handle_unknown='error', infrequent=None):
         super(OneHotEncoderString, self).__init__(logical_operator, transformer=True)
 
         self.num_columns = len(categories)
@@ -113,7 +113,7 @@ class OneHotEncoder(PhysicalOperator, torch.nn.Module):
     Class implementing OneHotEncoder operators for ints in PyTorch.
     """
 
-    def __init__(self, logical_operator, categories, handle_unknown, device, infrequent=None):
+    def __init__(self, logical_operator, categories, device, handle_unknown='error', infrequent=None):
         super(OneHotEncoder, self).__init__(logical_operator, transformer=True)
 
         self.num_columns = len(categories)
