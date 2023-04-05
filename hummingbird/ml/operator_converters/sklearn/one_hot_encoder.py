@@ -50,7 +50,7 @@ def convert_sklearn_one_hot_encoder(operator, device, extra_config):
     ):
         categories = [[str(x) for x in c.tolist()] for c in operator.raw_operator.categories_]
         return OneHotEncoderString(operator, categories, device, extra_config=extra_config,
-                                    handle_unknown=operator.raw_operator.handle_unknown, infrequent=infrequent)
+                                   handle_unknown=operator.raw_operator.handle_unknown, infrequent=infrequent)
     else:
         return OneHotEncoder(operator, operator.raw_operator.categories_, device,
                              handle_unknown=operator.raw_operator.handle_unknown, infrequent=infrequent)
