@@ -74,10 +74,11 @@ class OneHotEncoderString(PhysicalOperator, torch.nn.Module):
             self.infrequent_tensors = torch.nn.Parameter(torch.IntTensor(infrequent_tensors), requires_grad=False)
 
             # We need to create a mask to filter out infrequent categories.
-            self.mask = torch.nn.ParameterList([])
-            for i in range(len(self.condition_tensors[0])):
-                if self.condition_tensors[0][i] not in self.infrequent_tensors[0]:
-                    self.mask.append(torch.nn.Parameter(self.condition_tensors[0][i], requires_grad=False))
+            mask = []
+            for i in range(len(self.condition_tensors)):
+                if self.condition_tensors[i] not in self.infrequent_tensors:
+                    mask.append(self.condition_tensors[i])
+            self.mask = torch.nn.Parameter(torch.tensor([mask]).T, requires_grad=False)
         else:
             self.infrequent_tensors = None
 
