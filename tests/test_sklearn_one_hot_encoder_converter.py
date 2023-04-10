@@ -156,7 +156,13 @@ class TestSklearnOneHotEncoderConverter(unittest.TestCase):
 
         hb = hummingbird.ml.convert(ohe, "pytorch", device="cpu")
 
+        # Quick check on a dataset where all values have been seen during training
         np.testing.assert_allclose(ohe.transform(X_train), hb.transform(X_train), rtol=1e-06, atol=1e-06)
+
+        # Now check data not seen during training
+        X_test = np.array([[10.0, 1.0]] * 3 + [[14.0, 3.0]] * 2)
+        np.testing.assert_allclose(ohe.transform(X_test), hb.transform(X_test), rtol=1e-06, atol=1e-06)
+
 
     # @unittest.skipIf(parse(sklearn.__version__) < Version("1.1"), "Skipping test because sklearn version is too old.")
     # def test_user_provided_example(self):
