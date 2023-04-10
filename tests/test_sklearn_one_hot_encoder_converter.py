@@ -163,9 +163,9 @@ class TestSklearnOneHotEncoderConverter(unittest.TestCase):
         X_test = np.array([[10.0, 1.0]] * 3 + [[14.0, 3.0]] * 2)
         np.testing.assert_allclose(ohe.transform(X_test), hb.transform(X_test), rtol=1e-06, atol=1e-06)
 
-
-    # @unittest.skipIf(parse(sklearn.__version__) < Version("1.1"), "Skipping test because sklearn version is too old.")
-    # def test_user_provided_example(self):
+    @unittest.skipIf(parse(sklearn.__version__) < Version("1.1"), "Skipping test because sklearn version is too old.")
+    def test_user_provided_example(self):
+        pass
 
     #     from sklearn.impute import SimpleImputer
     #     from sklearn.pipeline import Pipeline
