@@ -169,10 +169,12 @@ class OneHotEncoder(PhysicalOperator, torch.nn.Module):
                 x = x.long()
 
             for i in range(self.num_columns):
-                encoded_tensors.append(torch.eq(x[:, i : i + 1], compare_tensors[i]))
+                curr_column = torch.eq(x[:, i : i + 1], compare_tensors[i])
+                encoded_tensors.append(curr_column)
 
-        # if self.infrequent_tensors is not None, then append another tensor that is the "not" of the sum of the encoded tensors.
-        if self.infrequent_tensors is not None:
-            encoded_tensors.append(torch.logical_not(torch.sum(torch.stack(encoded_tensors), dim=0)))
+                # If self.infrequent_tensors is not None, then append another tensor that is
+                #    the logical "not" of the sum of the encoded tensors of the *current* iteration only
+                if self.infrequent_tensors is not None:
+                    encoded_tensors.append(torch.logical_not(torch.sum(torch.stack([curr_column]), dim=0)))
 
         return torch.cat(encoded_tensors, dim=1).float()

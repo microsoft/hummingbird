@@ -148,19 +148,15 @@ class TestSklearnOneHotEncoderConverter(unittest.TestCase):
         np.testing.assert_allclose(orig, hb, rtol=1e-06, atol=1e-06)
         np.testing.assert_allclose(orig.shape, hb.shape, rtol=1e-06, atol=1e-06)
 
-    # @unittest.skipIf(parse(sklearn.__version__) < Version("1.1"), "Skipping test because sklearn version is too old.")
-    # def test_2d_infrequent(self):
+    @unittest.skipIf(parse(sklearn.__version__) < Version("1.1"), "Skipping test because sklearn version is too old.")
+    def test_2d_infrequent(self):
 
-    #     X_train = np.array([[10.0, 1.0]] * 10
-    #                         + [[22.0, 1.0]] * 2
-    #                         + [[10.0, 1.0]] * 3
-    #                         + [[14.0, 2.0]] * 1)
-    #     ohe = OneHotEncoder(sparse_output=False, handle_unknown="infrequent_if_exist", min_frequency=0.49).fit(X_train)
-    #     #ohe = OneHotEncoder(sparse_output=False).fit(X_train)
+        X_train = np.array([[10.0, 1.0]] * 3 + [[14.0, 2.0]] * 2)
+        ohe = OneHotEncoder(sparse_output=False, handle_unknown="infrequent_if_exist", min_frequency=0.49).fit(X_train)
 
-    #     hb = hummingbird.ml.convert(ohe, "pytorch", device="cpu")
+        hb = hummingbird.ml.convert(ohe, "pytorch", device="cpu")
 
-    #     np.testing.assert_allclose(ohe.transform(X_train), hb.transform(X_train), rtol=1e-06, atol=1e-06)
+        np.testing.assert_allclose(ohe.transform(X_train), hb.transform(X_train), rtol=1e-06, atol=1e-06)
 
     # @unittest.skipIf(parse(sklearn.__version__) < Version("1.1"), "Skipping test because sklearn version is too old.")
     # def test_user_provided_example(self):
