@@ -55,7 +55,7 @@ setup(
     install_requires=install_requires,
     extras_require={
         "tests": ["flake8", "pytest", "coverage", "pre-commit"],
-        "sparkml": ["pyspark>=2.4.4,<3.1.2", "pyarrow>1.0", "pandas<1.5.3"],
+        "sparkml": ["pyspark>=2.4.4", "pyarrow>1.0"],
         "onnx": onnx_requires,
         "extra": extra_requires,
         "benchmark": onnx_requires + extra_requires + ["memory-profiler", "psutil"],
