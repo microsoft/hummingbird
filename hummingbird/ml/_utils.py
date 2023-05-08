@@ -43,6 +43,7 @@ def onnx_ml_tools_installed():
     """
     try:
         import onnxmltools
+        import skl2onnx
 
         return True
     except ImportError:
