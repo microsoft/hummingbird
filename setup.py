@@ -30,9 +30,10 @@ install_requires = [
     "protobuf>=3.20.2",
 ]
 onnx_requires = [
+    "onnx<=1.13.0",
     "onnxruntime>=1.0.0",
     "onnxmltools>=1.6.0,<=1.11.0",
-    "skl2onnx>=1.7.0",
+    "skl2onnx>=1.7.0,<=1.13.0",
 ]
 extra_requires = [
     # The need each for these depends on which libraries you plan to convert from
