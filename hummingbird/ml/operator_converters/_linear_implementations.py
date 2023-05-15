@@ -47,12 +47,20 @@ class LinearModel(PhysicalOperator, torch.nn.Module):
     def forward(self, x):
         x = x.float()
         output = torch.addmm(self.intercepts, x, self.coefficients)
-        if self.multi_class == "multinomial":
-            output = torch.softmax(output, dim=1)
-        elif self.regression:
+
+        if self.regression:
             if self.loss == "log":
                 return torch.exp(output)
             return output
+
+        if self.binary_classification:
+            indices = (output > 0).squeeze().int()
+        else:
+            indices = torch.argmax(output, dim=1)
+        predict_res = torch.index_select(self.classes, 0, indices)
+
+        if self.multi_class == "multinomial":
+            output = torch.softmax(output, dim=1)
         else:
             if self.loss == "modified_huber":
                 output = torch.clip(output, -1, 1)
@@ -77,7 +85,4 @@ class LinearModel(PhysicalOperator, torch.nn.Module):
         if self.binary_classification:
             output = torch.cat([1 - output, output], dim=1)
 
-        if self.perform_class_select:
-            return torch.index_select(self.classes, 0, torch.argmax(output, dim=1)), output
-        else:
-            return torch.argmax(output, dim=1), output
+        return predict_res, output
