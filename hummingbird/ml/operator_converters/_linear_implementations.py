@@ -36,10 +36,6 @@ class LinearModel(PhysicalOperator, torch.nn.Module):
         if self.loss is None and self.classification:
             self.loss = "log"
 
-        self.perform_class_select = False
-        if min(classes) != 0 or max(classes) != len(classes) - 1:
-            self.perform_class_select = True
-
         self.binary_classification = False
         if len(classes) == 2:
             self.binary_classification = True
