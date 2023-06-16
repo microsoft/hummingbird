@@ -237,7 +237,7 @@ def from_strings_to_ints(input, max_string_length):
     return np.array(input, dtype="|S" + str(max_string_length)).view(np.int32).reshape(shape)
 
 
-def load(location):
+def load(location, digest=None):
     """
     Utility function used to load arbitrary Hummingbird models.
     """
@@ -246,6 +246,8 @@ def load(location):
     from hummingbird.ml.containers import TVMSklearnContainer
     from hummingbird.ml.containers import ONNXSklearnContainer
     from hummingbird.ml.operator_converters import constants
+    import hmac
+    import hashlib
 
     model = None
     model_type = None
@@ -257,6 +259,16 @@ def load(location):
     else:
         location = zip_location[:-4]
     assert os.path.exists(zip_location), "Zip file {} does not exist.".format(zip_location)
+
+    # Verify the digest if provided.
+    if digest is None:
+        print("Warning: No digest provided. Model integrity not verified.")
+    else:
+        with open(zip_location, 'rb') as file:
+            new_digest = hmac.new(b'shared-key', file.read(), hashlib.sha1).hexdigest()
+            if digest != new_digest:
+                raise RuntimeError('Integrity check failed')
+
     shutil.unpack_archive(zip_location, location, format="zip")
 
     assert os.path.exists(location), "Model location {} does not exist.".format(location)
@@ -265,12 +277,14 @@ def load(location):
     with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
         model_type = file.readline()
 
+    print("IN generic with digest {}".format(digest))
     if "torch" in model_type:
-        model = PyTorchSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+        print("ok and now digest = {}".format(digest))
+        model = PyTorchSklearnContainer.load(location, do_unzip_and_model_type_check=False, digest=digest)
     elif "onnx" in model_type:
-        model = ONNXSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+        model = ONNXSklearnContainer.load(location, do_unzip_and_model_type_check=False, digest=digest)
     elif "tvm" in model_type:
-        model = TVMSklearnContainer.load(location, do_unzip_and_model_type_check=False)
+        model = TVMSklearnContainer.load(location, do_unzip_and_model_type_check=False, digest=digest)
     else:
         shutil.rmtree(location)
         raise RuntimeError("Model type {} not recognized.".format(model_type))

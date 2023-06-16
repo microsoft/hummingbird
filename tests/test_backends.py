@@ -118,6 +118,31 @@ class TestBackends(unittest.TestCase):
 
         os.remove("pt-tmp.zip")
 
+    # Test pytorch save and load with digest
+    def test_pytorch_save_load_with_digest(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(hb_model)
+        my_digest = hb_model.save("pt-tmp")
+
+        hb_model_loaded = hummingbird.ml.TorchContainer.load("pt-tmp", digest=my_digest)
+        np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+        # Now try to load with a different digest
+        self.assertRaises(RuntimeError, hummingbird.ml.TorchContainer.load, "pt-tmp", digest="BAD_DIGEST")
+
+        os.remove("pt-tmp.zip")
+
     # Test pytorch save and load
     def test_pytorch_save_load_delete_folder(self):
         warnings.filterwarnings("ignore")
@@ -307,6 +332,31 @@ class TestBackends(unittest.TestCase):
 
         os.remove("ts-tmp.zip")
 
+    # Test torchscript save and load with digest
+    def test_torchscript_save_load_digest(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "torch.jit", X)
+        self.assertIsNotNone(hb_model)
+        my_digest = hb_model.save("ts-tmp")
+
+        hb_model_loaded = hummingbird.ml.TorchContainer.load("ts-tmp", digest=my_digest)
+        np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+        # Now try to load with a different digest
+        self.assertRaises(RuntimeError, hummingbird.ml.TorchContainer.load, "ts-tmp", digest="BAD_DIGEST")
+
+        os.remove("ts-tmp.zip")
+
     # Test torchscript save and generic load
     def test_torchscript_save_generic_load(self):
         warnings.filterwarnings("ignore")
@@ -422,6 +472,32 @@ class TestBackends(unittest.TestCase):
 
         os.remove("tvm-tmp.zip")
 
+    # Test tvm save and load
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    def test_tvm_save_load_digest(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "tvm", X)
+        self.assertIsNotNone(hb_model)
+        my_digest = hb_model.save("tvm-tmp")
+
+        hb_model_loaded = hummingbird.ml.TVMContainer.load("tvm-tmp", digest=my_digest)
+        np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+        # Now try to load with a different digest
+        self.assertRaises(RuntimeError, hummingbird.ml.TVMContainer.load, "tvm-tmp", digest="BAD_DIGEST")
+
+        os.remove("tvm-tmp.zip")
+
     # Test tvm save and generic load
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
     def test_tvm_save_generic_load(self):
@@ -516,6 +592,31 @@ class TestBackends(unittest.TestCase):
 
         hummingbird.ml.load("tvm-tmp")
         os.remove("tvm-tmp.zip")
+
+    # Test *generic* save and load with digest
+    def test_generic_save_load_with_digest(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "torch")
+        self.assertIsNotNone(hb_model)
+        my_digest = hb_model.save("gen-tmp")
+
+        hb_model_loaded = hummingbird.ml.load("gen-tmp", digest=my_digest)
+        np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+        # Now try to load with a different digest
+        self.assertRaises(RuntimeError, hummingbird.ml.load, "gen-tmp", digest="BAD_DIGEST")
+
+        os.remove("gen-tmp.zip")
 
     # Test onnx requires test_data or initial_types
     @unittest.skipIf(
@@ -651,6 +752,32 @@ class TestBackends(unittest.TestCase):
 
         hb_model_loaded = hummingbird.ml.ONNXContainer.load("onnx-tmp")
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+        os.remove("onnx-tmp.zip")
+
+    # Test ONNX save and load
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNX test requires ORT")
+    def test_onnx_save_load_digest(self):
+        warnings.filterwarnings("ignore")
+        max_depth = 10
+        num_classes = 2
+        model = GradientBoostingClassifier(n_estimators=10, max_depth=max_depth)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(num_classes, size=100)
+
+        model.fit(X, y)
+
+        hb_model = hummingbird.ml.convert(model, "onnx", X)
+        self.assertIsNotNone(hb_model)
+        my_digest = hb_model.save("onnx-tmp")
+
+        hb_model_loaded = hummingbird.ml.ONNXContainer.load("onnx-tmp", digest=my_digest)
+        np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+        # Now try to load with a different digest
+        self.assertRaises(RuntimeError, hummingbird.ml.ONNXContainer.load, "onnx-tmp", digest="BAD_DIGEST")
 
         os.remove("onnx-tmp.zip")
 
