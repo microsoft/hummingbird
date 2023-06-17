@@ -277,9 +277,7 @@ def load(location, digest=None):
     with open(os.path.join(location, constants.SAVE_LOAD_MODEL_TYPE_PATH), "r") as file:
         model_type = file.readline()
 
-    print("IN generic with digest {}".format(digest))
     if "torch" in model_type:
-        print("ok and now digest = {}".format(digest))
         model = PyTorchSklearnContainer.load(location, do_unzip_and_model_type_check=False, digest=digest)
     elif "onnx" in model_type:
         model = ONNXSklearnContainer.load(location, do_unzip_and_model_type_check=False, digest=digest)
