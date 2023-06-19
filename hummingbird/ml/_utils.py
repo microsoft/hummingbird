@@ -240,6 +240,10 @@ def from_strings_to_ints(input, max_string_length):
 def load(location, digest=None):
     """
     Utility function used to load arbitrary Hummingbird models.
+
+    Args:
+        location: The location of the model.
+        digest (optional): A digest string to verify the model integrity (created during save).
     """
     # Add load capabilities.
     from hummingbird.ml.containers import PyTorchSklearnContainer
