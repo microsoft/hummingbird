@@ -126,6 +126,7 @@ jobs:
       run: |
         python -m pip install -U wheel packaging
         python setup.py bdist_wheel
+        ls -l dist/
         python -m pip install dist/tvm-*.whl
 
     # We don't run pytest for Linux py3.8 since we do coverage for that case.
