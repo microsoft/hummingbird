@@ -33,7 +33,6 @@ from abc import ABC, abstractmethod
 import time
 import numpy as np
 import pandas as pd
-import pickle
 import os.path
 
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV

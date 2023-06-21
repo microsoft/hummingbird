@@ -46,6 +46,8 @@ class PyTorchSklearnContainer(SklearnContainer):
             location: The location on the file system where to save the model.
         """
         assert self.model is not None, "Saving a None model is undefined."
+        import hmac
+        import hashlib
 
         if constants.TEST_INPUT in self._extra_config:
             self._extra_config[constants.TEST_INPUT] = None
@@ -62,7 +64,7 @@ class PyTorchSklearnContainer(SklearnContainer):
                 file.write("torch.jit")
 
             # Save the actual model.
-            self.model.save(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
+            digest = self.model.save(os.path.join(location, constants.SAVE_LOAD_TORCH_JIT_PATH))
 
             model = self.model
             self._model = None
@@ -93,11 +95,17 @@ class PyTorchSklearnContainer(SklearnContainer):
         # Zip the dir.
         shutil.make_archive(location, "zip", location)
 
+        with open(location + '.zip', "rb") as file:
+            digest = hmac.new(b'shared-key', file.read(), hashlib.sha1).hexdigest()
+            print("Model saved with digest: {}".format(digest))
+
         # Remove the directory.
         shutil.rmtree(location)
 
+        return digest
+
     @staticmethod
-    def load(location, do_unzip_and_model_type_check=True, delete_unzip_location_folder: bool = True):
+    def load(location, do_unzip_and_model_type_check=True, delete_unzip_location_folder: bool = True, digest=None):
         """
         Method used to load a container from the file system.
 
@@ -110,6 +118,8 @@ class PyTorchSklearnContainer(SklearnContainer):
         Returns:
             The loaded model.
         """
+        import hmac
+        import hashlib
         container = None
 
         # Unzip the dir.
@@ -120,6 +130,16 @@ class PyTorchSklearnContainer(SklearnContainer):
             else:
                 location = zip_location[:-4]
             assert os.path.exists(zip_location), "Zip file {} does not exist.".format(zip_location)
+
+            # Verify the digest if provided.
+            if digest is None:
+                print("Warning: No digest provided. Model integrity not verified.")
+            else:
+                with open(zip_location, 'rb') as file:
+                    new_digest = hmac.new(b'shared-key', file.read(), hashlib.sha1).hexdigest()
+                    if digest != new_digest:
+                        raise RuntimeError('Integrity check failed')
+
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)
