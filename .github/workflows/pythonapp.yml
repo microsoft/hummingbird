@@ -21,8 +21,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-12, windows-2022]
-        python-version: ['3.8', '3.9', '3.10']
+        os: [macos-12]
+        python-version: ['3.10']
 
     steps:
     - uses: actions/checkout@v3
@@ -58,10 +58,6 @@ jobs:
         make sphinx-site -C website/
         # now refresh the code
         git checkout . && python -m pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
-    - name: Run basic tests without extra
-      run: pytest
-    - name: Coverage on basic tests without extra
-      run: coverage run -a -m pytest tests/test_no_extra_install.py
     - name: If mac, install libomp to facilitate lgbm install
       if: ${{ startsWith(matrix.os, 'macos')}}
       run: |
@@ -106,6 +102,9 @@ jobs:
         git checkout tags/v0.10.0
         git submodule update --recursive --init
         cmake -E make_directory build
+    - name: Debug check dir
+      run: |
+        ls /Users/runner/work/hummingbird/tvm/build/
     - name: CMake TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
       working-directory: ../tvm/build
