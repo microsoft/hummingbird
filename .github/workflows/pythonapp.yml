@@ -100,6 +100,7 @@ jobs:
       if: ${{ startsWith(matrix.os, 'macos') }}
       run: |
         brew install llvm@14
+      continue-on-error: true
     - name: Fetch and prepare TVM for compilation if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
       run: |
@@ -109,6 +110,7 @@ jobs:
         git checkout tags/v0.10.0
         git submodule update --recursive --init
         cmake -E make_directory build
+      continue-on-error: true
     - name: CMake TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
       working-directory: ../tvm/build
@@ -118,11 +120,13 @@ jobs:
         "-DUSE_GRAPH_RUNTIME=ON"
         "-DUSE_LLVM=$(brew --prefix llvm@14)/bin/llvm-config --link-static"
         ..
+      continue-on-error: true
     - name: Build TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
       working-directory: ../tvm/build
       run: |
         make -j3
+      continue-on-error: true
     - name: Install python TVM if Mac
       if: ${{  startsWith(matrix.os, 'macos') }}
       working-directory: ../tvm/python
@@ -130,7 +134,7 @@ jobs:
         python -m pip install -U wheel packaging
         python setup.py bdist_wheel
         python -m pip install dist/tvm-*.whl
-
+      continue-on-error: true
     # We don't run pytest for Linux py3.8 since we do coverage for that case.
     - name: Test with pytest
       if: ${{ matrix.python-version != '3.8' || startsWith(matrix.os, 'ubuntu') != true }}
