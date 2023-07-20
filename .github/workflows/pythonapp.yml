@@ -132,6 +132,7 @@ jobs:
       working-directory: ../tvm/python
       run: |
         python -m pip install -U wheel packaging
+        python -m pip install cython==0.29.34
         python setup.py bdist_wheel
         python -m pip install dist/tvm-*.whl
       continue-on-error: true
