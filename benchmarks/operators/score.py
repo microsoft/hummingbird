@@ -85,7 +85,7 @@ class ScoreBackend(ABC):
                 ]
                 else False,
                 "n_classes": 231
-                if type(model) == PolynomialFeatures
+                if isinstance(model, PolynomialFeatures)
                 else 20
                 if data.learning_task == LearningTask.REGRESSION
                 else len(set(data.y_test)),
