@@ -93,7 +93,7 @@ def convert_sklearn_linear_regression_model(operator, device, extra_config):
     else:
         intercepts = intercepts.reshape(1, -1).astype("float32")
 
-    if hasattr(operator.raw_operator, "_base_loss") and type(operator.raw_operator._base_loss.link) == LogLink:
+    if hasattr(operator.raw_operator, "_base_loss") and isinstance(operator.raw_operator._base_loss.link, LogLink):
         loss = "log"
 
     return LinearModel(operator, coefficients, intercepts, device, loss=loss, is_linear_regression=True)

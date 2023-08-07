@@ -162,8 +162,8 @@ def init_parameters(p, run_id, component_map):
             name == "validation_fraction"
             or name == "dtype"
             or value in ["deprecated", '"deprecated"']
-            or (type(comp) == sklearn.pipeline.Pipeline and name == "steps")
-            or (type(comp) == sklearn.linear_model.SGDClassifier and name == "max_iter" and value == "None")
+            or isinstance(comp, sklearn.pipeline.Pipeline) and name == "steps"
+            or isinstance(comp, sklearn.linear_model.SGDClassifier) and name == "max_iter" and value == "None"
         ):
             continue
 
@@ -179,7 +179,7 @@ def init_parameters(p, run_id, component_map):
                         break
             continue
 
-        if type(comp) == sklearn.preprocessing.OneHotEncoder and name == "categorical_features":
+        if isinstance(comp, sklearn.preprocessing.OneHotEncoder) and name == "categorical_features":
             idx = eval(value)
             if idx is not None and len(idx) > 0:
                 comp.categorical_features = idx
@@ -273,10 +273,10 @@ if __name__ == "__main__":
 
             found_unsupported_column_transformer = False
             for transf in p.named_steps.values():
-                if type(transf) == sklearn.compose.ColumnTransformer:
+                if isinstance(transf, sklearn.compose.ColumnTransformer):
                     for name, _, column_indices in transf.transformers:
                         if isinstance(column_indices, list):
-                            if len(column_indices) > 0 and type(column_indices[0]) == bool:
+                            if len(column_indices) > 0 and isinstance(column_indices[0], bool):
                                 found_unsupported_column_transformer = True
                     sum_steps += len(transf.transformers) - 1
             if found_unsupported_column_transformer:

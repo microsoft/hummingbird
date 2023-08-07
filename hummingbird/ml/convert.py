@@ -318,12 +318,12 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
 
     # Fix the test_input type
     if constants.TEST_INPUT in extra_config:
-        if type(extra_config[constants.TEST_INPUT]) == list:
+        if isinstance(extra_config[constants.TEST_INPUT], list):
             extra_config[constants.TEST_INPUT] = np.array(extra_config[constants.TEST_INPUT])
-        elif type(extra_config[constants.TEST_INPUT]) == tuple:
+        elif isinstance(extra_config[constants.TEST_INPUT], tuple):
             # We are passing multiple datasets.
             assert all(
-                [type(input) == np.ndarray for input in extra_config[constants.TEST_INPUT]]
+                [isinstance(input, np.ndarray) for input in extra_config[constants.TEST_INPUT]]
             ), "When passing multiple inputs only ndarrays are supported."
             assert all([len(input.shape) == 2 for input in extra_config[constants.TEST_INPUT]])
             extra_config[constants.N_FEATURES] = sum([input.shape[1] for input in extra_config[constants.TEST_INPUT]])
@@ -381,7 +381,7 @@ def _convert_common(model, backend, test_input=None, device="cpu", extra_config=
         test_input = extra_config[constants.TEST_INPUT]
 
     # We do some normalization on backends.
-    if type(backend) != str:
+    if not isinstance(backend, str):
         raise ValueError("Backend must be a string: {}".format(backend))
     backend_formatted = backend.lower()
     backend_formatted = backends[backend_formatted]
