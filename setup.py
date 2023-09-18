@@ -55,7 +55,7 @@ setup(
     include_package_data=True,
     install_requires=install_requires,
     extras_require={
-        "tests": ["flake8", "pytest", "coverage", "pre-commit"],
+        "tests": ["flake8", "pytest", "coverage", "pre-commit", "hypothesis", "distutils"],
         "sparkml": ["pyspark>=2.4.4", "pyarrow>1.0"],
         "onnx": onnx_requires,
         "extra": extra_requires,

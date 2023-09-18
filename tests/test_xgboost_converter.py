@@ -15,6 +15,7 @@ from tree_utils import gbdt_implementation_map
 
 if xgboost_installed():
     import xgboost as xgb
+    from xgboost import testing as tm
 
 if pandas_installed():
     import pandas as pd
@@ -98,13 +99,11 @@ class TestXGBoostConverter(unittest.TestCase):
     def _run_xgb_ranker_converter(self, num_classes, extra_config={}):
         warnings.filterwarnings("ignore")
         for max_depth in [1, 3, 8, 10, 12]:
-            model = xgb.XGBRanker(n_estimators=10, max_depth=max_depth)
-            np.random.seed(0)
-            X = np.random.rand(100, 200)
-            X = np.array(X, dtype=np.float32)
-            y = np.random.randint(num_classes, size=100)
+            model = xgb.XGBRanker(n_estimators=10, max_depth=max_depth, ndcg_exp_gain=True)  # ndcg is default
+            X, y, q, w = tm.make_ltr(n_samples=1024, n_features=num_classes, n_query_groups=3, max_rel=3)
 
-            model.fit(X, y, group=[X.shape[0]])
+            model.fit(X, y, qid=q, sample_weight=w, eval_set=[(X, y)],
+                      eval_qid=(q,), sample_weight_eval_set=(w,), verbose=True)
 
             torch_model = hummingbird.ml.convert(model, "torch", X, extra_config=extra_config)
             self.assertIsNotNone(torch_model)
@@ -256,7 +255,7 @@ class TestXGBoostConverter(unittest.TestCase):
         import torch
 
         for max_depth in [1, 3, 8, 10, 12]:
-            model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth)
+            model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth, objective="rank:pairwise")
             np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
@@ -275,7 +274,7 @@ class TestXGBoostConverter(unittest.TestCase):
         import torch
 
         for max_depth in [1, 3, 8, 10, 12]:
-            model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth)
+            model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth, objective="rank:pairwise")
             np.random.seed(0)
             X = np.random.rand(100, 200)
             X = np.array(X, dtype=np.float32)
