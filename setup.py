@@ -30,7 +30,7 @@ install_requires = [
     "protobuf>=3.20.2",
 ]
 onnx_requires = [
-    "onnxruntime>=1.0.0",
+    "onnxruntime>=1.0.0,<=1.15.1",
     "onnxmltools>=1.6.0,<=1.11.0",
     "skl2onnx>=1.7.0",
 ]
