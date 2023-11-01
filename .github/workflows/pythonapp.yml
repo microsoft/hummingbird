@@ -89,7 +89,7 @@ jobs:
       if: ${{ startsWith(matrix.os, 'macos')}}
       id: cache
       env:
-        CACHE_NUMBER: 9
+        CACHE_NUMBER: 10
       with:
         path: ~/work/hummingbird/tvm
         key: ${{ matrix.os }}-${{ env.CACHE_NUMBER }}-${{ matrix.python-version }}-tvm-0.10
