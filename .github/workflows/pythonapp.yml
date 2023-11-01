@@ -99,7 +99,7 @@ jobs:
     - name: Install LLVM if Mac
       if: ${{ startsWith(matrix.os, 'macos') }}
       run: |
-        brew install llvm@14
+        brew install llvm@17
     - name: Fetch and prepare TVM for compilation if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
       run: |
@@ -116,7 +116,7 @@ jobs:
         MACOSX_DEPLOYMENT_TARGET=10.13 cmake
         "-DUSE_RPC=ON"
         "-DUSE_GRAPH_RUNTIME=ON"
-        "-DUSE_LLVM=$(brew --prefix llvm@14)/bin/llvm-config --link-static"
+        "-DUSE_LLVM=$(brew --prefix llvm@17)/bin/llvm-config --link-static"
         ..
     - name: Build TVM if Mac
       if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
