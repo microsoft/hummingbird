@@ -32,7 +32,7 @@ class ArrayFeatureExtractor(PhysicalOperator, torch.nn.Module):
         self.is_contiguous = is_contiguous
 
     def forward(self, x):
-        if type(x) == tuple:
+        if isinstance(x, tuple):
             return x[self.column_indices]
         if len(x.shape) == 1:
             x = x.view(1, -1)

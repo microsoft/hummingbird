@@ -4,9 +4,6 @@ Tests lightgbm->onnxmltools->hb conversion for lightgbm models.
 import unittest
 import warnings
 
-import sys
-import os
-import pickle
 import numpy as np
 from onnxconverter_common.data_types import FloatTensorType
 

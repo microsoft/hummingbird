@@ -135,7 +135,11 @@ def convert_sklearn_pls_regression(operator, device, extra_config):
     """
     assert operator is not None, "Cannot convert None operator"
 
-    coefficients = operator.raw_operator.coef_
+    # Check if operator.raw_operator._coef_ does not exist, which means to transpose coefficients (#26016)
+    if hasattr(operator.raw_operator, "_coef_"):  # SKL<1.3
+        coefficients = operator.raw_operator.coef_
+    else:  # SKL>=1.3
+        coefficients = operator.raw_operator.coef_.T
     x_mean = operator.raw_operator._x_mean
     x_std = operator.raw_operator._x_std
     y_mean = operator.raw_operator._y_mean

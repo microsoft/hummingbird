@@ -46,6 +46,9 @@ class SklearnContainer(ABC):
 
         Args:
             location: The location on the file system where to save the model.
+
+        Returns:
+            A string digest of the saved model to be used for integrity checks during load.
         """
         return
 

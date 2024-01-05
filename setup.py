@@ -31,12 +31,12 @@ install_requires = [
 ]
 onnx_requires = [
     "onnxruntime>=1.0.0",
-    "onnxmltools>=1.6.0,<=1.11.0",
+    "onnxmltools>=1.6.0",
     "skl2onnx>=1.7.0",
 ]
 extra_requires = [
     # The need each for these depends on which libraries you plan to convert from
-    "xgboost>=0.90",
+    "xgboost>=0.90,<2.0.0",
     "lightgbm>=2.2",
     "holidays==0.24",
     "prophet==1.1",

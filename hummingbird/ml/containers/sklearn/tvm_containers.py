@@ -62,6 +62,8 @@ class TVMSklearnContainer(SklearnContainer):
             location: The location on the file system where to save the model.
         """
         assert self.model is not None, "Saving a None model is undefined."
+        import hmac
+        import hashlib
 
         if location.endswith("zip"):
             location = location[:-4]
@@ -109,6 +111,10 @@ class TVMSklearnContainer(SklearnContainer):
         # Zip the dir.
         shutil.make_archive(location, "zip", location)
 
+        with open(location + '.zip', "rb") as file:
+            digest = hmac.new(b'shared-key', file.read(), hashlib.sha1).hexdigest()
+            print("Model saved with digest: {}".format(digest))
+
         # Remove the directory.
         shutil.rmtree(location)
 
@@ -120,9 +126,10 @@ class TVMSklearnContainer(SklearnContainer):
         self._extra_config[constants.TVM_CONTEXT] = ctx
         self._ctx = ctx
         self._model = model
+        return digest
 
     @staticmethod
-    def load(location, do_unzip_and_model_type_check=True):
+    def load(location, do_unzip_and_model_type_check=True, digest=None):
         """
         Method used to load a container from the file system.
 
@@ -136,6 +143,8 @@ class TVMSklearnContainer(SklearnContainer):
         assert tvm_installed(), "TVM Container requires TVM installed."
 
         from tvm.runtime.params import load_param_dict
+        import hmac
+        import hashlib
 
         container = None
 
@@ -147,6 +156,16 @@ class TVMSklearnContainer(SklearnContainer):
             else:
                 location = zip_location[:-4]
             assert os.path.exists(zip_location), "Zip file {} does not exist.".format(zip_location)
+
+            # Verify the digest if provided.
+            if digest is None:
+                print("Warning: No digest provided. Model integrity not verified.")
+            else:
+                with open(zip_location, 'rb') as file:
+                    new_digest = hmac.new(b'shared-key', file.read(), hashlib.sha1).hexdigest()
+                    if digest != new_digest:
+                        raise RuntimeError('Integrity check failed')
+
             shutil.unpack_archive(zip_location, location, format="zip")
 
             assert os.path.exists(location), "Model location {} does not exist.".format(location)

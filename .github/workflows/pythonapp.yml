@@ -11,7 +11,7 @@ on:
   pull_request:
     branches:
       - main
-      
+
   schedule:
     - cron: "15 21 * * FRI"
 
@@ -49,6 +49,9 @@ jobs:
     - name: Install basic dependencies
       run: |
         python -m pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
+    - name: Test with older SKLearn on Linux with py3.9 to check backward compatibility
+      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') == true }}
+      run: python -m pip install scikit-learn==1.2.1
     # Compile (but not push) documentation only for one of the runs (Linux py3.8).
     - name: Generate Documentation
       if: ${{ matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
@@ -126,6 +129,7 @@ jobs:
       working-directory: ../tvm/python
       run: |
         python -m pip install -U wheel packaging
+        python -m pip install cython==0.29.34
         python setup.py bdist_wheel
         python -m pip install dist/tvm-*.whl
 
@@ -147,7 +151,7 @@ jobs:
         flags: unittests
     - name: Deploy to GitHub pages 🚀
       if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
-      uses: JamesIves/github-pages-deploy-action@4.0.0
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         branch: gh-pages
         folder: website/public

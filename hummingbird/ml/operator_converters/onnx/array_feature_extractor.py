@@ -45,3 +45,4 @@ def convert_onnx_array_feature_extractor(operator, device, extra_config):
 
 
 register_converter("ONNXMLArrayFeatureExtractor", convert_onnx_array_feature_extractor)
+register_converter("ONNXMLGather", convert_onnx_array_feature_extractor)
