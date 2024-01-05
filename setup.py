@@ -39,7 +39,7 @@ extra_requires = [
     "xgboost>=0.90,<2.0.0",
     "lightgbm>=2.2",
     "holidays==0.24",
-    "prophet==1.1",
+    "prophet",
 ]
 setup(
     name="hummingbird-ml",
