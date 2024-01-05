@@ -84,16 +84,20 @@ jobs:
     - name: Install TVM from pypi if Ubuntu
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: python -m pip install apache-tvm==0.10.0
+    - name: Install ccache if Mac
+      if: ${{ startsWith(matrix.os, 'macos') }}
+      run: |
+        brew install ccache
     - uses: actions/cache@v3
       # TVM takes forever, we try to cache it.
       if: ${{ startsWith(matrix.os, 'macos')}}
       id: cache
       env:
-        CACHE_NUMBER: 9
+        CACHE_NUMBER: 10
       with:
-        path: ~/work/hummingbird/tvm
-        key: ${{ matrix.os }}-${{ env.CACHE_NUMBER }}-${{ matrix.python-version }}-tvm-0.10
-    # Getting TVM requires: 1) Install LLVM 2) fetching TVM from github, 3) cmake, 4) make, 5) install python dependency.
+        path: ~/work/hummingbird/.cache/ccache
+        key: ${{ matrix.os }}-${{ env.CACHE_NUMBER }}
+      # Getting TVM requires: 1) Install LLVM 2) fetching TVM from github, 3) cmake, 4) make, 5) install python dependency.
     # 2 to 4 will be retrieved from the cache.
     # The pipeline only works for Unix systems. For windows we will have to compile LLVM from source which is a no go.
     - name: Install LLVM if Mac
@@ -101,7 +105,7 @@ jobs:
       run: |
         brew install llvm@14
     - name: Fetch and prepare TVM for compilation if Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
+      if: ${{ startsWith(matrix.os, 'macos') }}
       run: |
         cd ~/work/hummingbird
         git clone https://github.com/apache/tvm.git
@@ -110,7 +114,7 @@ jobs:
         git submodule update --recursive --init
         cmake -E make_directory build
     - name: CMake TVM if Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
+      if: ${{ startsWith(matrix.os, 'macos') }}
       working-directory: ../tvm/build
       run: >-
         MACOSX_DEPLOYMENT_TARGET=10.13 cmake
@@ -119,7 +123,7 @@ jobs:
         "-DUSE_LLVM=$(brew --prefix llvm@14)/bin/llvm-config --link-static"
         ..
     - name: Build TVM if Mac
-      if: ${{ steps.cache.outputs.cache-hit != 'true' && startsWith(matrix.os, 'macos') }}
+      if: ${{ startsWith(matrix.os, 'macos') }}
       working-directory: ../tvm/build
       run: |
         make -j3
