@@ -38,7 +38,7 @@ extra_requires = [
     # The need each for these depends on which libraries you plan to convert from
     "xgboost>=0.90,<2.0.0",
     "lightgbm>=2.2",
-    "holidays==0.24",
+    "holidays",
     "prophet",
 ]
 setup(
