@@ -4,6 +4,7 @@
 name: Build
 
 on:
+
   push:
     branches:
       - main
@@ -14,6 +15,8 @@ on:
 
   schedule:
     - cron: "15 21 * * FRI"
+
+permissions: read-all
 
 jobs:
   build:
