@@ -20,7 +20,6 @@ permissions: read-all
 
 jobs:
   build:
-
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -54,16 +53,6 @@ jobs:
     - name: Test with older SKLearn on Linux with py3.9 to check backward compatibility
       if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') == true }}
       run: python -m pip install scikit-learn==1.2.1
-    # Compile (but not push) documentation only for one of the runs (Linux py3.8).
-    - name: Generate Documentation
-      if: ${{ matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
-      run: |
-        # We're mocking out the torch. So now we also need to sub this on out
-        find ../. -type f -exec sed -i 's/{torch.__version__}/1.12.0/g' {} +
-        find ../. -type f -exec sed -i 's/torch.__version__/"1.12.0"/g' {} +
-        make sphinx-site -C website/
-        # now refresh the code
-        git checkout . && python -m pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra
@@ -151,10 +140,32 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
+
+  page-build:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        python-version: ['3.8']
+    permissions: write-all
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Generate Documentation
+      run: |
+        # We're mocking out the torch. So now we also need to sub this on out
+        find ../. -type f -exec sed -i 's/{torch.__version__}/1.12.0/g' {} +
+        find ../. -type f -exec sed -i 's/torch.__version__/"1.12.0"/g' {} +
+        make sphinx-site -C website/
+        # now refresh the code
+        git checkout . && python -m pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Deploy to GitHub pages 🚀
       if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
       uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         branch: gh-pages
-        folder: website/public
-
+        folder: website/public   
