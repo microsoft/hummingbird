@@ -19,6 +19,7 @@ permissions: read-all
 
 jobs:
   build:
+  
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -169,5 +170,5 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         branch: gh-pages
-        folder: website/public  
+        folder: website/public
 
