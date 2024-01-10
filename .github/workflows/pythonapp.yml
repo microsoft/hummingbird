@@ -150,7 +150,7 @@ jobs:
         python-version: ['3.8']
     permissions: # here we push documentation
       actions: read
-      deployments: write
+      contents: write
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
