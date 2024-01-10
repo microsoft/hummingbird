@@ -4,7 +4,6 @@
 name: Build
 
 on:
-
   push:
     branches:
       - main
@@ -148,7 +147,9 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
         python-version: ['3.8']
-    permissions: write-all
+    permissions: # here we push documentation
+      actions: read
+      deployments: write
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -168,4 +169,5 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         branch: gh-pages
-        folder: website/public   
+        folder: website/public  
+
