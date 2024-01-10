@@ -19,7 +19,7 @@ permissions: read-all
 
 jobs:
   build:
-  
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
