@@ -204,7 +204,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -245,7 +245,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -286,7 +286,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -327,7 +327,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -369,7 +369,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -411,7 +411,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -454,7 +454,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -496,7 +496,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -539,7 +539,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
@@ -581,7 +581,7 @@ class TestSklearnPipeline(unittest.TestCase):
 
         numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse=True, handle_unknown="ignore"))])
+        categorical_transformer = Pipeline(steps=[("onehot", OneHotEncoder(sparse_output=True, handle_unknown="ignore"))])
 
         preprocessor = ColumnTransformer(
             transformers=[
