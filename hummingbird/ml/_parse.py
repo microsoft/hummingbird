@@ -21,7 +21,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import BaggingClassifier, BaggingRegressor
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.multioutput import MultiOutputRegressor, RegressorChain
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, FunctionTransformer
 
 from .containers import CommonSklearnModelContainer, CommonONNXModelContainer, CommonSparkMLModelContainer
 from ._topology import Topology
@@ -35,7 +35,7 @@ try:
 except ImportError:
     StackingClassifier = None
 
-do_not_merge_columns = tuple(filter(lambda op: op is not None, [OneHotEncoder, ColumnTransformer]))
+do_not_merge_columns = tuple(filter(lambda op: op is not None, [OneHotEncoder, ColumnTransformer, FunctionTransformer]))
 
 
 def parse_sklearn_api_model(model, extra_config={}):
@@ -473,6 +473,11 @@ def _parse_sklearn_column_transformer(topology, model, inputs):
     return transformed_result_names
 
 
+def _parse_sklearn_function_transformer(topology, model, inputs):
+    # TODO borrow from _parse_sklearn_column_transformer
+    pass
+
+
 def _parse_sklearn_stacking(topology, model, inputs):
     """
     Taken from https://github.com/onnx/sklearn-onnx/blob/9939c089a467676f4ffe9f3cb91098c4841f89d8/skl2onnx/_parse.py#L238.
@@ -549,6 +554,7 @@ def _build_sklearn_api_parsers_map():
     # Parsers for edge cases are going here.
     map_parser = {
         ColumnTransformer: _parse_sklearn_column_transformer,
+        FunctionTransformer: _parse_sklearn_function_transformer,
         GridSearchCV: _parse_sklearn_model_selection,
         MultiOutputRegressor: _parse_sklearn_multi_output_regressor,
         pipeline.Pipeline: _parse_sklearn_pipeline,
