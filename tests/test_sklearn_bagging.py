@@ -13,7 +13,7 @@ from hummingbird.ml import constants
 class TestSklearnBagging(unittest.TestCase):
     def test_bagging_svc_1(self):
         X, y = make_classification(n_samples=100, n_features=4, n_informative=2, n_redundant=0, random_state=0, shuffle=False)
-        clf = BaggingClassifier(base_estimator=SVC(), n_estimators=10, random_state=0)
+        clf = BaggingClassifier(estimator=SVC(), n_estimators=10, random_state=0)
 
         clf.fit(X, y)
 
@@ -25,7 +25,7 @@ class TestSklearnBagging(unittest.TestCase):
 
     def test_bagging_svc(self):
         X, y = make_classification(n_samples=100, n_features=4, n_informative=2, n_redundant=0, random_state=0, shuffle=False)
-        clf = BaggingClassifier(base_estimator=SVC(), n_estimators=10, random_state=0)
+        clf = BaggingClassifier(estimator=SVC(), n_estimators=10, random_state=0)
 
         clf.fit(X, y)
 
@@ -37,7 +37,7 @@ class TestSklearnBagging(unittest.TestCase):
 
     def test_bagging_logistic_regression(self):
         X, y = make_classification(n_samples=100, n_features=4, n_informative=2, n_redundant=0, random_state=0, shuffle=False)
-        clf = BaggingClassifier(base_estimator=LogisticRegression(), n_estimators=10, random_state=0)
+        clf = BaggingClassifier(estimator=LogisticRegression(), n_estimators=10, random_state=0)
 
         clf.fit(X, y)
 
@@ -49,7 +49,7 @@ class TestSklearnBagging(unittest.TestCase):
 
     def test_bagging_linear_svr_1(self):
         X, y = make_regression(n_samples=1000, n_features=8, n_informative=5, n_targets=1, random_state=0, shuffle=True)
-        reg = BaggingRegressor(base_estimator=LinearSVR(), n_estimators=10, random_state=0)
+        reg = BaggingRegressor(estimator=LinearSVR(), n_estimators=10, random_state=0)
 
         reg.fit(X, y)
 
@@ -64,7 +64,7 @@ class TestSklearnBagging(unittest.TestCase):
 
     def test_bagging_linear_svr(self):
         X, y = make_regression(n_samples=1000, n_features=8, n_informative=5, n_targets=1, random_state=0, shuffle=True)
-        reg = BaggingRegressor(base_estimator=LinearSVR(), n_estimators=10, random_state=0)
+        reg = BaggingRegressor(estimator=LinearSVR(), n_estimators=10, random_state=0)
 
         reg.fit(X, y)
 
@@ -76,7 +76,7 @@ class TestSklearnBagging(unittest.TestCase):
 
     def test_bagging_linear_regression(self):
         X, y = make_regression(n_samples=1000, n_features=8, n_informative=5, n_targets=1, random_state=0, shuffle=True)
-        reg = BaggingRegressor(base_estimator=LinearRegression(), n_estimators=10, random_state=0)
+        reg = BaggingRegressor(estimator=LinearRegression(), n_estimators=10, random_state=0)
 
         reg.fit(X, y)
 
