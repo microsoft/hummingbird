@@ -474,8 +474,23 @@ def _parse_sklearn_column_transformer(topology, model, inputs):
 
 
 def _parse_sklearn_function_transformer(topology, model, inputs):
-    # TODO borrow from _parse_sklearn_column_transformer
-    pass
+    """
+    Taken from https://github.com/onnx/sklearn-onnx/blob/fdb52cec86d4d19401cc365db97650fd7692676b/skl2onnx/operator_converters/function_transformer.py#L10.  # noqa: E501
+    :param topology: Topology object
+    :param model: A *scikit-learn* *FunctionTransformer* object
+    :param inputs: A list of Variable objects
+    :return: Output produced by function transformer
+    """
+    if len(inputs) == 1:
+        # apply identity
+        return inputs
+    else:
+        # apply concat
+        conc_op = topology.declare_logical_operator("SklearnConcat")
+        conc_op.inputs = inputs
+        conc_names = topology.declare_logical_variable("concat_inputs")
+        conc_op.outputs.append(conc_names)
+        return conc_op.outputs
 
 
 def _parse_sklearn_stacking(topology, model, inputs):
