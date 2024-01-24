@@ -124,18 +124,18 @@ jobs:
         python setup.py bdist_wheel
         python -m pip install dist/tvm-*.whl
 
-    # We don't run pytest for Linux py3.8 since we do coverage for that case.
+    # We don't run pytest for Linux py3.9 since we do coverage for that case.
     - name: Test with pytest
-      if: ${{ matrix.python-version != '3.8' || startsWith(matrix.os, 'ubuntu') != true }}
+      if: ${{ matrix.python-version != '3.9' || startsWith(matrix.os, 'ubuntu') != true }}
       run: pytest
-    # Run and push coverage only for Linux py3.8
-    - name: Coverage 3.8 Linux
-      if: ${{ matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
+    # Run and push coverage only for Linux py3.9
+    - name: Coverage 3.9 Linux
+      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov
-      if: ${{ matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
+      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') }}
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
@@ -147,7 +147,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        python-version: ['3.8']
+        python-version: ['3.9']
     permissions: # here we push documentation
       actions: read
       contents: write
@@ -166,7 +166,7 @@ jobs:
         # now refresh the code
         git checkout . && python -m pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Deploy to GitHub pages 🚀
-      if: ${{ github.ref == 'refs/heads/main' && matrix.python-version == '3.8' && startsWith(matrix.os, 'ubuntu') }}
+      if: ${{ github.ref == 'refs/heads/main' }}
       uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         branch: gh-pages
