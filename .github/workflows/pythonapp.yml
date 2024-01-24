@@ -151,6 +151,7 @@ jobs:
     permissions: # here we push documentation
       actions: read
       contents: write
+    if: github.ref == 'refs/heads/main' # only run this on main after PR merged
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
@@ -166,7 +167,6 @@ jobs:
         # now refresh the code
         git checkout . && python -m pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Deploy to GitHub pages 🚀
-      if: ${{ github.ref == 'refs/heads/main' }}
       uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         branch: gh-pages
