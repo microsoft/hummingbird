@@ -148,7 +148,7 @@ class TestSklearnPipeline(unittest.TestCase):
         # SimpleImputer on string is not available for string
         # in ONNX-ML specifications.
         # So we do it beforehand.
-        X["pclass"].fillna("missing", inplace=True)
+        X['pclass'] = X['pclass'].fillna('missing')
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
