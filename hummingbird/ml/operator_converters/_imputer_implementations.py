@@ -36,7 +36,7 @@ class SimpleImputer(PhysicalOperator, torch.nn.Module):
         self.transformer = True
         self.do_mask = strategy == "constant" or all(b_mask)
         self.mask = torch.nn.Parameter(torch.LongTensor([] if self.do_mask else i_mask), requires_grad=False)
-        self.replace_values = torch.nn.Parameter(torch.tensor([stats_], dtype=torch.float32), requires_grad=False)
+        self.replace_values = torch.nn.Parameter(torch.tensor(np.array([stats_]), dtype=torch.float32), requires_grad=False)
 
         self.is_nan = True if (missing_values == "NaN" or np.isnan(missing_values)) else False
         if not self.is_nan:
