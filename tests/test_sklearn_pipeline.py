@@ -712,7 +712,7 @@ class TestSklearnPipeline(unittest.TestCase):
         X, y = load_iris(return_X_y=True)
         estimators = [
             ("rf", RandomForestClassifier(n_estimators=10, random_state=42)),
-            ("svr", make_pipeline(StandardScaler(), LinearSVC(random_state=42, dual=True))),
+            ("svr", make_pipeline(StandardScaler(), LinearSVC(random_state=42, dual="auto"))),
         ]
         clf = StackingClassifier(estimators=estimators, final_estimator=LogisticRegression())
 
@@ -724,7 +724,7 @@ class TestSklearnPipeline(unittest.TestCase):
     @unittest.skipIf(StackingClassifier is None, reason="StackingRegressor not available in scikit-learn < 0.22")
     def test_stacking_regressor(self):
         X, y = load_diabetes(return_X_y=True)
-        estimators = [("lr", RidgeCV()), ("svr", LinearSVR(random_state=42, dual=True))]
+        estimators = [("lr", RidgeCV()), ("svr", LinearSVR(random_state=42, dual="auto"))]
         reg = StackingRegressor(estimators=estimators, final_estimator=RandomForestRegressor(n_estimators=10, random_state=42))
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
