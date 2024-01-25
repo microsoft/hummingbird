@@ -14,7 +14,7 @@ from hummingbird.ml._utils import tvm_installed
 
 class TestSklearnSVC(unittest.TestCase):
     def _test_linear_svc(self, num_classes, labels_shift=0):
-        model = LinearSVC(dual="auto")
+        model = LinearSVC(dual=True)
         np.random.seed(0)
         X = np.random.rand(100, 200)
         X = np.array(X, dtype=np.float32)
@@ -39,7 +39,7 @@ class TestSklearnSVC(unittest.TestCase):
 
     # LinearSVR test function to be parameterized
     def _test_svr(self, y_input):
-        model = LinearSVR(dual="auto")
+        model = LinearSVR(dual=True)
 
         np.random.seed(0)
         X = np.random.rand(100, 200)
@@ -148,7 +148,7 @@ class TestSklearnSVC(unittest.TestCase):
         X = np.random.rand(100, 200)
         y = np.random.randint(num_classes, size=100)
 
-        model = LinearSVC(dual="auto")
+        model = LinearSVC(dual=True)
         model.fit(X, y)
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertTrue(torch_model is not None)
