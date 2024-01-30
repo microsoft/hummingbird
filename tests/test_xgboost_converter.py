@@ -9,7 +9,7 @@ from sklearn.datasets import fetch_california_housing
 from sklearn.model_selection import train_test_split
 
 import hummingbird.ml
-from hummingbird.ml._utils import xgboost_installed, tvm_installed, pandas_installed
+from hummingbird.ml._utils import xgboost_installed, tvm_installed, pandas_installed, onnx_runtime_installed
 from hummingbird.ml import constants
 from tree_utils import gbdt_implementation_map
 
@@ -253,7 +253,6 @@ class TestXGBoostConverter(unittest.TestCase):
     @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     def test_xgb_regressor_converter_torchscript(self):
         warnings.filterwarnings("ignore")
-        import torch
 
         for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth)
@@ -272,7 +271,6 @@ class TestXGBoostConverter(unittest.TestCase):
     @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     def test_xgb_classifier_converter_torchscript(self):
         warnings.filterwarnings("ignore")
-        import torch
 
         for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth)
@@ -293,7 +291,6 @@ class TestXGBoostConverter(unittest.TestCase):
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
     def test_xgb_regressor_converter_tvm(self):
         warnings.filterwarnings("ignore")
-        import torch
 
         for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBRegressor(n_estimators=10, max_depth=max_depth)
@@ -313,7 +310,6 @@ class TestXGBoostConverter(unittest.TestCase):
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
     def test_xgb_classifier_converter_tvm(self):
         warnings.filterwarnings("ignore")
-        import torch
 
         for max_depth in [1, 3, 8, 10, 12]:
             model = xgb.XGBClassifier(n_estimators=10, max_depth=max_depth)
@@ -327,6 +323,41 @@ class TestXGBoostConverter(unittest.TestCase):
             tvm_model = hummingbird.ml.convert(model, "tvm", X, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
             self.assertIsNotNone(tvm_model)
             np.testing.assert_allclose(model.predict_proba(X), tvm_model.predict_proba(X), rtol=1e-06, atol=1e-06)
+
+    # Check that we can export into ONNX.
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires LightGBM installed")
+    def test_xgb_onnx(self):
+        warnings.filterwarnings("ignore")
+
+        X = [[0, 1], [1, 1], [2, 0]]
+        X = np.array(X, dtype=np.float32)
+        y = np.array([100, -10, 50], dtype=np.float32)
+        model = xgb.XGBRegressor(n_estimators=3, min_child_samples=1)
+        model.fit(X, y)
+
+        # Create ONNX model
+        onnx_model = hummingbird.ml.convert(model, "onnx", X)
+
+        np.testing.assert_allclose(onnx_model.predict(X).flatten(), model.predict(X))
+
+    # Check output renaming with two outputs
+    @unittest.skipIf(not onnx_runtime_installed(), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS")
+    @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires LightGBM installed")
+    def test_xgb_onnx_two_outputs(self):
+        model = xgb.XGBClassifier(n_estimators=3, max_depth=5)
+        np.random.seed(0)
+        X = np.random.rand(100, 200)
+        X = np.array(X, dtype=np.float32)
+        y = np.random.randint(2, size=100)
+
+        model.fit(X, y)
+
+        torch_model = hummingbird.ml.convert(model, "onnx", X, extra_config={constants.OUTPUT_NAMES: ['labels', 'predictions']})
+        self.assertIsNotNone(torch_model)
+
+        self.assertTrue(torch_model.model.graph.output[0].name == 'labels')
+        self.assertTrue(torch_model.model.graph.output[1].name == 'predictions')
 
 
 if __name__ == "__main__":
