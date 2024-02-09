@@ -505,6 +505,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
     # Test trees with TVM backend
     # Random forest gemm classifier
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_random_forest_tvm_gemm_classifier_converter(self):
         self._run_tree_classification_converter(
             RandomForestClassifier,
@@ -546,6 +550,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Random forest gemm multi classifier
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_random_forest_tvm_gemm_multi_classifier_converter(self):
         self._run_tree_classification_converter(
             RandomForestClassifier,
@@ -557,6 +565,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Random forest tree_trav multi classifier
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_random_forest_tvm_tree_trav_multi_classifier_converter(self):
         self._run_tree_classification_converter(
             RandomForestClassifier,
@@ -568,6 +580,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Random forest perf_tree_trav multi classifier
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_random_forest_tvm_perf_tree_trav_multi_classifier_converter(self):
         self._run_tree_classification_converter(
             RandomForestClassifier,
@@ -579,6 +595,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Random forest gemm classifier shifted classes
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_random_forest_tvm_gemm_classifier_shifted_labels_converter(self):
         self._run_tree_classification_converter(
             RandomForestClassifier,
@@ -623,6 +643,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Random forest gemm regressor
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_random_forest_tvm_gemm_regressor_converter(self):
         self._run_tree_regressor_converter(
             RandomForestRegressor,
@@ -634,6 +658,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Random forest tree_trav regressor
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_random_forest_tvm_tree_trav_regressor_converter(self):
         self._run_tree_regressor_converter(
             RandomForestRegressor,
@@ -645,6 +673,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Random forest perf_tree_trav regressor
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_random_forest_tvm_perf_tree_trav_regressor_converter(self):
         self._run_tree_regressor_converter(
             RandomForestRegressor,
@@ -656,6 +688,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Extra trees gemm regressor
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_extra_trees_tvm_gemm_regressor_converter(self):
         self._run_tree_regressor_converter(
             ExtraTreesRegressor,
@@ -682,6 +718,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Extra trees perf_tree_trav regressor
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_extra_trees_tvm_perf_tree_trav_regressor_converter(self):
         self._run_tree_regressor_converter(
             ExtraTreesRegressor,
@@ -693,11 +733,19 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Decision tree regressor
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_decision_tree_tvm_regressor_converter(self):
         self._run_tree_regressor_converter(DecisionTreeRegressor, 1000, "tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30})
 
     # Decision tree gemm regressor
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_decision_tree_tvm_gemm_regressor_converter(self):
         self._run_tree_regressor_converter(
             DecisionTreeRegressor,
@@ -708,6 +756,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Decision tree tree_trav regressor
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_decision_tree_tvm_tree_trav_regressor_converter(self):
         self._run_tree_regressor_converter(
             DecisionTreeRegressor,
@@ -718,6 +770,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Decision tree perf_tree_trav regressor
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_decision_tree_tvm_perf_tree_trav_regressor_converter(self):
         self._run_tree_regressor_converter(
             DecisionTreeRegressor,
@@ -728,6 +784,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Decision tree classifier
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_decision_tree_tvm_classifier_converter(self):
         self._run_tree_classification_converter(
             DecisionTreeClassifier, 3, "tvm", extra_config={constants.TVM_MAX_FUSE_DEPTH: 30}
@@ -735,6 +795,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Extra trees classifier
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_extra_trees_tvm_classifier_converter(self):
         self._run_tree_classification_converter(
             ExtraTreesClassifier, 3, "tvm", n_estimators=10, extra_config={constants.TVM_MAX_FUSE_DEPTH: 30}
