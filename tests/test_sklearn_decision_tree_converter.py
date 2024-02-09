@@ -3,6 +3,8 @@ Tests Sklearn RandomForest, DecisionTree, ExtraTrees converters.
 """
 import unittest
 import warnings
+import os
+import sys
 
 import numpy as np
 from sklearn.ensemble import ExtraTreesClassifier, ExtraTreesRegressor, RandomForestClassifier, RandomForestRegressor
@@ -514,6 +516,10 @@ class TestSklearnTreeConverter(unittest.TestCase):
 
     # Random forest tree_trav classifier
     @unittest.skipIf(not (tvm_installed()), reason="TVM tests require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_random_forest_tvm_tree_trav_classifier_converter(self):
         self._run_tree_classification_converter(
             RandomForestClassifier,
