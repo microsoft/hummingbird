@@ -3,7 +3,6 @@ Tests Sklearn RandomForest, DecisionTree, ExtraTrees converters.
 """
 import unittest
 import warnings
-import os
 import sys
 
 import numpy as np
@@ -13,15 +12,11 @@ from sklearn import datasets
 
 import hummingbird.ml
 from hummingbird.ml.exceptions import MissingConverter
-from hummingbird.ml._utils import tvm_installed
+from hummingbird.ml._utils import tvm_installed, is_on_github_actions
 from hummingbird.ml import constants
 from tree_utils import dt_implementation_map
 
 import random
-
-
-def is_on_github_actions():
-    return ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)
 
 
 class TestSklearnTreeConverter(unittest.TestCase):

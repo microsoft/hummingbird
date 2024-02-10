@@ -5,12 +5,13 @@ import unittest
 import warnings
 
 import numpy as np
+import sys
 import torch
 from sklearn.ensemble import IsolationForest
 
 import hummingbird.ml
 from hummingbird.ml import constants
-from hummingbird.ml._utils import onnx_runtime_installed, tvm_installed
+from hummingbird.ml._utils import onnx_runtime_installed, tvm_installed, is_on_github_actions
 from tree_utils import iforest_implementation_map
 
 
@@ -105,6 +106,10 @@ class TestIsolationForestConverter(unittest.TestCase):
 
     # Test TVM backend.
     @unittest.skipIf(not (tvm_installed()), reason="TVM test requires TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_isolation_forest_tvm_converter(self):
         warnings.filterwarnings("ignore")
         for max_samples in [2 ** 1, 2 ** 3, 2 ** 8, 2 ** 10, 2 ** 12]:
