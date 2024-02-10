@@ -32,6 +32,7 @@ from hummingbird.ml._utils import (
     sparkml_installed,
     pandas_installed,
     prophet_installed,
+    is_on_github_actions,
 )
 from hummingbird.ml.exceptions import MissingBackend
 
@@ -396,6 +397,10 @@ class TestBackends(unittest.TestCase):
         self.assertRaises(AssertionError, hummingbird.ml.ONNXContainer.load, "nonsense")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_load_fails_bad_path_tvm(self):
         self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense.zip")
         self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense")
@@ -434,6 +439,10 @@ class TestBackends(unittest.TestCase):
 
     # Test TVM requires test_data
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_test_data(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -451,6 +460,10 @@ class TestBackends(unittest.TestCase):
 
     # Test tvm save and load
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -474,6 +487,10 @@ class TestBackends(unittest.TestCase):
 
     # Test tvm save and load
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load_digest(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -500,6 +517,10 @@ class TestBackends(unittest.TestCase):
 
     # Test tvm save and generic load
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_generic_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -523,6 +544,10 @@ class TestBackends(unittest.TestCase):
 
     # Test tvm save and load zip file
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load_zip(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -545,6 +570,10 @@ class TestBackends(unittest.TestCase):
         os.remove("tvm-tmp.zip")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -567,6 +596,10 @@ class TestBackends(unittest.TestCase):
         os.remove("tvm-tmp.zip")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load_no_versions(self):
         from hummingbird.ml.operator_converters import constants
 
