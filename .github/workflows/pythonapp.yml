@@ -27,7 +27,7 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11']
     env:
       TVM_VERSION_TAG: v0.15.0
-      PYTORCH_VERSION: 2.0.0
+      PYTORCH_VERSION: 2.2.0
       LLVM_VERSION: 14
 
     steps:
