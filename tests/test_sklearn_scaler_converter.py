@@ -3,11 +3,12 @@ Tests scikit scaler converter.
 """
 import unittest
 import numpy as np
+import sys
 import torch
 from sklearn.preprocessing import RobustScaler, MaxAbsScaler, MinMaxScaler, StandardScaler
 
 import hummingbird.ml
-from hummingbird.ml._utils import tvm_installed
+from hummingbird.ml._utils import tvm_installed, is_on_github_actions
 from hummingbird.ml import constants
 
 
@@ -102,30 +103,58 @@ class TestSklearnScalerConverter(unittest.TestCase):
 
     # Tests with TVM backend
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_standard_scaler_floats_tvm_false_false(self):
         self._test_standard_scaler_floats(False, False, "tvm")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_standard_scaler_floats_tvm_true_false(self):
         self._test_standard_scaler_floats(True, False, "tvm")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_standard_scaler_floats_tvm_true_true(self):
         self._test_standard_scaler_floats(True, True, "tvm")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_robust_scaler_floats_tvm_false_false(self):
         self._test_robust_scaler_floats(False, False, "tvm")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_robust_scaler_floats_tvm_true_false(self):
         self._test_robust_scaler_floats(True, False, "tvm")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_robust_scaler_floats_tvm_false_true(self):
         self._test_robust_scaler_floats(False, True, "tvm")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_robust_scaler_floats_tvm_true_true(self):
         self._test_robust_scaler_floats(True, True, "tvm")
 

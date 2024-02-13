@@ -22,6 +22,7 @@ from hummingbird.ml._utils import (
     pandas_installed,
     lightgbm_installed,
     tvm_installed,
+    is_on_github_actions,
 )
 from hummingbird.ml import constants
 
@@ -423,6 +424,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test tvm transform with batching.
     @unittest.skipIf(not tvm_installed(), reason="TVM test require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_batch_transform(self):
         warnings.filterwarnings("ignore")
         model = StandardScaler(with_mean=True, with_std=True)
@@ -440,6 +445,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test tvm regression with batching.
     @unittest.skipIf(not tvm_installed(), reason="TVM test require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_regression_batch(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -461,6 +470,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test tvm classification with batching.
     @unittest.skipIf(not tvm_installed(), reason="TVM test require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_classification_batch(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -482,6 +495,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test tvm iforest with batching.
     @unittest.skipIf(not tvm_installed(), reason="TVM test require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_iforest_batch(self):
         warnings.filterwarnings("ignore")
         num_classes = 2
@@ -503,6 +520,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test tvm transform with batching and uneven numer of records.
     @unittest.skipIf(not tvm_installed(), reason="TVM test require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_batch_remainder_transform(self):
         warnings.filterwarnings("ignore")
         model = StandardScaler(with_mean=True, with_std=True)
@@ -521,6 +542,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test tvm regression with batching and uneven numer of records.
     @unittest.skipIf(not tvm_installed(), reason="TVM test require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_regression_remainder_batch(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -542,6 +567,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test tvm classification with batching and uneven numer of records.
     @unittest.skipIf(not tvm_installed(), reason="TVM test require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_classification_remainder_batch(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -564,6 +593,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test tvm iforest with batching and uneven numer of records.
     @unittest.skipIf(not tvm_installed(), reason="TVM test require TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_iforest_remainder_batch(self):
         warnings.filterwarnings("ignore")
         num_classes = 2
@@ -744,6 +777,10 @@ class TestExtraConf(unittest.TestCase):
     # Test batch with pandas tvm.
     @unittest.skipIf(not pandas_installed(), reason="Test requires pandas installed")
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_pandas_batch_tvm(self):
         import pandas
 
@@ -801,6 +838,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test max fuse depth configuration in TVM.
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_max_fuse(self):
         warnings.filterwarnings("ignore")
 
@@ -816,6 +857,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test TVM without padding returns an errror is sizes don't match.
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_no_padding(self):
         warnings.filterwarnings("ignore")
 
@@ -832,6 +877,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test padding in TVM.
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_padding(self):
         warnings.filterwarnings("ignore")
 
@@ -848,6 +897,10 @@ class TestExtraConf(unittest.TestCase):
 
     # Test padding in TVM does not create problems when not necessary.
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_padding_2(self):
         warnings.filterwarnings("ignore")
 

@@ -215,6 +215,10 @@ def is_spark_dataframe(df):
         return False
 
 
+def is_on_github_actions():
+    return ("CI" in os.environ) and ("GITHUB_RUN_ID" in os.environ)
+
+
 def get_device(model):
     """
     Convenient function used to get the runtime device for the model.

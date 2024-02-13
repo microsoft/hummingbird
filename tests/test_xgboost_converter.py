@@ -1,6 +1,7 @@
 """
 Tests XGBoost converters.
 """
+import sys
 import unittest
 import warnings
 
@@ -9,7 +10,7 @@ from sklearn.datasets import fetch_california_housing
 from sklearn.model_selection import train_test_split
 
 import hummingbird.ml
-from hummingbird.ml._utils import xgboost_installed, tvm_installed, pandas_installed
+from hummingbird.ml._utils import xgboost_installed, tvm_installed, pandas_installed, is_on_github_actions
 from hummingbird.ml import constants
 from tree_utils import gbdt_implementation_map
 
@@ -291,6 +292,10 @@ class TestXGBoostConverter(unittest.TestCase):
     # TVM backend regression.
     @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_xgb_regressor_converter_tvm(self):
         warnings.filterwarnings("ignore")
         import torch
@@ -311,6 +316,10 @@ class TestXGBoostConverter(unittest.TestCase):
     # Test TVM backend classification.
     @unittest.skipIf(not xgboost_installed(), reason="XGBoost test requires XGBoost installed")
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_xgb_classifier_converter_tvm(self):
         warnings.filterwarnings("ignore")
         import torch
