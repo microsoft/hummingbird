@@ -333,6 +333,45 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     def test_sgd_classifier_no_intercept(self):
         self._test_sgd_classifier(3, fit_intercept=False)
 
+    # SGDClassifier with modified log loss
+    def test_log_loss(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="log_loss", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict_proba(inputs), hb_model.predict_proba(inputs), rtol=1e-6, atol=1e-6)
+
+    def test_log_loss2(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="log_loss", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-6, atol=1e-6)
+
+    def test_log_loss__multi(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="log_loss", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict_proba(inputs), hb_model.predict_proba(inputs), rtol=1e-6, atol=1e-6)
+
     # SGDClassifier with modified huber loss
     def test_modified_huber(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
