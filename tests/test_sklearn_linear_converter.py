@@ -333,6 +333,45 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
     def test_sgd_classifier_no_intercept(self):
         self._test_sgd_classifier(3, fit_intercept=False)
 
+    # SGDClassifier with log loss
+    def test_log_loss(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="log_loss", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict_proba(inputs), hb_model.predict_proba(inputs), rtol=1e-6, atol=1e-6)
+
+    def test_log_loss2(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="log_loss", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        np.testing.assert_allclose(model.predict_proba(X), hb_model.predict_proba(X), rtol=1e-6, atol=1e-6)
+
+    def test_log_loss__multi(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="log_loss", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict_proba(inputs), hb_model.predict_proba(inputs), rtol=1e-6, atol=1e-6)
+
     # SGDClassifier with modified huber loss
     def test_modified_huber(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
@@ -371,6 +410,280 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
         np.testing.assert_allclose(model.predict_proba(inputs), hb_model.predict_proba(inputs), rtol=1e-6, atol=1e-6)
+
+    # Only log_loss and modified_huber support the probability
+    # SGDClassifier with squared_hinge
+    def test_squared_hinge(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="squared_hinge", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    def test_squared_hinge2(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="squared_hinge", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    def test_squared_hinge__multi(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="squared_hinge", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    # SGDClassifier with hinge
+    def test_hinge(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="hinge", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    def test_hinge2(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="hinge", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    def test_hinge__multi(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="hinge", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    # SGDClassifier with huber
+    def test_huber(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="huber", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    def test_huber2(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="huber", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    def test_huber__multi(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="huber", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    # SGDClassifier with perceptron
+    def test_perceptron(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="perceptron", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    def test_perceptron2(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="perceptron", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    def test_perceptron__multi(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="perceptron", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    # SGDClassifier with epsilon_insensitive
+    def test_epsilon_insensitive(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="epsilon_insensitive", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    def test_epsilon_insensitive2(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="epsilon_insensitive", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    def test_epsilon_insensitive__multi(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="epsilon_insensitive", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    # SGDClassifier with squared_error
+    def test_squared_error(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="squared_error", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    def test_squared_error2(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="squared_error", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    def test_squared_error__multi(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="squared_error", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    # SGDClassifier with squared_epsilon_insensitive
+    def test_squared_epsilon_insensitive(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="squared_epsilon_insensitive", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
+
+    def test_squared_epsilon_insensitive2(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([1, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="squared_epsilon_insensitive", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        np.testing.assert_allclose(model.predict(X), hb_model.predict(X), rtol=1e-6, atol=1e-6)
+
+    def test_squared_epsilon_insensitive__multi(self):
+        X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
+        Y = np.array([0, 1, 1, 1, 2, 2, 2, 2])
+
+        model = SGDClassifier(loss="squared_epsilon_insensitive", max_iter=1000, tol=1e-3)
+        model.fit(X, Y)
+
+        # Use Hummingbird to convert the model to PyTorch
+        hb_model = hummingbird.ml.convert(model, "torch")
+
+        inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
+        np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
 
     # Failure cases
     def test_sklearn_linear_model_raises_wrong_type(self):
