@@ -567,7 +567,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
         np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
-   
+
     # SGDClassifier with epsilon_insensitive
     def test_epsilon_insensitive(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
