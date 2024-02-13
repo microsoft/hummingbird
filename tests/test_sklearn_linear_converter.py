@@ -450,7 +450,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
         np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
-    
+
     # SGDClassifier with hinge
     def test_hinge(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
@@ -528,7 +528,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
         np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
-        
+
     # SGDClassifier with perceptron
     def test_perceptron(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
@@ -567,7 +567,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
         np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
-        
+   
     # SGDClassifier with epsilon_insensitive
     def test_epsilon_insensitive(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
@@ -645,7 +645,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
         np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
-        
+
     # SGDClassifier with squared_epsilon_insensitive
     def test_squared_epsilon_insensitive(self):
         X = np.array([[-0.5, -1], [-1, -1], [-0.1, -0.1], [0.1, -0.2], [0.5, 1], [1, 1], [0.1, 0.1], [-0.1, 0.2]])
@@ -684,7 +684,7 @@ class TestSklearnLinearClassifiers(unittest.TestCase):
 
         inputs = [[-1, -1], [1, 1], [-0.2, 0.1], [0.2, -0.1]]
         np.testing.assert_allclose(model.predict(inputs), hb_model.predict(inputs), rtol=1e-6, atol=1e-6)
-    
+
     # Failure cases
     def test_sklearn_linear_model_raises_wrong_type(self):
         warnings.filterwarnings("ignore")
