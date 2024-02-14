@@ -105,7 +105,8 @@ class PyTorchSklearnContainer(SklearnContainer):
         return digest
 
     @staticmethod
-    def load(location, do_unzip_and_model_type_check=True, delete_unzip_location_folder: bool = True, digest=None):
+    def load(location, do_unzip_and_model_type_check=True, delete_unzip_location_folder: bool = True,
+             digest=None, override_flag=False):
         """
         Method used to load a container from the file system.
 
@@ -114,6 +115,8 @@ class PyTorchSklearnContainer(SklearnContainer):
             do_unzip_and_model_type_check: Whether to unzip the model and check the type.
             delete_unzip_location_folder: Whether to delete the folder provided by caller or created by this method
                                             where the model is unzipped
+            digest (optional): The digest to verify the integrity of the model.
+            override_flag (optional): A flag to override the integrity check. Set to True to bypass if trusted source.
 
         Returns:
             The loaded model.
@@ -133,7 +136,11 @@ class PyTorchSklearnContainer(SklearnContainer):
 
             # Verify the digest if provided.
             if digest is None:
-                print("Warning: No digest provided. Model integrity not verified.")
+                if override_flag is False:
+                    raise RuntimeError("No digest provided. If you trust the source of this model, "
+                                       "set override_flag to True. Ex: .load(location, override_flag=True)")
+                else:
+                    print("Skipping integrity check. Override flag set to True.")
             else:
                 with open(zip_location, 'rb') as file:
                     new_digest = hmac.new(b'shared-key', file.read(), hashlib.sha1).hexdigest()
