@@ -241,13 +241,14 @@ def from_strings_to_ints(input, max_string_length):
     return np.array(input, dtype="|S" + str(max_string_length)).view(np.int32).reshape(shape)
 
 
-def load(location, digest=None):
+def load(location, digest=None, override_flag=False):
     """
     Utility function used to load arbitrary Hummingbird models.
 
     Args:
         location: The location of the model.
         digest (optional): A digest string to verify the model integrity (created during save).
+        override_flag (optional): A flag to override the integrity check. Set to True to bypass if trusted source.
     """
     # Add load capabilities.
     from hummingbird.ml.containers import PyTorchSklearnContainer
@@ -270,7 +271,11 @@ def load(location, digest=None):
 
     # Verify the digest if provided.
     if digest is None:
-        print("Warning: No digest provided. Model integrity not verified.")
+        if override_flag is False:
+            raise RuntimeError("No digest provided. If you trust the source of this model, "
+                  "set override_flag to True. Ex: .load(location, override_flag=True)")
+        else:
+            print("Skipping integrity check. Override flag set to True.")
     else:
         with open(zip_location, 'rb') as file:
             new_digest = hmac.new(b'shared-key', file.read(), hashlib.sha1).hexdigest()
