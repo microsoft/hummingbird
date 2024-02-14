@@ -590,8 +590,8 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("tvm-tmp.zip")
 
-        hummingbird.ml.TVMContainer.load("tvm-tmp.zip")
-        hummingbird.ml.TVMContainer.load("tvm-tmp.zip")
+        hummingbird.ml.TVMContainer.load("tvm-tmp.zip", override_flag=True)
+        hummingbird.ml.TVMContainer.load("tvm-tmp.zip", override_flag=True)
 
         os.remove("tvm-tmp.zip")
 
@@ -623,7 +623,7 @@ class TestBackends(unittest.TestCase):
         # Removing the configuration file with the versions does not create problems.
         os.remove(os.path.join("tvm-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH))
 
-        hummingbird.ml.load("tvm-tmp")
+        hummingbird.ml.load("tvm-tmp", override_flag=True)
         os.remove("tvm-tmp.zip")
 
     # Test *generic* save and load with digest
