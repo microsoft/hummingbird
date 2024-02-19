@@ -32,6 +32,7 @@ from hummingbird.ml._utils import (
     sparkml_installed,
     pandas_installed,
     prophet_installed,
+    is_on_github_actions,
 )
 from hummingbird.ml.exceptions import MissingBackend
 
@@ -113,7 +114,7 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("pt-tmp")
 
-        hb_model_loaded = hummingbird.ml.TorchContainer.load("pt-tmp")
+        hb_model_loaded = hummingbird.ml.TorchContainer.load("pt-tmp", override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("pt-tmp.zip")
@@ -162,10 +163,10 @@ class TestBackends(unittest.TestCase):
         hb_model.save(model_location_name)
 
         # Default behavior
-        hummingbird.ml.TorchContainer.load(model_location_name, delete_unzip_location_folder=True)
+        hummingbird.ml.TorchContainer.load(model_location_name, delete_unzip_location_folder=True, override_flag=True)
         assert not os.path.exists(model_location_name)
 
-        hummingbird.ml.TorchContainer.load(model_location_name, delete_unzip_location_folder=False)
+        hummingbird.ml.TorchContainer.load(model_location_name, delete_unzip_location_folder=False, override_flag=True)
         assert os.path.exists(model_location_name)
 
         os.remove(f"{model_location_name}.zip")
@@ -188,7 +189,7 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("pt-tmp")
 
-        hb_model_loaded = hummingbird.ml.load("pt-tmp")
+        hb_model_loaded = hummingbird.ml.load("pt-tmp", override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("pt-tmp.zip")
@@ -209,8 +210,8 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("pt-tmp")
 
-        hummingbird.ml.load("pt-tmp")
-        hummingbird.ml.load("pt-tmp")
+        hummingbird.ml.load("pt-tmp", override_flag=True)
+        hummingbird.ml.load("pt-tmp", override_flag=True)
 
         os.remove("pt-tmp.zip")
 
@@ -243,7 +244,7 @@ class TestBackends(unittest.TestCase):
             file.writelines(configuration)
         shutil.make_archive("pt-tmp", "zip", "pt-tmp")
 
-        hummingbird.ml.load("pt-tmp")
+        hummingbird.ml.load("pt-tmp", override_flag=True)
         os.remove("pt-tmp.zip")
 
     def test_pytorch_save_load_less_versions(self):
@@ -275,7 +276,7 @@ class TestBackends(unittest.TestCase):
             file.writelines(configuration)
         shutil.make_archive("pt-tmp", "zip", "pt-tmp")
 
-        hummingbird.ml.load("pt-tmp")
+        hummingbird.ml.load("pt-tmp", override_flag=True)
         os.remove("pt-tmp.zip")
 
     def test_pytorch_save_load_different_versions(self):
@@ -307,7 +308,7 @@ class TestBackends(unittest.TestCase):
             file.writelines(configuration)
         shutil.make_archive("pt-tmp", "zip", "pt-tmp")
 
-        hummingbird.ml.load("pt-tmp")
+        hummingbird.ml.load("pt-tmp", override_flag=True)
         os.remove("pt-tmp.zip")
 
     # Test torchscript save and load
@@ -327,7 +328,7 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("ts-tmp")
 
-        hb_model_loaded = hummingbird.ml.TorchContainer.load("ts-tmp")
+        hb_model_loaded = hummingbird.ml.TorchContainer.load("ts-tmp", override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("ts-tmp.zip")
@@ -374,7 +375,7 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("ts-tmp")
 
-        hb_model_loaded = hummingbird.ml.load("ts-tmp")
+        hb_model_loaded = hummingbird.ml.load("ts-tmp", override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("ts-tmp.zip")
@@ -396,6 +397,10 @@ class TestBackends(unittest.TestCase):
         self.assertRaises(AssertionError, hummingbird.ml.ONNXContainer.load, "nonsense")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_load_fails_bad_path_tvm(self):
         self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense.zip")
         self.assertRaises(AssertionError, hummingbird.ml.TVMContainer.load, "nonsense")
@@ -434,6 +439,10 @@ class TestBackends(unittest.TestCase):
 
     # Test TVM requires test_data
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_test_data(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -451,6 +460,10 @@ class TestBackends(unittest.TestCase):
 
     # Test tvm save and load
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -467,13 +480,17 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("tvm-tmp")
 
-        hb_model_loaded = hummingbird.ml.TVMContainer.load("tvm-tmp")
+        hb_model_loaded = hummingbird.ml.TVMContainer.load("tvm-tmp", override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("tvm-tmp.zip")
 
     # Test tvm save and load
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load_digest(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -490,7 +507,7 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         my_digest = hb_model.save("tvm-tmp")
 
-        hb_model_loaded = hummingbird.ml.TVMContainer.load("tvm-tmp", digest=my_digest)
+        hb_model_loaded = hummingbird.ml.TVMContainer.load("tvm-tmp", digest=my_digest, override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         # Now try to load with a different digest
@@ -500,6 +517,10 @@ class TestBackends(unittest.TestCase):
 
     # Test tvm save and generic load
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_generic_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -516,13 +537,17 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("tvm-tmp")
 
-        hb_model_loaded = hummingbird.ml.load("tvm-tmp")
+        hb_model_loaded = hummingbird.ml.load("tvm-tmp", override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("tvm-tmp.zip")
 
     # Test tvm save and load zip file
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load_zip(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -539,12 +564,16 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("tvm-tmp.zip")
 
-        hb_model_loaded = hummingbird.ml.TVMContainer.load("tvm-tmp.zip")
+        hb_model_loaded = hummingbird.ml.TVMContainer.load("tvm-tmp.zip", override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("tvm-tmp.zip")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load_load(self):
         warnings.filterwarnings("ignore")
         max_depth = 10
@@ -561,12 +590,16 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("tvm-tmp.zip")
 
-        hummingbird.ml.TVMContainer.load("tvm-tmp.zip")
-        hummingbird.ml.TVMContainer.load("tvm-tmp.zip")
+        hummingbird.ml.TVMContainer.load("tvm-tmp.zip", override_flag=True)
+        hummingbird.ml.TVMContainer.load("tvm-tmp.zip", override_flag=True)
 
         os.remove("tvm-tmp.zip")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
     def test_tvm_save_load_no_versions(self):
         from hummingbird.ml.operator_converters import constants
 
@@ -590,7 +623,7 @@ class TestBackends(unittest.TestCase):
         # Removing the configuration file with the versions does not create problems.
         os.remove(os.path.join("tvm-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH))
 
-        hummingbird.ml.load("tvm-tmp")
+        hummingbird.ml.load("tvm-tmp", override_flag=True)
         os.remove("tvm-tmp.zip")
 
     # Test *generic* save and load with digest
@@ -750,7 +783,7 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("onnx-tmp")
 
-        hb_model_loaded = hummingbird.ml.ONNXContainer.load("onnx-tmp")
+        hb_model_loaded = hummingbird.ml.ONNXContainer.load("onnx-tmp", override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("onnx-tmp.zip")
@@ -799,7 +832,7 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("onnx-tmp")
 
-        hb_model_loaded = hummingbird.ml.load("onnx-tmp")
+        hb_model_loaded = hummingbird.ml.load("onnx-tmp", override_flag=True)
         np.testing.assert_allclose(hb_model_loaded.predict_proba(X), hb_model.predict_proba(X), rtol=1e-06, atol=1e-06)
 
         os.remove("onnx-tmp.zip")
@@ -822,8 +855,8 @@ class TestBackends(unittest.TestCase):
         self.assertIsNotNone(hb_model)
         hb_model.save("onnx-tmp")
 
-        hummingbird.ml.load("onnx-tmp")
-        hummingbird.ml.load("onnx-tmp")
+        hummingbird.ml.load("onnx-tmp", override_flag=True)
+        hummingbird.ml.load("onnx-tmp", override_flag=True)
 
         os.remove("onnx-tmp.zip")
 
@@ -851,7 +884,7 @@ class TestBackends(unittest.TestCase):
         # Removing the configuration file with the versions does not create problems.
         os.remove(os.path.join("onnx-tmp", constants.SAVE_LOAD_MODEL_CONFIGURATION_PATH))
 
-        hummingbird.ml.load("onnx-tmp")
+        hummingbird.ml.load("onnx-tmp", override_flag=True)
         os.remove("onnx-tmp.zip")
 
     # Test for when the user forgets to add a target (ex: convert(model, output) rather than convert(model, 'torch')) due to API change
