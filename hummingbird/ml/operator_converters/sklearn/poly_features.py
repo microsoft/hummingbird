@@ -74,8 +74,8 @@ def convert_sklearn_poly_features(operator, device, extra_config):
     if operator.raw_operator.interaction_only:
         raise NotImplementedError("Hummingbird does not currently support interaction_only flag for PolynomialFeatures")
 
-    if operator.raw_operator.degree != 2:
-        raise NotImplementedError("Hummingbird currently only supports degree 2 for PolynomialFeatures")
+    if operator.raw_operator.degree < 2:
+        raise NotImplementedError("Hummingbird supports 2 or higher degree for PolynomialFeatures")
     return PolynomialFeatures(
         operator,
         operator.raw_operator.n_features_in_,
