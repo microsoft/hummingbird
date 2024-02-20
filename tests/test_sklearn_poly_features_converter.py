@@ -48,11 +48,11 @@ class TestSklearnPolynomialFeatures(unittest.TestCase):
 
         # TODO: delete when implemented
         model = PolynomialFeatures(degree=4, include_bias=True, order="F").fit(data)
-        self.assertRaises(NotImplementedError, hummingbird.ml.convert, model, "torch")
+        self._test_sklearn_polynomial_featurizer(data, model)
 
         # TODO: delete when implemented
         model = PolynomialFeatures(degree=2, include_bias=True, order="F").fit(data)
-        self.assertRaises(NotImplementedError, hummingbird.ml.convert, model, "torch")
+        self._test_sklearn_polynomial_featurizer(data, model)
 
 
 if __name__ == "__main__":
