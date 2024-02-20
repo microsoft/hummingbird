@@ -51,7 +51,7 @@ class TestSklearnPolynomialFeatures(unittest.TestCase):
         self.assertRaises(NotImplementedError, hummingbird.ml.convert, model, "torch")
 
         # TODO: delete when implemented
-        model = PolynomialFeatures(degree=2, interaction_only=True, order="F").fit(data)
+        model = PolynomialFeatures(degree=2, include_bias=True, order="F").fit(data)
         self.assertRaises(NotImplementedError, hummingbird.ml.convert, model, "torch")
 
 
