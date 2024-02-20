@@ -11,6 +11,8 @@ from .._physical_operator import PhysicalOperator
 from onnxconverter_common.registration import register_converter
 import torch
 import itertools
+
+
 class PolynomialFeatures(PhysicalOperator, torch.nn.Module):
     """
     Class implementing PolynomialFeatures operators in PyTorch.
@@ -26,9 +28,8 @@ class PolynomialFeatures(PhysicalOperator, torch.nn.Module):
         self.interaction_only = interaction_only
         self.include_bias = include_bias
 
-
     def forward(self, x):
-        if self.degree<0:
+        if self.degree < 0:
             raise ValueError("Degree should be greater than or equal to 0.")
 
         features = []
