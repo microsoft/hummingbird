@@ -46,11 +46,9 @@ class TestSklearnPolynomialFeatures(unittest.TestCase):
     def test_sklearn_poly_featurizer_raises(self):
         data = np.array([[1.2, 3.2, 1.3, -5.6], [4.3, -3.2, 5.7, 1.0], [0, 3.2, 4.7, -8.9]], dtype=np.float32)
 
-        # TODO: delete when implemented
         model = PolynomialFeatures(degree=4, include_bias=True, order="F").fit(data)
         self._test_sklearn_polynomial_featurizer(data, model)
 
-        # TODO: delete when implemented
         model = PolynomialFeatures(degree=2, include_bias=True, order="F").fit(data)
         self._test_sklearn_polynomial_featurizer(data, model)
 
