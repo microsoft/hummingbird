@@ -49,7 +49,7 @@ class TestSklearnPolynomialFeatures(unittest.TestCase):
         model = PolynomialFeatures(degree=4, include_bias=True, order="F").fit(data)
         self._test_sklearn_polynomial_featurizer(data, model)
 
-        model = PolynomialFeatures(degree=2, include_bias=True, order="F").fit(data)
+        model = PolynomialFeatures(degree=2, interaction_only=True, order="F").fit(data)
         self._test_sklearn_polynomial_featurizer(data, model)
 
 

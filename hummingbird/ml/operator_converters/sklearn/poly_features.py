@@ -69,9 +69,6 @@ def convert_sklearn_poly_features(operator, device, extra_config):
     """
     assert operator is not None, "Cannot convert None operator"
 
-    # if operator.raw_operator.interaction_only:
-    #     raise NotImplementedError("Hummingbird does not currently support interaction_only flag for PolynomialFeatures")
-
     if operator.raw_operator.degree < 0:
         raise NotImplementedError("Hummingbird does not supports negtive degree for PolynomialFeatures")
     return PolynomialFeatures(
