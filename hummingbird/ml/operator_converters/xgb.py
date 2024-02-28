@@ -136,11 +136,9 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
         if feature_names is not None:
             extra_config[constants.FEATURE_NAMES] = feature_names
     import json
-    def get_basescore(model) -> float:
+    def get_basescore(model):
         """Get base score from an XGBoost sklearn estimator."""
-        base_score = float(
-            json.loads(model.get_booster().save_config())["learner"]["learner_model_param"]["base_score"]
-        )
+        base_score = float(json.loads(model.get_booster().save_config())["learner"]["learner_model_param"]["base_score"])
         return base_score
     base_prediction = get_basescore(operator.raw_operator)
     if base_prediction is None:
