@@ -135,7 +135,7 @@ def convert_sklearn_xgb_regressor(operator, device, extra_config):
         feature_names = operator.raw_operator.get_booster().feature_names
         if feature_names is not None:
             extra_config[constants.FEATURE_NAMES] = feature_names
-    base_prediction =  float(eval(operator.raw_operator.get_booster().save_config().replace('false', "False").replace("true", "True"))["learner"]["learner_model_param"]["base_score"])
+    base_prediction = float(eval(operator.raw_operator.get_booster().save_config().replace('false', "False").replace("true", "True"))["learner"]["learner_model_param"]["base_score"])
     if base_prediction is None:
         base_prediction = [0.5]
     if type(base_prediction) is float:
