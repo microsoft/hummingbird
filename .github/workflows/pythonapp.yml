@@ -54,6 +54,7 @@ jobs:
       run: python -m pip install torch==${{ env.PYTORCH_VERSION }}
     - name: Install basic dependencies
       run: |
+        python -m pip install scikit-learn==1.4.2
         python -m pip install -e .[tests] -f https://download.pytorch.org/whl/torch_stable.html
     - name: Test with older SKLearn on Linux with py3.9 to check backward compatibility
       if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') == true }}
