@@ -58,9 +58,9 @@ jobs:
     - name: Test with older SKLearn on Linux with py3.9 to check backward compatibility
       if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') == true }}
       run: python -m pip install scikit-learn==1.2.1
-    - name: Pin SKLearn==1.4.2 on not Linux with py3.9
+    - name: Pin SKLearn<1.5.0 on not Linux with py3.9
       if: ${{ !(matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') == true) }}
-      run: python -m pip install scikit-learn==1.4.2
+      run: python -m pip install "scikit-learn<1.5.0"
     - name: Run basic tests without extra
       run: pytest
     - name: Coverage on basic tests without extra
