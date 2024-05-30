@@ -23,7 +23,7 @@ install_requires = [
     "numpy>=1.15",
     "onnxconverter-common>=1.6.0",
     "scipy",
-    "scikit-learn",
+    "scikit-learn>=1.5.0",
     "torch>1.7.0",
     "psutil",
     "dill",
