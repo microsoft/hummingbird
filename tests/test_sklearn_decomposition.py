@@ -110,7 +110,6 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
     def test_kernel_pca_converter_precomputed(self):
         self._fit_model_pca(KernelPCA(n_components=5, kernel="precomputed"), precompute=True)
 
-    # TODO: Fails on macos-latest Python 3.8 due to a sklearn bug.
     # FastICA converter with n_components none
     def test_fast_ica_converter_none(self):
         self._fit_model_pca(FastICA(n_components=None))
