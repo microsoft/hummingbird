@@ -112,8 +112,8 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
 
     # TODO: Fails on macos-latest Python 3.8 due to a sklearn bug.
     # FastICA converter with n_components none
-    # def test_fast_ica_converter_none(self):
-    #     self._fit_model_pca(FastICA(n_components=None))
+    def test_fast_ica_converter_none(self):
+        self._fit_model_pca(FastICA(n_components=None))
 
     # FastICA converter with n_components 3
     def test_fast_ica_converter_3(self):
