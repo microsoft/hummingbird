@@ -1,5 +1,5 @@
-hummingbird.ml.containers.\_input\_containers
-=============================================
+hummingbird.ml.containers.\_input\_containers module
+====================================================
 
 .. automodule:: hummingbird.ml.containers._input_containers
    :members:

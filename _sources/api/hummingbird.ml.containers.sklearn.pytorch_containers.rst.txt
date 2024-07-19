@@ -1,5 +1,5 @@
-hummingbird.ml.containers.sklearn.pytorch\_containers
-=====================================================
+hummingbird.ml.containers.sklearn.pytorch\_containers module
+============================================================
 
 .. automodule:: hummingbird.ml.containers.sklearn.pytorch_containers
    :members:

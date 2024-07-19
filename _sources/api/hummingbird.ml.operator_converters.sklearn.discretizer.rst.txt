@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.sklearn.discretizer
-=======================================================
+hummingbird.ml.operator\_converters.sklearn.discretizer module
+==============================================================
 
 .. automodule:: hummingbird.ml.operator_converters.sklearn.discretizer
    :members:

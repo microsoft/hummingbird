@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.\_physical\_operator
-========================================================
+hummingbird.ml.operator\_converters.\_physical\_operator module
+===============================================================
 
 .. automodule:: hummingbird.ml.operator_converters._physical_operator
    :members:

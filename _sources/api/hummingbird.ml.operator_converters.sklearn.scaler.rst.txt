@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.sklearn.scaler
-==================================================
+hummingbird.ml.operator\_converters.sklearn.scaler module
+=========================================================
 
 .. automodule:: hummingbird.ml.operator_converters.sklearn.scaler
    :members:

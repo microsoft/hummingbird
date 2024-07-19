@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.onnx.imputer
-================================================
+hummingbird.ml.operator\_converters.onnx.imputer module
+=======================================================
 
 .. automodule:: hummingbird.ml.operator_converters.onnx.imputer
    :members:

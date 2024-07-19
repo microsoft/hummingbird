@@ -1,13 +1,8 @@
-hummingbird.ml.containers.sklearn
-=================================
+hummingbird.ml.containers.sklearn package
+=========================================
 
-
-.. automodule:: hummingbird.ml.containers.sklearn
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
-
+Submodules
+----------
 
 .. toctree::
    :maxdepth: 1
@@ -15,3 +10,12 @@ hummingbird.ml.containers.sklearn
    hummingbird.ml.containers.sklearn.onnx_containers
    hummingbird.ml.containers.sklearn.pytorch_containers
    hummingbird.ml.containers.sklearn.tvm_containers
+
+Module contents
+---------------
+
+.. automodule:: hummingbird.ml.containers.sklearn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

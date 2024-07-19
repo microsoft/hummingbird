@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.onnx.binarizer
-==================================================
+hummingbird.ml.operator\_converters.onnx.binarizer module
+=========================================================
 
 .. automodule:: hummingbird.ml.operator_converters.onnx.binarizer
    :members:

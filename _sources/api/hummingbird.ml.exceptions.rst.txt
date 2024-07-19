@@ -1,5 +1,5 @@
-hummingbird.ml.exceptions
-=========================
+hummingbird.ml.exceptions module
+================================
 
 .. automodule:: hummingbird.ml.exceptions
    :members:

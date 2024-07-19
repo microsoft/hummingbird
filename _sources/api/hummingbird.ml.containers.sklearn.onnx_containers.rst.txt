@@ -1,5 +1,5 @@
-hummingbird.ml.containers.sklearn.onnx\_containers
-==================================================
+hummingbird.ml.containers.sklearn.onnx\_containers module
+=========================================================
 
 .. automodule:: hummingbird.ml.containers.sklearn.onnx_containers
    :members:

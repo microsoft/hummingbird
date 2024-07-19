@@ -1,5 +1,5 @@
-hummingbird.ml.containers.sklearn.tvm\_containers
-=================================================
+hummingbird.ml.containers.sklearn.tvm\_containers module
+========================================================
 
 .. automodule:: hummingbird.ml.containers.sklearn.tvm_containers
    :members:

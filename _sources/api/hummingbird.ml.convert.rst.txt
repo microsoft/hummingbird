@@ -1,5 +1,5 @@
-hummingbird.ml.convert
-======================
+hummingbird.ml.convert module
+=============================
 
 .. automodule:: hummingbird.ml.convert
    :members:

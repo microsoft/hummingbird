@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.onnx.feature\_vectorizer
-============================================================
+hummingbird.ml.operator\_converters.onnx.feature\_vectorizer module
+===================================================================
 
 .. automodule:: hummingbird.ml.operator_converters.onnx.feature_vectorizer
    :members:

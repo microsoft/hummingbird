@@ -1,13 +1,16 @@
-hummingbird.ml.containers
-=========================
+hummingbird.ml.containers package
+=================================
 
+Subpackages
+-----------
 
-.. automodule:: hummingbird.ml.containers
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
+.. toctree::
+   :maxdepth: 1
 
+   hummingbird.ml.containers.sklearn
+
+Submodules
+----------
 
 .. toctree::
    :maxdepth: 1
@@ -16,7 +19,11 @@ hummingbird.ml.containers
    hummingbird.ml.containers._sklearn_api_containers
    hummingbird.ml.containers.batch_container
 
-.. toctree::
-   :maxdepth: 1
+Module contents
+---------------
 
-   hummingbird.ml.containers.sklearn
+.. automodule:: hummingbird.ml.containers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

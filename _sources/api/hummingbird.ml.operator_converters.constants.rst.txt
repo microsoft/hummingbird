@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.constants
-=============================================
+hummingbird.ml.operator\_converters.constants module
+====================================================
 
 .. automodule:: hummingbird.ml.operator_converters.constants
    :members:

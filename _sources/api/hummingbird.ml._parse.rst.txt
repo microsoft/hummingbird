@@ -1,5 +1,5 @@
-hummingbird.ml.\_parse
-======================
+hummingbird.ml.\_parse module
+=============================
 
 .. automodule:: hummingbird.ml._parse
    :members:

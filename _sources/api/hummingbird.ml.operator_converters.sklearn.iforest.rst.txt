@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.sklearn.iforest
-===================================================
+hummingbird.ml.operator\_converters.sklearn.iforest module
+==========================================================
 
 .. automodule:: hummingbird.ml.operator_converters.sklearn.iforest
    :members:

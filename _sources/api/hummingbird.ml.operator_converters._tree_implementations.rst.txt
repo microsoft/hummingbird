@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.\_tree\_implementations
-===========================================================
+hummingbird.ml.operator\_converters.\_tree\_implementations module
+==================================================================
 
 .. automodule:: hummingbird.ml.operator_converters._tree_implementations
    :members:

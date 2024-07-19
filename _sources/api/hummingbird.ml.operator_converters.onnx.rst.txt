@@ -1,13 +1,8 @@
-hummingbird.ml.operator\_converters.onnx
-========================================
+hummingbird.ml.operator\_converters.onnx package
+================================================
 
-
-.. automodule:: hummingbird.ml.operator_converters.onnx
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
-
+Submodules
+----------
 
 .. toctree::
    :maxdepth: 1
@@ -24,3 +19,12 @@ hummingbird.ml.operator\_converters.onnx
    hummingbird.ml.operator_converters.onnx.scaler
    hummingbird.ml.operator_converters.onnx.sv
    hummingbird.ml.operator_converters.onnx.tree_ensemble
+
+Module contents
+---------------
+
+.. automodule:: hummingbird.ml.operator_converters.onnx
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

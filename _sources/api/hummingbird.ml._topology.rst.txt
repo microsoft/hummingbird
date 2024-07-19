@@ -1,5 +1,5 @@
-hummingbird.ml.\_topology
-=========================
+hummingbird.ml.\_topology module
+================================
 
 .. automodule:: hummingbird.ml._topology
    :members:

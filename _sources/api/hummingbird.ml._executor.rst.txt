@@ -1,5 +1,5 @@
-hummingbird.ml.\_executor
-=========================
+hummingbird.ml.\_executor module
+================================
 
 .. automodule:: hummingbird.ml._executor
    :members:

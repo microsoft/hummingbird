@@ -1,5 +1,5 @@
-hummingbird.ml.containers.\_sklearn\_api\_containers
-====================================================
+hummingbird.ml.containers.\_sklearn\_api\_containers module
+===========================================================
 
 .. automodule:: hummingbird.ml.containers._sklearn_api_containers
    :members:

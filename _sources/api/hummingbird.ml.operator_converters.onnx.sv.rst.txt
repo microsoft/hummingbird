@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.onnx.sv
-===========================================
+hummingbird.ml.operator\_converters.onnx.sv module
+==================================================
 
 .. automodule:: hummingbird.ml.operator_converters.onnx.sv
    :members:

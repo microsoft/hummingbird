@@ -1,13 +1,8 @@
-hummingbird.ml.operator\_converters.sklearn
-===========================================
+hummingbird.ml.operator\_converters.sklearn package
+===================================================
 
-
-.. automodule:: hummingbird.ml.operator_converters.sklearn
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :private-members:
-
+Submodules
+----------
 
 .. toctree::
    :maxdepth: 1
@@ -33,3 +28,12 @@ hummingbird.ml.operator\_converters.sklearn
    hummingbird.ml.operator_converters.sklearn.poly_features
    hummingbird.ml.operator_converters.sklearn.scaler
    hummingbird.ml.operator_converters.sklearn.sv
+
+Module contents
+---------------
+
+.. automodule:: hummingbird.ml.operator_converters.sklearn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

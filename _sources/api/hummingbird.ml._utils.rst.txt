@@ -1,5 +1,5 @@
-hummingbird.ml.\_utils
-======================
+hummingbird.ml.\_utils module
+=============================
 
 .. automodule:: hummingbird.ml._utils
    :members:

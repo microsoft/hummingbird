@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.\_label\_encoder\_implementations
-=====================================================================
+hummingbird.ml.operator\_converters.\_label\_encoder\_implementations module
+============================================================================
 
 .. automodule:: hummingbird.ml.operator_converters._label_encoder_implementations
    :members:

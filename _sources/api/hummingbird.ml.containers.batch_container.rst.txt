@@ -1,5 +1,5 @@
-hummingbird.ml.containers.batch\_container
-==========================================
+hummingbird.ml.containers.batch\_container module
+=================================================
 
 .. automodule:: hummingbird.ml.containers.batch_container
    :members:

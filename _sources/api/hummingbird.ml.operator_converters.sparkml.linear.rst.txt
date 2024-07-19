@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.sparkml.linear
-==================================================
+hummingbird.ml.operator\_converters.sparkml.linear module
+=========================================================
 
 .. automodule:: hummingbird.ml.operator_converters.sparkml.linear
    :members:

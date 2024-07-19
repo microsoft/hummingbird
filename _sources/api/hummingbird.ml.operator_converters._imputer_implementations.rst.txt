@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.\_imputer\_implementations
-==============================================================
+hummingbird.ml.operator\_converters.\_imputer\_implementations module
+=====================================================================
 
 .. automodule:: hummingbird.ml.operator_converters._imputer_implementations
    :members:

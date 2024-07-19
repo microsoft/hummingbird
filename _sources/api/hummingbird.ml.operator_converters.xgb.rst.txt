@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.xgb
-=======================================
+hummingbird.ml.operator\_converters.xgb module
+==============================================
 
 .. automodule:: hummingbird.ml.operator_converters.xgb
    :members:

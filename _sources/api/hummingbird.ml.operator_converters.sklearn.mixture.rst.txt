@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.sklearn.mixture
-===================================================
+hummingbird.ml.operator\_converters.sklearn.mixture module
+==========================================================
 
 .. automodule:: hummingbird.ml.operator_converters.sklearn.mixture
    :members:

@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.sklearn.gbdt
-================================================
+hummingbird.ml.operator\_converters.sklearn.gbdt module
+=======================================================
 
 .. automodule:: hummingbird.ml.operator_converters.sklearn.gbdt
    :members:

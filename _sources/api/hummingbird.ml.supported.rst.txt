@@ -1,5 +1,5 @@
-hummingbird.ml.supported
-========================
+hummingbird.ml.supported module
+===============================
 
 .. automodule:: hummingbird.ml.supported
    :members:

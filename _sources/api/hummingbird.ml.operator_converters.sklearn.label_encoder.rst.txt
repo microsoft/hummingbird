@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.sklearn.label\_encoder
-==========================================================
+hummingbird.ml.operator\_converters.sklearn.label\_encoder module
+=================================================================
 
 .. automodule:: hummingbird.ml.operator_converters.sklearn.label_encoder
    :members:

@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.\_sv\_implementations
-=========================================================
+hummingbird.ml.operator\_converters.\_sv\_implementations module
+================================================================
 
 .. automodule:: hummingbird.ml.operator_converters._sv_implementations
    :members:

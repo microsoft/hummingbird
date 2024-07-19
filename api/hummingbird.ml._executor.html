@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>hummingbird.ml._executor &mdash; hummingbird  documentation</title>
+  <title>hummingbird.ml._executor module &mdash; hummingbird  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/hummingbird.css?v=a86d39e7" />
       <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=fb9458d3" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hummingbird.ml._parse" href="hummingbird.ml._parse.html" />
-    <link rel="prev" title="hummingbird.ml" href="hummingbird.ml.html" /> 
+    <link rel="next" title="hummingbird.ml._parse module" href="hummingbird.ml._parse.html" />
+    <link rel="prev" title="hummingbird.ml.operator_converters.xgb module" href="hummingbird.ml.operator_converters.xgb.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,53 +49,17 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference external" href="https://microsoft.github.io/hummingbird/">Main website</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="hummingbird.html">hummingbird</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="hummingbird.ml.html">hummingbird.ml</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">hummingbird.ml._executor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._parse.html">hummingbird.ml._parse</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._topology.html">hummingbird.ml._topology</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml._utils.html">hummingbird.ml._utils</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.convert.html">hummingbird.ml.convert</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.exceptions.html">hummingbird.ml.exceptions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.supported.html">hummingbird.ml.supported</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.containers.html">hummingbird.ml.containers</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.containers._input_containers.html">hummingbird.ml.containers._input_containers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.containers._sklearn_api_containers.html">hummingbird.ml.containers._sklearn_api_containers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.containers.batch_container.html">hummingbird.ml.containers.batch_container</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.containers.sklearn.html">hummingbird.ml.containers.sklearn</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="hummingbird.ml.operator_converters.html">hummingbird.ml.operator_converters</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._array_feature_extractor_implementations.html">hummingbird.ml.operator_converters._array_feature_extractor_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._decomposition_implementations.html">hummingbird.ml.operator_converters._decomposition_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._discretizer_implementations.html">hummingbird.ml.operator_converters._discretizer_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._gbdt_commons.html">hummingbird.ml.operator_converters._gbdt_commons</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._imputer_implementations.html">hummingbird.ml.operator_converters._imputer_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._kneighbors_implementations.html">hummingbird.ml.operator_converters._kneighbors_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._label_encoder_implementations.html">hummingbird.ml.operator_converters._label_encoder_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._linear_implementations.html">hummingbird.ml.operator_converters._linear_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._mixture_implementations.html">hummingbird.ml.operator_converters._mixture_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._mlp_implementations.html">hummingbird.ml.operator_converters._mlp_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._nb_implementations.html">hummingbird.ml.operator_converters._nb_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._normalizer_implementations.html">hummingbird.ml.operator_converters._normalizer_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._one_hot_encoder_implementations.html">hummingbird.ml.operator_converters._one_hot_encoder_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._physical_operator.html">hummingbird.ml.operator_converters._physical_operator</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._pipeline_implementations.html">hummingbird.ml.operator_converters._pipeline_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._scaler_implementations.html">hummingbird.ml.operator_converters._scaler_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._sv_implementations.html">hummingbird.ml.operator_converters._sv_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_commons.html">hummingbird.ml.operator_converters._tree_commons</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters._tree_implementations.html">hummingbird.ml.operator_converters._tree_implementations</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.constants.html">hummingbird.ml.operator_converters.constants</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.lightgbm.html">hummingbird.ml.operator_converters.lightgbm</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.prophet.html">hummingbird.ml.operator_converters.prophet</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.xgb.html">hummingbird.ml.operator_converters.xgb</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.onnx.html">hummingbird.ml.operator_converters.onnx</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sklearn.html">hummingbird.ml.operator_converters.sklearn</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.operator_converters.sparkml.html">hummingbird.ml.operator_converters.sparkml</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="hummingbird.html">hummingbird package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="hummingbird.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="hummingbird.ml.html">hummingbird.ml package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="hummingbird.ml.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="hummingbird.ml.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="hummingbird.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -114,9 +78,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="hummingbird.html">hummingbird</a></li>
-          <li class="breadcrumb-item"><a href="hummingbird.ml.html">hummingbird.ml</a></li>
-      <li class="breadcrumb-item active">hummingbird.ml._executor</li>
+          <li class="breadcrumb-item"><a href="hummingbird.html">hummingbird package</a></li>
+          <li class="breadcrumb-item"><a href="hummingbird.ml.html">hummingbird.ml package</a></li>
+      <li class="breadcrumb-item active">hummingbird.ml._executor module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/hummingbird.ml._executor.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -126,16 +90,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="hummingbird-ml-executor">
-<h1>hummingbird.ml._executor<a class="headerlink" href="#hummingbird-ml-executor" title="Link to this heading">¶</a></h1>
+  <section id="hummingbird-ml-executor-module">
+<h1>hummingbird.ml._executor module<a class="headerlink" href="#hummingbird-ml-executor-module" title="Link to this heading">¶</a></h1>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="hummingbird.ml.html" class="btn btn-neutral float-left" title="hummingbird.ml" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="hummingbird.ml._parse.html" class="btn btn-neutral float-right" title="hummingbird.ml._parse" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="hummingbird.ml.operator_converters.xgb.html" class="btn btn-neutral float-left" title="hummingbird.ml.operator_converters.xgb module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hummingbird.ml._parse.html" class="btn btn-neutral float-right" title="hummingbird.ml._parse module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.sklearn.cluster
-===================================================
+hummingbird.ml.operator\_converters.sklearn.cluster module
+==========================================================
 
 .. automodule:: hummingbird.ml.operator_converters.sklearn.cluster
    :members:

@@ -1,5 +1,5 @@
-hummingbird.ml.operator\_converters.prophet
-===========================================
+hummingbird.ml.operator\_converters.prophet module
+==================================================
 
 .. automodule:: hummingbird.ml.operator_converters.prophet
    :members:
