@@ -95,7 +95,7 @@ jobs:
     - name: Install LLVM if Ubuntu
       if: ${{ startsWith(matrix.os, 'ubuntu')}}
       run: |
-        sudo apt install llvm-${{ env.LLVM_VERSION }}-dev
+        sudo apt install llvm-${{ env.LLVM_VERSION }}-dev libpolly-${{ env.LLVM_VERSION }}-dev
     - name: Install LLVM if Mac
       if: ${{ startsWith(matrix.os, 'macos')}}
       run: |
