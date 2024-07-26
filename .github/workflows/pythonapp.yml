@@ -26,7 +26,7 @@ jobs:
         os: [ubuntu-24.04, macos-12, windows-2022]
         python-version: ['3.9', '3.10', '3.11']
     env:
-      TVM_VERSION_TAG: v0.16.0
+      TVM_VERSION_TAG: v0.17.0
       PYTORCH_VERSION: 2.2.0
       LLVM_VERSION: 18
 
