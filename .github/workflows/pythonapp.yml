@@ -28,7 +28,7 @@ jobs:
     env:
       TVM_VERSION_TAG: v0.16.0
       PYTORCH_VERSION: 2.2.0
-      LLVM_VERSION: 14
+      LLVM_VERSION: 18
 
     steps:
     - uses: actions/checkout@v4
