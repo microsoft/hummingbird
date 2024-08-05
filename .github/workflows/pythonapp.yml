@@ -138,18 +138,18 @@ jobs:
         cd ~/work/hummingbird/tvm/python
         python3 -m pip install -e .
 
-    # We don't run pytest for macos py3.9 since we do coverage for that case.
+    # We don't run pytest for ubuntu py3.9 since we do coverage for that case.
     - name: Test with pytest
-      if: ${{ matrix.python-version != '3.9' || startsWith(matrix.os, 'macos') != true }}
+      if: ${{ matrix.python-version != '3.9' || startsWith(matrix.os, 'ubuntu') != true }}
       run: pytest
-    # Run and push coverage only for macos py3.9
-    - name: Coverage 3.9 macos
-      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'macos') }}
+    # Run and push coverage only for ubuntu py3.9
+    - name: Coverage 3.9 ubuntu
+      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov
-      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'macos') }}
+      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') }}
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
