@@ -23,12 +23,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-12, windows-2022]
+        os: [ubuntu-24.04, macos-12, windows-2022]
         python-version: ['3.9', '3.10', '3.11']
     env:
-      TVM_VERSION_TAG: v0.16.0
+      TVM_VERSION_TAG: v0.17.0
       PYTORCH_VERSION: 2.2.0
-      LLVM_VERSION: 14
+      LLVM_VERSION: 18
 
     steps:
     - uses: actions/checkout@v4
@@ -89,7 +89,7 @@ jobs:
     - name: Install LLVM if Ubuntu
       if: ${{ startsWith(matrix.os, 'ubuntu')}}
       run: |
-        sudo apt install llvm-${{ env.LLVM_VERSION }}-dev
+        sudo apt install llvm-${{ env.LLVM_VERSION }}-dev libpolly-${{ env.LLVM_VERSION }}-dev
     - name: Install LLVM if Mac
       if: ${{ startsWith(matrix.os, 'macos')}}
       run: |
@@ -132,19 +132,19 @@ jobs:
         cd ~/work/hummingbird/tvm/python
         python3 -m pip install -e .
 
-    # We don't run pytest for macos py3.9 since we do coverage for that case.
+    # We don't run pytest for ubuntu py3.9 since we do coverage for that case.
     - name: Test with pytest
-      if: ${{ matrix.python-version != '3.9' || startsWith(matrix.os, 'macos') != true }}
+      if: ${{ matrix.python-version != '3.9' || startsWith(matrix.os, 'ubuntu') != true }}
       run: pytest
-    # Run and push coverage only for macos py3.9
-    - name: Coverage 3.9 macos
-      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'macos') }}
+    # Run and push coverage only for ubuntu py3.9
+    - name: Coverage 3.9 ubuntu
+      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') }}
       run: |
         coverage run -a -m pytest tests
         coverage xml
     - name: Upload coverage to Codecov
-      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'macos') }}
-      uses: codecov/codecov-action@v3
+      if: ${{ matrix.python-version == '3.9' && startsWith(matrix.os, 'ubuntu') }}
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: unittests
