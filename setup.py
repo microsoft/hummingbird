@@ -45,9 +45,9 @@ extra_requires = [
 setup(
     name="hummingbird-ml",
     version=version_str,
-    description="Convert trained traditional machine learning models into tensor computations",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
+    # description="Convert trained traditional machine learning models into tensor computations",
+    # long_description=long_description,
+    # long_description_content_type="text/markdown",
     license="MIT License",
     author="Microsoft Corporation",
     author_email="hummingbird-dev@microsoft.com",
