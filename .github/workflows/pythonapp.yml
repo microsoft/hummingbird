@@ -158,7 +158,7 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
-        token: ${{ secrets.codecov_token }}
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   page-build:
     needs: build
