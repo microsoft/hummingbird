@@ -89,7 +89,7 @@ jobs:
       if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')}}
       id: cache
       env:
-        CACHE_NUMBER: 13
+        CACHE_NUMBER: 14
       with:
         path: ~/work/hummingbird/tvm
         key: ${{ matrix.os }}-python${{ matrix.python-version }}-tvm-${{ env.TVM_VERSION_TAG }}-${{ env.CACHE_NUMBER }}
