@@ -243,7 +243,7 @@ def convert(topology, backend, test_input, device, extra_config={}):
 
     if backend == onnx.__name__:
         onnx_model_name = output_model_name = None
-        target_opset = 11
+        target_opset = 13
 
         # Set optional configuration options for ONNX if any.
         if constants.ONNX_OUTPUT_MODEL_NAME in extra_config:
