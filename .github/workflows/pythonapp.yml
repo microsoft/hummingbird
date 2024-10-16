@@ -143,6 +143,9 @@ jobs:
         cd ~/work/hummingbird/tvm/python
         python3 -m pip install -e .
 
+    - name: Use Java 21 on Windows
+      if: ${{ startsWith(matrix.os, 'windows')}}
+      run: setx JAVA_HOME "%JAVA_HOME_21_X64%"
     # We don't run pytest for ubuntu py3.9 since we do coverage for that case.
     - name: Test with pytest
       if: ${{ matrix.python-version != '3.9' || startsWith(matrix.os, 'ubuntu') != true }}
