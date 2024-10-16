@@ -15,6 +15,11 @@ on:
   schedule:
     - cron: "15 21 * * FRI"
 
+  workflow_call:
+    secrets:
+      codecov_token:
+        required: true
+
 permissions: read-all
 
 jobs:
@@ -23,11 +28,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-12, windows-2022]
+        os: [ubuntu-24.04, macos-14, windows-2022]
         python-version: ['3.9', '3.10', '3.11']
     env:
       TVM_VERSION_TAG: v0.17.0
-      PYTORCH_VERSION: 2.2.0
+      PYTORCH_VERSION: 2.4.1
       LLVM_VERSION: 18
 
     steps:
@@ -62,7 +67,6 @@ jobs:
       if: ${{ startsWith(matrix.os, 'macos')}}
       run: |
         wget https://raw.githubusercontent.com/Homebrew/homebrew-core/fb8323f2b170bd4ae97e1bac9bf3e2983af3fdb0/Formula/libomp.rb
-        brew unlink libomp
         brew install ./libomp.rb
         export CC=/usr/bin/clang
         export CXX=/usr/bin/clang++
@@ -79,7 +83,7 @@ jobs:
       if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')}}
       id: cache
       env:
-        CACHE_NUMBER: 13
+        CACHE_NUMBER: 14
       with:
         path: ~/work/hummingbird/tvm
         key: ${{ matrix.os }}-python${{ matrix.python-version }}-tvm-${{ env.TVM_VERSION_TAG }}-${{ env.CACHE_NUMBER }}
@@ -148,6 +152,7 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   page-build:
     needs: build

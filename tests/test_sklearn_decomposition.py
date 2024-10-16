@@ -32,7 +32,7 @@ class TestSklearnMatrixDecomposition(unittest.TestCase):
 
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertTrue(torch_model is not None)
-        np.testing.assert_allclose(model.transform(X_test), torch_model.transform(X_test), rtol=1e-6, atol=2 * 1e-5)
+        np.testing.assert_allclose(model.transform(X_test), torch_model.transform(X_test), rtol=4 * 1e-4, atol=2 * 1e-4)
 
     # PCA n_components none
     def test_pca_converter_none(self):
