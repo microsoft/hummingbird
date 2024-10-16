@@ -84,6 +84,7 @@ jobs:
       run: |
         python -m pip install .[extra,onnx,sparkml]
         python -m pip install pandas
+        python -m pip install pyspark==4.0.0.dev2
     - uses: actions/cache@v3
       # TVM takes forever, we try to cache it.
       if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')}}
