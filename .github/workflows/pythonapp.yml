@@ -84,6 +84,7 @@ jobs:
       run: |
         python -m pip install .[extra,onnx,sparkml]
         python -m pip install pandas
+        python -m pip install pyspark==4.0.0.dev2
     - uses: actions/cache@v3
       # TVM takes forever, we try to cache it.
       if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')}}
@@ -142,6 +143,14 @@ jobs:
         cd ~/work/hummingbird/tvm/python
         python3 -m pip install -e .
 
+    - name: Use Java 21 on Windows
+      if: ${{ startsWith(matrix.os, 'windows')}}
+      run: $env:JAVA_HOME=$env:JAVA_HOME_21_X64
+    - name: Print Environmental Variables on Windows
+      if: ${{ startsWith(matrix.os, 'windows')}}
+      run: |
+        echo $env:JAVA_HOME
+        echo $env:JAVA_HOME_21_X64
     # We don't run pytest for ubuntu py3.9 since we do coverage for that case.
     - name: Test with pytest
       if: ${{ matrix.python-version != '3.9' || startsWith(matrix.os, 'ubuntu') != true }}
