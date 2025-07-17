@@ -243,7 +243,7 @@ def from_strings_to_ints(input, max_string_length):
 
 def load(location, digest=None, override_flag=False):
     """
-    Utility function used to load arbitrary Hummingbird models. WARNING: Do not run models from  untrusted sources. 
+    Utility function used to load arbitrary Hummingbird models. WARNING: Do not run models from  untrusted sources.
 
     Args:
         location: The location of the model.
