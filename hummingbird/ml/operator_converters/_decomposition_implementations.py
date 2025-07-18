@@ -96,6 +96,5 @@ class CrossDecomposition(PhysicalOperator, torch.nn.Module):
 
     def forward(self, x):
         x -= self.x_mean
-        x /= self.x_std
         y_pred = torch.mm(x, self.coefficients).float()
         return y_pred + self.y_mean
