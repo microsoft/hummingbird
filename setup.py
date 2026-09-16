@@ -37,7 +37,7 @@ onnx_requires = [
 ]
 extra_requires = [
     # The need each for these depends on which libraries you plan to convert from
-    "xgboost>=0.90,<2.0.0",
+    "xgboost>=0.90",
     "lightgbm>=2.2",
     "holidays",
     "prophet",
