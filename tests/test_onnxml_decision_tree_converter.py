@@ -8,6 +8,7 @@ import numpy as np
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from onnxconverter_common.data_types import FloatTensorType
+from distutils.version import LooseVersion
 
 from hummingbird.ml import convert
 from hummingbird.ml._utils import onnx_ml_tools_installed, onnx_runtime_installed, xgboost_installed
@@ -263,6 +264,7 @@ class TestONNXDecisionTreeConverter(unittest.TestCase):
         not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test require ONNX, ORT and ONNXMLTOOLS"
     )
     @unittest.skipIf(not xgboost_installed(), reason="ONNXML BRANCH_LT test requires XGBoost")
+    @unittest.skipIf(LooseVersion(xgb.__version__) > LooseVersion("2.0"), reason="Unsupported XGBoost version")
     def test_xgboost_branch_lt(self):
         warnings.filterwarnings("ignore")
         n_features = 28
