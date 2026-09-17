@@ -67,7 +67,7 @@ class SklearnContainer(ABC):
                 splits = [inputs[input_names[idx]] for idx in range(len(input_names))]
                 inputs = [df.to_numpy().reshape(-1, 1) for df in splits]
 
-        return function(*inputs)
+        return function(inputs)
 
 
 class SklearnContainerTransformer(SklearnContainer):
