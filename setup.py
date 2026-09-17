@@ -7,7 +7,7 @@ packages = find_packages()
 assert packages
 
 # read version from the package file.
-with (open(os.path.join(this, "hummingbird/__init__.py"), "r")) as f:
+with open(os.path.join(this, "hummingbird/__init__.py"), "r") as f:
     line = [_ for _ in [_.strip("\r\n ") for _ in f.readlines()] if _.startswith("__version__")]
     if len(line) > 0:
         version_str = line[0].split("=")[1].strip('" ')
@@ -45,9 +45,6 @@ extra_requires = [
 setup(
     name="hummingbird-ml",
     version=version_str,
-    description="Convert trained traditional machine learning models into tensor computations",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
     license="MIT License",
     author="Microsoft Corporation",
     author_email="hummingbird-dev@microsoft.com",
