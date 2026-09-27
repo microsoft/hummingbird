@@ -1,6 +1,7 @@
 """
 Tests sklearn LabelEncoder converter
 """
+
 import unittest
 
 import numpy as np
@@ -19,6 +20,16 @@ class TestSklearnLabelEncoderConverter(unittest.TestCase):
         torch_model = hummingbird.ml.convert(model, "torch")
         self.assertTrue(torch_model is not None)
         np.testing.assert_allclose(model.transform(data), torch_model.transform(data), rtol=1e-06, atol=1e-06)
+
+    def test_model_label_encoder_int64_range(self):
+        limits = np.iinfo(np.int64)
+        data = np.array([0, 2**32, 2**32 + 1, -(2**32), limits.min, limits.max, 2**32], dtype=np.int64)
+        model = LabelEncoder().fit(data)
+
+        for backend in ("torch", "torch.jit"):
+            with self.subTest(backend=backend):
+                converted = hummingbird.ml.convert(model, backend, data, extra_config={"n_threads": 1})
+                np.testing.assert_array_equal(model.transform(data), converted.transform(data))
 
     def test_model_label_encoder_str(self):
         model = LabelEncoder()
