@@ -56,7 +56,7 @@ class NumericLabelEncoder(PhysicalOperator, torch.nn.Module):
     def __init__(self, logical_operator, classes, device):
         super(NumericLabelEncoder, self).__init__(logical_operator, transformer=True)
         self.regression = False
-        self.check_tensor = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
+        self.check_tensor = torch.nn.Parameter(torch.LongTensor(classes), requires_grad=False)
 
     def forward(self, x):
         x = x.view(-1, 1)

@@ -1,6 +1,7 @@
 """
 Tests onnxml LabelEncoder converter
 """
+
 from packaging.version import Version, parse
 import unittest
 import warnings
@@ -24,6 +25,23 @@ if onnx_runtime_installed():
 
 
 class TestONNXLabelEncoder(unittest.TestCase):
+
+    @unittest.skipIf(
+        not (onnx_ml_tools_installed() and onnx_runtime_installed()), reason="ONNXML test requires ONNX, ORT and ONNXMLTOOLS"
+    )
+    def test_model_label_encoder_int64_range(self):
+        limits = np.iinfo(np.int64)
+        data = np.array([0, 2**32, 2**32 + 1, -(2**32), limits.min, limits.max, 2**32], dtype=np.int64)
+        model = LabelEncoder().fit(data)
+        onnx_ml_model = convert_sklearn(model, initial_types=[("input", LongTensorType_onnx(data.shape))])
+        session = ort.InferenceSession(onnx_ml_model.SerializeToString(), providers=["CPUExecutionProvider"])
+        reference = session.run(None, {session.get_inputs()[0].name: data})[0].ravel()
+        np.testing.assert_array_equal(reference, model.transform(data))
+
+        for backend in ("torch", "torch.jit", "onnx"):
+            with self.subTest(backend=backend):
+                converted = convert(onnx_ml_model, backend, data, extra_config={"n_threads": 1})
+                np.testing.assert_array_equal(reference, converted.transform(data).ravel())
 
     # Test LabelEncoder with longs
     @unittest.skipIf(
