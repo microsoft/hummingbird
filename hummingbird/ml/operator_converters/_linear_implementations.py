@@ -56,7 +56,11 @@ class LinearModel(PhysicalOperator, torch.nn.Module):
         predict_res = torch.index_select(self.classes, 0, indices)
 
         if self.multi_class == "multinomial":
-            output = torch.softmax(output, dim=1)
+            if self.binary_classification:
+                # Binary multinomial scores represent the logits [-output, output].
+                output = torch.sigmoid(2 * output)
+            else:
+                output = torch.softmax(output, dim=1)
         else:
             if self.loss == "modified_huber":
                 output = torch.clip(output, -1, 1)
