@@ -78,6 +78,17 @@ def convert_sklearn_lgbm_classifier(operator, device, extra_config):
     )
 
 
+def _set_log_link_post_transform(model, extra_config):
+    """
+    Poisson, gamma and tweedie objectives predict exp of the raw score.
+    The objective is read from the dumped model, which also has it for a bare `lightgbm.Booster`
+    and spells aliases (e.g. `regression_poisson`) by their canonical name.
+    """
+    objective = model.get("objective", "").split(" ")[0]
+    if objective in ("poisson", "gamma", "tweedie"):
+        extra_config[constants.POST_TRANSFORM] = constants.TWEEDIE
+
+
 def convert_sklearn_lgbm_regressor(operator, device, extra_config):
     """
     Converter for `lightgbm.LGBMRegressor` and `lightgbm.LGBMRanker` (trained using the Sklearn API).
@@ -94,9 +105,9 @@ def convert_sklearn_lgbm_regressor(operator, device, extra_config):
 
     # Get tree information out of the model.
     n_features = operator.raw_operator._n_features
-    tree_infos = operator.raw_operator.booster_.dump_model()["tree_info"]
-    if operator.raw_operator._objective == "tweedie":
-        extra_config[constants.POST_TRANSFORM] = constants.TWEEDIE
+    model = operator.raw_operator.booster_.dump_model()
+    tree_infos = model["tree_info"]
+    _set_log_link_post_transform(model, extra_config)
 
     return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 
@@ -117,7 +128,9 @@ def convert_lgbm_booster(operator, device, extra_config):
 
     # Get tree information out of the model.
     n_features = len(operator.raw_operator.feature_name())
-    tree_infos = operator.raw_operator.dump_model()["tree_info"]
+    model = operator.raw_operator.dump_model()
+    tree_infos = model["tree_info"]
+    _set_log_link_post_transform(model, extra_config)
 
     return convert_gbdt_common(operator, tree_infos, _get_tree_parameters, n_features, extra_config=extra_config)
 
