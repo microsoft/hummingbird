@@ -46,7 +46,9 @@ def convert_sklearn_standard_scaler(operator, device, extra_config):
     scale = operator.raw_operator.scale_
     if scale is not None:
         scale = np.reciprocal(scale)
-    return Scaler(operator, operator.raw_operator.mean_, scale, device)
+    # mean_ is also computed when only with_std is set, but is then not subtracted.
+    offset = operator.raw_operator.mean_ if operator.raw_operator.with_mean else None
+    return Scaler(operator, offset, scale, device)
 
 
 register_converter("SklearnRobustScaler", convert_sklearn_robust_scaler)
