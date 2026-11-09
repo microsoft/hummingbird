@@ -135,6 +135,21 @@ class TestSklearnHistGradientBoostingClassifier(unittest.TestCase):
     def test_GBDT_perf_tree_trav_regressor_converter(self):
         self._run_GB_trees_regressor_converter(extra_config={"tree_implementation": "perf_tree_trav"})
 
+    # Poisson and gamma losses predict exp of the raw score
+    def test_GBDT_regressor_log_link_converter(self):
+        warnings.filterwarnings("ignore")
+        np.random.seed(0)
+        X = np.random.rand(100, 20).astype(np.float32)
+        y = np.exp(X[:, 0] * 2 + np.random.normal(size=100) * 0.1)
+        for loss in ["poisson", "gamma"]:
+            for tree_implementation in ["gemm", "tree_trav", "perf_tree_trav"]:
+                with self.subTest(loss=loss, tree_implementation=tree_implementation):
+                    model = HistGradientBoostingRegressor(loss=loss, max_iter=10).fit(X, y)
+                    torch_model = hummingbird.ml.convert(
+                        model, "torch", extra_config={"tree_implementation": tree_implementation}
+                    )
+                    np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
 
 if __name__ == "__main__":
     unittest.main()

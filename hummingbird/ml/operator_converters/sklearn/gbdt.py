@@ -199,6 +199,9 @@ def convert_sklearn_hist_gbdt_regressor(operator, device, extra_config):
     tree_infos = [tree_infos[i][0] for i in range(len(tree_infos))]
     n_features = _get_n_features(operator.raw_operator)
     extra_config[constants.BASE_PREDICTION] = [[operator.raw_operator._baseline_prediction]]
+    # Poisson and gamma losses predict exp of the raw score.
+    if operator.raw_operator.loss in ("poisson", "gamma"):
+        extra_config[constants.POST_TRANSFORM] = constants.TWEEDIE
 
     return convert_gbdt_common(operator, tree_infos, _get_parameters_hist_gbdt, n_features, None, extra_config)
 

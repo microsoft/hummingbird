@@ -345,6 +345,23 @@ class TestLGBMConverter(unittest.TestCase):
         self.assertIsNotNone(torch_model)
         np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
 
+    # Poisson and gamma objectives predict exp of the raw score, also for a bare Booster
+    @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
+    def test_lgbm_log_link_objectives(self):
+        warnings.filterwarnings("ignore")
+        np.random.seed(0)
+        X = np.random.rand(100, 200).astype(np.float32)
+        y = np.random.randint(1, 100, size=100)
+        for objective in ["poisson", "gamma", "tweedie"]:
+            with self.subTest(objective=objective):
+                model = lgb.LGBMRegressor(objective=objective, n_estimators=2, max_depth=5).fit(X, y)
+                torch_model = hummingbird.ml.convert(model, "torch")
+                np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
+                booster = model.booster_
+                torch_model = hummingbird.ml.convert(booster, "torch", X)
+                np.testing.assert_allclose(booster.predict(X), torch_model.predict(X), rtol=1e-06, atol=1e-06)
+
     # Backend tests.
     # Test TorchScript backend regression.
     @unittest.skipIf(not lightgbm_installed(), reason="LightGBM test requires LightGBM installed")
