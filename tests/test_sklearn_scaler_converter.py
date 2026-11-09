@@ -60,6 +60,9 @@ class TestSklearnScalerConverter(unittest.TestCase):
     def test_standard_scaler_floats_torch_true_true(self):
         self._test_standard_scaler_floats(True, True)
 
+    def test_standard_scaler_floats_torch_false_true(self):
+        self._test_standard_scaler_floats(False, True)
+
     def test_max_abs_scaler_floats(self):
         # Generate a random 2D array with values in [0, 1000)
         np.random.seed(0)
@@ -125,6 +128,14 @@ class TestSklearnScalerConverter(unittest.TestCase):
     )
     def test_standard_scaler_floats_tvm_true_true(self):
         self._test_standard_scaler_floats(True, True, "tvm")
+
+    @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
+    @unittest.skipIf(
+        ((sys.platform == "linux") and is_on_github_actions()),
+        reason="This test is flaky on Ubuntu on GitHub Actions. See https://github.com/microsoft/hummingbird/pull/709 for more info.",
+    )
+    def test_standard_scaler_floats_tvm_false_true(self):
+        self._test_standard_scaler_floats(False, True, "tvm")
 
     @unittest.skipIf(not tvm_installed(), reason="TVM test requires TVM installed")
     @unittest.skipIf(
