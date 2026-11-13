@@ -37,6 +37,14 @@ class SVC(PhysicalOperator, torch.nn.Module):
         true_classes, false_classes = zip(*[(i, j) for i in range(self.len_nv) for j in range(i + 1, self.len_nv)])
         self.true_classes = torch.nn.Parameter(torch.IntTensor([true_classes]), requires_grad=False)
         self.false_classes = torch.nn.Parameter(torch.IntTensor([false_classes]), requires_grad=False)
+        # Precompute the one-vs-one coefficients as a (n_sv, n_pairs) matrix so that forward()
+        # computes all pairwise decision values with a single matmul instead of Python loops.
+        a = a.toarray() if scipy.sparse.issparse(a) else np.asarray(a)
+        coef = np.zeros((sv.shape[0], len(true_classes)), dtype=np.float64)
+        for pair, (i, j) in enumerate(zip(true_classes, false_classes)):
+            coef[self.start[j] : self.end[j], pair] = a[i, self.start[j] : self.end[j]]
+            coef[self.start[i] : self.end[i], pair] = a[j - 1, self.start[i] : self.end[i]]
+        self.coef = torch.nn.Parameter(torch.from_numpy(coef), requires_grad=False)
         self.classes = torch.nn.Parameter(torch.IntTensor(classes), requires_grad=False)
         self.perform_class_select = False
         if min(classes) != 0 or max(classes) != len(classes) - 1:
@@ -58,13 +66,7 @@ class SVC(PhysicalOperator, torch.nn.Module):
         else:  # poly kernel
             k = torch.pow(self.gamma * torch.mm(x, self.sv_t) + self.coef0, self.degree)
 
-        c = [
-            sum(self.a[i, p] * k[:, p : p + 1] for p in range(self.start[j], self.end[j]))
-            + sum(self.a[j - 1, p] * k[:, p : p + 1] for p in range(self.start[i], self.end[i]))
-            for i in range(self.len_nv)
-            for j in range(i + 1, self.len_nv)
-        ]
-        c = torch.cat(c, dim=1) + self.b
+        c = torch.mm(k, self.coef) + self.b
         if self.n_classes == 2:
             class_ids = torch.gt(c, 0.0).int().flatten()
         else:
