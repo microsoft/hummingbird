@@ -4,6 +4,7 @@ Tests sklearn SV classifiers / regressors (LinearSVC, LinearSVR, SVC, NuSVC) con
 import unittest
 
 import numpy as np
+import scipy.sparse
 import torch
 from sklearn.svm import LinearSVC, LinearSVR, SVC, NuSVC, SVR
 
@@ -108,6 +109,19 @@ class TestSklearnSVC(unittest.TestCase):
     # SVC with different gamma (default=’scale’)
     def test_svc_gamma(self):
         self._test_svc(3, gamma="auto")
+
+    # SVC with many classes and a different number of support vectors per class, fit on dense and sparse data
+    def test_svc_many_classes_unbalanced(self):
+        np.random.seed(0)
+        y = np.repeat(np.arange(6), [10, 20, 30, 40, 50, 60])
+        X = np.array(np.random.rand(len(y), 20) + y.reshape(-1, 1) * 0.1, dtype=np.float32)
+        for kernel in ["linear", "poly", "rbf"]:
+            for X_fit in [X, scipy.sparse.csr_matrix(X)]:
+                with self.subTest(kernel=kernel, sparse=scipy.sparse.issparse(X_fit)):
+                    model = SVC(kernel=kernel).fit(X_fit, y)
+                    self.assertEqual(len(np.unique(model.predict(X))), 6)
+                    torch_model = hummingbird.ml.convert(model, "torch")
+                    np.testing.assert_allclose(model.predict(X), torch_model.predict(X), rtol=1e-6, atol=1e-6)
 
     # NuSVC test function to be parameterized
     def _test_nu_svc(self, num_classes, backend="torch", extra_config={}):
