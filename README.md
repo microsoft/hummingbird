@@ -45,7 +45,7 @@ In this example, the decision tree has four decision nodes (orange), and five le
 <img src="https://github.com/microsoft/hummingbird/raw/main/website/images/3-matrix.png" width=450 >
 </p>
 
-**Step 2:** The `input path` tensor will be multiplied with tensor `C` that captures whether the internal node is a parent of that internal node, and if so, whether it is in the left or right sub-tree (left = 1, right =-1, otherwise =0) and then check the equals with tensor `D` that captures the count of the left child of its parent in the path from a leaf node to the tree root to create the tensor output path that represents the path from node to output. In this case, this tree model has 5 outputs with 4 conditions, therefore, the shape of tensor `C` is 4x5 and tensor `D` is 1x5.
+**Step 2:** Next we map the path through internal nodes onto a specific leaf. Tensor `C` has shape 4×5 (rows = the 4 internal/decision nodes, columns = the 5 leaves). For each leaf column, an entry is `1` if that leaf lies in the **left** subtree of the corresponding internal node, `-1` if it lies in the **right** subtree, and `0` if that internal node is not an ancestor of the leaf. For example, a leaf whose root-to-leaf path goes left, right, (skips a node), then left would have column `(1, -1, 0, 1)`. Multiplying `input path` by `C` and comparing with tensor `D` (shape 1×5) — which stores, for each leaf, how many left-child steps appear on its path from the root — produces the `output path` tensor that selects the reached leaf. With 4 internal nodes and 5 leaves, `C` is 4×5 and `D` is 1×5.
 
 <p align="center">
 <img src="https://github.com/microsoft/hummingbird/raw/main/website/images/4-matrixnext.png" width=450 >
